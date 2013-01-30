@@ -76,3 +76,12 @@ class res_company(osv.osv):
         'gain_loss_account':fields.many2one('account.account','Exchange Gain/Loss Account'),
         }
 res_company()
+
+class account_move_line(osv.osv):
+    _inherit = 'account.move.line'
+    _columns = {
+        'post_rate':fields.float('Post Rate'),
+        'br_credit':fields.float('Before Revaluation Credit'),
+        'br_debit':fields.float('Before Revaluation Debit'),
+        }
+account_move_line()
