@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_account_period_close_ntm" model="ir.ui.view">
+            <field name="name">account.period.close.ntm.form</field>
+            <field name="model">account.period.close.ntm</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Revaluate Period Entries">
+                    <field colspan="4" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
+                        <form string="Currencies">
+                            <field name="currency_id"/>
+                            <field name="start_rate"/>
+                            <field name="weighted_rate"/>
+							<field name="end_rate"/>
+                            <field name="post_rate"/>
+                        </form>
+                        <tree string="Currencies" editable="bottom">
+                            <field name="currency_id" readonly="1"/>
+                            <field name="start_rate" readonly="1"/>
+                            <field name="weighted_rate" readonly="1"/>
+							<field name="end_rate"/>
+                            <field name="post_rate"/>
+                        </tree>
+					</field>
+					<group colspan="13" col="4">
+					<field name="state" readonly="1"/>
+					<button string="Get Currencies"
+                                            type="object"
+                                            name="fetch_currencies"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible': [('state','!=','draft')]}"
+                                            />
+                    <button string="Compute"
+                                            type="object"
+                                            name="compute_wr_per_line"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible': [('state','!=','compute')]}"
+                                            />
+                    </group>
+               </form>
+            </field>
+        </record>
+
+        <record id="action_account_period_close_ntm" model="ir.actions.act_window">
+            <field name="name">Revaluate Entries</field>
+            <field name="res_model">account.period.close.ntm</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_account_period_close_ntm"/>
+            <field name="target">new</field>
+        </record>
+
+        <record id="action_idea_post_vote_values_ntm" model="ir.values">
+            <field name="model_id" ref="account.model_account_period" />
+            <field name="object" eval="1" />
+            <field name="name">Revaluate Entries</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.act_window,' + str(ref('action_account_period_close_ntm'))"/>
+            <field name="key">action</field>
+            <field name="model">account.period</field>
+        </record>
+
+    </data>
+</openerp>

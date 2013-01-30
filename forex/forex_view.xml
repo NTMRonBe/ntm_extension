@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+		
+        <menuitem id="menu_forex_rate_parent"  
+            parent="account.menu_finance_periodical_processing"
+			name="Foreign Exchanges"
+            sequence="400" 
+            groups="base.group_user"/>
+            
+    <!--Forex Transactions-->
+        <record id="forex_transaction_form" model="ir.ui.view">
+            <field name="name">forex.transaction.form</field>
+            <field name="model">forex.transaction</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Forex Transaction">
+                    	<field name="period_id"/>
+                    	<field name="journal_id" domain="[('type','=','general')]"/>
+                    	<group colspan="4" col="4">
+                    	    <group colspan="2" col="2">
+                    	        <field name="currency_one" attrs="{'readonly': [('state','!=','draft')]}"/>
+                    	        <field name="bank_account1_id" on_change="on_change_act1(bank_account1_id)" attrs="{'readonly': [('state','!=','draft')]}"/>
+                    	        <field name="amount_currency1" attrs="{'readonly': [('state','!=','draft')]}"/>
+                    	    </group>
+              				<group colspan="2" col="2">
+              				    <field name="currency_two" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        		<field name="bank_account2_id" on_change="on_change_act2(bank_account2_id)" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        		<field name="amount_currency2"/>
+              				</group>
+                        </group>
+                        <group colspan="4" col="4">
+                    	    <group colspan="2" col="2">
+                    	        <group colspan="4" col="4">
+                    	    		<field name="transact_date"/>
+                    	    		<field name="state"/>
+                        		</group>
+                    	    </group>
+              				<group colspan="2" col="2">
+              				    <group colspan="4" col="4">
+                    	    		<field name="rate" attrs="{'readonly': [('state','!=','draft')]}"/>
+                    	    		<button string="Approve"
+                                            type="object"
+                                            name="create_exchange"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible': [('state','!=','draft')]}"
+                                            />
+                        		</group>
+              				</group>
+                        </group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="forex_transaction_tree">
+            <field name="name">forex.transaction.tree</field>
+            <field name="model">forex.transaction</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Forex Transaction">
+					    <field name="currency_one"/>
+                        <field name="currency_two"/>
+                        <field name="bank_account1_id"/>
+                        <field name="bank_account2_id"/>
+                        <field name="amount_currency1"/>
+                        <field name="amount_currency2"/>
+                        <field name="rate"/>
+                </tree> 
+            </field>
+        </record>
+        <record id="forex_transaction_filter" model="ir.ui.view">
+		    <field name="name">forex.transaction.filter</field>
+            <field name="model">forex.transaction</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Forex Transaction">
+					    <field name="currency_one"/>
+                        <field name="currency_two"/>
+                        <field name="bank_account1_id"/>
+                        <field name="bank_account2_id"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_forex_transaction_form">
+        	<field name="name">Forex Transaction</field>
+	        <field name="res_model">forex.transaction</field>
+		    <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_forex_transaction" 
+            action="action_forex_transaction_form" 
+            parent="menu_forex_rate_parent"
+            sequence="20" 
+            groups="base.group_user"/>  
+    </data>
+</openerp>

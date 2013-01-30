@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>        
+        <record id="crs_form" model="ir.ui.view">
+            <field name="name">crs.form</field>
+            <field name="model">cash.request.slip</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Cash Request Slip">
+                  <field name="name"/>
+                  <field name="pc_id" attrs="{'readonly':[('state','!=','draft')]}"/>
+                  <field name="requestor_id" domain="[('supplier','=','True')]" attrs="{'readonly':[('state','!=','draft')]}"/>
+                  <field name="request_date" attrs="{'readonly':[('state','!=','draft')]}"/>
+                  <field name="amount" attrs="{'readonly':[('state','!=','draft')]}"/>
+                  <group colspan="4" col="13">
+                        <field name="state" select="1"/>
+						<button name="approval" attrs="{'invisible':[('state','!=','draft')]}" string="Submit"  type="object" icon="gtk-jump-to"/>
+						<button name="approval" attrs="{'invisible':[('state','!=','cancel')]}" string="Re-Open"  type="object" icon="gtk-jump-to"/>
+                        <button name="approved" string="Approved" type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','!=','approval')]}"/>
+					</group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="crs_tree">
+            <field name="name">crs.tree</field>
+            <field name="model">cash.request.slip</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Cash Request Slip">
+					    <field name="name"/>
+                  <field name="pc_id"/>
+                  <field name="amount"/>
+                  <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="crs_filter" model="ir.ui.view">
+		    <field name="name">crs.filter</field>
+            <field name="model">cash.request.slip</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Cash Request Slip">
+					    <field name="name"/>
+                  <field name="pc_id"/>
+                  <field name="amount"/>
+                  <field name="state"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_crs_form">
+        	<field name="name">Cash Request Slip</field>
+	        <field name="res_model">cash.request.slip</field>
+		    <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_crs" 
+            action="action_crs_form" 
+            parent="main_pettycash"
+            sequence="40" 
+            groups="base.group_user"/>  
+            
+        
+        
+        <record id="pcd_form" model="ir.ui.view">
+            <field name="name">pcd.form</field>
+            <field name="model">pettycash.disbursement</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Pettycash Disbursement">
+                    <group colspan="6" col="6">
+		                  <field name="name"/>
+		                  <field name="pc_id"/>
+		                  <field name="amount"/>
+                  	</group>
+                  	<group colspan="6" col="6">
+                  	    <field name="journal_id" domain="[('type','=','disbursement')]"/>
+                  	    <field name="crs_id" domain="[('state','=','approved')]"/>
+                  	    <field name="date"/>
+                  	    <field name="period_id" invisible="1" readonly="1"/>
+                  	</group>
+                  	<field name="denomination_ids" nolabel="1" colspan="6" height="300"/>
+                  	<group colspan="4" col="13">
+                  	    <field name="state"/>
+                  	    <button name="compute_amount" string="Compute" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="complete_pcd" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
+                  	</group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="pcd_tree">
+            <field name="name">pcd.tree</field>
+            <field name="model">pettycash.disbursement</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Pettycash Disbursement">
+					    <field name="crs_id"/>
+                  <field name="pc_id"/>
+                  <field name="amount"/>
+                </tree>
+            </field>
+        </record>
+        <record id="pcd_filter" model="ir.ui.view">
+		    <field name="name">crs.filter</field>
+            <field name="model">pettycash.disbursement</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Pettycash Disbursement">
+					<field name="crs_id"/>
+	                  <field name="pc_id"/>
+	                  <field name="amount"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_pcd_form">
+        	<field name="name">Pettycash Disbursement</field>
+	        <field name="res_model">pettycash.disbursement</field>
+		    <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_pcd" 
+            action="action_pcd_form" 
+            parent="main_pettycash"
+            sequence="50" 
+            groups="base.group_user"/>  
+    </data>
+</openerp>

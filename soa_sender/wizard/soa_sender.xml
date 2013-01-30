@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="soa_sender_view" model="ir.ui.view">
+            <field name="name">SOA Sender</field>
+            <field name="model">soa.sender</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="SOA Sender">
+            	<group colspan="4" col="2">
+	            	<separator string="Email Account Credentials"/>
+	            	<group colspan="2" col="2">
+	            		<field name="username"/>
+	            		<field password="True" name="password"/>
+	            	</group>
+            	</group>
+            	<group colspan="4" col="2">
+	                <separator string="SOA Sender"/>
+	                <group colspan="4" col="2">
+		                <field name="filename"/>
+	                </group>
+	                <group colspan="4" col="2">
+		                <button string="Send" type="object" name="convert" icon="gtk-execute"/>
+	                </group>
+                </group>
+               </form>
+            </field>
+        </record>
+
+        <record id="action_soa_sender" model="ir.actions.act_window">
+            <field name="name">SOA Sender</field>
+            <field name="res_model">soa.sender</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="soa_sender_view"/>
+            <field name="target">new</field>
+            <field name="help"></field>
+        </record>
+
+        <menuitem
+            name="SOA Sender"
+            parent="account.menu_finance_periodical_processing"
+            id="menu_soa_sender_main"
+           />
+		<menuitem
+            name="SOA Sender"
+            parent="menu_soa_sender_main"
+            action="action_soa_sender"
+            id="menu_soa_sender"
+           />
+
+    </data>
+</openerp>
