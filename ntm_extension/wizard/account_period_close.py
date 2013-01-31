@@ -6,7 +6,7 @@ import psycopg2
 from tools.translate import _
 import decimal_precision as dp
 
-class account_period_close_ntm(osv.osv):
+class account_period_close_ntm(osv.osv_memory):
     """
         close period
     """
@@ -18,21 +18,11 @@ class account_period_close_ntm(osv.osv):
                                   ('draft','Draft'),
                                   ('compute','Compute'),
                                   ('verify','Verify'),
-                                  ])
+                                  ], 'State')
     }
     _defaults = {
             'state':'draft',
             }
-    
-    def create(self, cr, uid, ids, context=None):
-        apcn_pool = self.pool.get('account.period.close.ntm')
-        for form in self.read(cr, uid, ids, context=context):           
-            values = {
-                'id':form['id'],
-                'state':form['state']
-                }
-            apcn_pool.create(cr, uid, values)
-        return True
     
     def data_save(self, cr, uid, ids, context=None):
         period_pool = self.pool.get('account.period')
@@ -165,11 +155,12 @@ class account_period_close_ntm(osv.osv):
                                 'period_close_id':form_id,
                                 }
                             apcnc_pool.create(cr, uid, currencies_list)
-        return self.write(cr, uid, ids, {'state':'compute'})
+            self.write(cr, uid, ids, {'state':'compute'})
+        return True
 
 account_period_close_ntm()
 
-class account_period_close_ntm_currencies(osv.osv):
+class account_period_close_ntm_currencies(osv.osv_memory):
 	_name = 'account.period.close.ntm.currencies'
 	_columns = {
 		'currency_id':fields.many2one('res.currency', "Currency"),
