@@ -41,7 +41,7 @@ class forex_transaction(osv.osv):
             'state': fields.selection([
             ('draft','Draft'),
             ('post','Posted'),
-            ],'State', select=True, readonly=True),
+            ],'State', select=True),
         }
     _defaults={
                'transact_date': lambda *a: time.strftime('%Y-%m-%d'),
@@ -69,7 +69,7 @@ class forex_transaction(osv.osv):
                 'period_id': transaction_id.period_id and transaction_id.period_id.id or False
             }
             move_id = move_pool.create(cr, uid, move)
-            if transaction_id.currency_one==transaction_id.bank_account1_id.company_currency_id.id:
+            if transaction_id.currency_one.id==transaction_id.bank_account1_id.company_currency_id.id:
                 move_line = {
                     'name': transaction_name or '/',
                     'credit': transaction_id.amount_currency1,
@@ -94,7 +94,7 @@ class forex_transaction(osv.osv):
                     'amount_currency':amount2,
                 }
                 move_line_pool.create(cr, uid, move_line)
-            else:
+            elif transaction_id.currency_one.id!=transaction_id.bank_account1_id.company_currency_id.id:
                 move_line = {
                     'name': transaction_name or '/',
                     'credit': amount2,

@@ -6,7 +6,7 @@ import psycopg2
 from tools.translate import _
 import decimal_precision as dp
 
-class account_period_close_ntm(osv.osv_memory):
+class account_period_close_ntm(osv.osv):
     """
         close period
     """
@@ -23,6 +23,17 @@ class account_period_close_ntm(osv.osv_memory):
     _defaults = {
             'state':'draft',
             }
+    
+    def create(self, cr, uid, ids, context=None):
+        apcn_pool = self.pool.get('account.period.close.ntm')
+        for form in self.read(cr, uid, ids, context=context):           
+            values = {
+                'id':form['id'],
+                'state':form['state']
+                }
+            apcn_pool.create(cr, uid, values)
+        return True
+    
     def data_save(self, cr, uid, ids, context=None):
         period_pool = self.pool.get('account.period')
 
@@ -158,7 +169,7 @@ class account_period_close_ntm(osv.osv_memory):
 
 account_period_close_ntm()
 
-class account_period_close_ntm_currencies(osv.osv_memory):
+class account_period_close_ntm_currencies(osv.osv):
 	_name = 'account.period.close.ntm.currencies'
 	_columns = {
 		'currency_id':fields.many2one('res.currency', "Currency"),
@@ -169,4 +180,6 @@ class account_period_close_ntm_currencies(osv.osv_memory):
 		'period_close_id':fields.many2one('account.period.close.ntm'),
 	}
 account_period_close_ntm_currencies()
+
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
