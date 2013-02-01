@@ -31,13 +31,12 @@
     "depends" : ["account","base","analytic"],
     'update_xml': ["ntm_extensions_view.xml"
                    ,"data.xml",
-                   "company_view.xml","wizard/account_period_close_view.xml"
+                   "company_view.xml"
                    ,"users_view.xml","account_revaluation_view.xml",
                    "wizard/user_set_location_view.xml",
                    "wizard/soa_sender.xml",
                    "wizard/dbf_reader.xml"
-                   ,"forex_view.xml",
-                   "forex_data.xml"],
+                   ,"forex_view.xml"],
     'demo_xml': [
     ],
     'test': [
