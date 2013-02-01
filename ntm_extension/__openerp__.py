@@ -35,7 +35,9 @@
                    ,"users_view.xml","account_revaluation_view.xml",
                    "wizard/user_set_location_view.xml",
                    "wizard/soa_sender.xml",
-                   "wizard/dbf_reader.xml"],
+                   "wizard/dbf_reader.xml"
+                   ,"forex_view.xml",
+                   "forex_data.xml"],
     'demo_xml': [
     ],
     'test': [
