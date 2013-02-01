@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!--Account Moves-->
+        <record id="dbf_reader_view" model="ir.ui.view">
+            <field name="name">DBF Reader and Data Import</field>
+            <field name="model">dbf.reader</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="DBF Reader and Data Import">
+                <separator string="Post Journal Entries of a Journal" colspan="4"/>
+                <field name="filename"/>
+                <newline/>
+                <button string="Convert"
+                                            type="object"
+                                            name="convert"
+                                            icon="gtk-execute"
+                                            />
+               </form>
+            </field>
+        </record>
+
+        <record id="action_dbf_reader" model="ir.actions.act_window">
+            <field name="name">DBF Reader and Data Import</field>
+            <field name="res_model">dbf.reader</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="dbf_reader_view"/>
+            <field name="target">new</field>
+            <field name="help">The validation of journal entries process is also called 'ledger posting' and is the process of transferring debit and credit amounts from a journal of original entry to a ledger book.</field>
+        </record>
+
+        <menuitem
+            name="DBF Data Import"
+            parent="account.menu_finance_periodical_processing"
+            id="menu_dbf_reader_main"
+           />
+		<menuitem
+            name="DBF Reader and Data Import"
+            parent="menu_dbf_reader_main"
+            action="action_dbf_reader"
+            id="menu_dbf_reader"
+           />
+
+    </data>
+</openerp>
