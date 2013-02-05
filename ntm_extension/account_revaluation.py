@@ -11,38 +11,62 @@ class account_revaluation(osv.osv):
     _description = "Account Revaluations"
     _columns = {
         'period_id':fields.many2one('account.period','Period to close'),
-        ''
         'currency_ids':fields.one2many('account.revaluation.currencies','period_close_id','Currencies', ondelete="cascade"),
         'state':fields.selection([
                                   ('draft','Draft'),
-                                  ('compute','Compute'),
+                                  ('data_fetched','Currencies Fetched'),
                                   ('verify','Verify'),
                                   ], 'State'),
+        'line_ids':fields.one2many('account.revaluation.entries','period_close_id','Journal Items', ondelete="cascade"),
+        'account_ids':fields.one2many('account.revaluation.accounts','period_close_id','PR Accounts', ondelete="cascade"),
     }
     _defaults = {
             'state':'draft',
             }
     
-    def data_save(self, cr, uid, ids, context=None):
-        period_pool = self.pool.get('account.period')
-
-        mode = 'done'
-        for form in self.read(cr, uid, ids, context=context):
-            if form['sure']:
-                for id in context['active_ids']:
-                    cr.execute('update account_journal_period set state=%s where period_id=%s', (mode, id))
-                    cr.execute('update account_period set state=%s where id=%s', (mode, id))
-
-                    # Log message for Period
-                    for period_id, name in period_pool.name_get(cr, uid, [id]):
-                        period_pool.log(cr, uid, period_id, "Period '%s' is closed, no more modification allowed for this period." % (name))
-        return {'type': 'ir.actions.act_window_close'}
+    def get_move_lines(self,cr, uid, ids, context=None):
+        aml_pool = self.pool.get('account.move.line')
+        are_pool = self.pool.get('account.revaluation.entries')
+        for reval in self.read(cr, uid, ids,['period_id','id']):
+            period_close_id = reval['id']
+            period_id = reval['period_id'][0]
+            aml_search = aml_pool.search(cr, uid, [('period_id','=',period_id)])
+            for aml_id in aml_search:
+                values={
+                    'move_line_id':aml_id,
+                    'period_close_id':period_close_id,
+                    }
+                are_pool.create(cr, uid, values)
+            self.write(cr, uid, ids, {'state':'data_fetched'})
+        return True
+    
+    def get_account(self, cr, uid, ids, context=None):
+        aml_pool = self.pool.get('account.move.line')
+        acc_pool = self.pool.get('account.account')
+        ara_pool = self.pool.get('account.revaluation.accounts')
+        for reval in self.read(cr, uid, ids, ['period_id','id']):
+            period_close_id = reval['id']
+            period_id = reval['period_id'][0]
+            acc_search = acc_pool.search(cr, uid, [('pr','=','True')])
+            for acc_id in acc_search:
+                values = {
+                    'account_id':acc_id,
+                    'period_close_id':period_close_id,
+                    }
+                ara_pool.create(cr, uid, values)
+                #aml_lines = aml_pool.search(cr, uid,[('account_id','=',acc_id)])
+                #for aml_line in aml_lines:
+                #    aml_read = aml_pool.read(cr, uid, aml_line,[('currency_id')])
+                #    aml_curr_id = aml_read['currency_id'][0]
+                #netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(currency_lists))
+        return True               
+            
             
     def fetch_currencies(self, cr, uid, ids, context=None):
         apcnc_pool = self.pool.get('account.period.close.ntm.currencies')
         period_pool = self.pool.get('account.period')
         for form in self.read(cr, uid, ids, context=context):
-           form_id = form['id']
+            form_id = form['id']
             for id in context['active_ids']:
                 for period_id in period_pool.browse(cr, uid, [id]):
                     period_id1 = period_id.id
@@ -100,6 +124,36 @@ class account_revaluation(osv.osv):
                             apcnc_pool.create(cr, uid, currencies_list)
             self.write(cr, uid, ids, {'state':'compute'})
         return True
+    
+    def get_currencies(self, cr, uid, ids, context=None):
+        pool = self.pool.get
+        for reval in self.read(cr, uid, ids, ['period_id','id']):
+            period_close_id = reval['id']
+            period_id = reval['period_id'][0]
+            company = pool('account.period').read(cr, uid, period_id,['company_id','date_start','date_stop'])
+            currency = pool('res.company').read(cr, uid, company['company_id'][0], ['currency_id'])
+            currency_id = currency['currency_id'][0]
+            aml_search = pool('account.move.line').search(cr, uid, ['&','|',('period_id','=',period_id),('currency_id','!=',currency_id),('currency_id','!=','')])
+            currency_lists = []
+            for aml_ids in aml_search:
+                #netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(aml_ids))
+                record = pool('account.move.line').read(cr, uid, aml_ids,['currency_id'])
+                currency_id = record['currency_id'][0]
+                #netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(currency_lists))
+                if not currency_id in currency_lists:
+                    currency_lists.append(currency_id)
+                    rate_search = pool('res.currency.rate').search(cr, uid, [('currency_id','=',currency_id),'&',('name','>=',company['date_start']),('name','<=',company['date_stop'])])
+                    rate_search = pool('res.currency.rate').read(cr, uid,rate_search[0],['rate'])
+                    values = {
+                        'currency_id':currency_id,
+                        'start_rate':rate_search['rate'],
+                        'period_close_id':period_close_id,
+                        }
+                    pool('account.revaluation.currencies').create(cr, uid, values)
+            self.write(cr, uid, ids, {'state':'data_fetched'})
+        return True
+    
+        
 
 account_revaluation()
 
@@ -115,5 +169,28 @@ class account_revaluation_currencies(osv.osv):
     }
 account_revaluation_currencies()
 
+class account_revaluation_accounts(osv.osv):
+    _name = 'account.revaluation.accounts'
+    _columns = {
+        'account_id':fields.many2one('account.account','Account'),
+        'bal_beg':fields.float('Beginning Balance'),
+        'currency_id':fields.many2one('res.currency', 'Currency'),
+        'bal_ap':fields.float('Balance AP'),
+        'period_close_id':fields.many2one('account.revaluation'),
+        }
+account_revaluation_accounts()
+
+class account_revaluation_entries(osv.osv):
+    _name = 'account.revaluation.entries'
+    _columns = {
+        'move_line_id':fields.many2one('account.move.line','Journal Item'),
+        'debit': fields.related('move_line_id', 'debit', type="float", string="Debit", store=True),
+        'credit': fields.related('move_line_id', 'credit', type="float", string="Credit", store=True),
+        'post_rate': fields.related('move_line_id', 'post_rate', type="float", string="Post Rate", store=True),
+        'br_debit': fields.related('move_line_id', 'br_debit', type="float", string="Before Revaluation Debit", store=True),
+        'br_credit': fields.related('move_line_id', 'br_credit', type="float", string="Before Revaluation Credit", store=True),
+        'period_close_id':fields.many2one('account.revaluation'),
+        }
+account_revaluation_entries()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -8,41 +8,78 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Revaluate Period Entries">
-                    <field colspan="4" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
-                        <form string="Currencies">
-                            <field name="currency_id"/>
-                            <field name="start_rate"/>
-                            <field name="weighted_rate"/>
-							<field name="end_rate"/>
-                            <field name="post_rate"/>
-                        </form>
-                        <tree string="Currencies" editable="bottom">
-                            <field name="currency_id" readonly="1"/>
-                            <field name="start_rate" readonly="1"/>
-                            <field name="weighted_rate" readonly="1"/>
-							<field name="end_rate"/>
-                            <field name="post_rate"/>
-                        </tree>
-					</field>
-					<group colspan="13" col="4">
-					<field name="state" readonly="1"/>
-					<button string="Get Currencies"
-                                            type="object"
-                                            name="fetch_currencies"
-                                            icon="gtk-execute"
-                                            attrs="{'invisible': [('state','!=','draft')]}"
-                                            />
-                    <button string="Compute"
-                                            type="object"
-                                            name="compute_wr_per_line"
-                                            icon="gtk-execute"
-                                            attrs="{'invisible': [('state','!=','compute')]}"
-                                            />
-                    </group>
+                <group colspan="4" col="2">
+	                <field name="period_id" domain="[('state','!=','done')]"/>
+	                    <field colspan="4" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
+	                        <form string="Currencies">
+	                            <field name="currency_id"/>
+	                            <field name="start_rate"/>
+	                            <field name="weighted_rate"/>
+								<field name="end_rate"/>
+	                            <field name="post_rate"/>
+	                        </form>
+	                        <tree string="Currencies" editable="bottom">
+	                            <field name="currency_id" readonly="1"/>
+	                            <field name="start_rate" readonly="1"/>
+	                            <field name="weighted_rate" readonly="1"/>
+								<field name="end_rate"/>
+	                            <field name="post_rate"/>
+	                        </tree>
+						</field>
+						<group colspan="4" col="2">
+						<field colspan="4" mode="tree,form" name="account_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
+                            <form string="PR Accounts">
+                                <field name="account_id" readonly="1"/>
+                                <field name="currency_id" readonly="1"/>
+                                <field name="bal_beg" readonly="1"/>
+                                <field name="bal_ap" readonly="1"/>
+                            </form>
+                            <tree string="PR Accounts">
+                                <field name="account_id" readonly="1"/>
+                                <field name="currency_id" readonly="1"/>
+                                <field name="bal_beg" readonly="1"/>
+                                <field name="bal_ap" readonly="1"/>
+                            </tree>
+                        </field>
+						<field colspan="4" mode="tree,form" name="line_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
+                            <form string="Journal Items">
+                                <field name="move_line_id" readonly="1"/>
+                                <field name="debit" readonly="1"/>
+                                <field name="credit" readonly="1"/>
+                                <field name="post_rate" readonly="1"/>
+                                <field name="br_debit" readonly="1"/>
+                                <field name="br_credit" readonly="1"/>
+                            </form>
+                            <tree string="Journal Items" editable="bottom">
+                                <field name="move_line_id" readonly="1"/>
+                                <field name="debit" readonly="1"/>
+                                <field name="credit" readonly="1"/>
+                                <field name="post_rate" readonly="1"/>
+                                <field name="br_debit" readonly="1"/>
+                                <field name="br_credit" readonly="1"/>
+                            </tree>
+                        </field>
+						</group>
+						<group colspan="13" col="4">
+						<field name="state" readonly="1"/>
+						<button string="Get Currencies"
+	                                            type="object"
+	                                            name="get_currencies"
+	                                            icon="gtk-execute"
+	                                            attrs="{'invisible': [('state','!=','draft')]}"
+	                                            />
+	                    <button string="Fetch Entries"
+                                                type="object"
+                                                name="get_account"
+                                                icon="gtk-execute"
+                                                attrs="{'invisible': [('state','!=','data_fetched')]}"
+                                                />
+	                    </group>
+	           </group>   
                </form>
             </field>
         </record>
-
+        
         <record id="action_account_revaluation" model="ir.actions.act_window">
             <field name="name">Revaluate Entries</field>
             <field name="res_model">account.revaluation</field>
@@ -51,27 +88,10 @@
             <field name="view_id" ref="view_account_revaluation"/>
             <field name="target">new</field>
         </record>
-        <record id="action_account_revaluation_tree" model="ir.actions.act_window">
-            <field name="name">Revaluate Entries</field>
-            <field name="res_model">account.revaluation</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-        </record>
-        <menuitem
-            name="Revaluations"
-            parent="account.menu_finance_periodical_processing"
-            id="menu_revaluations"
-           />
-        <menuitem
-            name="Revaluate Entries"
-            parent="menu_revaluations"
-            action="action_account_revaluation_tree"
-            id="menu_account_revaluation_tree"
-            sequence="50"
-           />
+        
 		<menuitem
             name="Revaluate Entries"
-            parent="menu_revaluations"
+            parent="account.menu_account_end_year_treatments"
             action="action_account_revaluation"
             id="menu_account_revaluation"
             sequence="50"
