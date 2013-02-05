@@ -56,17 +56,33 @@ class account_revaluation(osv.osv):
         aml_pool = self.pool.get('account.move.line')
         acc_pool = self.pool.get('account.account')
         ara_pool = self.pool.get('account.revaluation.accounts')
+        period_pool = self.pool.get('account.period')
         for reval in self.read(cr, uid, ids, ['period_id','id']):
             period_close_id = reval['id']
             period_id = reval['period_id'][0]
+            per_id = period_pool.read(cr, uid, period_id,['date_start','date_stop'])
+            date_start = per_id['date_start']
             acc_search = acc_pool.search(cr, uid, [('pr','=','True')])
             for acc_id in acc_search:
-                aml_search = aml_pool.search(cr, uid,[('account_id','=',acc_id),('period_id','=',period_id)])
+                aml_search = aml_pool.search(cr, uid,[('account_id','=',acc_id),('date','<',date_start)])
+                debit = 0.00
+                credit = 0.00
+                balance = 0.00
+                netsvc.Logger().notifyChannel("aml_search", netsvc.LOG_INFO, ' '+str(aml_search))
+                for aml_id in aml_search:
+                    netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(aml_id))
+                    aml_reader = aml_pool.read(cr, uid, aml_id,['debit','credit'])
+                    debit += aml_reader['debit']
+                    credit += aml_reader['credit']
+                balance = debit - credit
+                netsvc.Logger().notifyChannel("aml_search", netsvc.LOG_INFO, ' '+str(balance))
                 values = {
                     'account_id':acc_id,
                     'period_close_id':period_close_id,
+                    'bal_beg':balance,
                     }
                 ara_pool.create(cr, uid, values)
+                
                 #aml_lines = aml_pool.search(cr, uid,[('account_id','=',acc_id)])
                 #for aml_line in aml_lines:
                 #    aml_read = aml_pool.read(cr, uid, aml_line,[('currency_id')])
@@ -133,6 +149,23 @@ class account_revaluation(osv.osv):
                     pool('account.revaluation.currencies').create(cr, uid, values)
             self.write(cr, uid, ids, {'state':'data_fetched'})
         return True
+    
+    def compute_pool_accounts(self, cr, uid, ids, context=None):
+        pool = self.pool.get
+        for reval in self.read(cr, uid, ids, ['period_id','id']):
+            period_close_id = reval['id']
+            period_id = reval['period_id'][0]
+            arc_search = pool('account.revaluation.currencies').search(cr, uid, [('period_close_id','=',period_close_id)])
+            for arc_ids in arc_search:
+                arc_reader = pool('account.revaluation.currencies').read(cr, uid, arc_ids, ['currency_id'])
+                arc_id = arc_ids['currency_id'][0]
+                are_search = pool('account.revaluation.entries').search(cr, uid, [('period_close_id','=',period_close_id),('currency_id','=',arc_id)])
+                amount_currency = 0.00
+                for aml_ids in are_search:
+                    are_reader = pool('account.revaluation.entries').read(cr, uid, aml_ids,['move_line_id'])
+                    aml_id = are_reader['move_line_id'][0]
+                    aml_reader = pool('account.move.line').read(cr, uid, aml_id,['amount_currency'])
+                
     
 account_revaluation()
 

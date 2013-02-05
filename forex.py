@@ -37,7 +37,7 @@ class forex_transaction(osv.osv):
             'rate':fields.float('Rate'),
             'journal_id':fields.many2one('account.journal', 'Journal', required=True, readonly=True, states={'draft':[('readonly',False)]}),
             'period_id':fields.many2one('account.period','Period'),
-            'transact_date':fields.date('Transaction Date', readonly=True),
+            'transact_date':fields.date('Transaction Date'),
             'state': fields.selection([
             ('draft','Draft'),
             ('post','Posted'),
@@ -51,7 +51,6 @@ class forex_transaction(osv.osv):
     def create_exchange(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
         move_line_pool = self.pool.get('account.move.line')
-        
         for transaction_id in self.browse(cr, uid, ids, context=None):
             amount1=transaction_id.amount_currency1
             rate=transaction_id.rate
@@ -97,8 +96,8 @@ class forex_transaction(osv.osv):
             elif transaction_id.currency_one.id!=transaction_id.bank_account1_id.company_currency_id.id:
                 move_line = {
                     'name': transaction_name or '/',
-                    'credit': amount2,
-                    'debit': 0.00,
+                    'debit': amount2,
+                    'credit': 0.00,
                     'account_id': transaction_id.bank_account2_id.id,
                     'move_id': move_id,
                     'journal_id': transaction_id.journal_id.id,
@@ -108,8 +107,8 @@ class forex_transaction(osv.osv):
                 move_line_pool.create(cr, uid, move_line)
                 move_line = {
                     'name': transaction_name or '/',
-                    'debit': amount2,
-                    'credit': 0.00,
+                    'credit': amount2,
+                    'debit': 0.00,
                     'account_id': transaction_id.bank_account1_id.id,
                     'move_id': move_id,
                     'journal_id': transaction_id.journal_id.id,
