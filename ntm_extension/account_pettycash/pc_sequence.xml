@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        <!-- Sequences for operations.servicing -->
+        <record id="seq_type_pc_sequence" model="ir.sequence.type">
+            <field name="name">Petty Cash Account</field>
+            <field name="code">account.pettycash</field>
+        </record>
+
+        <record id="seq_pc_sequence" model="ir.sequence">
+            <field name="name">Petty Cash Account</field>
+            <field name="code">account.pettycash</field>
+            <field name="prefix">PCA/%(y)s/</field>
+            <field name="padding">4</field>
+        </record>
+		
+		<record id="seq_type_pc_transfer_sequence" model="ir.sequence.type">
+            <field name="name">Petty Cash Fund Transfer</field>
+            <field name="code">account.pettycash.transfer</field>
+        </record>
+
+        <record id="seq_pc_transfer_sequence" model="ir.sequence">
+            <field name="name">Petty Cash Fund Transfer</field>
+            <field name="code">account.pettycash.transfer</field>
+            <field name="prefix">PCT/%(y)s/</field>
+            <field name="padding">4</field>
+        </record>
+        
+        <record id="seq_type_pc_replenishment_sequence" model="ir.sequence.type">
+            <field name="name">Petty Cash Replenishment</field>
+            <field name="code">pettycash.replenishment</field>
+        </record>
+
+        <record id="seq_pc_replenishment_sequence" model="ir.sequence">
+            <field name="name">Petty Cash Replenishment</field>
+            <field name="code">pettycash.replenishment</field>
+            <field name="prefix">PCR/%(y)s/</field>
+            <field name="padding">4</field>
+        </record>
+        <record id="seq_type_pc_crs_sequence" model="ir.sequence.type">
+            <field name="name">Cash Request Slip</field>
+            <field name="code">cash.request.slip</field>
+        </record>
+
+        <record id="seq_pc_replenishment_sequence" model="ir.sequence">
+            <field name="name">Cash Request Slip</field>
+            <field name="code">cash.request.slip</field>
+            <field name="prefix">CRS/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+
+    </data>
+</openerp>

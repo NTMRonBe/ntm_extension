@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>        
+        <menuitem id="main_pettycash"
+            parent="account.menu_finance_bank_and_cash"
+            name="Petty Cash"
+            sequence="40"/>
+        <!--Denominations-->
+        <record id="denominations_form" model="ir.ui.view">
+            <field name="name">denom.form</field>
+            <field name="model">denominations</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Denominations">
+                        <field name="name"/>
+                        <field name="multiplier"/>
+                        <field name="currency_id"/>
+                        <field name="sequence"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="denom_tree">
+            <field name="name">denom.tree</field>
+            <field name="model">denominations</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Denominations">
+					    <field name="name"/>
+					    <field name="multiplier"/>
+                        <field name="currency_id"/>
+                        <field name="sequence"/>
+                </tree>
+            </field>
+        </record>
+        <record id="denom_filter" model="ir.ui.view">
+		    <field name="name">denom.filter</field>
+            <field name="model">denominations</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Denominations">
+					    <field name="name"/>
+					    <field name="multiplier"/>
+                        <field name="currency_id"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_denom_form">
+        	<field name="name">Denominations</field>
+	        <field name="res_model">denominations</field>
+		    <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_denom" 
+            action="action_denom_form" 
+            parent="account.menu_configuration_misc"
+            sequence="50" 
+            groups="base.group_user"/>  
+        
+        <!--Petty Cash Denominations-->
+        <record id="pettycash_denom_form" model="ir.ui.view">
+            <field name="name">pettycash.denom.form</field>
+            <field name="model">pettycash.denom</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Denominations">
+                    <group colspan="4" col="4">
+                        <field name="name"/>
+                        <field name="quantity"/>
+                   	</group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="pettycash_denom_tree">
+            <field name="name">pettycash.denom.tree</field>
+            <field name="model">pettycash.denom</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Denominations">
+					    <field name="name"/>
+                        <field name="quantity"/>
+                </tree>
+            </field>
+        </record>
+        <record id="pettycash_denom_filter" model="ir.ui.view">
+		    <field name="name">pettycash.denom.filter</field>
+            <field name="model">pettycash.denom</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Denominations">
+					    <field name="name"/>
+                        <field name="quantity"/>
+                </search>
+            </field>
+        </record>
+    <!--Petty Cash Views-->
+        <record id="pc_transfer_form" model="ir.ui.view">
+            <field name="name">pc.transfer.form</field>
+            <field name="model">account.pettycash.transfer</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Petty Cash Fund Transfer">
+                    	<group colspan="4" col="4">
+	                        <field name="name" readonly="1"/>
+	                        <field name="journal_id"/>
+	                        <field name="transaction_date"/>
+	                        <field name="period_id" readonly="1"/>
+	                        <field name="src_pc_id" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
+	                        <field name="dest_pc_id" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
+	                        <field name="amount" readonly="1"/>
+	                       <field name="state"/>
+                        </group>
+                        <field name="denom_breakdown" nolabel="1" colspan="4"/>
+                        <newline/>
+                        <group colspan="4" col="4">
+                            <group colspan="2" col="2">
+                                <group colspan="4" col="4">
+                                    <group colspan="2" col="2"></group>
+                                    <group colspan="2" col="2"></group>
+                                </group>
+                            </group>
+                            <group colspan="2" col="2">
+                                <group colspan="4" col="4">
+                                    <button string="Cancel"
+                                            type="object"
+                                            name="button_cancel"
+                                            icon="gtk-cancel"
+                                            attrs="{'invisible': [('state','in',('cancel','completed'))]}"
+                                            />
+                                    <button string="Confirm"
+                                            type="object"
+                                            name="button_confirm"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible': [('state','!=','draft')]}"
+                                            />
+                                    <button string="Complete"
+                                            type="object"
+                                            name="button_completed"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible': [('state','!=','confirmed')]}"
+                                            />
+                                </group>
+                            </group>
+                        </group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="pc_transfer_tree">
+            <field name="name">pc.transfer.tree</field>
+            <field name="model">account.pettycash.transfer</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Petty Cash Fund Transfer">
+					    <field name="name"/>
+	                        <field name="transaction_date"/>
+	                        <field name="src_pc_id"/>
+	                        <field name="dest_pc_id"/>
+	                        <field name="amount"/>
+	                       <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="pc_transfer_filter" model="ir.ui.view">
+		    <field name="name">pc.transfer.filter</field>
+            <field name="model">account.pettycash.transfer</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Petty Cash Fund Transfer">
+					    <field name="name"/>
+	                        <field name="transaction_date"/>
+	                        <field name="src_pc_id"/>
+	                        <field name="dest_pc_id"/>
+	                        <field name="amount"/>
+	                       <field name="state"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_pettycash_transfer_form">
+        	<field name="name">Petty Cash Fund Transfer</field>
+	        <field name="res_model">account.pettycash.transfer</field>
+		    <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_pettycash_transfer" 
+            action="action_pettycash_transfer_form" 
+            parent="main_pettycash"
+            sequence="20" 
+            groups="base.group_user"/>  
+        
+    <!--Petty Cash Views-->
+        <record id="pettycash_form" model="ir.ui.view">
+            <field name="name">pettycash.form</field>
+            <field name="model">account.pettycash</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Petty Cash">
+                    	<group colspan="4" col="4">
+	                        <field name="name"  readonly="1"/>
+	                        <field name="date"/>
+	                        <field name="manager_id"/>
+	                        <field name="account_code" on_change="on_change_pca(account_code)" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                        <field name="amount" readonly="True"/>
+	                        <field name="currency_id"/>
+	                        <group colspan="4" col="4">
+	                        <!-- <button string="Compute Amount"
+                                            type="object"
+                                            name="get_amount"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible': [('state','!=','draft')]}"
+                                            /> -->
+	                        <button string="Fill Denominations Lists"
+                                            type="object"
+                                            name="fill_denominations"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible':[('state','!=','draft')]}"
+                                            />
+	                        </group>
+                        </group>
+                        <field name="denomination_ids" nolabel="1" colspan="4" readonly="True"/>
+                        <newline/>
+                        <field name="state" colspan="4"/>
+                        
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="pettycash_tree">
+            <field name="name">pettycash.tree</field>
+            <field name="model">account.pettycash</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Petty Cash">
+					    <field name="name"/>
+                        <field name="manager_id"/>
+                        <field name="date"/>
+                        <field name="account_code"/>
+                        <field name="amount"/>
+                </tree>
+            </field>
+        </record>
+        <record id="pettycash_filter" model="ir.ui.view">
+		    <field name="name">pettycash.filter</field>
+            <field name="model">account.pettycash</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Petty Cash">
+					    <field name="name"/>
+                        <field name="manager_id"/>
+                        <field name="date"/>
+                        <field name="account_code"/>
+                        <field name="amount"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_pettycash_form">
+        	<field name="name">Petty Cash</field>
+	        <field name="res_model">account.pettycash</field>
+		    <field name="view_type">form</field>
+        </record>
+
+        
+        <menuitem id="menu_pettycash" 
+            action="action_pettycash_form" 
+            parent="main_pettycash"
+            sequence="10" 
+            groups="base.group_user"/>  
+
+    </data>
+</openerp>

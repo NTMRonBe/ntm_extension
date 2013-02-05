@@ -66,16 +66,11 @@ class account_account(osv.osv):
     _columns = {
         'pr':fields.boolean('Partially Revaluated'),
         'to_be_moved':fields.boolean('To be moved to net equity?'),
+        'gain_loss':fields.many2one('account.account','Gain Loss Account'),
+        'gain_loss_acc':fields.boolean('Is this a Gain/Loss Account?'),
         }
 account_account()
 
-
-class res_company(osv.osv):
-    _inherit = "res.company"
-    _columns = {
-        'gain_loss_account':fields.many2one('account.account','Exchange Gain/Loss Account'),
-        }
-res_company()
 
 class account_move_line(osv.osv):
     _inherit = 'account.move.line'

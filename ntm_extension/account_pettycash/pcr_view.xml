@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>        
+    <!--Petty Cash Replenishment-->
+        <record id="pcr_form" model="ir.ui.view">
+            <field name="name">pcr.form</field>
+            <field name="model">pettycash.replenishment</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Petty Cash Replenishment">
+                    <group colspan="4" col="4">
+                        <field name="name"/>
+                        <field name="journal_id" widget="selection" domain="[('type','=','bank')]"/>
+                        <field name="date" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        <field name="period_id" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        <field name="pettycash_id" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        <field name="total_amount" readonly="1"/>
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Denominations Lists">
+		                    <group colspan="4" col="2">
+		                        <field name="denom_breakdown" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}"/>
+		                    </group>
+                    	</page>
+                    	<page string="Journal Items">
+                    	    <group colspan="4" col="2">
+	                    	    <group colspan="4" col="2">
+	                    	    	<field name="move_id"  attrs="{'readonly': [('state','!=','confirmed')]}"/>
+	                    	    </group>
+		                    	<group colspan="4" col="2">
+	                    	    	<separator string="Journal Items"/>
+			                    	    <group colspan="4" col="2">
+			                    	    	<field name="move_ids" nolabel="1"/>
+			                    	    </group>
+	                    	    </group>
+                    	    </group>
+                    	</page>
+                    </notebook>
+                    <group col="10" colspan="4">
+                        <field name="state"/>
+                        <button string="Cancel"
+                                            type="object"
+                                            name="button_cancel"
+                                            icon="gtk-cancel"
+                                            attrs="{'invisible': [('state','in',('cancel','completed'))]}"
+                                            />
+                                    <button string="Confirm"
+                                            type="object"
+                                            name="confirm_pcr"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible': [('state','!=','draft')]}"
+                                            />
+                                    <button string="Complete"
+                                            type="object"
+                                            name="complete_pcr"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible': [('state','!=','confirmed')]}"
+                                            />
+                    </group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="pcr_tree">
+            <field name="name">pcr.tree</field>
+            <field name="model">pettycash.replenishment</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Petty Cash Replenishments">
+					    <field name="name"/>
+                        <field name="date"/>
+                        <field name="journal_id"/>
+                        <field name="pettycash_id"/>
+                </tree>
+            </field>
+        </record>
+        <record id="pcr_filter" model="ir.ui.view">
+		    <field name="name">pcr.filter</field>
+            <field name="model">pettycash.replenishment</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Petty Cash Replenishment">
+					    <field name="name"/>
+                        <field name="date"/>
+                        <field name="journal_id"/>
+                        <field name="pettycash_id"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_pcr_form">
+        	<field name="name">Petty Cash Replenishment</field>
+	        <field name="res_model">pettycash.replenishment</field>
+		    <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_pcr" 
+            action="action_pcr_form" 
+            parent="main_pettycash"
+            sequence="30" 
+            groups="base.group_user"/>  
+
+    </data>
+</openerp>

@@ -53,9 +53,19 @@
             <field name="priority">2</field>
             <field name="inherit_id" ref="account.view_account_form"/>
             <field name="arch" type="xml">
-				<field name="reconcile" position="after">
-				    <field name="pr"/>
-				    <field name="to_be_moved"/>
+				<separator string = "Reconcile" position="replace">
+				    <separator string = "Configurations" colspan="2"/>
+				    <group colspan="4" col="4">
+				        <field name="pr"/>
+                        <field name="to_be_moved"/>
+				    </group>
+				</separator>
+				<field name="reconcile" position="replace">
+				    <group colspan="4" col="4">
+					    <field name="reconcile"/>
+					    <field name="gain_loss_acc"/>
+					    <field name="gain_loss"/>
+	                </group>
 				</field>
             </field>
         </record>

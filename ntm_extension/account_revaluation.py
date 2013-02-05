@@ -125,6 +125,11 @@ class account_revaluation(osv.osv):
             self.write(cr, uid, ids, {'state':'compute'})
         return True
     
+    def get_details(self, cr, uid, ids, context=None):
+        self.get_currencies(cr, uid, ids, context=context)
+        self.get_account(cr, uid, ids, context=context)
+        return True
+    
     def get_currencies(self, cr, uid, ids, context=None):
         pool = self.pool.get
         for reval in self.read(cr, uid, ids, ['period_id','id']):
@@ -132,8 +137,8 @@ class account_revaluation(osv.osv):
             period_id = reval['period_id'][0]
             company = pool('account.period').read(cr, uid, period_id,['company_id','date_start','date_stop'])
             currency = pool('res.company').read(cr, uid, company['company_id'][0], ['currency_id'])
-            currency_id = currency['currency_id'][0]
-            aml_search = pool('account.move.line').search(cr, uid, ['&','|',('period_id','=',period_id),('currency_id','!=',currency_id),('currency_id','!=','')])
+            comp_currency_id = currency['currency_id'][0]
+            aml_search = pool('account.move.line').search(cr, uid, ['&','|',('period_id','=',period_id),('currency_id','!=',comp_currency_id),('currency_id','!=','')])
             currency_lists = []
             for aml_ids in aml_search:
                 #netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(aml_ids))
@@ -141,7 +146,26 @@ class account_revaluation(osv.osv):
                 currency_id = record['currency_id'][0]
                 #netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(currency_lists))
                 if not currency_id in currency_lists:
+                    wr=0.00
+                    a1 = 0.00
+                    a2 = 0.00
+                    a3 = 0.00
+                    a4 = 0.00
                     currency_lists.append(currency_id)
+                    forex_trans = pool('forex.transaction').search(cr, uid, [('period_id','=',period_id),('currency_one','=',comp_currency_id),('currency_two','=',currency_id)])
+                    for forex in forex_trans:
+                        trans = pool('forex.transaction').read(cr, uid, forex,['amount_currency1','amount_currency2'])
+                        a1+=trans['amount_currency1']
+                        a2+=trans['amount_currency2']
+                    forex_trans = pool('forex.transaction').search(cr, uid, [('period_id','=',period_id),('currency_one','=',currency_id),('currency_two','=',comp_currency_id)])
+                    for forex in forex_trans:
+                        trans = pool('forex.transaction').read(cr, uid, forex,['amount_currency1','amount_currency2'])
+                        a3+=trans['amount_currency1']
+                        a4+=trans['amount_currency2']
+                    a14 = a1 - a4
+                    a23 = a2 - a3
+                    if a14 < 0.00:
+                        a14 = -1 * a14
                     rate_search = pool('res.currency.rate').search(cr, uid, [('currency_id','=',currency_id),'&',('name','>=',company['date_start']),('name','<=',company['date_stop'])])
                     rate_search = pool('res.currency.rate').read(cr, uid,rate_search[0],['rate'])
                     values = {
@@ -153,8 +177,6 @@ class account_revaluation(osv.osv):
             self.write(cr, uid, ids, {'state':'data_fetched'})
         return True
     
-        
-
 account_revaluation()
 
 class account_revaluation_currencies(osv.osv):

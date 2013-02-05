@@ -64,7 +64,7 @@
 						<field name="state" readonly="1"/>
 						<button string="Get Currencies"
 	                                            type="object"
-	                                            name="get_currencies"
+	                                            name="get_details"
 	                                            icon="gtk-execute"
 	                                            attrs="{'invisible': [('state','!=','draft')]}"
 	                                            />
