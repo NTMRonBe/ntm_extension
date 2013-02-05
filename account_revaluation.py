@@ -26,17 +26,29 @@ class account_revaluation(osv.osv):
     
     def get_move_lines(self,cr, uid, ids, context=None):
         aml_pool = self.pool.get('account.move.line')
+        curr_pool = self.pool.get('res.currency')
+        acc_pool = self.pool.get('account.account')
         are_pool = self.pool.get('account.revaluation.entries')
+        arc_pool = self.pool.get('account.revaluation.currencies')
+        ara_pool = self.pool.get('account.revaluation.accounts')
         for reval in self.read(cr, uid, ids,['period_id','id']):
             period_close_id = reval['id']
             period_id = reval['period_id'][0]
-            aml_search = aml_pool.search(cr, uid, [('period_id','=',period_id)])
-            for aml_id in aml_search:
-                values={
-                    'move_line_id':aml_id,
-                    'period_close_id':period_close_id,
-                    }
-                are_pool.create(cr, uid, values)
+            curr_lists = arc_pool.search(cr, uid, [('period_close_id','=',period_close_id)])
+            for curr_ids in curr_lists:
+                cur_ids = arc_pool.read(cr, uid, curr_ids,['currency_id'])
+                currency = cur_ids['currency_id'][0]
+                acc_lists = ara_pool.search (cr, uid, [('period_close_id','=',period_close_id)])
+                for acc_ids in acc_lists:
+                    acc_id = ara_pool.read(cr, uid, acc_ids,[('account_id')])
+                    acc_id = acc_id['account_id'][0] 
+                    aml_search = aml_pool.search(cr, uid, [('period_id','=',period_id), ('account_id','=',acc_id),('currency_id','=',currency)])
+                    for aml_id in aml_search:
+                        values={
+                            'move_line_id':aml_id,
+                            'period_close_id':period_close_id,
+                            }
+                        are_pool.create(cr, uid, values)
             self.write(cr, uid, ids, {'state':'data_fetched'})
         return True
     
@@ -49,6 +61,7 @@ class account_revaluation(osv.osv):
             period_id = reval['period_id'][0]
             acc_search = acc_pool.search(cr, uid, [('pr','=','True')])
             for acc_id in acc_search:
+                aml_search = aml_pool.search(cr, uid,[('account_id','=',acc_id),('period_id','=',period_id)])
                 values = {
                     'account_id':acc_id,
                     'period_close_id':period_close_id,
@@ -60,74 +73,11 @@ class account_revaluation(osv.osv):
                 #    aml_curr_id = aml_read['currency_id'][0]
                 #netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(currency_lists))
         return True               
-            
-            
-    def fetch_currencies(self, cr, uid, ids, context=None):
-        apcnc_pool = self.pool.get('account.period.close.ntm.currencies')
-        period_pool = self.pool.get('account.period')
-        for form in self.read(cr, uid, ids, context=context):
-            form_id = form['id']
-            for id in context['active_ids']:
-                for period_id in period_pool.browse(cr, uid, [id]):
-                    period_id1 = period_id.id
-                    comp_curr = period_id.company_id.currency_id.id
-                    netsvc.Logger().notifyChannel("period_id", netsvc.LOG_INFO, ' '+str(period_id1))
-                    date_start = period_id.date_start
-                    netsvc.Logger().notifyChannel("period_id", netsvc.LOG_INFO, ' '+str(date_start))
-                    date_start = "'"+date_start+"'"
-                    date_stop = period_id.date_stop
-                    netsvc.Logger().notifyChannel("period_id", netsvc.LOG_INFO, ' '+str(date_stop))
-                    date_stop = "'"+date_stop+"'"
-                    query = ("""select distinct(currency_id) from account_move_line where currency_id!=(select currency_id from res_company where id=(select company_id from res_users where id=%s)) and period_id=%s"""%(uid,period_id1))
-                    netsvc.Logger().notifyChannel("query", netsvc.LOG_INFO, ' '+str(query))
-                    cr.execute(query)
-                    for t in cr.dictfetchall():
-                        wr=0.00
-                        currency_id = t['currency_id']
-                        query = ("""select * from forex_transaction where period_id = %s and currency_one=%s and currency_two=%s"""%(period_id1,comp_curr,currency_id))
-                        cr.execute(query)
-                        amount_1 = 0.00
-                        amount_2 = 0.00
-                        for t in cr.dictfetchall():
-                            amount_one = t['amount_currency1']
-                            amount_two = t['amount_currency2']
-                            amount_1 += amount_one
-                            amount_2 += amount_two
-                        amount_3 = 0.00
-                        amount_4 = 0.00
-                        query = ("""select * from forex_transaction where period_id = %s and currency_one=%s and currency_two=%s"""%(period_id1,currency_id,comp_curr))
-                        cr.execute(query)
-                        for t in cr.dictfetchall():
-                            amount_one = t['amount_currency1']
-                            amount_two = t['amount_currency2']
-                            amount_3 += amount_one
-                            amount_4 += amount_two
-                        c1_amount = amount_1 - amount_4
-                        c2_amount = amount_2 - amount_3
-                        if c1_amount < 0.00:
-                            c1_amount = -1.00 * c1_amount
-                        if c2_amount < 0.00:
-                            c2_amount = -1.00 * c2_amount
-                        if c2_amount > 0.00 and c1_amount > 0.00:
-                            wr = c2_amount / c1_amount
-                        query = ("""select rate from res_currency_rate where currency_id=%s and name>=%s and name<=%s"""%(currency_id,date_start,date_stop))
-                        cr.execute(query)
-                        for t in cr.dictfetchall():
-                            rate = t['rate']
-                            currencies_list = {
-                                'currency_id':currency_id,
-                                'start_rate':rate,
-                                'weighted_rate':wr,
-                                'post_rate':wr,
-                                'period_close_id':form_id,
-                                }
-                            apcnc_pool.create(cr, uid, currencies_list)
-            self.write(cr, uid, ids, {'state':'compute'})
-        return True
-    
+                      
     def get_details(self, cr, uid, ids, context=None):
         self.get_currencies(cr, uid, ids, context=context)
         self.get_account(cr, uid, ids, context=context)
+        self.get_move_lines(cr, uid, ids, context=context)
         return True
     
     def get_currencies(self, cr, uid, ids, context=None):
@@ -164,14 +114,21 @@ class account_revaluation(osv.osv):
                         a4+=trans['amount_currency2']
                     a14 = a1 - a4
                     a23 = a2 - a3
+                    wr = 0.00
                     if a14 < 0.00:
                         a14 = -1 * a14
+                    if a23 < 0.00:
+                        a23 = -1 * a23
+                    if a23 > 0.00 and a14 > 0.00:
+                        wr = a23 / a14
                     rate_search = pool('res.currency.rate').search(cr, uid, [('currency_id','=',currency_id),'&',('name','>=',company['date_start']),('name','<=',company['date_stop'])])
                     rate_search = pool('res.currency.rate').read(cr, uid,rate_search[0],['rate'])
                     values = {
                         'currency_id':currency_id,
                         'start_rate':rate_search['rate'],
                         'period_close_id':period_close_id,
+                        'weighted_rate':wr,
+                        'post_rate':wr,
                         }
                     pool('account.revaluation.currencies').create(cr, uid, values)
             self.write(cr, uid, ids, {'state':'data_fetched'})
