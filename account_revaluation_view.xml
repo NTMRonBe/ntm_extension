@@ -68,9 +68,9 @@
 	                                            icon="gtk-execute"
 	                                            attrs="{'invisible': [('state','!=','draft')]}"
 	                                            />
-	                    <button string="Fetch Entries"
+	                    <button string="Compute Pool Accounts"
                                                 type="object"
-                                                name="get_account"
+                                                name="compute_pool_accounts"
                                                 icon="gtk-execute"
                                                 attrs="{'invisible': [('state','!=','data_fetched')]}"
                                                 />
