@@ -51,70 +51,73 @@ class forex_transaction(osv.osv):
     def create_exchange(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
         move_line_pool = self.pool.get('account.move.line')
-        for transaction_id in self.browse(cr, uid, ids, context=None):
-            amount1=transaction_id.amount_currency1
-            rate=transaction_id.rate
-            date=transaction_id.transact_date
-            amount2 = 0.00
-            transaction_name = "Conversion from "+transaction_id.currency_one.name+" to "+transaction_id.currency_two.name
-            if transaction_id.currency_one.id==transaction_id.bank_account1_id.company_currency_id.id:
-                amount2=amount1*rate
-            elif transaction_id.currency_two.id==transaction_id.bank_account1_id.company_currency_id.id:
-                amount2=amount1/rate
+        exchange_fields = ['amount_currency1','rate',
+                           'transact_date','currency_one',
+                           'currency_two','bank_account1_id',
+                           'bank_account2_id','journal_id','period_id']
+        for trans in self.read(cr, uid, ids, exchange_fields):
+            amount1=trans['amount_currency1']
+            rate=trans['rate']
+            date=trans['transact_date']
+            curr1 = self.pool.get('res.currency').read(cr, uid, trans['currency_one'][0],['name'])
+            curr2 = self.pool.get('res.currency').read(cr, uid, trans['currency_two'][0],['name'])
+            comp_curr = self.pool.get('account.account').read(cr, uid, trans['bank_account1_id'][0],['company_currency_id'])
+            amount2 = amount1 * rate 
+            transaction_name = "Conversion from "+curr1['name']+" to "+curr2['name']
             move = {
                 'name': transaction_name,
-                'journal_id': transaction_id.journal_id.id,
-                'date': transaction_id.transact_date,
-                'period_id': transaction_id.period_id and transaction_id.period_id.id or False
+                'journal_id': trans['journal_id'][0],
+                'date': trans['transact_date'],
+                'period_id': trans['period_id'][0],
             }
             move_id = move_pool.create(cr, uid, move)
-            if transaction_id.currency_one.id==transaction_id.bank_account1_id.company_currency_id.id:
+            if trans['currency_one'][0]==comp_curr['company_currency_id'][0]:
                 move_line = {
                     'name': transaction_name or '/',
-                    'credit': transaction_id.amount_currency1,
+                    'credit': trans['amount_currency1'],
                     'debit': 0.00,
-                    'account_id': transaction_id.bank_account1_id.id,
+                    'account_id': trans['bank_account1_id'][0],
                     'move_id': move_id,
-                    'journal_id': transaction_id.journal_id.id,
-                    'period_id': transaction_id.period_id.id,
-                    'date': transaction_id.transact_date,
+                    'journal_id': trans['journal_id'][0],
+                    'date': trans['transact_date'],
+                    'period_id': trans['period_id'][0],
                 }
                 move_line_pool.create(cr, uid, move_line)
                 move_line = {
                     'name': transaction_name or '/',
-                    'debit': transaction_id.amount_currency1,
+                    'debit': trans['amount_currency1'],
                     'credit': 0.00,
-                    'account_id': transaction_id.bank_account2_id.id,
+                    'account_id': trans['bank_account2_id'][0],
                     'move_id': move_id,
-                    'journal_id': transaction_id.journal_id.id,
-                    'period_id': transaction_id.period_id.id,
-                    'date': transaction_id.transact_date,
-                    'currency_id':transaction_id.currency_two.id,
+                    'journal_id': trans['journal_id'][0],
+                    'date': trans['transact_date'],
+                    'period_id': trans['period_id'][0],
+                    'currency_id':trans['currency_two'][0],
                     'amount_currency':amount2,
                 }
                 move_line_pool.create(cr, uid, move_line)
-            elif transaction_id.currency_one.id!=transaction_id.bank_account1_id.company_currency_id.id:
+            elif trans['currency_one'][0]!=comp_curr['company_currency_id'][0]:
                 move_line = {
                     'name': transaction_name or '/',
                     'debit': amount2,
                     'credit': 0.00,
-                    'account_id': transaction_id.bank_account2_id.id,
+                    'account_id': trans['bank_account2_id'][0],
                     'move_id': move_id,
-                    'journal_id': transaction_id.journal_id.id,
-                    'period_id': transaction_id.period_id.id,
-                    'date': transaction_id.transact_date,
+                    'journal_id': trans['journal_id'][0],
+                    'date': trans['transact_date'],
+                    'period_id': trans['period_id'][0],
                 }
                 move_line_pool.create(cr, uid, move_line)
                 move_line = {
                     'name': transaction_name or '/',
                     'credit': amount2,
                     'debit': 0.00,
-                    'account_id': transaction_id.bank_account1_id.id,
+                    'account_id': trans['bank_account1_id'][0],
                     'move_id': move_id,
-                    'journal_id': transaction_id.journal_id.id,
-                    'period_id': transaction_id.period_id.id,
-                    'date': transaction_id.transact_date,
-                    'currency_id':transaction_id.currency_one.id,
+                    'journal_id': trans['journal_id'][0],
+                    'date': trans['transact_date'],
+                    'period_id': trans['period_id'][0],
+                    'currency_id':trans['currency_one'][0],
                     'amount_currency':amount1,
                 }
                 move_line_pool.create(cr, uid, move_line)
