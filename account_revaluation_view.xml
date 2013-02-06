@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <form string="Revaluate Period Entries">
                 <group colspan="8" col="2">
-	                <field name="period_id" domain="[('state','!=','done')]"/>
+	                <field name="period_id" domain="[('state','!=','done')]" required="1"/>
 	                    <field colspan="8" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
 	                        <form string="Currencies">
 	                            <field name="currency_id"/>
@@ -30,7 +30,6 @@
 						<field colspan="8" mode="tree,form" name="account_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
                             <form string="PR Accounts">
                                 <field name="account_id" readonly="1"/>
-                                <field name="usd_post" readonly="1"/>
                                 <field name="php_post" readonly="1"/>
                                 <field name="eur_post" readonly="1"/>
                                 <field name="bal_beg" readonly="1"/>
@@ -38,16 +37,17 @@
                             </form>
                             <tree string="PR Accounts">
                                 <field name="account_id" readonly="1"/>
-                                <field name="usd_post" readonly="1"/>
                                 <field name="php_post" readonly="1"/>
                                 <field name="eur_post" readonly="1"/>
                                 <field name="bal_beg" readonly="1"/>
                                 <field name="bal_ap" readonly="1"/>
                             </tree>
                         </field>
-						<field colspan="8" mode="tree,form" name="line_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
+						<field colspan="8" mode="tree,form" name="line_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" width="700">
                             <form string="Journal Items">
                                 <field name="move_line_id" readonly="1"/>
+                                <field name="account_id" readonly="1"/>
+                                <field name="currency_id" readonly="1"/>
                                 <field name="debit" readonly="1"/>
                                 <field name="credit" readonly="1"/>
                                 <field name="post_rate" readonly="1"/>
@@ -56,6 +56,8 @@
                             </form>
                             <tree string="Journal Items" editable="bottom">
                                 <field name="move_line_id" readonly="1"/>
+                                <field name="account_id" readonly="1"/>
+                                <field name="currency_id" readonly="1"/>
                                 <field name="debit" readonly="1"/>
                                 <field name="credit" readonly="1"/>
                                 <field name="post_rate" readonly="1"/>

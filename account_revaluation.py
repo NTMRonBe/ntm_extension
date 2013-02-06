@@ -152,19 +152,33 @@ class account_revaluation(osv.osv):
             period_id = reval['period_id'][0]
             arc_search = pool('account.revaluation.currencies').search(cr, uid, [('period_close_id','=',period_close_id)])
             for arc_ids in arc_search:
+                curr_name = ""
                 arc_reader = pool('account.revaluation.currencies').read(cr, uid, arc_ids, ['currency_id'])
                 arc_id = arc_reader['currency_id'][0]
-                are_search = pool('account.revaluation.entries').search(cr, uid, [('period_close_id','=',period_close_id)])
-                amount_currency = 0.00
-                for aml_ids in are_search:
-                    are_reader = pool('account.revaluation.entries').read(cr, uid, aml_ids,['move_line_id'])
-                    aml_id = are_reader['move_line_id'][0]
-                    aml_reader = pool('account.move.line').read(cr, uid, aml_id,['amount_currency','debit'])
-                    if aml_reader['debit']>0.00:
-                        amount_currency+=aml_reader['amount_currency']
-                    elif aml_reader['debit']==0.00:
-                        amount_currency-=aml_reader['amount_currency']
-                    netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(amount_currency))
+                curr_reader = pool('res.currency').read(cr, uid, arc_id,['name'])
+                if curr_reader['name']=="PHP":
+                    curr_name = "PHP"
+                elif curr_reader['name']=="EUR":
+                    curr_name = "EUR"
+                ara_search = pool('account.revaluation.accounts').search(cr, uid, [('period_close_id','=',period_close_id)])
+                for ara_ids in ara_search:
+                    ara_reader = pool('account.revaluation.accounts').read(cr, uid, ara_ids,['account_id'])
+                    ara_id = ara_reader['account_id'][0]
+                    are_search = pool('account.revaluation.entries').search(cr, uid, [('period_close_id','=',period_close_id),('account_id','=',ara_id),('currency_id','=',arc_id)])
+                    amount_currency = 0.00
+                    for aml_ids in are_search:
+                        are_reader = pool('account.revaluation.entries').read(cr, uid, aml_ids,['move_line_id'])
+                        aml_id = are_reader['move_line_id'][0]
+                        aml_reader = pool('account.move.line').read(cr, uid, aml_id,['amount_currency','debit'])
+                        if aml_reader['debit']>0.00:
+                            amount_currency+=aml_reader['amount_currency']
+                        elif aml_reader['debit']==0.00:
+                            amount_currency-=aml_reader['amount_currency']
+                        netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(amount_currency))
+                    if curr_name =="PHP":
+                        pool('account.revaluation.accounts').write(cr, uid, ara_ids, {'php_post':amount_currency})
+                    elif curr_name =="EUR":
+                        pool('account.revaluation.accounts').write(cr, uid, ara_ids, {'eur_post':amount_currency})
         return True
                 
     
@@ -187,10 +201,9 @@ class account_revaluation_accounts(osv.osv):
     _columns = {
         'account_id':fields.many2one('account.account','Account'),
         'bal_beg':fields.float('Beginning Balance'),
-        'currency_id':fields.many2one('res.currency', 'Currency'),
         'bal_ap':fields.float('Balance AP'),
         'period_close_id':fields.many2one('account.revaluation'),
-        'php_post':fields.float('Php Postings'),
+        'php_post':fields.float('PHP Postings'),
         'usd_post':fields.float('USD Postings'),
         'eur_post':fields.float('EUR Postings'),
         }
@@ -200,6 +213,8 @@ class account_revaluation_entries(osv.osv):
     _name = 'account.revaluation.entries'
     _columns = {
         'move_line_id':fields.many2one('account.move.line','Journal Item'),
+        'currency_id':fields.related('move_line_id','currency_id',type='many2one',relation='res.currency',store=True, string='Currency'),
+        'account_id':fields.related('move_line_id','account_id',type='many2one',relation='account.account',store=True,string="Account"),
         'debit': fields.related('move_line_id', 'debit', type="float", string="Debit", store=True),
         'credit': fields.related('move_line_id', 'credit', type="float", string="Credit", store=True),
         'post_rate': fields.related('move_line_id', 'post_rate', type="float", string="Post Rate", store=True),
