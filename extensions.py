@@ -78,5 +78,6 @@ class account_move_line(osv.osv):
         'post_rate':fields.float('Post Rate'),
         'br_credit':fields.float('Before Revaluation Credit'),
         'br_debit':fields.float('Before Revaluation Debit'),
+        'reval_post_rate':fields.float('Revaluation Post Rate'),
         }
 account_move_line()

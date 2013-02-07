@@ -98,9 +98,11 @@ class account_revaluation(osv.osv):
             comp_currency_id = currency['currency_id'][0]
             aml_search = pool('account.move.line').search(cr, uid, ['&','|',('period_id','=',period_id),('currency_id','!=',comp_currency_id),('currency_id','!=','')])
             currency_lists = []
+            netsvc.Logger().notifyChannel("aml_search", netsvc.LOG_INFO, ' '+str(aml_search))
             for aml_ids in aml_search:
                 record = pool('account.move.line').read(cr, uid, aml_ids,['currency_id'])
                 currency_id = record['currency_id'][0]
+                netsvc.Logger().notifyChannel("curr_id", netsvc.LOG_INFO, ' '+str(currency_id))
                 if not currency_id in currency_lists:
                     wr=0.00
                     a1 = 0.00
@@ -108,16 +110,22 @@ class account_revaluation(osv.osv):
                     a3 = 0.00
                     a4 = 0.00
                     currency_lists.append(currency_id)
-                    forex_trans = pool('forex.transaction').search(cr, uid, [('period_id','=',period_id),('currency_one','=',comp_currency_id),('currency_two','=',currency_id)])
+                    netsvc.Logger().notifyChannel("curr_list", netsvc.LOG_INFO, ' '+str(currency_lists))
+                    netsvc.Logger().notifyChannel("period_id", netsvc.LOG_INFO, ' '+str(period_id))
+                    netsvc.Logger().notifyChannel("comp_currency_id", netsvc.LOG_INFO, ' '+str(comp_currency_id))
+                    netsvc.Logger().notifyChannel("currency_id", netsvc.LOG_INFO, ' '+str(currency_id))
+                    forex_trans = self.pool.get('forex.transaction').search(cr, uid, [('period_id','=',period_id),('currency_one','=',comp_currency_id),('currency_two','=',currency_id)])
                     for forex in forex_trans:
                         trans = pool('forex.transaction').read(cr, uid, forex,['amount_currency1','amount_currency2'])
                         a1+=trans['amount_currency1']
                         a2+=trans['amount_currency2']
+                        netsvc.Logger().notifyChannel("a1a2", netsvc.LOG_INFO, ' '+str(a1)+str(a2))
                     forex_trans = pool('forex.transaction').search(cr, uid, [('period_id','=',period_id),('currency_one','=',currency_id),('currency_two','=',comp_currency_id)])
                     for forex in forex_trans:
                         trans = pool('forex.transaction').read(cr, uid, forex,['amount_currency1','amount_currency2'])
                         a3+=trans['amount_currency1']
                         a4+=trans['amount_currency2']
+                        netsvc.Logger().notifyChannel("a3a4", netsvc.LOG_INFO, ' '+str(a3)+str(a4))
                     a14 = a1 - a4
                     a23 = a2 - a3
                     wr = 0.00
@@ -127,6 +135,9 @@ class account_revaluation(osv.osv):
                         a23 = -1 * a23
                     if a23 > 0.00 and a14 > 0.00:
                         wr = a23 / a14
+                        netsvc.Logger().notifyChannel("a14", netsvc.LOG_INFO, ' '+str(a14))
+                        netsvc.Logger().notifyChannel("a23", netsvc.LOG_INFO, ' '+str(a23))
+                        netsvc.Logger().notifyChannel("wr", netsvc.LOG_INFO, ' '+str(wr))
                     rate_search = pool('res.currency.rate').search(cr, uid, [('currency_id','=',currency_id),'&',('name','>=',company['date_start']),('name','<=',company['date_stop'])])
                     rate_search = pool('res.currency.rate').read(cr, uid,rate_search[0],['rate'])
                     values = {
@@ -168,7 +179,6 @@ class account_revaluation(osv.osv):
                             amount_currency+=aml_reader['amount_currency']
                         elif aml_reader['debit']==0.00:
                             amount_currency-=aml_reader['amount_currency']
-                        netsvc.Logger().notifyChannel("aml_id", netsvc.LOG_INFO, ' '+str(amount_currency))
                     if curr_name =="PHP":
                         pool('account.revaluation.accounts').write(cr, uid, ara_ids, {'php_post':amount_currency})
                     elif curr_name =="EUR":
@@ -196,6 +206,9 @@ class account_revaluation(osv.osv):
             eur_reval_posting = acc_reader['eur_post'] / eur_post_rate
             bal_ap = acc_reader['bal_beg'] + php_reval_posting + eur_reval_posting
             self.pool.get('account.revaluation.accounts' ).write(cr, uid, acc_search, {'bal_ap':bal_ap})
+        for are_search in self.pool.get('account.revaluation.entries').search(cr, uid, [('period_close_id','=',ids),('currency_id.name','ilike','PHP')]):
+            are_reader = self.pool.get('account.revaluation.entries').read(cr, uid, are_search,[''])
+            
         return True
                 
     
@@ -205,10 +218,10 @@ class account_revaluation_currencies(osv.osv):
     _name = 'account.revaluation.currencies'
     _columns = {
         'currency_id':fields.many2one('res.currency', "Currency"),
-        'weighted_rate':fields.float("Weighted Rate"),
-        'start_rate':fields.float("Start Rate"),
-        'post_rate':fields.float("Post Rate"),
-        'end_rate':fields.float("End Rate"),
+        'weighted_rate':fields.float("Weighted Rate",digits_compute=dp.get_precision('Account')),
+        'start_rate':fields.float("Start Rate",digits_compute=dp.get_precision('Account')),
+        'post_rate':fields.float("Post Rate",digits_compute=dp.get_precision('Account')),
+        'end_rate':fields.float("End Rate",digits_compute=dp.get_precision('Account')),
         'period_close_id':fields.many2one('account.revaluation'),
     }
 account_revaluation_currencies()
@@ -217,11 +230,11 @@ class account_revaluation_accounts(osv.osv):
     _name = 'account.revaluation.accounts'
     _columns = {
         'account_id':fields.many2one('account.account','Account'),
-        'bal_beg':fields.float('Beginning Balance'),
-        'bal_ap':fields.float('Balance AP'),
+        'bal_beg':fields.float('Beginning Balance',digits_compute=dp.get_precision('Account')),
+        'bal_ap':fields.float('Balance AP',digits_compute=dp.get_precision('Account')),
         'period_close_id':fields.many2one('account.revaluation'),
-        'php_post':fields.float('PHP Postings'),
-        'eur_post':fields.float('EUR Postings'),
+        'php_post':fields.float('PHP Postings',digits_compute=dp.get_precision('Account')),
+        'eur_post':fields.float('EUR Postings',digits_compute=dp.get_precision('Account')),
         }
 account_revaluation_accounts()
 
@@ -231,11 +244,12 @@ class account_revaluation_entries(osv.osv):
         'move_line_id':fields.many2one('account.move.line','Journal Item'),
         'currency_id':fields.related('move_line_id','currency_id',type='many2one',relation='res.currency',store=True, string='Currency'),
         'account_id':fields.related('move_line_id','account_id',type='many2one',relation='account.account',store=True,string="Account"),
-        'debit': fields.related('move_line_id', 'debit', type="float", string="Debit", store=True),
-        'credit': fields.related('move_line_id', 'credit', type="float", string="Credit", store=True),
-        'post_rate': fields.related('move_line_id', 'post_rate', type="float", string="Post Rate", store=True),
-        'br_debit': fields.related('move_line_id', 'br_debit', type="float", string="Before Revaluation Debit", store=True),
-        'br_credit': fields.related('move_line_id', 'br_credit', type="float", string="Before Revaluation Credit", store=True),
+        'debit': fields.related('move_line_id', 'debit', type="float", string="Debit", store=True,digits_compute=dp.get_precision('Account')),
+        'credit': fields.related('move_line_id', 'credit', type="float", string="Credit", store=True,digits_compute=dp.get_precision('Account')),
+        'amount_currency': fields.related('move_line_id', 'amount_currency', type="float", string="Amount Currency", store=True,digits_compute=dp.get_precision('Account')),
+        'post_rate': fields.related('move_line_id', 'post_rate', type="float", string="Post Rate", store=True,digits_compute=dp.get_precision('Account')),
+        'br_debit': fields.related('move_line_id', 'br_debit', type="float", string="After Revaluation Debit", store=True,digits_compute=dp.get_precision('Account')),
+        'br_credit': fields.related('move_line_id', 'br_credit', type="float", string="After Revaluation Credit", store=True,digits_compute=dp.get_precision('Account')),
         'period_close_id':fields.many2one('account.revaluation'),
         }
 account_revaluation_entries()

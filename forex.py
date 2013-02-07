@@ -4,6 +4,7 @@ from osv import osv, fields, orm
 import netsvc
 import pooler
 import psycopg2
+import decimal_precision as dp
 from tools.translate import _
 
 class forex_transaction(osv.osv):
@@ -33,8 +34,8 @@ class forex_transaction(osv.osv):
             'bank_account1_id':fields.many2one('account.account', "Bank Account 1"),
             'bank_account2_id':fields.many2one('account.account', "Bank Account 2"),
             'amount_currency1':fields.float('Amount'),
-            'amount_currency2':fields.float('Amount', readonly=True),
-            'rate':fields.float('Rate'),
+            'amount_currency2':fields.float('Amount'),
+            'rate':fields.float('Rate',digits_compute=dp.get_precision('Account'),readonly=True, help="Rate with respect to the company currency. 1 USD= ###(Currency)"),
             'journal_id':fields.many2one('account.journal', 'Journal', required=True, readonly=True, states={'draft':[('readonly',False)]}),
             'period_id':fields.many2one('account.period','Period'),
             'transact_date':fields.date('Transaction Date'),
@@ -51,18 +52,21 @@ class forex_transaction(osv.osv):
     def create_exchange(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
         move_line_pool = self.pool.get('account.move.line')
-        exchange_fields = ['amount_currency1','rate',
+        exchange_fields = ['amount_currency1','amount_currency2',
                            'transact_date','currency_one',
                            'currency_two','bank_account1_id',
                            'bank_account2_id','journal_id','period_id']
         for trans in self.read(cr, uid, ids, exchange_fields):
             amount1=trans['amount_currency1']
-            rate=trans['rate']
+            amount2=trans['amount_currency2']
             date=trans['transact_date']
             curr1 = self.pool.get('res.currency').read(cr, uid, trans['currency_one'][0],['name'])
             curr2 = self.pool.get('res.currency').read(cr, uid, trans['currency_two'][0],['name'])
             comp_curr = self.pool.get('account.account').read(cr, uid, trans['bank_account1_id'][0],['company_currency_id'])
-            amount2 = amount1 * rate 
+            if trans['currency_one'][0] == comp_curr['company_currency_id'][0]: 
+                rate = amount2/amount1
+            elif trans['currency_two'][0] == comp_curr['company_currency_id'][0]: 
+                rate = amount1/amount2
             transaction_name = "Conversion from "+curr1['name']+" to "+curr2['name']
             move = {
                 'name': transaction_name,
@@ -94,6 +98,7 @@ class forex_transaction(osv.osv):
                     'period_id': trans['period_id'][0],
                     'currency_id':trans['currency_two'][0],
                     'amount_currency':amount2,
+                    'post_rate':rate,
                 }
                 move_line_pool.create(cr, uid, move_line)
             elif trans['currency_one'][0]!=comp_curr['company_currency_id'][0]:
@@ -119,10 +124,11 @@ class forex_transaction(osv.osv):
                     'period_id': trans['period_id'][0],
                     'currency_id':trans['currency_one'][0],
                     'amount_currency':amount1,
+                    'post_rate':rate,
                 }
                 move_line_pool.create(cr, uid, move_line)
             move_pool.post(cr, uid, [move_id], context={})
-            self.write(cr, uid, ids, {'amount_currency2':amount2,'state':'post'})
+            self.write(cr, uid, ids, {'rate':rate,'state':'post'})
             
         return True
     def on_change_act1(self, cr, uid, ids, bank_account1_id=False):

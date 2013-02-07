@@ -60,9 +60,10 @@
                                 <field name="currency_id" readonly="1"/>
                                 <field name="debit" readonly="1"/>
                                 <field name="credit" readonly="1"/>
+                                <field name="amount_currency" readonly="1"/>
                                 <field name="post_rate" readonly="1"/>
-                                <field name="br_debit" readonly="1"/>
-                                <field name="br_credit" readonly="1"/>
+                                <!-- <field name="br_debit" readonly="1"/>
+                                <field name="br_credit" readonly="1"/> -->
                             </tree>
                         </field>
 						</group>

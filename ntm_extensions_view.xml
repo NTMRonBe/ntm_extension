@@ -84,6 +84,7 @@
 				</field>
 				<field name="amount_currency" position="after">
 				    <field name="post_rate"/>
+				    <field name="reval_post_rate"/>
 				</field>
             </field>
         </record>
