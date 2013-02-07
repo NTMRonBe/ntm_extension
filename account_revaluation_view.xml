@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <form string="Revaluate Period Entries">
                 <group colspan="8" col="2">
-	                <field name="period_id" domain="[('state','!=','done')]" required="1"/>
+	                <field name="period_id" domain="[('state','!=','done')]" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
 	                    <field colspan="8" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
 	                        <form string="Currencies">
 	                            <field name="currency_id"/>
@@ -74,11 +74,17 @@
 	                                            icon="gtk-execute"
 	                                            attrs="{'invisible': [('state','!=','draft')]}"
 	                                            />
-	                    <button string="Compute Pool Accounts"
+	                    <button string="Compute Account Postings"
                                                 type="object"
                                                 name="compute_pool_accounts"
                                                 icon="gtk-execute"
                                                 attrs="{'invisible': [('state','!=','data_fetched')]}"
+                                                />
+                        <button string="Compute Balance AP"
+                                                type="object"
+                                                name="compute_balap"
+                                                icon="gtk-execute"
+                                                attrs="{'invisible': [('state','!=','postings_fetched')]}"
                                                 />
 	                    </group>
 	           </group>   
