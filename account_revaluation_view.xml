@@ -13,6 +13,8 @@
 	                    <field colspan="8" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
 	                        <form string="Currencies">
 	                            <field name="currency_id"/>
+	                            <field name="beg_bal"/>
+	                            <field name="ap_bal"/>
 	                            <field name="start_rate"/>
 	                            <field name="weighted_rate"/>
 								<field name="end_rate"/>
@@ -20,6 +22,8 @@
 	                        </form>
 	                        <tree string="Currencies" editable="bottom">
 	                            <field name="currency_id" readonly="1"/>
+	                            <field name="beg_bal"/>
+                                <field name="ap_bal"/>
 	                            <field name="start_rate" readonly="1"/>
 	                            <field name="weighted_rate" readonly="1"/>
 								<field name="end_rate"/>
@@ -28,19 +32,17 @@
 						</field>
 						<group colspan="8" col="2">
 						<field colspan="8" mode="tree,form" name="account_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
-                            <form string="PR Accounts">
+                            <form string="Accounts for Partial Revaluation">
                                 <field name="account_id" readonly="1"/>
-                                <field name="php_post" readonly="1"/>
-                                <field name="eur_post" readonly="1"/>
                                 <field name="bal_beg" readonly="1"/>
                                 <field name="bal_ap" readonly="1"/>
+                                <field name="bal_end" readonly="1"/>
                             </form>
-                            <tree string="PR Accounts">
+                            <tree string="Accounts for Partial Revaluation">
                                 <field name="account_id" readonly="1"/>
-                                <field name="php_post" readonly="1"/>
-                                <field name="eur_post" readonly="1"/>
                                 <field name="bal_beg" readonly="1"/>
                                 <field name="bal_ap" readonly="1"/>
+                                <field name="bal_end" readonly="1"/>
                             </tree>
                         </field>
 						<field colspan="8" mode="tree,form" name="line_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" width="700">
