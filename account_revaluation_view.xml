@@ -9,7 +9,12 @@
             <field name="arch" type="xml">
                 <form string="Revaluate Period Entries">
                 <group colspan="8" col="2">
-	                <field name="period_id" domain="[('state','!=','done')]" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                   <group colspan="8" col="4">
+	                       <field name="period_id" domain="[('state','!=','done')]" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                       <field name="company_id" readonly="1"/>
+	                       <field name="comp_curr" readonly="1"/>
+	                       <field name="comp_curr_beg_bal" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                   </group>
 	                    <field colspan="8" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
 	                        <form string="Currencies">
 	                            <field name="currency_id"/>
@@ -36,12 +41,14 @@
                                 <field name="account_id" readonly="1"/>
                                 <field name="bal_beg" readonly="1"/>
                                 <field name="bal_ap" readonly="1"/>
+                                <field name="diff" readonly="1"/>
                                 <field name="bal_end" readonly="1"/>
                             </form>
                             <tree string="Accounts for Partial Revaluation">
                                 <field name="account_id" readonly="1"/>
                                 <field name="bal_beg" readonly="1"/>
                                 <field name="bal_ap" readonly="1"/>
+                                <field name="diff" readonly="1"/>
                                 <field name="bal_end" readonly="1"/>
                             </tree>
                         </field>
@@ -59,9 +66,9 @@
                             <tree string="Journal Items" editable="bottom">
                                 <field name="move_line_id" readonly="1"/>
                                 <field name="account_id" readonly="1"/>
-                                <field name="currency_id" readonly="1"/>
                                 <field name="debit" readonly="1"/>
                                 <field name="credit" readonly="1"/>
+                                <field name="currency_id" readonly="1"/>
                                 <field name="amount_currency" readonly="1"/>
                                 <field name="post_rate" readonly="1"/>
                                 <!-- <field name="br_debit" readonly="1"/>

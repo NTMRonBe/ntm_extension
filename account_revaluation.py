@@ -11,6 +11,9 @@ class account_revaluation(osv.osv):
     _description = "Account Revaluations"
     _columns = {
         'period_id':fields.many2one('account.period','Period to close'),
+        'company_id':fields.related('period_id','company_id',type='many2one',relation='res.company',store=True,string="Company"),
+        'comp_curr':fields.related('company_id','currency_id',type='many2one',relation='res.currency',store=True,string="Company Currency"),
+        'comp_curr_beg_bal':fields.float('Beginning Balance'),
         'currency_ids':fields.one2many('account.revaluation.currencies','period_close_id','Currencies', ondelete="cascade"),
         'state':fields.selection([
                                   ('draft','Draft'),
@@ -88,7 +91,6 @@ class account_revaluation(osv.osv):
         self.get_move_lines(cr, uid, ids, context=context)
         self.get_currency_beg_bal(cr, uid, ids, context=context)
         return True
-    
     def get_currency_beg_bal(self,cr, uid, ids, context=None):
         aml_pool = self.pool.get('account.move.line')
         arc_pool = self.pool.get('account.revaluation.currencies')
@@ -202,31 +204,83 @@ class account_revaluation(osv.osv):
         return True
     
     def compute_balap(self, cr, uid, ids, context=None):
-        for reval in self.read(cr, uid, ids,['period_id','id']):
+        for reval in self.read(cr, uid, ids,['period_id','id','comp_curr_beg_bal']):
             period_close_id = reval['id']
             period_id = reval['period_id'][0]
-            for arc_search in self.pool.get('account.revaluation.currencies').search(cr, uid, [('period_close_id','=',period_close_id)]):
-                arc_reader = self.pool.get('account.revaluation.currencies').read(cr, uid, arc_search, ['currency_id','post_rate'])
-                curr_id = arc_reader['currency_id'][0]
-                curr_post_rate = arc_reader['post_rate']
-                for ara_search in self.pool.get('account.revaluation.accounts').search(cr, uid,[('period_close_id','=',period_close_id)]):
-                    ara_reader = self.pool.get('account.revaluation.accounts').read(cr, uid, ara_search, ['account_id','bal_ap','bal_beg'])
-                    acc_id = ara_reader['account_id'][0]
-                    balance_ap = ara_reader['bal_ap']
-                    are_sum = 0.00
-                    for are_id in self.pool.get('account.revaluation.entries').search(cr, uid, [('period_close_id','=',period_close_id),('currency_id','=',curr_id),('account_id','=',acc_id)]):    
-                        are_reader = self.pool.get('account.revaluation.entries').read(cr, uid, are_id,['amount_currency'])
-                        are_sum += are_reader['amount_currency']
-                    are_pr = are_sum / curr_post_rate
-                    balance_ap +=are_pr
+            comp_curr_beg_bal = reval['comp_curr_beg_bal']
+            for are_search in self.pool.get('account.revaluation.entries').search(cr, uid, [('period_close_id','=',period_close_id)]):
+            	#### Account Revaluation Currencies Variables
+            	arc_start_rate = 0.00
+            	arc_weighted_rate = 0.00
+            	arc_post_rate = 0.00
+            	arc_beg_bal = 0.00
+            	arc_ap_bal = 0.00
+            	#### Account Revaluation Account Variables
+            	ara_bal_beg = 0.00
+            	ara_bal_end = 0.00
+            	ara_bal_ap = 0.00
+            	ara_id = 0.00
+            	are_fields = ['currency_id','amount_currency','account_id']
+            	are_read = self.pool.get('account.revaluation.entries').read(cr, uid, are_search,are_fields)
+            	for ara_search in self.pool.get('account.revaluation.accounts').search(cr, uid, [('account_id','=',are_read['account_id'][0]),('period_close_id','=',period_close_id)]):
+            		ara_fields = ['bal_beg','bal_end','id']
+            		ara_read = self.pool.get('account.revaluation.accounts').read(cr, uid, ara_search,ara_fields)
+            		ara_bal_beg = ara_read['bal_beg']
+                	ara_bal_end = ara_read['bal_end']
+                	ara_id = ara_read['id']
+                	netsvc.Logger().notifyChannel("Print", netsvc.LOG_INFO, ''+str("Ara Reader"))
+                	netsvc.Logger().notifyChannel("ara_bal_beg", netsvc.LOG_INFO, ''+str(ara_bal_beg))
+                	netsvc.Logger().notifyChannel("ara_bal_end", netsvc.LOG_INFO, ''+str(ara_bal_end))
+            		if ara_read['bal_end']==0:
+            			ara_bal_beg = ara_read['bal_beg']
+            		elif ara_read['bal_end']!=0:
+            			ara_bal_beg = ara_read['bal_end']
+            	for arc_search in self.pool.get('account.revaluation.currencies').search(cr, uid,[('currency_id','=',are_read['currency_id'][0]),('period_close_id','=',period_close_id)]):
+            		arc_fields = ['start_rate','weighted_rate','post_rate','beg_bal','ap_bal']
+            		arc_read = self.pool.get('account.revaluation.currencies').read(cr, uid, arc_search,arc_fields)
+            		arc_start_rate = arc_read['start_rate']
+                	arc_weighted_rate = arc_read['weighted_rate']
+                	arc_post_rate = arc_read['post_rate']
+                	arc_beg_bal = arc_read['beg_bal']
+                	arc_ap_bal = arc_read['ap_bal']
+                	netsvc.Logger().notifyChannel("Print", netsvc.LOG_INFO, ''+str("ARC Reader"))
+                	netsvc.Logger().notifyChannel("arc_start_rate", netsvc.LOG_INFO, ''+str(arc_start_rate))
+                	netsvc.Logger().notifyChannel("arc_weighted_rate", netsvc.LOG_INFO, ''+str(arc_weighted_rate))
+                	netsvc.Logger().notifyChannel("arc_post_rate", netsvc.LOG_INFO, ''+str(arc_post_rate))
+                	netsvc.Logger().notifyChannel("arc_beg_bal", netsvc.LOG_INFO, ''+str(arc_beg_bal))
+                	netsvc.Logger().notifyChannel("arc_ap_bal", netsvc.LOG_INFO, ''+str(arc_ap_bal))
+                # balance_ap = account_beg_bal + USD Postings + (PHP Postings/PHP WR) + (EUR Postings / EUR WR)
+                balance_ap = ara_bal_beg + (are_read['amount_currency'] / arc_weighted_rate)
+                netsvc.Logger().notifyChannel("balance_ap", netsvc.LOG_INFO, ''+str(balance_ap)) 
+                #diff1 = bal_beg * (PHP_beg / sr) / (USD_beg + PHP_beg / sr) * (sr / wr - 1)
+            	diff1 = ara_bal_beg * (arc_beg_bal/arc_start_rate) / (comp_curr_beg_bal + arc_beg_bal/arc_start_rate) * (arc_start_rate/arc_weighted_rate -1)
+            	netsvc.Logger().notifyChannel("diff1", netsvc.LOG_INFO, ''+str(diff1))
+            	#diff2 = (bal_ap + diff1) * (PHP_ap / wr) / (USD_ap + PHP_ap / wr) * (wr / er - 1)
+            	diff2 = (balance_ap+diff1) * (arc_ap_bal/arc_weighted_rate) / (comp_curr_beg_bal + arc_ap_bal/arc_weighted_rate) * (arc_weighted_rate / arc_post_rate - 1)  	
+            	netsvc.Logger().notifyChannel("diff2", netsvc.LOG_INFO, ''+str(diff2))
+            	diff = diff2 + diff1
+            	ara_bal_end = diff + balance_ap
+            	self.pool.get('account.revaluation.accounts').write(cr, uid, ara_id,{'bal_end':ara_bal_end})
+            	netsvc.Logger().notifyChannel("", netsvc.LOG_INFO, ''+str(""))
+            	netsvc.Logger().notifyChannel("", netsvc.LOG_INFO, ''+str(""))
+            	netsvc.Logger().notifyChannel("", netsvc.LOG_INFO, ''+str(""))
+            	netsvc.Logger().notifyChannel("", netsvc.LOG_INFO, ''+str("")) 
+#            for arc_search in self.pool.get('account.revaluation.currencies').search(cr, uid, [('period_close_id','=',period_close_id)]):
+#                arc_reader = self.pool.get('account.revaluation.currencies').read(cr, uid, arc_search, ['currency_id','post_rate'])
+#                curr_id = arc_reader['currency_id'][0]
+#                curr_post_rate = arc_reader['post_rate']
+#                for ara_search in self.pool.get('account.revaluation.accounts').search(cr, uid,[('period_close_id','=',period_close_id)]):
+#                    ara_reader = self.pool.get('account.revaluation.accounts').read(cr, uid, ara_search, ['account_id','bal_ap','bal_beg'])
+#                    acc_id = ara_reader['account_id'][0]
+#                    balance_ap = ara_reader['bal_ap']
+#                    are_sum = 0.00
+#                    for are_id in self.pool.get('account.revaluation.entries').search(cr, uid, [('period_close_id','=',period_close_id),('currency_id','=',curr_id),('account_id','=',acc_id)]):    
+#                        are_reader = self.pool.get('account.revaluation.entries').read(cr, uid, are_id,['amount_currency'])
+#                        are_sum += are_reader['amount_currency']
+#                    are_pr = are_sum / curr_post_rate
+#                    balance_ap +=are_pr
                     #netsvc.Logger().notifyChannel("balap", netsvc.LOG_INFO, ''+str(balance_ap))
-                    self.pool.get('account.revaluation.accounts').write(cr, uid,ara_search,{'bal_ap':balance_ap})
-            for ara_search in self.pool.get('account.revaluation.accounts').search(cr, uid,[('period_close_id','=',period_close_id)]):
-                ara_reader = self.pool.get('account.revaluation.accounts').read(cr, uid, ara_search, ['bal_ap','bal_beg'])
-                ara_balap = ara_reader['bal_ap']
-                ara_balbeg = ara_reader['bal_beg']
-                ara_balbeg = ara_balap + ara_balbeg
-                self.pool.get('account.revaluation.accounts').write(cr, uid,ara_search,{'bal_ap':ara_balbeg})
+#                    self.pool.get('account.revaluation.accounts').write(cr, uid,ara_search,{'bal_ap':balance_ap})
         return True
     
     def reval(self, cr, uid, ids, context=None):
@@ -264,6 +318,7 @@ class account_revaluation_accounts(osv.osv):
         'account_id':fields.many2one('account.account','Account'),
         'bal_beg':fields.float('Beginning Balance',digits_compute=dp.get_precision('Account')),
         'bal_ap':fields.float('Balance AP',digits_compute=dp.get_precision('Account')),
+        'diff':fields.float('Diff'),
         'period_close_id':fields.many2one('account.revaluation'),
         'bal_end':fields.float('Ending Balance', digits_compute=dp.get_precision('Account')),
         }
@@ -273,11 +328,11 @@ class account_revaluation_entries(osv.osv):
     _name = 'account.revaluation.entries'
     _columns = {
         'move_line_id':fields.many2one('account.move.line','Journal Item'),
-        'currency_id':fields.related('move_line_id','currency_id',type='many2one',relation='res.currency',store=True, string='Currency'),
+        'currency_id':fields.related('move_line_id','currency_id',type='many2one',relation='res.currency',store=True, string='Posting Currency'),
         'account_id':fields.related('move_line_id','account_id',type='many2one',relation='account.account',store=True,string="Account"),
         'debit': fields.related('move_line_id', 'debit', type="float", string="Debit", store=True,digits_compute=dp.get_precision('Account')),
         'credit': fields.related('move_line_id', 'credit', type="float", string="Credit", store=True,digits_compute=dp.get_precision('Account')),
-        'amount_currency': fields.related('move_line_id', 'amount_currency', type="float", string="Amount Currency", store=True,digits_compute=dp.get_precision('Account')),
+        'amount_currency': fields.related('move_line_id', 'amount_currency', type="float", string="Posting Amount", store=True,digits_compute=dp.get_precision('Account')),
         'post_rate': fields.related('move_line_id', 'post_rate', type="float", string="Post Rate", store=True,digits_compute=dp.get_precision('Account')),
         'br_debit': fields.related('move_line_id', 'br_debit', type="float", string="After Revaluation Debit", store=True,digits_compute=dp.get_precision('Account')),
         'br_credit': fields.related('move_line_id', 'br_credit', type="float", string="After Revaluation Credit", store=True,digits_compute=dp.get_precision('Account')),
