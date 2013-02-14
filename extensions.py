@@ -68,6 +68,7 @@ class account_account(osv.osv):
         'to_be_moved':fields.boolean('To be moved to net equity?'),
         'gain_loss':fields.many2one('account.account','Gain Loss Account'),
         'gain_loss_acc':fields.boolean('Is this a Gain/Loss Account?'),
+        'gain_loss_consolidated':fields.boolean('Will this have Consolidated Entries?')
         }
 account_account()
 

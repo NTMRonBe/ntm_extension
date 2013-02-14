@@ -65,6 +65,7 @@
 					    <field name="reconcile"/>
 					    <field name="gain_loss_acc"/>
 					    <field name="gain_loss"/>
+					    <field name="gain_loss_consolidated"/>
 	                </group>
 				</field>
             </field>

@@ -15,68 +15,86 @@
 	                       <field name="comp_curr" readonly="1"/>
 	                       <field name="comp_curr_beg_bal" attrs="{'readonly':[('state','!=','draft')]}"/>
 	                   </group>
-	                    <field colspan="8" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
-	                        <form string="Currencies">
-	                            <field name="currency_id"/>
-	                            <field name="beg_bal"/>
-	                            <field name="ap_bal"/>
-	                            <field name="start_rate"/>
-	                            <field name="weighted_rate"/>
-								<field name="end_rate"/>
-	                            <field name="post_rate"/>
-	                        </form>
-	                        <tree string="Currencies" editable="bottom">
-	                            <field name="currency_id" readonly="1"/>
-	                            <field name="beg_bal"/>
-                                <field name="ap_bal"/>
-	                            <field name="start_rate" readonly="1"/>
-	                            <field name="weighted_rate" readonly="1"/>
-								<field name="end_rate"/>
-	                            <field name="post_rate"/>
-	                        </tree>
-						</field>
-						<group colspan="8" col="2">
-						<field colspan="8" mode="tree,form" name="account_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}">
-                            <form string="Accounts for Partial Revaluation">
-                                <field name="account_id" readonly="1"/>
-                                <field name="bal_beg" readonly="1"/>
-                                <field name="bal_ap" readonly="1"/>
-                                <field name="diff" readonly="1"/>
-                                <field name="bal_end" readonly="1"/>
-                            </form>
-                            <tree string="Accounts for Partial Revaluation">
-                                <field name="account_id" readonly="1"/>
-                                <field name="bal_beg" readonly="1"/>
-                                <field name="bal_ap" readonly="1"/>
-                                <field name="diff" readonly="1"/>
-                                <field name="bal_end" readonly="1"/>
-                            </tree>
-                        </field>
-						<field colspan="8" mode="tree,form" name="line_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" width="700">
-                            <form string="Journal Items">
-                                <field name="move_line_id" readonly="1"/>
-                                <field name="account_id" readonly="1"/>
-                                <field name="currency_id" readonly="1"/>
-                                <field name="debit" readonly="1"/>
-                                <field name="credit" readonly="1"/>
-                                <field name="post_rate" readonly="1"/>
-                                <field name="br_debit" readonly="1"/>
-                                <field name="br_credit" readonly="1"/>
-                            </form>
-                            <tree string="Journal Items" editable="bottom">
-                                <field name="move_line_id" readonly="1"/>
-                                <field name="account_id" readonly="1"/>
-                                <field name="debit" readonly="1"/>
-                                <field name="credit" readonly="1"/>
-                                <field name="currency_id" readonly="1"/>
-                                <field name="amount_currency" readonly="1"/>
-                                <field name="post_rate" readonly="1"/>
-                                <!-- <field name="br_debit" readonly="1"/>
-                                <field name="br_credit" readonly="1"/> -->
-                            </tree>
-                        </field>
-						</group>
-						<group colspan="13" col="4">
+	                   <notebook>
+	                   <page string="Currency Lists">
+		                    <field colspan="8" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" height="300">
+		                        <form string="Currencies">
+		                            <field name="currency_id"/>
+		                            <field name="beg_bal"/>
+		                            <field name="ap_bal"/>
+		                            <field name="start_rate"/>
+		                            <field name="weighted_rate"/>
+									<field name="end_rate" readonly="1"/>
+		                            <field name="post_rate"/>
+		                        </form>
+		                        <tree string="Currencies" editable="bottom">
+		                            <field name="currency_id" readonly="1"/>
+		                            <field name="beg_bal"/>
+	                                <field name="ap_bal"/>
+		                            <field name="start_rate" readonly="1"/>
+		                            <field name="weighted_rate" readonly="1"/>
+									<field name="end_rate" readonly="1"/>
+		                            <field name="post_rate"/>
+		                        </tree>
+							</field>
+						</page>
+						<page string = "Accounts for Partial Revaluation">
+							<field colspan="8" mode="tree,form" name="account_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" height="300">
+	                            <form string = "Accounts for Partial Revaluation">
+	                                <field name="account_id" readonly="1"/>
+	                                <field name="bal_beg" readonly="1"/>
+	                                <field name="bal_ap" readonly="1"/>
+	                                <field name="diff" readonly="1"/>
+	                                <field name="bal_end" readonly="1"/>
+	                            </form>
+	                            <tree string = "Accounts for Partial Revaluation">
+	                                <field name="account_id" readonly="1"/>
+	                                <field name="bal_beg" readonly="1"/>
+	                                <field name="bal_ap" readonly="1"/>
+	                                <field name="diff" readonly="1"/>
+	                                <field name="bal_end" readonly="1"/>
+	                            </tree>
+	                        </field>
+                        </page>
+                        <page string = "Accounting Entries to Revaluate">
+                            <field colspan="8" mode="tree,form" name="line_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" width="700" height="300">
+                                <form string="Journal Items">
+                                    <field name="move_line_id" readonly="1"/>
+                                    <field name="account_id" readonly="1"/>
+                                    <field name="currency_id" readonly="1"/>
+                                    <field name="debit" readonly="1" invisible="1"/>
+                                    <field name="credit" readonly="1" invisible="1"/>
+                                    <field name="post_rate" readonly="1"/>
+                                    <field name="reval_amount" readonly="1"/>
+                                </form>
+                                <tree string="Journal Items" editable="bottom">
+                                    <field name="move_line_id" readonly="1"/>
+                                    <field name="account_id" readonly="1"/>
+                                    <field name="debit" readonly="1" invisible="1"/>
+                                    <field name="credit" readonly="1" invisible="1"/>
+                                    <field name="currency_id" readonly="1"/>
+                                    <field name="amount_currency" readonly="1"/>
+                                    <field name="reval_amount" readonly="1"/>
+                                    <field name="diff" readonly="1"/>
+                                    <field name="bal_ap" readonly="1"/>
+                                    <field name="bal_end" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string = "Gain/Loss Accounts">
+                            <field colspan="8" mode="tree,form" name="gain_loss_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" width="700" height="300">
+                                <form string="Gain/Loss Accounts">
+                                    <field name="account_id" readonly="1"/>
+                                    <field name="gain_loss" readonly="1"/>
+                                </form>
+                                <tree string="Gain/Loss Accounts" editable="bottom">
+                                    <field name="account_id" readonly="1"/>
+                                    <field name="gain_loss" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+						</notebook>
+						<group colspan="4" col="10">
 						<field name="state" readonly="1"/>
 						<button string="Get Currencies"
 	                                            type="object"
@@ -84,17 +102,23 @@
 	                                            icon="gtk-execute"
 	                                            attrs="{'invisible': [('state','!=','draft')]}"
 	                                            />
-	                    <button string="Compute Account Postings"
+	                    <button string="Adjust per Post Rate"
                                                 type="object"
-                                                name="compute_pool_accounts"
+                                                name="adjust_post_rate"
                                                 icon="gtk-execute"
-                                                attrs="{'invisible': [('state','!=','data_fetched')]}"
+                                                attrs="{'invisible': [('state','!=','test_reval')]}"
                                                 />
                         <button string="Compute Balance AP"
                                                 type="object"
                                                 name="compute_balap"
                                                 icon="gtk-execute"
-                                                attrs="{'invisible': [('state','!=','postings_fetched')]}"
+                                                attrs="{'invisible': [('state','!=','data_fetched')]}"
+                                                />
+                        <button string="Check Revaluation"
+                                                type="object"
+                                                name="reval_entries"
+                                                icon="gtk-execute"
+                                                attrs="{'invisible': [('state','!=','balap_computed')]}"
                                                 />
 	                    </group>
 	           </group>   
