@@ -70,8 +70,8 @@
                                 <tree string="Journal Items" editable="bottom">
                                     <field name="move_line_id" readonly="1"/>
                                     <field name="account_id" readonly="1"/>
-                                    <field name="debit" readonly="1" invisible="1"/>
-                                    <field name="credit" readonly="1" invisible="1"/>
+                                    <field name="debit" readonly="1" invisible="0"/>
+                                    <field name="credit" readonly="1" invisible="0"/>
                                     <field name="currency_id" readonly="1"/>
                                     <field name="amount_currency" readonly="1"/>
                                     <field name="reval_amount" readonly="1"/>
@@ -89,6 +89,7 @@
                                 </form>
                                 <tree string="Gain/Loss Accounts" editable="bottom">
                                     <field name="account_id" readonly="1"/>
+                                    <field name="rel_pr_account" readonly="1"/>
                                     <field name="gain_loss" readonly="1"/>
                                 </tree>
                             </field>
@@ -102,9 +103,15 @@
 	                                            icon="gtk-execute"
 	                                            attrs="{'invisible': [('state','!=','draft')]}"
 	                                            />
-	                    <button string="Adjust per Post Rate"
+                        <button string="Adjust per Post Rate"
                                                 type="object"
                                                 name="adjust_post_rate"
+                                                icon="gtk-execute"
+                                                attrs="{'invisible': [('state','!=','test_reval')]}"
+                                                />
+                        <button string="Check Gain Loss"
+                                                type="object"
+                                                name="check_gain_loss_accounts"
                                                 icon="gtk-execute"
                                                 attrs="{'invisible': [('state','!=','test_reval')]}"
                                                 />

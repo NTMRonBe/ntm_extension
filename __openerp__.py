@@ -29,18 +29,17 @@
     'website': '',
     'init_xml': [],
     "depends" : ["account","base","analytic"],
-    'update_xml': ["ntm_extensions_view.xml"
-                   ,"data.xml"
+    'update_xml': ["data.xml"
                    ,"users_view.xml","account_revaluation_view.xml",
                    "wizard/user_set_location_view.xml",
                    "wizard/soa_sender.xml",
                    "wizard/dbf_reader.xml"
-                   ,"forex_view.xml","account_pettycash/account_pettycash_view.xml","account_pettycash/pc_sequence.xml","account_pettycash/pcr_view.xml","account_pettycash/crs_view.xml"],
+                   ,"forex_view.xml","account_pettycash/account_pettycash_view.xml","soaview.xml","account_pettycash/pc_sequence.xml","account_pettycash/pcr_view.xml","account_pettycash/crs_view.xml"],
     'demo_xml': [
     ],
     'test': [
             ],
     'installable': True,
-    'active': False,
+    'active': True,
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

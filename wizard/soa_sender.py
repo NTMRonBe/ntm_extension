@@ -68,7 +68,7 @@ class soa_sender(osv.osv_memory):
                     f.close()
                     send_to = "\"" + answer + "\""
                     netsvc.Logger().notifyChannel("Line", netsvc.LOG_INFO, ' '+str(send_to))
-                    server = smtplib.SMTP_SSL('smtp.gmail.com',465)
+                    server = smtplib.SMTP_SSL('smtp.gmail.com',587)
                     subject = file_name
                     headers = ["From: " + login,
                                "Subject: " + subject,
