@@ -17,6 +17,11 @@
                                             name="convert"
                                             icon="gtk-execute"
                                             />
+               <button string="Check"
+                                            type="object"
+                                            name="dbfimport"
+                                            icon="gtk-execute"
+                                            />
                </form>
             </field>
         </record>
@@ -42,6 +47,72 @@
             action="action_dbf_reader"
             id="menu_dbf_reader"
            />
+        <record id="dbf_details_form" model="ir.ui.view">
+            <field name="name">dbf.details.form</field>
+            <field name="model">dbf.details</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "DBF Import Result">
+                        <field name="battypecd"/>
+                        <field name="batdt"/>
+                        <field name="batltr"/>
+                        <field name="docno"/>
+                        <field name="amount"/>
+                        <field name="trancd"/>
+                        <field name="comm1"/>
+                        <field name="comm2"/>
+                        <field name="dcno"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="dbf_details_tree">
+            <field name="name">dbf.details.tree</field>
+            <field name="model">dbf.details</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="DBF Import Result">
+                        <field name="battypecd"/>
+                        <field name="batdt"/>
+                        <field name="batltr"/>
+                        <field name="docno"/>
+                        <field name="amount"/>
+                        <field name="trancd"/>
+                        <field name="comm1"/>
+                        <field name="comm2"/>
+                        <field name="dcno"/>
+                </tree> 
+            </field>
+        </record>
+        <record id="dbf_details_filter" model="ir.ui.view">
+            <field name="name">dbf.details.filter</field>
+            <field name="model">dbf.details</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="DBF Import Result">
+                        <field name="battypecd"/>
+                        <field name="batdt"/>
+                        <field name="batltr"/>
+                        <field name="docno"/>
+                        <field name="amount"/>
+                        <field name="trancd"/>
+                        <field name="comm1"/>
+                        <field name="comm2"/>
+                        <field name="dcno"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_dbf_details_form">
+            <field name="name">DBF Import Result</field>
+            <field name="res_model">dbf.details</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_dbf_details" 
+            action="action_dbf_details_form" 
+            parent="menu_dbf_reader_main"
+            sequence="30" 
+            groups="base.group_user"/> 
 
     </data>
 </openerp>

@@ -25,6 +25,22 @@ import csv
 import sys
 import netsvc
 
+class dbf_details(osv.osv):
+    _name = 'dbf.details'
+    _description = "DBF Converted File Details"
+    _columns = {
+        'battypecd':fields.char('BATTYPECD',size=2),
+        'batdt':fields.date('BATDT'),
+        'batltr':fields.char('BATLTR',size=2),
+        'docno':fields.char('DOCNO',size=6),
+        'amount':fields.float('AMOUNT'),
+        'trancd':fields.char('TRANCD',size=2),
+        'comm1':fields.char('COMM1',size=25),
+        'comm2':fields.char('COMM2',size=25),
+        'dcno':fields.char('DCNO',size=6),
+        }
+dbf_details()
+
 class dbf_reader(osv.osv_memory):
     _name = "dbf.reader"
     _description = "DBF Reader"
@@ -44,7 +60,7 @@ class dbf_reader(osv.osv_memory):
                     user_name = users.name
                     location = users.location
                     location_filename = location + '/' + file_name + '.dbf'
-                    new_csv = '/var/log/openerp/files' + '/' + file_name + '.csv'
+                    new_csv = location + '/' + file_name + '.csv'
                     netsvc.Logger().notifyChannel("User", netsvc.LOG_INFO, ' '+str(user_name))
                     netsvc.Logger().notifyChannel("Location", netsvc.LOG_INFO, ' '+str(location))
                     netsvc.Logger().notifyChannel("Actual File", netsvc.LOG_INFO, ' '+str(location_filename))
@@ -59,7 +75,68 @@ class dbf_reader(osv.osv_memory):
                         out_csv.writerow(rec.fieldData)
                         
                     in_db.close
-        return {'type': 'ir.actions.act_window_close'}
+        return True #{'type': 'ir.actions.act_window_close'}
+    def dbfimport(self, cr, uid, ids, context=None):
+        for form in self.read(cr, uid, ids, context=context):
+            if form['filename']:
+                file_name = form['filename']
+                user_id = uid
+                usr_reader = self.pool.get('res.users').read(cr, uid, user_id, ['location'])
+                location = usr_reader['location']
+                location_filename = location + '/' + file_name + '.csv'
+                dbf_details =  csv.reader(open(location_filename,'rb'))
+                for row in dbf_details:
+                    if row[0]=='BATTYPECD':
+                        #netsvc.Logger().notifyChannel("Row", netsvc.LOG_INFO, ' '+str(row))
+                        continue
+                    search_fields = [
+                                    ('battypecd','=',row[0]),
+                                    ('batdt','=',row[1]),
+                                    ('batltr','=',row[2]),
+                                    ('docno','=',row[3]),
+                                    ('amount','=',row[4]),
+                                    ('trancd','=',row[5]),
+                                    ('comm1','=',row[6]),
+                                    ('comm2','=',row[7]),
+                                    ('dcno','=',row[8]),
+                                     ]
+                    
+                    res_id = self.pool.get('dbf.details').search(cr, uid, search_fields)
+                    if not res_id:
+                        values= {
+                            'battypecd':row[0],
+                            'batdt':row[1],
+                            'batltr':row[2],
+                            'docno':row[3],
+                            'amount':row[4],
+                            'trancd':row[5],
+                            'comm1':row[6],
+                            'comm2':row[7],
+                            'dcno':row[8],
+                            }
+                        self.pool.get('dbf.details').create(cr, uid, values)
+                    
+                    
+                    '''
+                    for row_searcher in self.pool.get('dbf.details').search(cr, uid, search_fields):
+                        netsvc.Logger().notifyChannel("row_searcher", netsvc.LOG_INFO, ' '+str(row_searcher))
+                        if row_searcher:
+                            netsvc.Logger().notifyChannel("Row", netsvc.LOG_INFO, ' '+str(row))
+                            continue
+                        values= {
+                            'battypecd':row[0],
+                            'batdt':row[1],
+                            'batltr':row[2],
+                            'docno':row[3],
+                            'amount':row[4],
+                            'trancd':row[5],
+                            'comm1':row[6],
+                            'comm2':row[7],
+                            'dcno':row[8],
+                            }
+                        self.pool.get('dbf.details').create(cr, uid, values)
+                    '''
+        return True
 
 dbf_reader()
 
