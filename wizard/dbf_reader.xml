@@ -10,7 +10,7 @@
             <field name="arch" type="xml">
             <form string="DBF Reader and Data Import">
                 <separator string="Post Journal Entries of a Journal" colspan="4"/>
-                <field name="filename"/>
+                <field name="fname"/>
                 <newline/>
                 <button string="Convert"
                                             type="object"
@@ -124,6 +124,94 @@
             parent="menu_dbf_reader_main"
             sequence="30" 
             groups="base.group_user"/> 
+            
+        <record id="dbf_files_form" model="ir.ui.view">
+            <field name="name">dbf.files.form</field>
+            <field name="model">dbf.files</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "DBF Files">
+                        <field name="name"/>
+                        <field name="user_id"/>
+                        <field name="extension"/>
+                        <field name="imported"/>
+                        <field name="full_location"/>
+                        <field name="converted_file"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="dbf_files_tree">
+            <field name="name">dbf.files.tree</field>
+            <field name="model">dbf.files</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="DBF Files">
+                        <field name="name"/>
+                        <field name="user_id"/>
+                        <field name="extension"/>
+                        <field name="imported"/>
+                        <field name="full_location"/>
+                        <field name="converted_file"/>
+                </tree> 
+            </field>
+        </record>
+        <record id="dbf_files_filter" model="ir.ui.view">
+            <field name="name">dbf.files.filter</field>
+            <field name="model">dbf.files</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="DBF Files">
+                        <field name="name"/>
+                        <field name="user_id"/>
+                        <field name="extension"/>
+                        <field name="imported"/>
+                        <field name="full_location"/>
+                        <field name="converted_file"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_dbf_files_form">
+            <field name="name">DBF Files</field>
+            <field name="res_model">dbf.files</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_dbf_files" 
+            action="action_dbf_files_form" 
+            parent="menu_dbf_reader_main"
+            sequence="40" 
+            groups="base.group_user"/>
+            
+        <record id="dbf_file_get_view" model="ir.ui.view">
+            <field name="name">File Fetcher</field>
+            <field name="model">dbf.file.get</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="DBF File Fetcher">
+                <button string="Fetch Files"
+                                            type="object"
+                                            name="getFiles"
+                                            icon="gtk-execute"
+                                            />
+               </form>
+            </field>
+        </record>
 
+        <record id="action_dbf_file_get" model="ir.actions.act_window">
+            <field name="name">File Fetcher</field>
+            <field name="res_model">dbf.file.get</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="dbf_file_get_view"/>
+            <field name="target">new</field>
+        </record> 
+        <menuitem
+            name="File Fetcher"
+            parent="menu_dbf_reader_main"
+            action="action_dbf_file_get"
+            id="menu_dbf_file_get"
+            sequence="50"
+           />
     </data>
 </openerp>

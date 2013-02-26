@@ -24,7 +24,24 @@ from dbfpy import dbf
 import csv
 import sys
 import netsvc
+import os
 
+class dbf_files(osv.osv):
+    _name = 'dbf.files'
+    _description = "DBF Files on Folder"
+    _columns= {
+        'name':fields.char('File Name',size=64,readonly=True),
+        'user_id':fields.many2one('res.users','User',readonly=True),
+        'imported':fields.boolean('File already imported',readonly=True),
+        'extension':fields.selection([
+                                      ('dbf','dbf'),
+                                      ('DBF','DBF'),
+                                      ],'File Extension',readonly=True),
+        'full_location':fields.char('Full Location',size=100,readonly=True),
+        'converted_file':fields.char('Converted File',size=100,readonly=True),
+        }
+     
+dbf_files()
 class dbf_details(osv.osv):
     _name = 'dbf.details'
     _description = "DBF Converted File Details"
@@ -76,21 +93,80 @@ class dbf_details(osv.osv):
         }
 dbf_details()
 
+class dbf_file_get(osv.osv_memory):
+    _name = "dbf.file.get"
+    _description = "DBF File Fetcher"
+    
+    def getFiles(self, cr, uid, ids, context=None):
+        user_loc = self.pool.get('res.users').read(cr, uid, uid,['location'])
+        location = user_loc['location']
+        for dbf_list in os.listdir(location):
+            values={}
+            if dbf_list.endswith('.dbf'):
+                dbf_file_split = dbf_list.split('.')
+                full_loc = location + '/' +dbf_list
+                values={
+                    'name':dbf_file_split[0],
+                    'extension':'dbf',
+                    'user_id':uid,
+                    'full_location':full_loc,
+                    }
+                file_id = self.pool.get('dbf.files').search(cr, uid, [('name','ilike',dbf_file_split[0]),('full_location','ilike',full_loc)])
+                if not file_id:
+                    self.pool.get('dbf.files').create(cr, uid, values)
+            elif dbf_list.endswith('.DBF'):
+                dbf_file_split = dbf_list.split('.')
+                full_loc = location + '/' +dbf_list
+                values={
+                    'name':dbf_file_split[0],
+                    'extension':'DBF',
+                    'user_id':uid,
+                    'full_location':full_loc,
+                    }
+                file_id = self.pool.get('dbf.files').search(cr, uid, [('name','ilike',dbf_file_split[0]),('full_location','ilike',full_loc)])
+                if not file_id:
+                    self.pool.get('dbf.files').create(cr, uid, values)
+        return {'type': 'ir.actions.act_window_close'}
+dbf_file_get()
 class dbf_reader(osv.osv_memory):
+    def _get_files(self, cr, uid, context=None):
+        netsvc.Logger().notifyChannel("res", netsvc.LOG_INFO, 'Nagprint')
+        if context is None:
+            context = {}
+        dbffiles_obj = self.pool.get('dbf.files')
+        netsvc.Logger().notifyChannel("User", netsvc.LOG_INFO, ' '+str(uid))
+        res = dbffiles_obj.search(cr, uid, [('imported', '=', False),
+                                            ('user_id', '=', uid)])
+        #
+        return res and res[0]
     _name = "dbf.reader"
     _description = "DBF Reader"
     _columns = {
-        'filename': fields.char('File Name',size=64),
+        'fname':fields.function(_get_files, type='selection', method=True,string='Filename',store=True, readonly=False),
+        #'filename': fields.many2one('dbf.files','Files for Conversion')
     }
     
     def convert(self, cr, uid, ids, context=None):
         user_pool = self.pool.get('res.users')
         for form in self.read(cr, uid, ids, context=context):
-            if form['filename']:
-                file_name = form['filename']
-                user_id = uid
-                netsvc.Logger().notifyChannel("filename", netsvc.LOG_INFO, ' '+str(file_name))
-                netsvc.Logger().notifyChannel("User", netsvc.LOG_INFO, ' '+str(user_id))
+            if form['fname']:
+                file_name = form['fname']
+                netsvc.Logger().notifyChannel("file_name", netsvc.LOG_INFO, ' '+str(file_name))
+                dbf_file_reader = self.pool.get('dbf.files').read(cr, uid, file_name,['name','extension','full_location'])
+                user_read = self.pool.get('res.users').read(cr, uid, uid, ['location'])
+                in_db = dbf.Dbf(dbf_file_reader['full_location'])
+                new_csv = user_read['location'] + '/' + dbf_file_reader['name'] + '.csv'
+                out_csv = csv.writer(open(new_csv,'wb'))
+                names = []
+                for field in in_db.header.fields:
+                    names.append(field.name)
+                out_csv.writerow(names)
+                for rec in in_db:
+                    out_csv.writerow(rec.fieldData)
+                        
+                in_db.close
+                self.pool.get('dbf.files').write(cr, uid, file_name,{'converted_file':new_csv})
+                '''
                 for users in user_pool.browse(cr, uid, [user_id]):
                     user_name = users.name
                     location = users.location
@@ -109,8 +185,9 @@ class dbf_reader(osv.osv_memory):
                     for rec in in_db:
                         out_csv.writerow(rec.fieldData)
                         
-                    in_db.close
+                    in_db.close'''
         return True #{'type': 'ir.actions.act_window_close'}
+    
     def dbfimport(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=context):
             if form['filename']:
