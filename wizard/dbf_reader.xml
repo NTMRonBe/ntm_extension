@@ -62,6 +62,9 @@
                         <field name="comm1"/>
                         <field name="comm2"/>
                         <field name="dcno"/>
+                        <field name="period_id"/>
+                        <field name="converted"/>
+                        <field name="filename"/>
                 </form>
             </field>
         </record>        
@@ -80,6 +83,9 @@
                         <field name="comm1"/>
                         <field name="comm2"/>
                         <field name="dcno"/>
+                        <field name="period_id"/>
+                        <field name="converted"/>
+                        <field name="filename"/>
                 </tree> 
             </field>
         </record>
@@ -94,10 +100,15 @@
                         <field name="batltr"/>
                         <field name="docno"/>
                         <field name="amount"/>
+                        <newline/>
                         <field name="trancd"/>
                         <field name="comm1"/>
                         <field name="comm2"/>
                         <field name="dcno"/>
+                        <field name="period_id"/>
+                        <newline/>
+                        <filter string="BATTYPECD" icon="terp-folder-orange" domain="[]" context="{'group_by':'battypecd'}"/>
+                        <filter string="TRANCD" icon="terp-folder-green" domain="[]" context="{'group_by':'trancd'}"/>
                 </search>
             </field>
         </record>

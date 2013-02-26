@@ -29,15 +29,50 @@ class dbf_details(osv.osv):
     _name = 'dbf.details'
     _description = "DBF Converted File Details"
     _columns = {
-        'battypecd':fields.char('BATTYPECD',size=2),
+        'battypecd':fields.selection([
+                                    ('CR','CASH RECEIPT'),
+                                    ('CK','CONTRIBUTION IN KIND'),
+                                    ('CD','CASH DISBURSEMENT'),
+                                    ('AJ','ADJUSTING JOURNAL'),
+                                    ('SJ','SALES JOURNAL'),
+                                    ('TA','TRANSFER, AUTOMATED'),
+                                    ('TD','TRANSFER, DAILY'),
+                                    ('TM','TRANSFER, MONTHLY'),
+                                    ('PJ','PAYABLES JOURNAL'),
+                                    ('YC','YEAR END CLOSING BATCH'),
+                                    ('WD','WIRE DISBURSEMENT'),
+                                    ('TC','TRANSFER, CONSIGNMENT'),
+                                    ('TI','TRANSFER, INSURANCE'),
+                                    ('CC','CREDIT CARD BATCH')
+                                      ],'BATTYPECD'),
         'batdt':fields.date('BATDT'),
-        'batltr':fields.char('BATLTR',size=2),
+        'trancd':fields.selection([
+                            ('DG','DESIGNATED'),('PY','PAYMENT'),('BD','BIRTHDAY GIFT'),
+                            ('PG','PERSONAL GIFT'),('DP','DEPOSIT TO PERSONAL'),('RF','REFUND'),
+                            ('CH','CHRISTMAS GIFT'),('NT','POA, COUNTS AS INCOME'),('DO','DESIGNATED BY OFFICE'),
+                            ('AD','AUTHORIZED DESIGNATED'),('ST','STUDENT GIFT'),('CK','CONTRIBUTION IN KIND'),
+                            ('TI','TAXABLE INCOME'),('SU','SUBSIDY PAYMENT TAXABLE'),('AS','SUMMIT ASSIST, TAX-DEDUCT'),
+                            ('IF','INTERFACE, NON-TAX-DEDUCT'),('GP','GIFT (FROM PERSONAL ACCT)'),('PD','PERSONAL DISBURSEMENT'),
+                            ('SD','SPECIAL DISBURSEMENT'),('ME','MINISTRY EXPENSE'),('GS','GIFT (FROM SPECIAL ACCT)'),
+                            ('DS','DEPOSIT TO SPECIAL'),('MI','MINISTRY INCOME'),('DD','ASSIST DISBURSMENT'),
+                            ('PI','MEDICAL INSURANCE DEBITS'),('IN','SUMMIT INTERFACE INTERN'),('ID','INTERFACE DISBURSEMENT'),
+                            ('MU','MAKEUP ALLOWANCE'),('MD','MINISTRY DISBURSEMENT'),('TS','403B TSA CONTRIBUTION'),
+                            ('CL','CLEAR MISSION SUBACCOUNT'),('WD','WIRE DISBURSEMENT'),('DV','DEPOSIT TO VOUCHER'),
+                            ('VD','VOUCHER DISBURSEMENT'),('HD','HOLDING DISBURSEMENT'),('HI','HOLDING INCOME'),
+                            ('LI','LIFE INSURANCE DEBITS'),('LP','LIFE INSURANCE POST-TAX'),('V','VOUCHER'),('BI','BUDGET INCOME'),
+                            ('BO','BUDGET DISBURSE OUT'),('TP','TRAINING ACCOUNT PAYMENT'),('TC','TRAINING CHARGE'),('EC','MEC EXPENSE CLAIM'),
+                            ('ED','MEC EXPENSE DISBURSEMENT'),('MP','MINISTRY PROJECT INCOME'),('HP','HOLDING PROJECT INCOME'),('MX','MINISTRY (FIELD % EXEMPT)'),
+                            ('MS','SOCIAL SECURITY TAX'),('MM','MEDICARE TAX'),('VO','VOID TRANSACTION'),('TR','403B ROTH CONTRIBUTION')
+                            ],'TRANCD'),
         'docno':fields.char('DOCNO',size=6),
         'amount':fields.float('AMOUNT'),
-        'trancd':fields.char('TRANCD',size=2),
+        'batltr':fields.char('BATLTR',size=2),
         'comm1':fields.char('COMM1',size=25),
         'comm2':fields.char('COMM2',size=25),
         'dcno':fields.char('DCNO',size=6),
+        'filename':fields.char('Filename',size=64,readonly=True),
+        'period_id':fields.many2one('account.period','Period'),
+        'converted':fields.boolean('Converted to Voucher'),
         }
 dbf_details()
 
@@ -89,8 +124,7 @@ class dbf_reader(osv.osv_memory):
                     if row[0]=='BATTYPECD':
                         #netsvc.Logger().notifyChannel("Row", netsvc.LOG_INFO, ' '+str(row))
                         continue
-                    search_fields = [
-                                    ('battypecd','=',row[0]),
+                    search_fields = [('battypecd','=',row[0]),
                                     ('batdt','=',row[1]),
                                     ('batltr','=',row[2]),
                                     ('docno','=',row[3]),
@@ -99,43 +133,27 @@ class dbf_reader(osv.osv_memory):
                                     ('comm1','=',row[6]),
                                     ('comm2','=',row[7]),
                                     ('dcno','=',row[8]),
+                                    ('filename','=',file_name),
                                      ]
                     
                     res_id = self.pool.get('dbf.details').search(cr, uid, search_fields)
                     if not res_id:
-                        values= {
-                            'battypecd':row[0],
-                            'batdt':row[1],
-                            'batltr':row[2],
-                            'docno':row[3],
-                            'amount':row[4],
-                            'trancd':row[5],
-                            'comm1':row[6],
-                            'comm2':row[7],
-                            'dcno':row[8],
-                            }
-                        self.pool.get('dbf.details').create(cr, uid, values)
-                    
-                    
-                    '''
-                    for row_searcher in self.pool.get('dbf.details').search(cr, uid, search_fields):
-                        netsvc.Logger().notifyChannel("row_searcher", netsvc.LOG_INFO, ' '+str(row_searcher))
-                        if row_searcher:
-                            netsvc.Logger().notifyChannel("Row", netsvc.LOG_INFO, ' '+str(row))
-                            continue
-                        values= {
-                            'battypecd':row[0],
-                            'batdt':row[1],
-                            'batltr':row[2],
-                            'docno':row[3],
-                            'amount':row[4],
-                            'trancd':row[5],
-                            'comm1':row[6],
-                            'comm2':row[7],
-                            'dcno':row[8],
-                            }
-                        self.pool.get('dbf.details').create(cr, uid, values)
-                    '''
+                        for period_search in self.pool.get('account.period').search(cr, uid, [('date_start','<=',row[1]),('date_stop','>=',row[1])]):
+                            period_read = self.pool.get('account.period').read(cr, uid, period_search,['id'])
+                            values= {
+                                'battypecd':row[0],
+                                'batdt':row[1],
+                                'batltr':row[2],
+                                'docno':row[3],
+                                'amount':row[4],
+                                'trancd':row[5],
+                                'comm1':row[6],
+                                'comm2':row[7],
+                                'dcno':row[8],
+                                'period_id':period_read['id'],
+                                'filename':file_name,
+                                }
+                            self.pool.get('dbf.details').create(cr, uid, values)
         return True
 
 dbf_reader()
