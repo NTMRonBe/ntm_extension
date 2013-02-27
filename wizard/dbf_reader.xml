@@ -10,7 +10,11 @@
             <field name="arch" type="xml">
             <form string="DBF Reader and Data Import">
                 <separator string="Post Journal Entries of a Journal" colspan="4"/>
-                <field name="fname"/>
+                <group colspan="4" col="2">
+	                <field name="type"/>
+	                <field name="filename" widget="selection" domain="[('type','=','phone'),('imported','=',False)]"/>
+	                <!-- <field name="filename"/> -->
+                </group>
                 <newline/>
                 <button string="Convert"
                                             type="object"
@@ -137,6 +141,7 @@
                         <field name="imported"/>
                         <field name="full_location"/>
                         <field name="converted_file"/>
+                        <field name="type"/>
                 </form>
             </field>
         </record>        
@@ -152,6 +157,7 @@
                         <field name="imported"/>
                         <field name="full_location"/>
                         <field name="converted_file"/>
+                        <field name="type"/>
                 </tree> 
             </field>
         </record>
@@ -167,6 +173,7 @@
                         <field name="imported"/>
                         <field name="full_location"/>
                         <field name="converted_file"/>
+                        <field name="type"/>
                 </search>
             </field>
         </record>
