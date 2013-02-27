@@ -120,9 +120,13 @@ class dbf_file_get(osv.osv_memory):
                     self.pool.get('dbf.files').create(cr, uid, values)
             elif dbf_list.endswith('.DBF'):
                 dbf_file_split = dbf_list.split('.')
+                dbf_file_split = dbf_file_split[0].replace(" ","")
+                dbf_file_split = dbf_file_split.replace("(","_")
+                dbf_file_split = dbf_file_split.replace(")","_")
+                netsvc.Logger().notifyChannel("dbf_file_split", netsvc.LOG_INFO, ' '+str(dbf_file_split))
                 full_loc = location + '/' +dbf_list
                 values={
-                    'name':dbf_file_split[0],
+                    'name':dbf_file_split,
                     'extension':'DBF',
                     'user_id':uid,
                     'full_location':full_loc,
