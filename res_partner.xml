@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+		<record id="61FLCP" model="res.partner"><field name="name">Field Consultant Program</field><field name="account_analytic_id" ref="61FLCP"/></record>
+		<record id="61FLDE" model="res.partner"><field name="name">Field Education Fund</field><field name="account_analytic_id" ref="61FLDE"/></record>
+		<record id="61FLDH" model="res.partner"><field name="name">Field Housing Fund</field><field name="account_analytic_id" ref="61FLDH"/></record>
+		<record id="61FLDR" model="res.partner"><field name="name">Field Revitalization Fund</field><field name="account_analytic_id" ref="61FLDR"/></record>
+		<record id="61FLPR" model="res.partner"><field name="name">Field Project Fund</field><field name="account_analytic_id" ref="61FLPR"/></record>
+		<record id="61FLRA" model="res.partner"><field name="name">Field Regional Admin Fund</field><field name="account_analytic_id" ref="61FLRA"/></record>
+		<record id="61FLSU" model="res.partner"><field name="name">Field Flight Subsidy Fund</field><field name="account_analytic_id" ref="61FLSU"/></record>
+		<record id="61FLTS" model="res.partner"><field name="name">Field LeadershipTravel Subsidy</field><field name="account_analytic_id" ref="61FLTS"/></record>
+		<record id="61FRAD" model="res.partner"><field name="name">Field Radio Fund</field><field name="account_analytic_id" ref="61FRAD"/></record>
+		<record id="61CONF" model="res.partner"><field name="name">Field Conference Account</field><field name="account_analytic_id" ref="61CONF"/></record>
+		<record id="61CONT" model="res.partner"><field name="name">Field Contingency Fund</field><field name="account_analytic_id" ref="61CONT"/></record>
+		<record id="61FICA" model="res.partner"><field name="name">Field Calamity Relief Fund</field><field name="account_analytic_id" ref="61FICA"/></record>
+		<record id="61ACTR" model="res.partner"><field name="name">Z Sea Consultant Travel</field><field name="account_analytic_id" ref="61ACTR"/></record>
+		<record id="61ECDF" model="res.partner"><field name="name">Deacons Fund EB (Executive Board US)</field><field name="account_analytic_id" ref="61ECDF"/></record>
+		<record id="61DEAC" model="res.partner"><field name="name">Deacons Fund</field><field name="account_analytic_id" ref="61DEAC"/></record>
+		<record id="61MKED" model="res.partner"><field name="name">MK Ed. Contribution</field><field name="account_analytic_id" ref="61MKED"/></record>
+		<record id="61TPUB" model="res.partner"><field name="name">Tribal Publications</field><field name="account_analytic_id" ref="61TPUB"/></record>
+		<record id="61TRLT" model="res.partner"><field name="name">Tribal Leadership Training</field><field name="account_analytic_id" ref="61TRLT"/></record>
+		<record id="61NTPP" model="res.partner"><field name="name">New Translation Printing Proj.</field><field name="account_analytic_id" ref="61NTPP"/></record>
+		<record id="61NTPR" model="res.partner"><field name="name">New Translation Project</field><field name="account_analytic_id" ref="61NTPR"/></record>
+		<record id="61EVAN" model="res.partner"><field name="name">Manila Office - Evangelistic</field><field name="account_analytic_id" ref="61EVAN"/></record>
+		<record id="61CDOL" model="res.partner"><field name="name">CDO Mission Home Property</field><field name="account_analytic_id" ref="61CDOL"/></record>
+		<record id="61FAIT" model="res.partner"><field name="name">Faith Academy Transfer Account</field><field name="account_analytic_id" ref="61FAIT"/></record>
+		<record id="61UNDE" model="res.partner"><field name="name">Undesignated Gifts</field><field name="account_analytic_id" ref="61UNDE"/></record>
+		<record id="61WELL" model="res.partner"><field name="name">Well Drilling Project</field><field name="account_analytic_id" ref="61WELL"/></record>
+		<record id="61LIPR" model="res.partner"><field name="name">Literacy Project Fund</field><field name="account_analytic_id" ref="61LIPR"/></record>
+		<record id="61PGAP" model="res.partner"><field name="name">People Group Assessment Proj</field><field name="account_analytic_id" ref="61PGAP"/></record>
+		<record id="61SEMR" model="res.partner"><field name="name">Seminars</field><field name="account_analytic_id" ref="61SEMR"/></record>
+		<record id="61IMLC" model="res.partner"><field name="name">Inter Mission Fund</field><field name="account_analytic_id" ref="61IMLC"/></record>
+		<record id="61CLAD" model="res.partner"><field name="name">Culture and Language Program Dev</field><field name="account_analytic_id" ref="61CLAD"/></record>
+		<record id="61HELI" model="res.partner"><field name="name">Helicopter Project</field><field name="account_analytic_id" ref="61HELI"/></record>
+		<record id="61BMEM" model="res.partner"><field name="name">Martin Burnham memorial tribut</field><field name="account_analytic_id" ref="61BMEM"/></record>
+		<record id="62PRNL" model="res.partner"><field name="name">NL Regional Project Fund</field><field name="account_analytic_id" ref="62PRNL"/></record>
+		<record id="62NLUZ" model="res.partner"><field name="name">NL Project</field><field name="account_analytic_id" ref="62NLUZ"/></record>
+		<record id="62LMFC" model="res.partner"><field name="name">NL Mini Field Conference</field><field name="account_analytic_id" ref="62LMFC"/></record>
+		<record id="62PRPP" model="res.partner"><field name="name">PP Regional Project Fund</field><field name="account_analytic_id" ref="62PRPP"/></record>
+		<record id="62PMFC" model="res.partner"><field name="name">PP Mini Field Conference</field><field name="account_analytic_id" ref="62PMFC"/></record>
+		<record id="62PPGH" model="res.partner"><field name="name">PP Guest House Duplex</field><field name="account_analytic_id" ref="62PPGH"/></record>
+		<record id="62PPHA" model="res.partner"><field name="name">PP Hanger</field><field name="account_analytic_id" ref="62PPHA"/></record>
+		<record id="62PPSH" model="res.partner"><field name="name">PP Staff House</field><field name="account_analytic_id" ref="62PPSH"/></record>
+		<record id="62PPTH" model="res.partner"><field name="name">PP Tribal House</field><field name="account_analytic_id" ref="62PPTH"/></record>
+		<record id="62LADA" model="res.partner"><field name="name">PP Lada</field><field name="account_analytic_id" ref="62LADA"/></record>
+		<record id="62PRMY" model="res.partner"><field name="name">MY Regional Project Fund</field><field name="account_analytic_id" ref="62PRMY"/></record>
+		<record id="62MMFC" model="res.partner"><field name="name">MY Mini Field Conference</field><field name="account_analytic_id" ref="62MMFC"/></record>
+		<record id="62MAIR" model="res.partner"><field name="name">MY Airstrip</field><field name="account_analytic_id" ref="62MAIR"/></record>
+		<record id="62MERC" model="res.partner"><field name="name">MY Education</field><field name="account_analytic_id" ref="62MERC"/></record>
+		<record id="62CLAV" model="res.partner"><field name="name">MY Culture and Language Aq.</field><field name="account_analytic_id" ref="62CLAV"/></record>
+		<record id="62PABI" model="res.partner"><field name="name">Palawan Bible Inst Staff House</field><field name="account_analytic_id" ref="62PABI"/></record>
+		<record id="62PHNA" model="res.partner"><field name="name">PHNA G/H, Coron. Palawan</field><field name="account_analytic_id" ref="62PHNA"/></record>
+		<record id="63AGTP" model="res.partner"><field name="name">Agta Project - Burbidge</field><field name="account_analytic_id" ref="63AGTP"/></record>
+		<record id="63DUMG" model="res.partner"><field name="name">Dumagat Project - Petro</field><field name="account_analytic_id" ref="63DUMG"/></record>
+		<record id="63GADA" model="res.partner"><field name="name">Ga'dang Project</field><field name="account_analytic_id" ref="63GADA"/></record>
+		<record id="63IBAB" model="res.partner"><field name="name">Ibaloi Bible Project - Burnham</field><field name="account_analytic_id" ref="63IBAB"/></record>
+		<record id="63IFUG" model="res.partner"><field name="name">Ifugao Project - Garet</field><field name="account_analytic_id" ref="63IFUG"/></record>
+		<record id="63ILPR" model="res.partner"><field name="name">Ilongot Project - Schultz</field><field name="account_analytic_id" ref="63ILPR"/></record>
+		<record id="63ISPR" model="res.partner"><field name="name">Isneg Project - Bamford</field><field name="account_analytic_id" ref="63ISPR"/></record>
+		<record id="63IWAK" model="res.partner"><field name="name">I-wak Airstrip Project - HAGC</field><field name="account_analytic_id" ref="63IWAK"/></record>
+		<record id="63KACH" model="res.partner"><field name="name">Kalangoya Chron Less. - Bagley</field><field name="account_analytic_id" ref="63KACH"/></record>
+		<record id="63KALP" model="res.partner"><field name="name">Kalangoya Project - Ambrosius</field><field name="account_analytic_id" ref="63KALP"/></record>
+		<record id="63KALT" model="res.partner"><field name="name">Kalangoya Translation - Ambros</field><field name="account_analytic_id" ref="63KALT"/></record>
+		<record id="63AGPR" model="res.partner"><field name="name">Agutaynen Project - Jordan</field><field name="account_analytic_id" ref="63AGPR"/></record>
+		<record id="63MELF" model="res.partner"><field name="name">Menti Literacy Fund Project</field><field name="account_analytic_id" ref="63MELF"/></record>
+		<record id="63MENT" model="res.partner"><field name="name">Menti Medical Project</field><field name="account_analytic_id" ref="63MENT"/></record>
+		<record id="63MOPR" model="res.partner"><field name="name">Molbog Project Fund</field><field name="account_analytic_id" ref="63MOPR"/></record>
+		<record id="63PALM" model="res.partner"><field name="name">S.W. Palawano Medical Project</field><field name="account_analytic_id" ref="63PALM"/></record>
+		<record id="63PALT" model="res.partner"><field name="name">S.W. Palawano Translation Project</field><field name="account_analytic_id" ref="63PALT"/></record>
+		<record id="63TAGB" model="res.partner"><field name="name">Tagbanwa-Calamian Barangunan</field><field name="account_analytic_id" ref="63TAGB"/></record>
+		<record id="63TAGC" model="res.partner"><field name="name">Tagbanwa Central</field><field name="account_analytic_id" ref="63TAGC"/></record>
+		<record id="63TAGM" model="res.partner"><field name="name">Tagbanwa Medical South - Crain</field><field name="account_analytic_id" ref="63TAGM"/></record>
+		<record id="63TAGP" model="res.partner"><field name="name">Tagbanwa Project South - Crain</field><field name="account_analytic_id" ref="63TAGP"/></record>
+		<record id="63AGIS" model="res.partner"><field name="name">Agutaya Island Project</field><field name="account_analytic_id" ref="63AGIS"/></record>
+		<record id="63BANL" model="res.partner"><field name="name">Banwaon Literature Project - CAAL</field><field name="account_analytic_id" ref="63BANL"/></record>
+		<record id="63BANP" model="res.partner"><field name="name">Banwaon Team Project - CAAL</field><field name="account_analytic_id" ref="63BANP"/></record>
+		<record id="63HIGA" model="res.partner"><field name="name">Higaonon Project - Jennings</field><field name="account_analytic_id" ref="63HIGA"/></record>
+		<record id="63LTAP" model="res.partner"><field name="name">Lapok Tala Andig Project</field><field name="account_analytic_id" ref="63LTAP"/></record>
+		<record id="63MANU" model="res.partner"><field name="name">Manubu Project Fund</field><field name="account_analytic_id" ref="63MANU"/></record>
+		<record id="63TABT" model="res.partner"><field name="name">Tala Andig Bible Translation</field><field name="account_analytic_id" ref="63TABT"/></record>
+		<record id="63TAOP" model="res.partner"><field name="name">Tala Andig Outreach Proj</field><field name="account_analytic_id" ref="63TAOP"/></record>
+		<record id="63TMAN" model="res.partner"><field name="name">Tigwa Manobo Project Fund</field><field name="account_analytic_id" ref="63TMAN"/></record>
+		<record id="63BUTA" model="res.partner"><field name="name">Butan Church / Thomas</field><field name="account_analytic_id" ref="63BUTA"/></record>
+		<record id="64NPAR" model="res.partner"><field name="name">National Partnership Project</field><field name="account_analytic_id" ref="64NPAR"/></record>
+		<record id="64BAMS" model="res.partner"><field name="name">Bataan Mission School</field><field name="account_analytic_id" ref="64BAMS"/></record>
+		<record id="71ABBODK" model="res.partner"><field name="name">Abbott, David and Kristia</field><field name="account_analytic_id" ref="71ABBODK"/></record>
+		<record id="71AMBRBJ" model="res.partner"><field name="name">Ambrosius, Bob and Judy</field><field name="account_analytic_id" ref="71AMBRBJ"/></record>
+		<record id="71BAGLBJ" model="res.partner"><field name="name">Bagley, Bob and Jan</field><field name="account_analytic_id" ref="71BAGLBJ"/></record>
+		<record id="71BARKGC" model="res.partner"><field name="name">Barkman, Garry and Cynthia</field><field name="account_analytic_id" ref="71BARKGC"/></record>
+		<record id="71BAYFGM" model="res.partner"><field name="name">Bayfield, Grant and Marianne</field><field name="account_analytic_id" ref="71BAYFGM"/></record>
+		<record id="71BAMFJH" model="res.partner"><field name="name">Bamford, Jonathan and Heidi</field><field name="account_analytic_id" ref="71BAMFJH"/></record>
+		<record id="71BAKEPK" model="res.partner"><field name="name">Baker, Peter and Kathy</field><field name="account_analytic_id" ref="71BAKEPK"/></record>
+		<record id="71BAIRSR" model="res.partner"><field name="name">Baird, Stephen and Roslyn</field><field name="account_analytic_id" ref="71BAIRSR"/></record>
+		<record id="71BERGBV" model="res.partner"><field name="name">Bergen, Boris and Valentina</field><field name="account_analytic_id" ref="71BERGBV"/></record>
+		<record id="71BIRKJS" model="res.partner"><field name="name">Birkin, Jason and Shirley</field><field name="account_analytic_id" ref="71BIRKJS"/></record>
+		<record id="71BINDKB" model="res.partner"><field name="name">Binder, Konrad and Betty</field><field name="account_analytic_id" ref="71BINDKB"/></record>
+		<record id="71BRUSCL" model="res.partner"><field name="name">Brust, Claudia</field><field name="account_analytic_id" ref="71BRUSCL"/></record>
+		<record id="71BROODP" model="res.partner"><field name="name">Brooks, Danny and Philippa</field><field name="account_analytic_id" ref="71BROODP"/></record>
+		<record id="71BRIGRL" model="res.partner"><field name="name">Bright, Richard and Lynn</field><field name="account_analytic_id" ref="71BRIGRL"/></record>
+		<record id="71BURNGR" model="res.partner"><field name="name">Burnham, Gracia</field><field name="account_analytic_id" ref="71BURNGR"/></record>
+		<record id="71BURBJO" model="res.partner"><field name="name">Burbidge, John</field><field name="account_analytic_id" ref="71BURBJO"/></record>
+		<record id="71BURNPO" model="res.partner"><field name="name">Burnham, Paul and Oreta</field><field name="account_analytic_id" ref="71BURNPO"/></record>
+		<record id="71CASTAL" model="res.partner"><field name="name">Castelijn, Albert and Lynne</field><field name="account_analytic_id" ref="71CASTAL"/></record>
+		<record id="71CANACH" model="res.partner"><field name="name">Canapp, Christina</field><field name="account_analytic_id" ref="71CANACH"/></record>
+		<record id="71CASTME" model="res.partner"><field name="name">Castagna, Matthew and Erin</field><field name="account_analytic_id" ref="71CASTME"/></record>
+		<record id="71CASTTP" model="res.partner"><field name="name">Castagna, Tim and Peggy</field><field name="account_analytic_id" ref="71CASTTP"/></record>
+		<record id="71CLARTJ" model="res.partner"><field name="name">Clarke, Trevor and Judy</field><field name="account_analytic_id" ref="71CLARTJ"/></record>
+		<record id="71CRAIJB" model="res.partner"><field name="name">Crain, Jody and Barb</field><field name="account_analytic_id" ref="71CRAIJB"/></record>
+		<record id="71DAVIBD" model="res.partner"><field name="name">Davis, Bill and Donna</field><field name="account_analytic_id" ref="71DAVIBD"/></record>
+		<record id="71DALTJC" model="res.partner"><field name="name">Dalton, Josh and Candy</field><field name="account_analytic_id" ref="71DALTJC"/></record>
+		<record id="71DAVIJM" model="res.partner"><field name="name">Davis, Joel and Missy</field><field name="account_analytic_id" ref="71DAVIJM"/></record>
+		<record id="71DORNJK" model="res.partner"><field name="name">Dorn, James and Kathleen</field><field name="account_analytic_id" ref="71DORNJK"/></record>
+		<record id="71EASTDV" model="res.partner"><field name="name">Easton, Dennis and Valerie</field><field name="account_analytic_id" ref="71EASTDV"/></record>
+		<record id="71EPPDCH" model="res.partner"><field name="name">Epp, Donovan and Charla</field><field name="account_analytic_id" ref="71EPPDCH"/></record>
+		<record id="71GAMMER" model="res.partner"><field name="name">Gammelsaeter, Egil and Rita</field><field name="account_analytic_id" ref="71GAMMER"/></record>
+		<record id="71GAPPRC" model="res.partner"><field name="name">Gappmayr, Richard and Carmen</field><field name="account_analytic_id" ref="71GAPPRC"/></record>
+		<record id="71GINNRL" model="res.partner"><field name="name">Ginn, Ross and Lea</field><field name="account_analytic_id" ref="71GINNRL"/></record>
+		<record id="71GORILJ" model="res.partner"><field name="name">Goring, Larry and Jill</field><field name="account_analytic_id" ref="71GORILJ"/></record>
+		<record id="71GRAYLS" model="res.partner"><field name="name">Gray, Shirley</field><field name="account_analytic_id" ref="71GRAYLS"/></record>
+		<record id="71GROSTK" model="res.partner"><field name="name">Grossman, Tim and Karen</field><field name="account_analytic_id" ref="71GROSTK"/></record>
+		<record id="71HARTBS" model="res.partner"><field name="name">Hart, Ben and Suzy</field><field name="account_analytic_id" ref="71HARTBS"/></record>
+		<record id="71HARAGC" model="res.partner"><field name="name">Harada, Geff and Christine</field><field name="account_analytic_id" ref="71HARAGC"/></record>
+		<record id="71HALLLI" model="res.partner"><field name="name">Hall, Linda</field><field name="account_analytic_id" ref="71HALLLI"/></record>
+		<record id="71HAPPMR" model="res.partner"><field name="name">Happel, Manfred and Rosie</field><field name="account_analytic_id" ref="71HAPPMR"/></record>
+		<record id="71HOWEPD" model="res.partner"><field name="name">Howells, Paul and Debbie</field><field name="account_analytic_id" ref="71HOWEPD"/></record>
+		<record id="71HOLERK" model="res.partner"><field name="name">Holeman, Russ and Kelly</field><field name="account_analytic_id" ref="71HOLERK"/></record>
+		<record id="71INGVNM" model="res.partner"><field name="name">Ingvoldstad, Nathan and Megan</field><field name="account_analytic_id" ref="71INGVNM"/></record>
+		<record id="71JACOOJ" model="res.partner"><field name="name">Jacobsen, Oli and Judy</field><field name="account_analytic_id" ref="71JACOOJ"/></record>
+		<record id="71JENNRM" model="res.partner"><field name="name">Jennings, Ron and Michelle</field><field name="account_analytic_id" ref="71JENNRM"/></record>
+		<record id="71JOHNBB" model="res.partner"><field name="name">Johnson, Brian and Brooke</field><field name="account_analytic_id" ref="71JOHNBB"/></record>
+		<record id="71JORDDB" model="res.partner"><field name="name">Jordan, Darryl and Becky</field><field name="account_analytic_id" ref="71JORDDB"/></record>
+		<record id="71JOHADH" model="res.partner"><field name="name">Johanson,  David and Helen</field><field name="account_analytic_id" ref="71JOHADH"/></record>
+		<record id="71JORDKS" model="res.partner"><field name="name">Jordan, Ken and Sue</field><field name="account_analytic_id" ref="71JORDKS"/></record>
+		<record id="71JORDSG" model="res.partner"><field name="name">Jordan, Stephen and Ginger</field><field name="account_analytic_id" ref="71JORDSG"/></record>
+		<record id="71JURIED" model="res.partner"><field name="name">Jurimas, Ed and Debbie</field><field name="account_analytic_id" ref="71JURIED"/></record>
+		<record id="71KELLZJ" model="res.partner"><field name="name">Keller, Zach and Jane</field><field name="account_analytic_id" ref="71KELLZJ"/></record>
+		<record id="71LONGEL" model="res.partner"><field name="name">Long, Elise</field><field name="account_analytic_id" ref="71LONGEL"/></record>
+		<record id="71LORELN" model="res.partner"><field name="name">Lorenz, Lucas and Naomi</field><field name="account_analytic_id" ref="71LORELN"/></record>
+		<record id="71MAYNDV" model="res.partner"><field name="name">Maynard, David and Vanessa</field><field name="account_analytic_id" ref="71MAYNDV"/></record>
+		<record id="71MARTGV" model="res.partner"><field name="name">Martin, Vicky</field><field name="account_analytic_id" ref="71MARTGV"/></record>
+		<record id="71MAJOJB" model="res.partner"><field name="name">Major, Jared and Bana</field><field name="account_analytic_id" ref="71MAJOJB"/></record>
+		<record id="71MANDJO" model="res.partner"><field name="name">Manda, Joy</field><field name="account_analytic_id" ref="71MANDJO"/></record>
+		<record id="71MOUGDJ" model="res.partner"><field name="name">Mough, Dave and Jena</field><field name="account_analytic_id" ref="71MOUGDJ"/></record>
+		<record id="71MOFFJB" model="res.partner"><field name="name">Moffit, Josh and Belinda</field><field name="account_analytic_id" ref="71MOFFJB"/></record>
+		<record id="71MORRJS" model="res.partner"><field name="name">Morris, Joe and Sesil</field><field name="account_analytic_id" ref="71MORRJS"/></record>
+		<record id="71NIELAN" model="res.partner"><field name="name">Nielsen, Anja</field><field name="account_analytic_id" ref="71NIELAN"/></record>
+		<record id="71NICLRL" model="res.partner"><field name="name">Niclasen, Rocky and Liz</field><field name="account_analytic_id" ref="71NICLRL"/></record>
+		<record id="71OLSOGG" model="res.partner"><field name="name">Olson, George and Ginny</field><field name="account_analytic_id" ref="71OLSOGG"/></record>
+		<record id="71OSTMLL" model="res.partner"><field name="name">Ostman, Lance and Laura</field><field name="account_analytic_id" ref="71OSTMLL"/></record>
+		<record id="71PARKGG" model="res.partner"><field name="name">Park, Gene and Gina</field><field name="account_analytic_id" ref="71PARKGG"/></record>
+		<record id="71PADERO" model="res.partner"><field name="name">Padernal, Robbie</field><field name="account_analytic_id" ref="71PADERO"/></record>
+		<record id="71PETRDA" model="res.partner"><field name="name">Petro, Dave and Adriana</field><field name="account_analytic_id" ref="71PETRDA"/></record>
+		<record id="71PETEED" model="res.partner"><field name="name">Peterson, Erik and Dana</field><field name="account_analytic_id" ref="71PETEED"/></record>
+		<record id="71POLLRC" model="res.partner"><field name="name">Pollock, Ray and Chris</field><field name="account_analytic_id" ref="71POLLRC"/></record>
+		<record id="71PRUEBB" model="res.partner"><field name="name">Pruett, Brian and Bailey</field><field name="account_analytic_id" ref="71PRUEBB"/></record>
+		<record id="71RIDEKB" model="res.partner"><field name="name">Rider, K.C. and Barb</field><field name="account_analytic_id" ref="71RIDEKB"/></record>
+		<record id="71LE RPV" model="res.partner"><field name="name">le Roux, Philip and Vina</field><field name="account_analytic_id" ref="71LE RPV"/></record>
+		<record id="71SAWDCH" model="res.partner"><field name="name">Sawdon, Chris and Heather</field><field name="account_analytic_id" ref="71SAWDCH"/></record>
+		<record id="71SCHABK" model="res.partner"><field name="name">Schaadt, Brian and Katherine</field><field name="account_analytic_id" ref="71SCHABK"/></record>
+		<record id="71SCHUDS" model="res.partner"><field name="name">Schultze, Dell and Sue</field><field name="account_analytic_id" ref="71SCHUDS"/></record>
+		<record id="71SCHWJJ" model="res.partner"><field name="name">Schwab, Jason and Jennifer</field><field name="account_analytic_id" ref="71SCHWJJ"/></record>
+		<record id="71SCHNWE" model="res.partner"><field name="name">Schneidmueller, Werner</field><field name="account_analytic_id" ref="71SCHNWE"/></record>
+		<record id="71SHARDG" model="res.partner"><field name="name">Sharp, Dwight and Ginny</field><field name="account_analytic_id" ref="71SHARDG"/></record>
+		<record id="71SHARTM" model="res.partner"><field name="name">Sharp, Tim and Monika</field><field name="account_analytic_id" ref="71SHARTM"/></record>
+		<record id="71SMITAM" model="res.partner"><field name="name">Smith, Andrew and Megan</field><field name="account_analytic_id" ref="71SMITAM"/></record>
+		<record id="71SMITRC" model="res.partner"><field name="name">Smith, Robert and Cirena</field><field name="account_analytic_id" ref="71SMITRC"/></record>
+		<record id="71SPICWC" model="res.partner"><field name="name">Spicer, Walt and Cheryl</field><field name="account_analytic_id" ref="71SPICWC"/></record>
+		<record id="71STRACL" model="res.partner"><field name="name">Strange, Chris and Lynne</field><field name="account_analytic_id" ref="71STRACL"/></record>
+		<record id="71STROKS" model="res.partner"><field name="name">Stroud-Lusk, Kevin and Stella</field><field name="account_analytic_id" ref="71STROKS"/></record>
+		<record id="71TALBCS" model="res.partner"><field name="name">Talbot, Charles and Shannon</field><field name="account_analytic_id" ref="71TALBCS"/></record>
+		<record id="71TRUDGC" model="res.partner"><field name="name">Trudeau, Gene and Carol</field><field name="account_analytic_id" ref="71TRUDGC"/></record>
+		<record id="71WARDDJ" model="res.partner"><field name="name">Ward, David and Julie</field><field name="account_analytic_id" ref="71WARDDJ"/></record>
+		<record id="71WAPPLM" model="res.partner"><field name="name">Wapp, Lloyd and Mary</field><field name="account_analytic_id" ref="71WAPPLM"/></record>
+		<record id="71WRIGPC" model="res.partner"><field name="name">Wright, Paul and Cathy</field><field name="account_analytic_id" ref="71WRIGPC"/></record>
+		<record id="71ZIMMMN" model="res.partner"><field name="name">Zimmermann, Manfred and Nadine</field><field name="account_analytic_id" ref="71ZIMMMN"/></record>
+		<record id="72BAIRSR" model="res.partner"><field name="name">Baird, Stephen and Roslyn - Special</field><field name="account_analytic_id" ref="72BAIRSR"/></record>
+		<record id="72BIRKJS" model="res.partner"><field name="name">Birkin, Jason and Shirley - Special</field><field name="account_analytic_id" ref="72BIRKJS"/></record>
+		<record id="72BRIGRL" model="res.partner"><field name="name">Bright, Richard and Lynn - Special</field><field name="account_analytic_id" ref="72BRIGRL"/></record>
+		<record id="72CASTAL" model="res.partner"><field name="name">Castelijn, Albert and Lynne - Special</field><field name="account_analytic_id" ref="72CASTAL"/></record>
+		<record id="72GAMMER" model="res.partner"><field name="name">Gammelsaeter, Egil and Rita - Special</field><field name="account_analytic_id" ref="72GAMMER"/></record>
+		<record id="72HARAGC" model="res.partner"><field name="name">Harada, Geff and Christine- Special</field><field name="account_analytic_id" ref="72HARAGC"/></record>
+		<record id="72JORDKS" model="res.partner"><field name="name">Jordan, Ken - Special</field><field name="account_analytic_id" ref="72JORDKS"/></record>
+		<record id="72JORDSG" model="res.partner"><field name="name">Jordan, Stephen and Ginger - Special</field><field name="account_analytic_id" ref="72JORDSG"/></record>
+		<record id="72MAYNDV" model="res.partner"><field name="name">Maynard, David and Vanessa - Special</field><field name="account_analytic_id" ref="72MAYNDV"/></record>
+		<record id="72NICLRL" model="res.partner"><field name="name">Niclasen, Rocky and Liz - Special</field><field name="account_analytic_id" ref="72NICLRL"/></record>
+		<record id="72PETEED" model="res.partner"><field name="name">Peterson, Erik and Dana - Special</field><field name="account_analytic_id" ref="72PETEED"/></record>
+		<record id="72RASMJC" model="res.partner"><field name="name">Rasmussen, JJ and Cathy - Special</field><field name="account_analytic_id" ref="72RASMJC"/></record>
+		<record id="72SAWDCH" model="res.partner"><field name="name">Sawdon, Chris and Heather - Special</field><field name="account_analytic_id" ref="72SAWDCH"/></record>
+		<record id="72SCHNWE" model="res.partner"><field name="name">Schneidmueller, Werner - Special</field><field name="account_analytic_id" ref="72SCHNWE"/></record>
+		<record id="72ROBERC" model="res.partner"><field name="name">Smith, Robert and Cirena - Special</field><field name="account_analytic_id" ref="72ROBERC"/></record>
+		<record id="72STROKS" model="res.partner"><field name="name">Stroud-Lusk, Kevin - Special</field><field name="account_analytic_id" ref="72STROKS"/></record>
+		<record id="72TALBCS" model="res.partner"><field name="name">Talbot, Charles and Shannon - Special</field><field name="account_analytic_id" ref="72TALBCS"/></record>
+		<record id="72ZIMMMN" model="res.partner"><field name="name">Zimmermann, Manfred - Special</field><field name="account_analytic_id" ref="72ZIMMMN"/></record>
+		<record id="73FRENDL" model="res.partner"><field name="name">French, David and Lori</field><field name="account_analytic_id" ref="73FRENDL"/></record>
+		<record id="74BERGAN" model="res.partner"><field name="name">Berg, Andreas</field><field name="account_analytic_id" ref="74BERGAN"/></record>
+		<record id="74FRIEAL" model="res.partner"><field name="name">Friesen, Alexander</field><field name="account_analytic_id" ref="74FRIEAL"/></record>
+		<record id="74HAINAN" model="res.partner"><field name="name">Hain, Achim and Natascha</field><field name="account_analytic_id" ref="74HAINAN"/></record>
+		<record id="74HALLBB" model="res.partner"><field name="name">Hall, Bob and Bronwyn</field><field name="account_analytic_id" ref="74HALLBB"/></record>
+		<record id="74SCHUNA" model="res.partner"><field name="name">Schunk, Naemi</field><field name="account_analytic_id" ref="74SCHUNA"/></record>
+		<record id="74STAVGL" model="res.partner"><field name="name">Stava,Glenn</field><field name="account_analytic_id" ref="74STAVGL"/></record>
+		<record id="74VANDCA" model="res.partner"><field name="name">van Dalen, Carin</field><field name="account_analytic_id" ref="74VANDCA"/></record>
+		<record id="74ZARAAN" model="res.partner"><field name="name">Zara, Anna</field><field name="account_analytic_id" ref="74ZARAAN"/></record>
+		<record id="74NICHJU" model="res.partner"><field name="name">Nicholson, Julie</field><field name="account_analytic_id" ref="74NICHJU"/></record>
+		<record id="74NICLRK" model="res.partner"><field name="name">Niclasen, Ryan and Kara</field><field name="account_analytic_id" ref="74NICLRK"/></record>
+		<record id="74RIVEPM" model="res.partner"><field name="name">Rivette, Patrick and Miriam</field><field name="account_analytic_id" ref="74RIVEPM"/></record>
+		<record id="74FOSTAN" model="res.partner"><field name="name">Foster, Andrew</field><field name="account_analytic_id" ref="74FOSTAN"/></record>
+		<record id="74TARTBL" model="res.partner"><field name="name">Tart, Ben and Leonie</field><field name="account_analytic_id" ref="74TARTBL"/></record>
+		<record id="74TYRIRO" model="res.partner"><field name="name">Tyril, Rosa</field><field name="account_analytic_id" ref="74TYRIRO"/></record>
+		<record id="81GARCCY" model="res.partner"><field name="name">Garcia, Cynthia - Medical</field><field name="account_analytic_id" ref="81GARCCY"/></record>
+		<record id="82NELSSC" model="res.partner"><field name="name">Nelsen, Scott and Cindy</field><field name="account_analytic_id" ref="82NELSSC"/></record>
+		<record id="82DANIDK" model="res.partner"><field name="name">Danielson, Dana and Kelly</field><field name="account_analytic_id" ref="82DANIDK"/></record>
+		<record id="82DEALST" model="res.partner"><field name="name">Deal, Steve</field><field name="account_analytic_id" ref="82DEALST"/></record>
+		<record id="82DEWICH" model="res.partner"><field name="name">Dewing, Charles</field><field name="account_analytic_id" ref="82DEWICH"/></record>
+		<record id="82HORTDM" model="res.partner"><field name="name">Horton, Dan and Maryanne</field><field name="account_analytic_id" ref="82HORTDM"/></record>
+		<record id="82HOLMLA" model="res.partner"><field name="name">Holmes, Larry</field><field name="account_analytic_id" ref="82HOLMLA"/></record>
+		<record id="82LEIGNA" model="res.partner"><field name="name">Leigh, Nathan and Armida</field><field name="account_analytic_id" ref="82LEIGNA"/></record>
+		<record id="82VELDSS" model="res.partner"><field name="name">Veldstra, Steve and Stacy</field><field name="account_analytic_id" ref="82VELDSS"/></record>
+		<record id="82LUYKHB" model="res.partner"><field name="name">Luyk, Huub and Becky</field><field name="account_analytic_id" ref="82LUYKHB"/></record>
+		<record id="82ASTIEL" model="res.partner"><field name="name">Astillero, Elmer and Lorri</field><field name="account_analytic_id" ref="82ASTIEL"/></record>
+		<record id="82OKEEDJ" model="res.partner"><field name="name">Okeefe, Dennis and Jeanie</field><field name="account_analytic_id" ref="82OKEEDJ"/></record>
+		<record id="82RASMJC" model="res.partner"><field name="name">Rasmussen, JJ and Cathy</field><field name="account_analytic_id" ref="82RASMJC"/></record>
+		<record id="82STAUBN" model="res.partner"><field name="name">Stauble, Bob and Nancy</field><field name="account_analytic_id" ref="82STAUBN"/></record>
+		<record id="82VODAAL" model="res.partner"><field name="name">Voda, Alina</field><field name="account_analytic_id" ref="82VODAAL"/></record>
+		<record id="83Guest1" model="res.partner"><field name="name">Guest 1</field><field name="account_analytic_id" ref="83Guest1"/></record>
+		<record id="83Guest2" model="res.partner"><field name="name">Guest 2</field><field name="account_analytic_id" ref="83Guest2"/></record>
+		<record id="83Guest3" model="res.partner"><field name="name">Guest 3</field><field name="account_analytic_id" ref="83Guest3"/></record>
+		<record id="83Guest4" model="res.partner"><field name="name">Guest 4</field><field name="account_analytic_id" ref="83Guest4"/></record>
+		<record id="83Guest5" model="res.partner"><field name="name">Guest 5</field><field name="account_analytic_id" ref="83Guest5"/></record>
+		<record id="83Guest6" model="res.partner"><field name="name">Guest 6</field><field name="account_analytic_id" ref="83Guest6"/></record>
+		<record id="83Guest7" model="res.partner"><field name="name">Guest 7</field><field name="account_analytic_id" ref="83Guest7"/></record>
+		<record id="83Guest8" model="res.partner"><field name="name">Guest 8</field><field name="account_analytic_id" ref="83Guest8"/></record>
+		<record id="83Guest9" model="res.partner"><field name="name">Guest 9</field><field name="account_analytic_id" ref="83Guest9"/></record>
+		<record id="88CARM" model="res.partner"><field name="name">CARM-Carl Stevens</field><field name="account_analytic_id" ref="88CARM"/></record>
+		<record id="88PHNA" model="res.partner"><field name="name">Philippine Nationals</field><field name="account_analytic_id" ref="88PHNA"/></record>
+		<record id="88SILM" model="res.partner"><field name="name">S.I.L. Flight Account</field><field name="account_analytic_id" ref="88SILM"/></record>
+		<record id="89JARN" model="res.partner"><field name="name">Jaron</field><field name="account_analytic_id" ref="89JARN"/></record>
+		<record id="89RCWT" model="res.partner"><field name="name">Rancho Community  Work Teams</field><field name="account_analytic_id" ref="89RCWT"/></record>
+		<record id="89ROCM" model="res.partner"><field name="name">ROC Ministries AU</field><field name="account_analytic_id" ref="89ROCM"/></record>
+		<record id="89STAU" model="res.partner"><field name="name">Summit Team Australia</field><field name="account_analytic_id" ref="89STAU"/></record>
+		<record id="89STGE" model="res.partner"><field name="name">Summit Team Germany</field><field name="account_analytic_id" ref="89STGE"/></record>
+		<record id="89STNO" model="res.partner"><field name="name">Summit Team - Norway</field><field name="account_analytic_id" ref="89STNO"/></record>
+		<record id="89STSI" model="res.partner"><field name="name">Summit Team Singapore</field><field name="account_analytic_id" ref="89STSI"/></record>
+		<record id="89STUK" model="res.partner"><field name="name">Summit Team UK</field><field name="account_analytic_id" ref="89STUK"/></record>
+		<record id="89STUS" model="res.partner"><field name="name">Summit Team USA</field><field name="account_analytic_id" ref="89STUS"/></record>
+		<record id="89WKTM" model="res.partner"><field name="name">Work Teams</field><field name="account_analytic_id" ref="89WKTM"/></record>
+		                        
+		                        
+		<record id="61FLCP" model="res.partner.address"><field name="name">Field Consultant Program</field><field name="partner_id" ref="61FLCP"/></record>
+		<record id="61FLDE" model="res.partner.address"><field name="name">Field Education Fund</field><field name="partner_id" ref="61FLDE"/></record>
+		<record id="61FLDH" model="res.partner.address"><field name="name">Field Housing Fund</field><field name="partner_id" ref="61FLDH"/></record>
+		<record id="61FLDR" model="res.partner.address"><field name="name">Field Revitalization Fund</field><field name="partner_id" ref="61FLDR"/></record>
+		<record id="61FLPR" model="res.partner.address"><field name="name">Field Project Fund</field><field name="partner_id" ref="61FLPR"/></record>
+		<record id="61FLRA" model="res.partner.address"><field name="name">Field Regional Admin Fund</field><field name="partner_id" ref="61FLRA"/></record>
+		<record id="61FLSU" model="res.partner.address"><field name="name">Field Flight Subsidy Fund</field><field name="partner_id" ref="61FLSU"/></record>
+		<record id="61FLTS" model="res.partner.address"><field name="name">Field LeadershipTravel Subsidy</field><field name="partner_id" ref="61FLTS"/></record>
+		<record id="61FRAD" model="res.partner.address"><field name="name">Field Radio Fund</field><field name="partner_id" ref="61FRAD"/></record>
+		<record id="61CONF" model="res.partner.address"><field name="name">Field Conference Account</field><field name="partner_id" ref="61CONF"/></record>
+		<record id="61CONT" model="res.partner.address"><field name="name">Field Contingency Fund</field><field name="partner_id" ref="61CONT"/></record>
+		<record id="61FICA" model="res.partner.address"><field name="name">Field Calamity Relief Fund</field><field name="partner_id" ref="61FICA"/></record>
+		<record id="61ACTR" model="res.partner.address"><field name="name">Z Sea Consultant Travel</field><field name="partner_id" ref="61ACTR"/></record>
+		<record id="61ECDF" model="res.partner.address"><field name="name">Deacons Fund EB (Executive Board US)</field><field name="partner_id" ref="61ECDF"/></record>
+		<record id="61DEAC" model="res.partner.address"><field name="name">Deacons Fund</field><field name="partner_id" ref="61DEAC"/></record>
+		<record id="61MKED" model="res.partner.address"><field name="name">MK Ed. Contribution</field><field name="partner_id" ref="61MKED"/></record>
+		<record id="61TPUB" model="res.partner.address"><field name="name">Tribal Publications</field><field name="partner_id" ref="61TPUB"/></record>
+		<record id="61TRLT" model="res.partner.address"><field name="name">Tribal Leadership Training</field><field name="partner_id" ref="61TRLT"/></record>
+		<record id="61NTPP" model="res.partner.address"><field name="name">New Translation Printing Proj.</field><field name="partner_id" ref="61NTPP"/></record>
+		<record id="61NTPR" model="res.partner.address"><field name="name">New Translation Project</field><field name="partner_id" ref="61NTPR"/></record>
+		<record id="61EVAN" model="res.partner.address"><field name="name">Manila Office - Evangelistic</field><field name="partner_id" ref="61EVAN"/></record>
+		<record id="61CDOL" model="res.partner.address"><field name="name">CDO Mission Home Property</field><field name="partner_id" ref="61CDOL"/></record>
+		<record id="61FAIT" model="res.partner.address"><field name="name">Faith Academy Transfer Account</field><field name="partner_id" ref="61FAIT"/></record>
+		<record id="61UNDE" model="res.partner.address"><field name="name">Undesignated Gifts</field><field name="partner_id" ref="61UNDE"/></record>
+		<record id="61WELL" model="res.partner.address"><field name="name">Well Drilling Project</field><field name="partner_id" ref="61WELL"/></record>
+		<record id="61LIPR" model="res.partner.address"><field name="name">Literacy Project Fund</field><field name="partner_id" ref="61LIPR"/></record>
+		<record id="61PGAP" model="res.partner.address"><field name="name">People Group Assessment Proj</field><field name="partner_id" ref="61PGAP"/></record>
+		<record id="61SEMR" model="res.partner.address"><field name="name">Seminars</field><field name="partner_id" ref="61SEMR"/></record>
+		<record id="61IMLC" model="res.partner.address"><field name="name">Inter Mission Fund</field><field name="partner_id" ref="61IMLC"/></record>
+		<record id="61CLAD" model="res.partner.address"><field name="name">Culture and Language Program Dev</field><field name="partner_id" ref="61CLAD"/></record>
+		<record id="61HELI" model="res.partner.address"><field name="name">Helicopter Project</field><field name="partner_id" ref="61HELI"/></record>
+		<record id="61BMEM" model="res.partner.address"><field name="name">Martin Burnham memorial tribut</field><field name="partner_id" ref="61BMEM"/></record>
+		<record id="62PRNL" model="res.partner.address"><field name="name">NL Regional Project Fund</field><field name="partner_id" ref="62PRNL"/></record>
+		<record id="62NLUZ" model="res.partner.address"><field name="name">NL Project</field><field name="partner_id" ref="62NLUZ"/></record>
+		<record id="62LMFC" model="res.partner.address"><field name="name">NL Mini Field Conference</field><field name="partner_id" ref="62LMFC"/></record>
+		<record id="62PRPP" model="res.partner.address"><field name="name">PP Regional Project Fund</field><field name="partner_id" ref="62PRPP"/></record>
+		<record id="62PMFC" model="res.partner.address"><field name="name">PP Mini Field Conference</field><field name="partner_id" ref="62PMFC"/></record>
+		<record id="62PPGH" model="res.partner.address"><field name="name">PP Guest House Duplex</field><field name="partner_id" ref="62PPGH"/></record>
+		<record id="62PPHA" model="res.partner.address"><field name="name">PP Hanger</field><field name="partner_id" ref="62PPHA"/></record>
+		<record id="62PPSH" model="res.partner.address"><field name="name">PP Staff House</field><field name="partner_id" ref="62PPSH"/></record>
+		<record id="62PPTH" model="res.partner.address"><field name="name">PP Tribal House</field><field name="partner_id" ref="62PPTH"/></record>
+		<record id="62LADA" model="res.partner.address"><field name="name">PP Lada</field><field name="partner_id" ref="62LADA"/></record>
+		<record id="62PRMY" model="res.partner.address"><field name="name">MY Regional Project Fund</field><field name="partner_id" ref="62PRMY"/></record>
+		<record id="62MMFC" model="res.partner.address"><field name="name">MY Mini Field Conference</field><field name="partner_id" ref="62MMFC"/></record>
+		<record id="62MAIR" model="res.partner.address"><field name="name">MY Airstrip</field><field name="partner_id" ref="62MAIR"/></record>
+		<record id="62MERC" model="res.partner.address"><field name="name">MY Education</field><field name="partner_id" ref="62MERC"/></record>
+		<record id="62CLAV" model="res.partner.address"><field name="name">MY Culture and Language Aq.</field><field name="partner_id" ref="62CLAV"/></record>
+		<record id="62PABI" model="res.partner.address"><field name="name">Palawan Bible Inst Staff House</field><field name="partner_id" ref="62PABI"/></record>
+		<record id="62PHNA" model="res.partner.address"><field name="name">PHNA G/H, Coron. Palawan</field><field name="partner_id" ref="62PHNA"/></record>
+		<record id="63AGTP" model="res.partner.address"><field name="name">Agta Project - Burbidge</field><field name="partner_id" ref="63AGTP"/></record>
+		<record id="63DUMG" model="res.partner.address"><field name="name">Dumagat Project - Petro</field><field name="partner_id" ref="63DUMG"/></record>
+		<record id="63GADA" model="res.partner.address"><field name="name">Ga'dang Project</field><field name="partner_id" ref="63GADA"/></record>
+		<record id="63IBAB" model="res.partner.address"><field name="name">Ibaloi Bible Project - Burnham</field><field name="partner_id" ref="63IBAB"/></record>
+		<record id="63IFUG" model="res.partner.address"><field name="name">Ifugao Project - Garet</field><field name="partner_id" ref="63IFUG"/></record>
+		<record id="63ILPR" model="res.partner.address"><field name="name">Ilongot Project - Schultz</field><field name="partner_id" ref="63ILPR"/></record>
+		<record id="63ISPR" model="res.partner.address"><field name="name">Isneg Project - Bamford</field><field name="partner_id" ref="63ISPR"/></record>
+		<record id="63IWAK" model="res.partner.address"><field name="name">I-wak Airstrip Project - HAGC</field><field name="partner_id" ref="63IWAK"/></record>
+		<record id="63KACH" model="res.partner.address"><field name="name">Kalangoya Chron Less. - Bagley</field><field name="partner_id" ref="63KACH"/></record>
+		<record id="63KALP" model="res.partner.address"><field name="name">Kalangoya Project - Ambrosius</field><field name="partner_id" ref="63KALP"/></record>
+		<record id="63KALT" model="res.partner.address"><field name="name">Kalangoya Translation - Ambros</field><field name="partner_id" ref="63KALT"/></record>
+		<record id="63AGPR" model="res.partner.address"><field name="name">Agutaynen Project - Jordan</field><field name="partner_id" ref="63AGPR"/></record>
+		<record id="63MELF" model="res.partner.address"><field name="name">Menti Literacy Fund Project</field><field name="partner_id" ref="63MELF"/></record>
+		<record id="63MENT" model="res.partner.address"><field name="name">Menti Medical Project</field><field name="partner_id" ref="63MENT"/></record>
+		<record id="63MOPR" model="res.partner.address"><field name="name">Molbog Project Fund</field><field name="partner_id" ref="63MOPR"/></record>
+		<record id="63PALM" model="res.partner.address"><field name="name">S.W. Palawano Medical Project</field><field name="partner_id" ref="63PALM"/></record>
+		<record id="63PALT" model="res.partner.address"><field name="name">S.W. Palawano Translation Project</field><field name="partner_id" ref="63PALT"/></record>
+		<record id="63TAGB" model="res.partner.address"><field name="name">Tagbanwa-Calamian Barangunan</field><field name="partner_id" ref="63TAGB"/></record>
+		<record id="63TAGC" model="res.partner.address"><field name="name">Tagbanwa Central</field><field name="partner_id" ref="63TAGC"/></record>
+		<record id="63TAGM" model="res.partner.address"><field name="name">Tagbanwa Medical South - Crain</field><field name="partner_id" ref="63TAGM"/></record>
+		<record id="63TAGP" model="res.partner.address"><field name="name">Tagbanwa Project South - Crain</field><field name="partner_id" ref="63TAGP"/></record>
+		<record id="63AGIS" model="res.partner.address"><field name="name">Agutaya Island Project</field><field name="partner_id" ref="63AGIS"/></record>
+		<record id="63BANL" model="res.partner.address"><field name="name">Banwaon Literature Project - CAAL</field><field name="partner_id" ref="63BANL"/></record>
+		<record id="63BANP" model="res.partner.address"><field name="name">Banwaon Team Project - CAAL</field><field name="partner_id" ref="63BANP"/></record>
+		<record id="63HIGA" model="res.partner.address"><field name="name">Higaonon Project - Jennings</field><field name="partner_id" ref="63HIGA"/></record>
+		<record id="63LTAP" model="res.partner.address"><field name="name">Lapok Tala Andig Project</field><field name="partner_id" ref="63LTAP"/></record>
+		<record id="63MANU" model="res.partner.address"><field name="name">Manubu Project Fund</field><field name="partner_id" ref="63MANU"/></record>
+		<record id="63TABT" model="res.partner.address"><field name="name">Tala Andig Bible Translation</field><field name="partner_id" ref="63TABT"/></record>
+		<record id="63TAOP" model="res.partner.address"><field name="name">Tala Andig Outreach Proj</field><field name="partner_id" ref="63TAOP"/></record>
+		<record id="63TMAN" model="res.partner.address"><field name="name">Tigwa Manobo Project Fund</field><field name="partner_id" ref="63TMAN"/></record>
+		<record id="63BUTA" model="res.partner.address"><field name="name">Butan Church / Thomas</field><field name="partner_id" ref="63BUTA"/></record>
+		<record id="64NPAR" model="res.partner.address"><field name="name">National Partnership Project</field><field name="partner_id" ref="64NPAR"/></record>
+		<record id="64BAMS" model="res.partner.address"><field name="name">Bataan Mission School</field><field name="partner_id" ref="64BAMS"/></record>
+		<record id="71ABBODK" model="res.partner.address"><field name="name">Abbott, David and Kristia</field><field name="partner_id" ref="71ABBODK"/></record>
+		<record id="71AMBRBJ" model="res.partner.address"><field name="name">Ambrosius, Bob and Judy</field><field name="partner_id" ref="71AMBRBJ"/></record>
+		<record id="71BAGLBJ" model="res.partner.address"><field name="name">Bagley, Bob and Jan</field><field name="partner_id" ref="71BAGLBJ"/></record>
+		<record id="71BARKGC" model="res.partner.address"><field name="name">Barkman, Garry and Cynthia</field><field name="partner_id" ref="71BARKGC"/></record>
+		<record id="71BAYFGM" model="res.partner.address"><field name="name">Bayfield, Grant and Marianne</field><field name="partner_id" ref="71BAYFGM"/></record>
+		<record id="71BAMFJH" model="res.partner.address"><field name="name">Bamford, Jonathan and Heidi</field><field name="partner_id" ref="71BAMFJH"/></record>
+		<record id="71BAKEPK" model="res.partner.address"><field name="name">Baker, Peter and Kathy</field><field name="partner_id" ref="71BAKEPK"/></record>
+		<record id="71BAIRSR" model="res.partner.address"><field name="name">Baird, Stephen and Roslyn</field><field name="partner_id" ref="71BAIRSR"/></record>
+		<record id="71BERGBV" model="res.partner.address"><field name="name">Bergen, Boris and Valentina</field><field name="partner_id" ref="71BERGBV"/></record>
+		<record id="71BIRKJS" model="res.partner.address"><field name="name">Birkin, Jason and Shirley</field><field name="partner_id" ref="71BIRKJS"/></record>
+		<record id="71BINDKB" model="res.partner.address"><field name="name">Binder, Konrad and Betty</field><field name="partner_id" ref="71BINDKB"/></record>
+		<record id="71BRUSCL" model="res.partner.address"><field name="name">Brust, Claudia</field><field name="partner_id" ref="71BRUSCL"/></record>
+		<record id="71BROODP" model="res.partner.address"><field name="name">Brooks, Danny and Philippa</field><field name="partner_id" ref="71BROODP"/></record>
+		<record id="71BRIGRL" model="res.partner.address"><field name="name">Bright, Richard and Lynn</field><field name="partner_id" ref="71BRIGRL"/></record>
+		<record id="71BURNGR" model="res.partner.address"><field name="name">Burnham, Gracia</field><field name="partner_id" ref="71BURNGR"/></record>
+		<record id="71BURBJO" model="res.partner.address"><field name="name">Burbidge, John</field><field name="partner_id" ref="71BURBJO"/></record>
+		<record id="71BURNPO" model="res.partner.address"><field name="name">Burnham, Paul and Oreta</field><field name="partner_id" ref="71BURNPO"/></record>
+		<record id="71CASTAL" model="res.partner.address"><field name="name">Castelijn, Albert and Lynne</field><field name="partner_id" ref="71CASTAL"/></record>
+		<record id="71CANACH" model="res.partner.address"><field name="name">Canapp, Christina</field><field name="partner_id" ref="71CANACH"/></record>
+		<record id="71CASTME" model="res.partner.address"><field name="name">Castagna, Matthew and Erin</field><field name="partner_id" ref="71CASTME"/></record>
+		<record id="71CASTTP" model="res.partner.address"><field name="name">Castagna, Tim and Peggy</field><field name="partner_id" ref="71CASTTP"/></record>
+		<record id="71CLARTJ" model="res.partner.address"><field name="name">Clarke, Trevor and Judy</field><field name="partner_id" ref="71CLARTJ"/></record>
+		<record id="71CRAIJB" model="res.partner.address"><field name="name">Crain, Jody and Barb</field><field name="partner_id" ref="71CRAIJB"/></record>
+		<record id="71DAVIBD" model="res.partner.address"><field name="name">Davis, Bill and Donna</field><field name="partner_id" ref="71DAVIBD"/></record>
+		<record id="71DALTJC" model="res.partner.address"><field name="name">Dalton, Josh and Candy</field><field name="partner_id" ref="71DALTJC"/></record>
+		<record id="71DAVIJM" model="res.partner.address"><field name="name">Davis, Joel and Missy</field><field name="partner_id" ref="71DAVIJM"/></record>
+		<record id="71DORNJK" model="res.partner.address"><field name="name">Dorn, James and Kathleen</field><field name="partner_id" ref="71DORNJK"/></record>
+		<record id="71EASTDV" model="res.partner.address"><field name="name">Easton, Dennis and Valerie</field><field name="partner_id" ref="71EASTDV"/></record>
+		<record id="71EPPDCH" model="res.partner.address"><field name="name">Epp, Donovan and Charla</field><field name="partner_id" ref="71EPPDCH"/></record>
+		<record id="71GAMMER" model="res.partner.address"><field name="name">Gammelsaeter, Egil and Rita</field><field name="partner_id" ref="71GAMMER"/></record>
+		<record id="71GAPPRC" model="res.partner.address"><field name="name">Gappmayr, Richard and Carmen</field><field name="partner_id" ref="71GAPPRC"/></record>
+		<record id="71GINNRL" model="res.partner.address"><field name="name">Ginn, Ross and Lea</field><field name="partner_id" ref="71GINNRL"/></record>
+		<record id="71GORILJ" model="res.partner.address"><field name="name">Goring, Larry and Jill</field><field name="partner_id" ref="71GORILJ"/></record>
+		<record id="71GRAYLS" model="res.partner.address"><field name="name">Gray, Shirley</field><field name="partner_id" ref="71GRAYLS"/></record>
+		<record id="71GROSTK" model="res.partner.address"><field name="name">Grossman, Tim and Karen</field><field name="partner_id" ref="71GROSTK"/></record>
+		<record id="71HARTBS" model="res.partner.address"><field name="name">Hart, Ben and Suzy</field><field name="partner_id" ref="71HARTBS"/></record>
+		<record id="71HARAGC" model="res.partner.address"><field name="name">Harada, Geff and Christine</field><field name="partner_id" ref="71HARAGC"/></record>
+		<record id="71HALLLI" model="res.partner.address"><field name="name">Hall, Linda</field><field name="partner_id" ref="71HALLLI"/></record>
+		<record id="71HAPPMR" model="res.partner.address"><field name="name">Happel, Manfred and Rosie</field><field name="partner_id" ref="71HAPPMR"/></record>
+		<record id="71HOWEPD" model="res.partner.address"><field name="name">Howells, Paul and Debbie</field><field name="partner_id" ref="71HOWEPD"/></record>
+		<record id="71HOLERK" model="res.partner.address"><field name="name">Holeman, Russ and Kelly</field><field name="partner_id" ref="71HOLERK"/></record>
+		<record id="71INGVNM" model="res.partner.address"><field name="name">Ingvoldstad, Nathan and Megan</field><field name="partner_id" ref="71INGVNM"/></record>
+		<record id="71JACOOJ" model="res.partner.address"><field name="name">Jacobsen, Oli and Judy</field><field name="partner_id" ref="71JACOOJ"/></record>
+		<record id="71JENNRM" model="res.partner.address"><field name="name">Jennings, Ron and Michelle</field><field name="partner_id" ref="71JENNRM"/></record>
+		<record id="71JOHNBB" model="res.partner.address"><field name="name">Johnson, Brian and Brooke</field><field name="partner_id" ref="71JOHNBB"/></record>
+		<record id="71JORDDB" model="res.partner.address"><field name="name">Jordan, Darryl and Becky</field><field name="partner_id" ref="71JORDDB"/></record>
+		<record id="71JOHADH" model="res.partner.address"><field name="name">Johanson,  David and Helen</field><field name="partner_id" ref="71JOHADH"/></record>
+		<record id="71JORDKS" model="res.partner.address"><field name="name">Jordan, Ken and Sue</field><field name="partner_id" ref="71JORDKS"/></record>
+		<record id="71JORDSG" model="res.partner.address"><field name="name">Jordan, Stephen and Ginger</field><field name="partner_id" ref="71JORDSG"/></record>
+		<record id="71JURIED" model="res.partner.address"><field name="name">Jurimas, Ed and Debbie</field><field name="partner_id" ref="71JURIED"/></record>
+		<record id="71KELLZJ" model="res.partner.address"><field name="name">Keller, Zach and Jane</field><field name="partner_id" ref="71KELLZJ"/></record>
+		<record id="71LONGEL" model="res.partner.address"><field name="name">Long, Elise</field><field name="partner_id" ref="71LONGEL"/></record>
+		<record id="71LORELN" model="res.partner.address"><field name="name">Lorenz, Lucas and Naomi</field><field name="partner_id" ref="71LORELN"/></record>
+		<record id="71MAYNDV" model="res.partner.address"><field name="name">Maynard, David and Vanessa</field><field name="partner_id" ref="71MAYNDV"/></record>
+		<record id="71MARTGV" model="res.partner.address"><field name="name">Martin, Vicky</field><field name="partner_id" ref="71MARTGV"/></record>
+		<record id="71MAJOJB" model="res.partner.address"><field name="name">Major, Jared and Bana</field><field name="partner_id" ref="71MAJOJB"/></record>
+		<record id="71MANDJO" model="res.partner.address"><field name="name">Manda, Joy</field><field name="partner_id" ref="71MANDJO"/></record>
+		<record id="71MOUGDJ" model="res.partner.address"><field name="name">Mough, Dave and Jena</field><field name="partner_id" ref="71MOUGDJ"/></record>
+		<record id="71MOFFJB" model="res.partner.address"><field name="name">Moffit, Josh and Belinda</field><field name="partner_id" ref="71MOFFJB"/></record>
+		<record id="71MORRJS" model="res.partner.address"><field name="name">Morris, Joe and Sesil</field><field name="partner_id" ref="71MORRJS"/></record>
+		<record id="71NIELAN" model="res.partner.address"><field name="name">Nielsen, Anja</field><field name="partner_id" ref="71NIELAN"/></record>
+		<record id="71NICLRL" model="res.partner.address"><field name="name">Niclasen, Rocky and Liz</field><field name="partner_id" ref="71NICLRL"/></record>
+		<record id="71OLSOGG" model="res.partner.address"><field name="name">Olson, George and Ginny</field><field name="partner_id" ref="71OLSOGG"/></record>
+		<record id="71OSTMLL" model="res.partner.address"><field name="name">Ostman, Lance and Laura</field><field name="partner_id" ref="71OSTMLL"/></record>
+		<record id="71PARKGG" model="res.partner.address"><field name="name">Park, Gene and Gina</field><field name="partner_id" ref="71PARKGG"/></record>
+		<record id="71PADERO" model="res.partner.address"><field name="name">Padernal, Robbie</field><field name="partner_id" ref="71PADERO"/></record>
+		<record id="71PETRDA" model="res.partner.address"><field name="name">Petro, Dave and Adriana</field><field name="partner_id" ref="71PETRDA"/></record>
+		<record id="71PETEED" model="res.partner.address"><field name="name">Peterson, Erik and Dana</field><field name="partner_id" ref="71PETEED"/></record>
+		<record id="71POLLRC" model="res.partner.address"><field name="name">Pollock, Ray and Chris</field><field name="partner_id" ref="71POLLRC"/></record>
+		<record id="71PRUEBB" model="res.partner.address"><field name="name">Pruett, Brian and Bailey</field><field name="partner_id" ref="71PRUEBB"/></record>
+		<record id="71RIDEKB" model="res.partner.address"><field name="name">Rider, K.C. and Barb</field><field name="partner_id" ref="71RIDEKB"/></record>
+		<record id="71LE RPV" model="res.partner.address"><field name="name">le Roux, Philip and Vina</field><field name="partner_id" ref="71LE RPV"/></record>
+		<record id="71SAWDCH" model="res.partner.address"><field name="name">Sawdon, Chris and Heather</field><field name="partner_id" ref="71SAWDCH"/></record>
+		<record id="71SCHABK" model="res.partner.address"><field name="name">Schaadt, Brian and Katherine</field><field name="partner_id" ref="71SCHABK"/></record>
+		<record id="71SCHUDS" model="res.partner.address"><field name="name">Schultze, Dell and Sue</field><field name="partner_id" ref="71SCHUDS"/></record>
+		<record id="71SCHWJJ" model="res.partner.address"><field name="name">Schwab, Jason and Jennifer</field><field name="partner_id" ref="71SCHWJJ"/></record>
+		<record id="71SCHNWE" model="res.partner.address"><field name="name">Schneidmueller, Werner</field><field name="partner_id" ref="71SCHNWE"/></record>
+		<record id="71SHARDG" model="res.partner.address"><field name="name">Sharp, Dwight and Ginny</field><field name="partner_id" ref="71SHARDG"/></record>
+		<record id="71SHARTM" model="res.partner.address"><field name="name">Sharp, Tim and Monika</field><field name="partner_id" ref="71SHARTM"/></record>
+		<record id="71SMITAM" model="res.partner.address"><field name="name">Smith, Andrew and Megan</field><field name="partner_id" ref="71SMITAM"/></record>
+		<record id="71SMITRC" model="res.partner.address"><field name="name">Smith, Robert and Cirena</field><field name="partner_id" ref="71SMITRC"/></record>
+		<record id="71SPICWC" model="res.partner.address"><field name="name">Spicer, Walt and Cheryl</field><field name="partner_id" ref="71SPICWC"/></record>
+		<record id="71STRACL" model="res.partner.address"><field name="name">Strange, Chris and Lynne</field><field name="partner_id" ref="71STRACL"/></record>
+		<record id="71STROKS" model="res.partner.address"><field name="name">Stroud-Lusk, Kevin and Stella</field><field name="partner_id" ref="71STROKS"/></record>
+		<record id="71TALBCS" model="res.partner.address"><field name="name">Talbot, Charles and Shannon</field><field name="partner_id" ref="71TALBCS"/></record>
+		<record id="71TRUDGC" model="res.partner.address"><field name="name">Trudeau, Gene and Carol</field><field name="partner_id" ref="71TRUDGC"/></record>
+		<record id="71WARDDJ" model="res.partner.address"><field name="name">Ward, David and Julie</field><field name="partner_id" ref="71WARDDJ"/></record>
+		<record id="71WAPPLM" model="res.partner.address"><field name="name">Wapp, Lloyd and Mary</field><field name="partner_id" ref="71WAPPLM"/></record>
+		<record id="71WRIGPC" model="res.partner.address"><field name="name">Wright, Paul and Cathy</field><field name="partner_id" ref="71WRIGPC"/></record>
+		<record id="71ZIMMMN" model="res.partner.address"><field name="name">Zimmermann, Manfred and Nadine</field><field name="partner_id" ref="71ZIMMMN"/></record>
+		<record id="72BAIRSR" model="res.partner.address"><field name="name">Baird, Stephen and Roslyn - Special</field><field name="partner_id" ref="72BAIRSR"/></record>
+		<record id="72BIRKJS" model="res.partner.address"><field name="name">Birkin, Jason and Shirley - Special</field><field name="partner_id" ref="72BIRKJS"/></record>
+		<record id="72BRIGRL" model="res.partner.address"><field name="name">Bright, Richard and Lynn - Special</field><field name="partner_id" ref="72BRIGRL"/></record>
+		<record id="72CASTAL" model="res.partner.address"><field name="name">Castelijn, Albert and Lynne - Special</field><field name="partner_id" ref="72CASTAL"/></record>
+		<record id="72GAMMER" model="res.partner.address"><field name="name">Gammelsaeter, Egil and Rita - Special</field><field name="partner_id" ref="72GAMMER"/></record>
+		<record id="72HARAGC" model="res.partner.address"><field name="name">Harada, Geff and Christine- Special</field><field name="partner_id" ref="72HARAGC"/></record>
+		<record id="72JORDKS" model="res.partner.address"><field name="name">Jordan, Ken - Special</field><field name="partner_id" ref="72JORDKS"/></record>
+		<record id="72JORDSG" model="res.partner.address"><field name="name">Jordan, Stephen and Ginger - Special</field><field name="partner_id" ref="72JORDSG"/></record>
+		<record id="72MAYNDV" model="res.partner.address"><field name="name">Maynard, David and Vanessa - Special</field><field name="partner_id" ref="72MAYNDV"/></record>
+		<record id="72NICLRL" model="res.partner.address"><field name="name">Niclasen, Rocky and Liz - Special</field><field name="partner_id" ref="72NICLRL"/></record>
+		<record id="72PETEED" model="res.partner.address"><field name="name">Peterson, Erik and Dana - Special</field><field name="partner_id" ref="72PETEED"/></record>
+		<record id="72RASMJC" model="res.partner.address"><field name="name">Rasmussen, JJ and Cathy - Special</field><field name="partner_id" ref="72RASMJC"/></record>
+		<record id="72SAWDCH" model="res.partner.address"><field name="name">Sawdon, Chris and Heather - Special</field><field name="partner_id" ref="72SAWDCH"/></record>
+		<record id="72SCHNWE" model="res.partner.address"><field name="name">Schneidmueller, Werner - Special</field><field name="partner_id" ref="72SCHNWE"/></record>
+		<record id="72ROBERC" model="res.partner.address"><field name="name">Smith, Robert and Cirena - Special</field><field name="partner_id" ref="72ROBERC"/></record>
+		<record id="72STROKS" model="res.partner.address"><field name="name">Stroud-Lusk, Kevin - Special</field><field name="partner_id" ref="72STROKS"/></record>
+		<record id="72TALBCS" model="res.partner.address"><field name="name">Talbot, Charles and Shannon - Special</field><field name="partner_id" ref="72TALBCS"/></record>
+		<record id="72ZIMMMN" model="res.partner.address"><field name="name">Zimmermann, Manfred - Special</field><field name="partner_id" ref="72ZIMMMN"/></record>
+		<record id="73FRENDL" model="res.partner.address"><field name="name">French, David and Lori</field><field name="partner_id" ref="73FRENDL"/></record>
+		<record id="74BERGAN" model="res.partner.address"><field name="name">Berg, Andreas</field><field name="partner_id" ref="74BERGAN"/></record>
+		<record id="74FRIEAL" model="res.partner.address"><field name="name">Friesen, Alexander</field><field name="partner_id" ref="74FRIEAL"/></record>
+		<record id="74HAINAN" model="res.partner.address"><field name="name">Hain, Achim and Natascha</field><field name="partner_id" ref="74HAINAN"/></record>
+		<record id="74HALLBB" model="res.partner.address"><field name="name">Hall, Bob and Bronwyn</field><field name="partner_id" ref="74HALLBB"/></record>
+		<record id="74SCHUNA" model="res.partner.address"><field name="name">Schunk, Naemi</field><field name="partner_id" ref="74SCHUNA"/></record>
+		<record id="74STAVGL" model="res.partner.address"><field name="name">Stava,Glenn</field><field name="partner_id" ref="74STAVGL"/></record>
+		<record id="74VANDCA" model="res.partner.address"><field name="name">van Dalen, Carin</field><field name="partner_id" ref="74VANDCA"/></record>
+		<record id="74ZARAAN" model="res.partner.address"><field name="name">Zara, Anna</field><field name="partner_id" ref="74ZARAAN"/></record>
+		<record id="74NICHJU" model="res.partner.address"><field name="name">Nicholson, Julie</field><field name="partner_id" ref="74NICHJU"/></record>
+		<record id="74NICLRK" model="res.partner.address"><field name="name">Niclasen, Ryan and Kara</field><field name="partner_id" ref="74NICLRK"/></record>
+		<record id="74RIVEPM" model="res.partner.address"><field name="name">Rivette, Patrick and Miriam</field><field name="partner_id" ref="74RIVEPM"/></record>
+		<record id="74FOSTAN" model="res.partner.address"><field name="name">Foster, Andrew</field><field name="partner_id" ref="74FOSTAN"/></record>
+		<record id="74TARTBL" model="res.partner.address"><field name="name">Tart, Ben and Leonie</field><field name="partner_id" ref="74TARTBL"/></record>
+		<record id="74TYRIRO" model="res.partner.address"><field name="name">Tyril, Rosa</field><field name="partner_id" ref="74TYRIRO"/></record>
+		<record id="81GARCCY" model="res.partner.address"><field name="name">Garcia, Cynthia - Medical</field><field name="partner_id" ref="81GARCCY"/></record>
+		<record id="82NELSSC" model="res.partner.address"><field name="name">Nelsen, Scott and Cindy</field><field name="partner_id" ref="82NELSSC"/></record>
+		<record id="82DANIDK" model="res.partner.address"><field name="name">Danielson, Dana and Kelly</field><field name="partner_id" ref="82DANIDK"/></record>
+		<record id="82DEALST" model="res.partner.address"><field name="name">Deal, Steve</field><field name="partner_id" ref="82DEALST"/></record>
+		<record id="82DEWICH" model="res.partner.address"><field name="name">Dewing, Charles</field><field name="partner_id" ref="82DEWICH"/></record>
+		<record id="82HORTDM" model="res.partner.address"><field name="name">Horton, Dan and Maryanne</field><field name="partner_id" ref="82HORTDM"/></record>
+		<record id="82HOLMLA" model="res.partner.address"><field name="name">Holmes, Larry</field><field name="partner_id" ref="82HOLMLA"/></record>
+		<record id="82LEIGNA" model="res.partner.address"><field name="name">Leigh, Nathan and Armida</field><field name="partner_id" ref="82LEIGNA"/></record>
+		<record id="82VELDSS" model="res.partner.address"><field name="name">Veldstra, Steve and Stacy</field><field name="partner_id" ref="82VELDSS"/></record>
+		<record id="82LUYKHB" model="res.partner.address"><field name="name">Luyk, Huub and Becky</field><field name="partner_id" ref="82LUYKHB"/></record>
+		<record id="82ASTIEL" model="res.partner.address"><field name="name">Astillero, Elmer and Lorri</field><field name="partner_id" ref="82ASTIEL"/></record>
+		<record id="82OKEEDJ" model="res.partner.address"><field name="name">Okeefe, Dennis and Jeanie</field><field name="partner_id" ref="82OKEEDJ"/></record>
+		<record id="82RASMJC" model="res.partner.address"><field name="name">Rasmussen, JJ and Cathy</field><field name="partner_id" ref="82RASMJC"/></record>
+		<record id="82STAUBN" model="res.partner.address"><field name="name">Stauble, Bob and Nancy</field><field name="partner_id" ref="82STAUBN"/></record>
+		<record id="82VODAAL" model="res.partner.address"><field name="name">Voda, Alina</field><field name="partner_id" ref="82VODAAL"/></record>
+		<record id="83Guest1" model="res.partner.address"><field name="name">Guest 1</field><field name="partner_id" ref="83Guest1"/></record>
+		<record id="83Guest2" model="res.partner.address"><field name="name">Guest 2</field><field name="partner_id" ref="83Guest2"/></record>
+		<record id="83Guest3" model="res.partner.address"><field name="name">Guest 3</field><field name="partner_id" ref="83Guest3"/></record>
+		<record id="83Guest4" model="res.partner.address"><field name="name">Guest 4</field><field name="partner_id" ref="83Guest4"/></record>
+		<record id="83Guest5" model="res.partner.address"><field name="name">Guest 5</field><field name="partner_id" ref="83Guest5"/></record>
+		<record id="83Guest6" model="res.partner.address"><field name="name">Guest 6</field><field name="partner_id" ref="83Guest6"/></record>
+		<record id="83Guest7" model="res.partner.address"><field name="name">Guest 7</field><field name="partner_id" ref="83Guest7"/></record>
+		<record id="83Guest8" model="res.partner.address"><field name="name">Guest 8</field><field name="partner_id" ref="83Guest8"/></record>
+		<record id="83Guest9" model="res.partner.address"><field name="name">Guest 9</field><field name="partner_id" ref="83Guest9"/></record>
+		<record id="88CARM" model="res.partner.address"><field name="name">CARM-Carl Stevens</field><field name="partner_id" ref="88CARM"/></record>
+		<record id="88PHNA" model="res.partner.address"><field name="name">Philippine Nationals</field><field name="partner_id" ref="88PHNA"/></record>
+		<record id="88SILM" model="res.partner.address"><field name="name">S.I.L. Flight Account</field><field name="partner_id" ref="88SILM"/></record>
+		<record id="89JARN" model="res.partner.address"><field name="name">Jaron</field><field name="partner_id" ref="89JARN"/></record>
+		<record id="89RCWT" model="res.partner.address"><field name="name">Rancho Community  Work Teams</field><field name="partner_id" ref="89RCWT"/></record>
+		<record id="89ROCM" model="res.partner.address"><field name="name">ROC Ministries AU</field><field name="partner_id" ref="89ROCM"/></record>
+		<record id="89STAU" model="res.partner.address"><field name="name">Summit Team Australia</field><field name="partner_id" ref="89STAU"/></record>
+		<record id="89STGE" model="res.partner.address"><field name="name">Summit Team Germany</field><field name="partner_id" ref="89STGE"/></record>
+		<record id="89STNO" model="res.partner.address"><field name="name">Summit Team - Norway</field><field name="partner_id" ref="89STNO"/></record>
+		<record id="89STSI" model="res.partner.address"><field name="name">Summit Team Singapore</field><field name="partner_id" ref="89STSI"/></record>
+		<record id="89STUK" model="res.partner.address"><field name="name">Summit Team UK</field><field name="partner_id" ref="89STUK"/></record>
+		<record id="89STUS" model="res.partner.address"><field name="name">Summit Team USA</field><field name="partner_id" ref="89STUS"/></record>
+		<record id="89WKTM" model="res.partner.address"><field name="name">Work Teams</field><field name="partner_id" ref="89WKTM"/></record>
+
+    </data>
+</openerp>
+        

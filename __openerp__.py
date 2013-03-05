@@ -34,7 +34,9 @@
                    "wizard/user_set_location_view.xml",
                    "wizard/soa_sender.xml",
                    "wizard/dbf_reader.xml"
-                   ,"forex_view.xml","account_pettycash/account_pettycash_view.xml","soaview.xml","account_pettycash/pc_sequence.xml",'analytic_accounts.xml',"account_pettycash/pcr_view.xml","account_pettycash/crs_view.xml"],
+                   ,"forex_view.xml","forex_data.xml","account_pettycash/account_pettycash_view.xml"
+                   ,"account_pettycash/pc_sequence.xml",'analytic_accounts.xml',"account_pettycash/pcr_view.xml"
+                   ,"account_pettycash/crs_view.xml","res_partner.xml"],
     'demo_xml': [
     ],
     'test': [

@@ -35,7 +35,7 @@ class forex_transaction(osv.osv):
             'bank_account2_id':fields.many2one('account.account', "Bank Account 2"),
             'amount_currency1':fields.float('Amount'),
             'amount_currency2':fields.float('Amount'),
-            'rate':fields.float('Rate',digits_compute=dp.get_precision('Account'),readonly=True, help="Rate with respect to the company currency. 1 USD= ###(Currency)"),
+            'rate':fields.float('Rate',digits=(16,6),readonly=True, help="Rate with respect to the company currency. 1 USD= ###(Currency)"),
             'journal_id':fields.many2one('account.journal', 'Journal', required=True, readonly=True, states={'draft':[('readonly',False)]}),
             'period_id':fields.many2one('account.period','Period'),
             'transact_date':fields.date('Transaction Date'),
