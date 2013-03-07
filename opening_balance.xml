@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        
+        <!-- Invoice Slip Uploader -->
+		<record model="ir.ui.view" id="view_ob_import_tree">
+            <field name="name">view.ob.import.tree</field>
+            <field name="model">ob.import</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Imported Opening Balance Entries">
+                    <field name="name"/>
+                    <field name="journal_id"/>
+                    <field name="ref"/>
+                    <field name="account_id"/>
+                    <field name="analytic_id"/>
+                    <field name="debit"/>
+                    <field name="credit"/>
+                    <field name="currency_id"/>
+                    <field name="partner_id"/>
+                    <field name="date"/>
+                    <field name="period_id"/>
+                    <field name="imported"/>
+                </tree>
+            </field>
+        </record>
+		
+		<record model="ir.ui.view" id="view_ob_import_form">
+            <field name="name">view.ob.import.form</field>
+            <field name="model">ob.import</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Opening Balance Entry">
+                    <field name="name"/>
+                    <field name="journal_id"/>
+                    <field name="ref"/>
+                    <field name="account_id"/>
+                    <field name="analytic_id"/>
+                    <field name="currency_id"/>
+                    <field name="debit"/>
+                    <field name="credit"/>
+                    <field name="partner_id"/>
+                    <field name="date"/>
+                    <field name="period_id"/>
+                    <field name="imported" readonly="1"/>
+                </form>
+            </field>
+        </record>      
+        <record model="ir.actions.act_window" id="action_ob_import_form">
+        	<field name="name">Import Opening Balance Entries</field>
+	        <field name="res_model">ob.import</field>
+		    <field name="view_type">form</field>
+        </record>
+
+        
+        <menuitem id="menu_ob_import" 
+            action="action_ob_import_form" 
+            parent="account.menu_finance_periodical_processing"
+            sequence="100" 
+            groups="base.group_user"/>  
+            
+            
+            
+            
+        <record id="view_ob_import_wiz" model="ir.ui.view">
+            <field name="name">view.ob.import.wiz.form</field>
+            <field name="model">ob.import.wiz</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Generate Entries">
+                    <separator string="Generate Entries" colspan="4"/>
+                    <group colspan="4" col="2">
+                        <button  icon="terp-gtk-go-back-rtl" string="Go" name="import_wiz" type="object"/>
+                    </group>
+               </form>
+            </field>
+        </record>
+
+        <record id="action_ob_import_wiz" model="ir.actions.act_window">
+            <field name="name">Generate Entries</field>
+            <field name="res_model">ob.import.wiz</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_ob_import_wiz"/>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem
+            name="Generate Entries"
+            parent="account.menu_finance_periodical_processing"
+            action="action_ob_import_wiz"
+            id="menu_ob_import_wiz"
+           />
+         
+       </data>
+</openerp>
