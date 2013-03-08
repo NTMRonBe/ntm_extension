@@ -52,23 +52,13 @@
 		    <field name="view_type">form</field>
         </record>
 
-        
-        <menuitem id="menu_ob_import" 
-            action="action_ob_import_form" 
-            parent="account.menu_finance_periodical_processing"
-            sequence="100" 
-            groups="base.group_user"/>  
-            
-            
-            
-            
         <record id="view_ob_import_wiz" model="ir.ui.view">
             <field name="name">view.ob.import.wiz.form</field>
             <field name="model">ob.import.wiz</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Generate Entries">
-                    <separator string="Generate Entries" colspan="4"/>
+                    <separator string="Generate Entries from imported opening balance schedule" colspan="4"/>
                     <group colspan="4" col="2">
                         <button  icon="terp-gtk-go-back-rtl" string="Go" name="import_wiz" type="object"/>
                     </group>
@@ -84,10 +74,19 @@
             <field name="view_id" ref="view_ob_import_wiz"/>
             <field name="target">new</field>
         </record>
-
+        <menuitem
+            name="Opening Balance"
+            parent="account.menu_finance_periodical_processing"
+            id="menu_opening_balance"
+           />
+        <menuitem id="menu_ob_import" 
+            action="action_ob_import_form" 
+            parent="menu_opening_balance"
+            sequence="100" 
+            groups="base.group_user"/>  
         <menuitem
             name="Generate Entries"
-            parent="account.menu_finance_periodical_processing"
+            parent="menu_opening_balance"
             action="action_ob_import_wiz"
             id="menu_ob_import_wiz"
            />
