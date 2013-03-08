@@ -16,7 +16,7 @@ class ob_import(osv.osv):
         'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
         'debit':fields.float('Debit'),
         'credit':fields.float('Credit'),
-        'currency_id':fields.many2one('res.currency','Currency',help="Currency of the amount"),
+        'currency_id':fields.related('account_id','currency_id',type='many2one',relation='res.currency',store=True, string='Posting Currency'),
         'date':fields.date('Effective Date'),
         'partner_id':fields.many2one('res.partner','Partner'),
         'imported':fields.boolean('Imported'),
@@ -25,16 +25,25 @@ ob_import()
 
 class ob_import_wiz(osv.osv_memory):
     _name = 'ob.import.wiz'
-    
+        
     def import_wiz(self, cr, uid, ids, context=None):
         aml_pool = self.pool.get('account.move.line')
         am_pool = self.pool.get('account.move')
         obi = self.pool.get('ob.import')
         for obi_lines in obi.search(cr, uid, [('imported','=',False)]):
-            obi_fields = ['name','journal_id','ref','period_id','account_id','analytic_id',
+            obi_fields = ['name','journal_id','ref','period_id','currency_id','account_id','analytic_id',
                           'debit','credit','currency_id','date','partner_id']
             obi_read = obi.read(cr, uid, obi_lines,obi_fields)
             am_check = am_pool.search(cr, uid,[('ref','=',obi_read['ref'])])
+            partner_id= False
+            analytic_id= False
+            curr_id = False
+            if obi_read['partner_id']:
+                 partner_id=obi_read['partner_id'][0]
+            if obi_read['analytic_id']:
+                analytic_id=obi_read['analytic_id'][0]
+            if obi_read['currency_id']:
+                curr_id=obi_read['currency_id'][0]
             if not am_check:
                 move = {
                     'ref':obi_read['ref'],
@@ -44,14 +53,16 @@ class ob_import_wiz(osv.osv_memory):
                     'state':'draft',
                 }
                 move_id = am_pool.create(cr, uid, move)
+                
                 move_line = {
                     'name':obi_read['name'],
                     'ref':obi_read['ref'],
-                    #'partner_id':obi_read['partner_id'][0],
+                    'partner_id':partner_id,
                     'journal_id':obi_read['journal_id'][0],
                     'period_id':obi_read['period_id'][0],
                     'account_id':obi_read['account_id'][0],
-                    #'analytic_account_id':obi_read['analytic_id'][0],
+                    'currency_id':curr_id,
+                    'analytic_account_id':analytic_id,
                     'debit':obi_read['debit'],
                     'credit':obi_read['credit'],
                     'date':obi_read['date'],
@@ -64,16 +75,18 @@ class ob_import_wiz(osv.osv_memory):
                     move_line = {
                         'name':obi_read['name'],
                         'ref':obi_read['ref'],
-                        #'partner_id':obi_read['partner_id'][0],
+                        'partner_id':partner_id,
+                        'currency_id':curr_id,
                         'journal_id':obi_read['journal_id'][0],
                         'period_id':obi_read['period_id'][0],
                         'account_id':obi_read['account_id'][0],
-                        #'analytic_account_id':obi_read['analytic_id'][0],
+                        'analytic_account_id':analytic_id,
                         'debit':obi_read['debit'],
                         'credit':obi_read['credit'],
                         'date':obi_read['date'],
                         'move_id':am_read['id'],
                     }
                     aml_pool.create(cr, uid, move_line)
+            obi.write(cr, uid,obi_lines,{'imported':True})
         return {'type': 'ir.actions.act_window_close'}
 ob_import_wiz()
