@@ -36,7 +36,7 @@
                    "wizard/dbf_reader.xml"
                    ,"forex_view.xml","forex_data.xml","account_pettycash/account_pettycash_view.xml"
                    ,"account_pettycash/pc_sequence.xml","account_pettycash/pcr_view.xml"
-                   ,"account_pettycash/crs_view.xml","res_partner.xml","opening_balance.xml"],
+                   ,"account_pettycash/crs_view.xml","opening_balance.xml"],
     'demo_xml': [
     ],
     'test': [
