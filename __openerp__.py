@@ -29,13 +29,13 @@
     'website': '',
     'init_xml': [],
     "depends" : ["account","base","analytic"],
-    'update_xml': ["data.xml"
+    'update_xml': ["data.xml","extensions.xml"
                    ,"users_view.xml","account_revaluation_view.xml",
                    "wizard/user_set_location_view.xml",
                    "wizard/soa_sender.xml",
                    "wizard/dbf_reader.xml"
                    ,"forex_view.xml","forex_data.xml","account_pettycash/account_pettycash_view.xml"
-                   ,"account_pettycash/pc_sequence.xml",'analytic_accounts.xml',"account_pettycash/pcr_view.xml"
+                   ,"account_pettycash/pc_sequence.xml","account_pettycash/pcr_view.xml"
                    ,"account_pettycash/crs_view.xml","res_partner.xml","opening_balance.xml"],
     'demo_xml': [
     ],

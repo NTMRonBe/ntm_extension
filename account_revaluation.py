@@ -81,7 +81,7 @@ class account_revaluation(osv.osv):
             period_id = reval['period_id'][0]
             per_id = period_pool.read(cr, uid, period_id,['date_start','date_stop'])
             date_start = per_id['date_start']
-            acc_search = acc_pool.search(cr, uid, [('pr','=','True')])
+            acc_search = acc_pool.search(cr, uid, [('is_pr','=','True')])
             for acc_id in acc_search:
                 aml_search = aml_pool.search(cr, uid,[('account_id','=',acc_id),('date','<',date_start)])
                 debit = 0.00
@@ -120,7 +120,7 @@ class account_revaluation(osv.osv):
             for arc_id in arc_search:
                 arc_reader = arc_pool.read(cr, uid, arc_id, ['currency_id'])
                 acc_id = arc_reader['currency_id'][0]
-                aml_search = aml_pool.search(cr, uid,[('account_id.pr','=',False),('account_id.type','=','liquidity'),('date','<',date_start),('currency_id','=',acc_id)])
+                aml_search = aml_pool.search(cr, uid,[('account_id.is_pr','=',False),('account_id.type','=','liquidity'),('date','<',date_start),('currency_id','=',acc_id)])
                 balance = 0.00
                 for aml_id in aml_search:
                     aml_reader = aml_pool.read(cr, uid, aml_id,['amount_currency'])

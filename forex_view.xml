@@ -82,7 +82,7 @@
         </record>
         
         <record model="ir.actions.act_window" id="action_forex_transaction_form">
-        	<field name="name">Forex Transaction</field>
+        	<field name="name">Exchanges</field>
 	        <field name="res_model">forex.transaction</field>
 		    <field name="view_type">form</field>
         </record>

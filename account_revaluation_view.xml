@@ -102,6 +102,7 @@
 	                                            name="get_details"
 	                                            icon="gtk-execute"
 	                                            attrs="{'invisible': [('state','!=','draft')]}"
+	                                            confirm="Are you sure??"
 	                                            />
                         <button string="Adjust per Post Rate"
                                                 type="object"
