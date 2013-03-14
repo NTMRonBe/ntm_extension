@@ -1,49 +1,37 @@
 <?xml version="1.0"?>
 <openerp>
     <data>        
-    <!--Petty Cash Replenishment-->
-       <report id="report_pettycash_replenishment_print"
-            string="Print Replenishment"
-            model="pettycash.replenishment"
-            name="pettycash.replenishment"
-            rml="ntm_extension/report/account_print_replenishment.rml"
-            auto="False"
-            header = "False"
-            menu="True"/>
-            
-        <record id="pcr_form" model="ir.ui.view">
-            <field name="name">pcr.form</field>
-            <field name="model">pettycash.replenishment</field>
+    <!--Petty Cash Liquidation-->
+        <record id="pcl_form" model="ir.ui.view">
+            <field name="name">pcl.form</field>
+            <field name="model">account.pettycash.liquidation</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Replenishment">
+                <form string="Liquidation">
                     <group colspan="4" col="4">
                         <field name="name"/>
                         <field name="journal_id" widget="selection" domain="[('type','=','bank')]"/>
                         <field name="date" attrs="{'readonly': [('state','!=','draft')]}"/>
                         <field name="period_id" attrs="{'readonly': [('state','!=','draft')]}"/>
-                        <field name="pettycash_id" attrs="{'readonly': [('state','!=','draft')]}"/>
-                        <field name="total_amount" readonly="1"/>
+                        <field name="pc_id" attrs="{'readonly': [('state','!=','draft')]}" domain="[('state','=','active')]"/>
+                        <field name="amount" readonly="1"/>
                     </group>
                     <notebook colspan="4">
                         <page string="Denominations Lists">
 		                    <group colspan="4" col="2">
-		                        <field name="denom_breakdown" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}"/>
+		                        <field name="denom_breakdown" height="200" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}"/>
 		                    </group>
                     	</page>
-                    	<page string="Journal Items">
-                    	    <group colspan="4" col="2">
-	                    	    <group colspan="4" col="2">
-	                    	    	<field name="move_id"  attrs="{'readonly': [('state','!=','confirmed')]}"/>
-	                    	    </group>
-		                    	<group colspan="4" col="2">
-	                    	    	<separator string="Journal Items"/>
-			                    	    <group colspan="4" col="2">
-			                    	    	<field name="move_ids" nolabel="1"/>
-			                    	    </group>
-	                    	    </group>
-                    	    </group>
-                    	</page>
+                    	<page string="Liquidation Lines">
+                    	   <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" height="300">
+                                <tree string="Liquidation Lines" editable="bottom">
+                                <field name="name"/>
+                                <field name="partner_id"/>
+                                <field name="reference"/>
+                                <field name="amount"/>
+                                </tree>
+                           </field>
+                        </page>
                     </notebook>
                     <group col="10" colspan="4">
                         <field name="state"/>
@@ -61,7 +49,7 @@
                                             />
                                     <button string="Complete"
                                             type="object"
-                                            name="complete"
+                                            name="complete_pcr"
                                             icon="gtk-execute"
                                             attrs="{'invisible': [('state','!=','confirmed')]}"
                                             />
@@ -69,43 +57,43 @@
                 </form>
             </field>
         </record>        
-        <record model="ir.ui.view" id="pcr_tree">
-            <field name="name">pcr.tree</field>
-            <field name="model">pettycash.replenishment</field>
+        <record model="ir.ui.view" id="pcl_tree">
+            <field name="name">pcl.tree</field>
+            <field name="model">account.pettycash.liquidation</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Replenishments">
 					    <field name="name"/>
                         <field name="date"/>
                         <field name="journal_id"/>
-                        <field name="pettycash_id"/>
+                        <field name="pc_id"/>
                 </tree>
             </field>
         </record>
-        <record id="pcr_filter" model="ir.ui.view">
-		    <field name="name">pcr.filter</field>
-            <field name="model">pettycash.replenishment</field>
+        <record id="pcl_filter" model="ir.ui.view">
+		    <field name="name">pcl.filter</field>
+            <field name="model">account.pettycash.liquidation</field>
             <field name="type">search</field>
             <field name="arch" type="xml">
-                <search string="Replenishment">
+                <search string="Liquidation">
 					    <field name="name"/>
                         <field name="date"/>
                         <field name="journal_id"/>
-                        <field name="pettycash_id"/>
+                        <field name="pc_id"/>
                 </search>
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_pcr_form">
-        	<field name="name">Replenishment</field>
-	        <field name="res_model">pettycash.replenishment</field>
+        <record model="ir.actions.act_window" id="action_pcl_form">
+        	<field name="name">Liquidation</field>
+	        <field name="res_model">account.pettycash.liquidation</field>
 		    <field name="view_type">form</field>
         </record>
         
-        <menuitem id="menu_pcr" 
-            action="action_pcr_form" 
+        <menuitem id="menu_pcl" 
+            action="action_pcl_form" 
             parent="main_pettycash"
-            sequence="50" 
+            sequence="60" 
             groups="base.group_user"/>  
 
     </data>

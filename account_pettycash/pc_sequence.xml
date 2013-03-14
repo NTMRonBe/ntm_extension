@@ -26,17 +26,6 @@
             <field name="padding">4</field>
         </record>
         
-        <record id="seq_type_pc_replenishment_sequence" model="ir.sequence.type">
-            <field name="name">Petty Cash Replenishment</field>
-            <field name="code">pettycash.replenishment</field>
-        </record>
-
-        <record id="seq_pc_replenishment_sequence" model="ir.sequence">
-            <field name="name">Petty Cash Replenishment</field>
-            <field name="code">pettycash.replenishment</field>
-            <field name="prefix">PCR/%(y)s/</field>
-            <field name="padding">4</field>
-        </record>
         <record id="seq_type_pc_crs_sequence" model="ir.sequence.type">
             <field name="name">Cash Request Slip</field>
             <field name="code">cash.request.slip</field>
@@ -46,6 +35,17 @@
             <field name="name">Cash Request Slip</field>
             <field name="code">cash.request.slip</field>
             <field name="prefix">CRS/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        <record id="seq_type_pcr_sequence" model="ir.sequence.type">
+            <field name="name">Petty Cash Replenish</field>
+            <field name="code">pettycash.replenishment</field>
+        </record>
+
+        <record id="seq_pcr_sequence" model="ir.sequence">
+            <field name="name">Petty Cash Replenish</field>
+            <field name="code">pettycash.replenishment</field>
+            <field name="prefix">PCR/%(y)s/</field>
             <field name="padding">3</field>
         </record>
 

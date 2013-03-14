@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        
+		<record model="ir.ui.view" id="view_fund_transfer_tree">
+            <field name="name">fund.transfer.tree</field>
+            <field name="model">fund_transfer</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Fund Transfer">
+                    <field name="name"/>
+                    <field name="journal_id"/>
+                    <field name="period_id"/>
+                    <field name="type" invisible="1"/>
+                    <field name="src_account" attrs="{'invisible':[('type','=','a2a')]}"/>
+                    <field name="dest_account" attrs="{'invisible':[('type','=','a2a')]}"/>
+                    <field name="src_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
+                    <field name="dest_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
+                </tree>
+            </field>
+        </record>
+		
+		<record id="view_fund_transfer_filter" model="ir.ui.view">
+            <field name="name">fund.transfer.filter</field>
+            <field name="model">fund.transfer</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Fund Transfer">
+                    <field name="name"/>
+                    <field name="journal_id"/>
+                    <field name="period_id"/>
+                    <field name="type" invisible="1"/>
+                    <field name="src_account" attrs="{'invisible':[('type','=','a2a')]}"/>
+                    <field name="dest_account" attrs="{'invisible':[('type','=','a2a')]}"/>
+                    <field name="src_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
+                    <field name="dest_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
+			    </search>
+            </field>
+        </record>      
+		
+		<record id="view_fund_transfer_form" model="ir.ui.view">
+            <field name="name">fund.transfer.form</field>
+            <field name="model">fund.transfer</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Fund Transfer">
+                    <field name="name"/>
+                    <field name="journal_id"/>
+                    <field name="period_id"/>
+                    <field name="type" invisible="1"/>
+                    <field name="src_account" attrs="{'invisible':[('type','=','a2a')]}"/>
+                    <field name="dest_account" attrs="{'invisible':[('type','=','a2a')]}"/>
+                    <field name="src_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
+                    <field name="dest_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
+                </form>
+            </field>
+        </record>     
+                
+        <record id="action_fund_transfer_b2b_tree" model="ir.actions.act_window">
+            <field name="name">Bank to Bank</field>
+            <field name="res_model">fund.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="view_id" ref="view_fund_transfer_tree"/>
+            <field name="context">{'type':'b2b'}</field>
+            <field name="domain">[('type','=','b2b')]</field>
+            <field name="search_view_id" ref="view_fund_transfer_filter"/>
+        </record>
+        <record id="action_fund_transfer_a2a_tree" model="ir.actions.act_window">
+            <field name="name">Analytic to Analytic</field>
+            <field name="res_model">fund.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="view_id" ref="view_fund_transfer_tree"/>
+            <field name="context">{'type':'a2a'}</field>
+            <field name="domain">[('type','=','a2a')]</field>
+            <field name="search_view_id" ref="view_fund_transfer_filter"/>
+        </record>
+
+       </data>
+</openerp>

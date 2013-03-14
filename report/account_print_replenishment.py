@@ -18,30 +18,20 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    "name" : "NTM Extensions",
-    "version" : "1.0",
-    "author" : "Roxly Rivero",
-    "category": 'Generic Modules/Accounting',
-    "description": """
-    NTM Extensions
-    """,
-    'website': '',
-    'init_xml': [],
-    "depends" : ["account","base","analytic"],
-    'update_xml': ["data.xml","ntm_extensions_view.xml"
-                   ,"users_view.xml","account_revaluation_view.xml",
-                   "wizard/user_set_location_view.xml",
-                   "wizard/soa_sender.xml",
-                   "wizard/dbf_reader.xml"
-                   ,"forex_view.xml","forex_data.xml","account_pettycash/account_pettycash_view.xml"
-                   ,"account_pettycash/pc_sequence.xml","account_pettycash/pcr_view.xml","account_pettycash/pcl_view.xml","fund_transfer_view.xml"
-                   ,"account_pettycash/crs_view.xml","opening_balance.xml","ntm_menus.xml"],
-    'demo_xml': [
-    ],
-    'test': [
-            ],
-    'installable': True,
-    'active': False,
-}
+
+import time
+from report import report_sxw
+
+class pettycash_replenishment(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context):
+        super(pettycash_replenishment, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+        })
+report_sxw.report_sxw(
+    'report.pettycash.replenishment',
+    'pettycash.replenishment',
+    'addons/ntm_extension/report/account_print_replenishment.rml',
+    parser=pettycash_replenishment
+)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

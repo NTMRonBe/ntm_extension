@@ -109,12 +109,27 @@
             <field name="priority">2</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
-                <field name="category_id" position="after">
-                    <separator colspan="4" string="Partner Codes"/>
-                    <field colspan="4" name="partner_dict" nolabel="1"/>
+                <separator string="Categories" position="replace">
+                </separator>
+                <field name="category_id" position="replace">
+                    <group colspan="4" col="6">
+                        <group colspan="4" col="2">
+                            <separator string="Entity Categories" colspan="4"/>
+                            <group colspan="4" col="2">
+                                <field name="category_id" nolabel="1"/>
+                            </group>                        
+                        </group>
+                        <group colspan="2" col="2">
+                            <separator string="Entity Codes"/>
+                            <group colspan="2" col="2">
+                                <field name="partner_dict" string="Entity Codes" nolabel="1"/>
+                            </group>                        
+                        </group>
+                    </group>
                 </field>
             </field>
         </record>
+        
         <record id="view_ntm_partner_analytic_form" model="ir.ui.view">
             <field name="name">ntm.partner.dict.form.inherit</field>
             <field name="model">res.partner</field>
@@ -160,5 +175,6 @@
                 </form>
             </field>
         </record>  
+        
        </data>
 </openerp>
