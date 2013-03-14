@@ -3,7 +3,7 @@
     <data>        
         <menuitem id="main_pettycash"
             name="Petty Cash"
-            sequence="70"  web_icon="images/safe.png"
+            sequence="30"  web_icon="images/safe.png"
             web_icon_hover="images/safe_hover.png"/>
         <!--Denominations-->
         <record id="denominations_form" model="ir.ui.view">

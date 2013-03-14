@@ -29,10 +29,10 @@ class forex_transaction(osv.osv):
     _name = "forex.transaction"
     _description = "Forex Transaction"
     _columns = {
-            'currency_one':fields.many2one('res.currency', 'Currency 1'),
-            'currency_two':fields.many2one('res.currency','Currency 2'),
-            'bank_account1_id':fields.many2one('account.account', "Bank Account 1"),
-            'bank_account2_id':fields.many2one('account.account', "Bank Account 2"),
+            'currency_one':fields.many2one('res.currency', 'Currency From'),
+            'currency_two':fields.many2one('res.currency','Currency Two'),
+            'bank_account1_id':fields.many2one('account.account', "From Bank"),
+            'bank_account2_id':fields.many2one('account.account', "To Bank"),
             'amount_currency1':fields.float('Amount'),
             'amount_currency2':fields.float('Amount'),
             'rate':fields.float('Rate',digits=(16,6),readonly=True, help="Rate with respect to the company currency. 1 USD= ###(Currency)"),

@@ -19,6 +19,14 @@
             <field name="sequence_id" ref="account.sequence_journal"/>
             <field name="user_id" ref="base.user_root"/>
         </record>
+        <record forcecreate="1" id="ob_journal" model="account.journal">
+            <field name="name">Fund Transfer</field>
+            <field name="code">BFT</field>
+            <field name="type">general</field>
+            <field name="view_id" ref="account.account_journal_view"/>
+            <field name="sequence_id" ref="account.sequence_journal"/>
+            <field name="user_id" ref="base.user_root"/>
+        </record>
         
         <record forcecreate="1" id="pc1000" model="denominations">
             <field name="name">1000</field>

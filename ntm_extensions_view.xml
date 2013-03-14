@@ -1,6 +1,46 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+            <record id="account.view_account_analytic_account_tree" model="ir.ui.view">
+            <field name="name">account.analytic.account.tree</field>
+            <field name="model">account.analytic.account</field>
+            <field name="type">tree</field>
+            <field name="field_parent">child_complete_ids</field>
+            <field name="arch" type="xml">
+                <tree colors="red:(date&lt;current_date);black:(date&gt;=current_date);black:(date==False)" string="Analytic account" toolbar="1">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="quantity" invisible="1"/>
+                    <field name="quantity_max" invisible="1"/>
+                    <field name="debit"/>
+                    <field name="credit"/>
+                    <field name="balance"/>
+                    <field name="currency_id" groups="base.group_extended"/>
+                    <field name="date" invisible="1"/>
+                    <field name="user_id" invisible="1"/>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="parent_id" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+                <record id="view_account_analytic_account_list" model="ir.ui.view">
+            <field name="name">account.analytic.account.list</field>
+            <field name="model">account.analytic.account</field>
+            <field name="type">tree</field>
+            <field eval="8" name="priority"/>
+            <field name="arch" type="xml">
+                <tree toolbar="1" colors="red:(date&lt;current_date);black:(date&gt;=current_date);black:(date==False)" string="Analytic Accounts">
+                    <field name="code"/>
+                    <field name="complete_name"/>
+                    <field name="quantity" invisible="1"/>
+                    <field name="quantity_max" invisible="1"/>
+                    <field name="date"/>
+                    <field name="user_id" invisible="1"/>
+                    <field name="parent_id" invisible="1"/>
+                    <field name="partner_id" invisible="1"/>
+                </tree>
+            </field>
+        </record>
         <record id="view_ntm_res_currency_form" model="ir.ui.view">
             <field name="name">ntm.res.currency.form.inherit</field>
             <field name="model">res.currency</field>
