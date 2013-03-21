@@ -52,37 +52,35 @@ class soa_line(osv.osv):
     _name = 'soa.line'
     _description = "Statement of Account Details"
     _columns= {
-        'date':fields.date('Date'),
-        'name':fields.char('Description',size=100),
-        'encoder':fields.many2one('res.users','Encoder'),
-        'src_curr':fields.many2one('res.currency','SRC'),
+        'name':fields.related('link_to','name',type='char',size=64,store=True, string='Description'),
+        'date':fields.related('move_id','date',type='date',store=True,string="Date"),
+        'amount':fields.related('link_to','amount',type='float',store=True, string='Amount'),
+        'currency_amount':fields.related('link_to','amount_currency',type='float',store=True, string='Encoding Amount'),
+        'link_to':fields.many2one('account.analytic.line','Analytic Line'),
+        'move_id':fields.related('link_to','move_id',type='many2one',relation='account.move.line',store=True,string='Move ID'),
+        'soa_id':fields.many2one('soa','SOA'),
         }
+    _order = 'date asc'
+     
 soa_line()
 
-
-class soa_scheduler(osv.osv):
-    def _get_period(self, cr, uid, context=None):
-        if context is None: context = {}
-        if context.get('period_id', False):
-            return context.get('period_id')
-        periods = self.pool.get('account.period').find(cr, uid, context=context)
-        return periods and periods[0] or False
-    
-    _name = 'soa.scheduler'
-    _description = 'Statement of Account Generator'
+class soa_add_line(osv.osv):
+    _inherit = 'soa'
     _columns = {
-        'date':fields.date('Generation Date'),
-        'period_id':fields.many2one('account.period','Period'),
+        'line_ids':fields.one2many('soa.line','soa_id','Details')
         }
-    _defaults = {
-        'date' : lambda *a: time.strftime('%Y-%m-%d'),
-        'period_id':_get_period,
-        }
-    
-    def create_statements(self, cr, uid, ids, context=None):
+    def get_lines(self,cr, uid, ids, context=None):
         date = datetime.datetime.now()
-        date = date.strftime("%Y-%m-%d")
-        netsvc.Logger().notifyChannel("date", netsvc.LOG_INFO, ''+str(date))
-        return True 
-            #period = form['period_id']
-soa_scheduler()
+        period = date.strftime("%m/%Y")
+        for statement in self.pool.get('soa').search(cr, uid, [('period_id.name','=',period)]):
+            soa_reader = self.pool.get('soa').read(cr, uid, statement, context=None)
+            for aal in self.pool.get('account.analytic.line').search(cr, uid, [('account_id','=',soa_reader['account_number'][0]),('move_id.period_id','=',soa_reader['period_id'][0])]):
+                aal_check = self.pool.get('soa.line').search(cr, uid, [('link_to','=',aal)])
+                if not aal_check:
+                    values = {
+                        'link_to':aal,
+                        'soa_id':statement,
+                        }
+                    self.pool.get('soa.line').create(cr, uid, values)
+        return True
+soa_add_line()

@@ -14,16 +14,16 @@
             <field eval="'(False,)'" name="args"/>
         </record>
         
-        <record forcecreate="True" id="ir_cron_soa_scheduler_action" model="ir.cron">
-            <field name="name">Create Statements for Analytic Accounts</field>
-            <field eval="False" name="active"/>
+        <record forcecreate="True" id="ir_cron_soa_updater_action" model="ir.cron">
+            <field name="name">Update Statement of Accounts per Period</field>
+            <field eval="True" name="active"/>
             <field name="user_id" ref="base.user_root"/>
             <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
+            <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
-            <field eval="False" name="doall"/>
-            <field eval="'soa.scheduler'" name="model"/>
-            <field eval="'create_statements'" name="function"/>
+            <field eval="True" name="doall"/>
+            <field eval="'soa'" name="model"/>
+            <field eval="'get_lines'" name="function"/>
             <field eval="'(False,)'" name="args"/>
         </record>
     </data>

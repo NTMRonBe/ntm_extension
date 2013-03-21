@@ -30,7 +30,22 @@
                            </group>
                         </group>
                     </group>
-				                
+                    <group colspan="4" col="2">
+                    <field colspan="4" mode="tree,form" name="line_ids" nolabel="1" height="300" readonly="1">
+                        <tree string="Analytic Lines">
+	                        <field name="date"/>
+	                        <field name="name"/>
+	                        <field name="amount"/>
+	                        <field name="currency_amount"/>
+                        </tree>
+                        <form string="Analytic Line">
+                            <field name="date"/>
+                            <field name="name"/>
+                            <field name="amount"/>
+                            <field name="currency_amount"/>
+                        </form>
+                    </field>
+                    </group>
                 </form>
             </field>
         </record>        
