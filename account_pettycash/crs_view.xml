@@ -68,10 +68,11 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Cash Disbursement">
-                    <group colspan="6" col="6">
+                    <group colspan="8" col="8">
 		                  <field name="name"/>
 		                  <field name="pc_id"/>
 		                  <field name="amount"/>
+		                  <button name="fill_denominations" string="Fill Denominations" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
                   	</group>
                   	<group colspan="6" col="6">
                   	    <field name="journal_id" domain="[('type','=','disbursement')]"/>
@@ -82,7 +83,7 @@
                   	<field name="denomination_ids" nolabel="1" colspan="6" height="300"/>
                   	<group colspan="4" col="13">
                   	    <field name="state"/>
-                  	    <button name="compute_amount" string="Compute" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="comp_amount" string="Compute" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
                   	    <button name="complete_pcd" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
                   	</group>
                 </form>

@@ -12,10 +12,11 @@
                     <field name="journal_id"/>
                     <field name="period_id"/>
                     <field name="type" invisible="1"/>
-                    <field name="src_account" attrs="{'invisible':[('type','=','a2a')]}"/>
-                    <field name="dest_account" attrs="{'invisible':[('type','=','a2a')]}"/>
-                    <field name="src_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
-                    <field name="dest_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
+                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}"/>
+                    <field name="src_account" attrs="{'invisible':[('type','!=','b2b')]}"/>
+                    <field name="dest_account" attrs="{'invisible':[('type','not in',['b2b','p2b])]}"/>
+                    <field name="src_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
+                    <field name="dest_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
                 </tree>
             </field>
         </record>
@@ -30,11 +31,12 @@
                     <field name="journal_id"/>
                     <field name="period_id"/>
                     <field name="type" invisible="1"/>
-                    <field name="src_account" attrs="{'invisible':[('type','=','a2a')]}"/>
-                    <field name="dest_account" attrs="{'invisible':[('type','=','a2a')]}"/>
-                    <field name="src_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
-                    <field name="dest_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
-			    </search>
+                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}"/>
+                    <field name="src_account" attrs="{'invisible':[('type','!=','b2b')]}"/>
+                    <field name="dest_account" attrs="{'invisible':[('type','not in',['b2b','p2b])]}"/>
+                    <field name="src_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
+                    <field name="dest_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>			    
+                    </search>
             </field>
         </record>      
 		
@@ -44,14 +46,23 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Fund Transfer">
-                    <field name="name"/>
-                    <field name="journal_id"/>
-                    <field name="period_id"/>
-                    <field name="type" invisible="1"/>
-                    <field name="src_account" attrs="{'invisible':[('type','=','a2a')]}"/>
-                    <field name="dest_account" attrs="{'invisible':[('type','=','a2a')]}"/>
-                    <field name="src_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
-                    <field name="dest_analytic_account" attrs="{'invisible':[('type','=','b2b')]}"/>
+                    <group colspan="6" col="6">
+	                    <field name="name"/>
+	                    <field name="journal_id" domain="[('type','=','general')]" widget="selection"/>
+	                    <field name="period_id"/>
+	                    <field name="type" invisible="1"/>
+                    </group>
+                    <separator string="Accounts" colspan="6"/>
+                    <group colspan="6" col="6">
+	                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}"/>
+	                    <field name="src_account" attrs="{'invisible':[('type','!=','b2b')]}" domain="[('type','=','liquidity')]"/>
+	                    <field name="dest_account" attrs="{'invisible':[('type','not in',['b2b','p2b'])]}" domain="[('type','=','liquidity')]"/>
+	                    <field name="src_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
+	                    <field name="dest_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
+	                    <field name="amount"/>
+                    </group>
+                    <group colspan="6" col="6">
+                    </group>
                 </form>
             </field>
         </record>     
@@ -74,6 +85,16 @@
             <field name="view_id" ref="view_fund_transfer_tree"/>
             <field name="context">{'type':'a2a'}</field>
             <field name="domain">[('type','=','a2a')]</field>
+            <field name="search_view_id" ref="view_fund_transfer_filter"/>
+        </record>
+        <record id="action_fund_transfer_p2b_tree" model="ir.actions.act_window">
+            <field name="name">Petty Cash to Bank</field>
+            <field name="res_model">fund.transfer</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="view_id" ref="view_fund_transfer_tree"/>
+            <field name="context">{'type':'p2b'}</field>
+            <field name="domain">[('type','=','p2b')]</field>
             <field name="search_view_id" ref="view_fund_transfer_filter"/>
         </record>
 

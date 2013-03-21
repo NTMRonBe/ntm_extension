@@ -220,5 +220,64 @@
             id="menu_dbf_file_get"
             sequence="50"
            />
+           
+           
+           
+       <!--     
+           
+       <record id="view_export_ntm_class" model="ir.ui.view">
+            <field name="name">export.ntm.class.form</field>
+            <field name="model">export.ntm.class</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Record Exporter">
+                    <group colspan="6" col="6">
+                        <field name="name"/>
+                        <button string="Get Fields"
+                                            type="object"
+                                            name="get_fields"
+                                            icon="gtk-execute"
+                                            />
+                        <button string="Write to CSV"
+                                            type="object"
+                                            name="write_to_csv"
+                                            icon="gtk-execute"
+                                            />
+                    </group>
+                    <field colspan="6" mode="tree,form" name="encf_ids" nolabel="1" height="300">
+                        <form string="Included Fields">
+                            <field name="include_to_report"/>
+                            <field name="field_name"/>
+                            <field name="label"/>
+                            <field name="name" readonly="1" invisible="1"/>
+                            <field name="type"/>
+                        </form>
+                        <tree string="Included Fields" editable="bottom">
+                            <field name="include_to_report"/>
+                            <field name="field_name" readonly="1"/>
+                            <field name="label"/>
+                            <field name="name" readonly="1" invisible="1"/>
+                            <field name="type" readonly="1"/>
+                        </tree>
+                    </field>
+               </form>
+            </field>
+        </record>
+        
+        <record id="action_export_ntm_class" model="ir.actions.act_window">
+            <field name="name">Record Exporter</field>
+            <field name="res_model">export.ntm.class</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_export_ntm_class"/>
+            <field name="target">new</field>
+        </record>
+        
+        <menuitem
+            name="Record Exporter"
+            action="action_export_ntm_class"
+            id="menu_action_export_ntm_class"
+            sequence="50"
+           /> -->
     </data>
 </openerp>

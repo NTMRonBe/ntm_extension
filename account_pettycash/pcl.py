@@ -57,7 +57,7 @@ class pc_liquidation_lines(osv.osv):
     _columns = {
         'name':fields.char('Description',size=64),
         'amount':fields.float('Amount'),
-        'partner_id':fields.many2one('res.partner','Missionary'),
+        'partner_id':fields.many2one('account.analytic.account','Missionary'),
         'reference':fields.char('Reference',size=64),
         'pcl_id':fields.many2one('account.pettycash.liquidation','Liquidation',ondelete="cascade"),
         }

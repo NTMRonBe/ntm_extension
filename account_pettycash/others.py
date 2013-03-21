@@ -27,6 +27,7 @@ class pettycash_denom(osv.osv):
     _columns ={
         'name':fields.many2one('denominations','Denomination'),
         'quantity':fields.float('Quantity'),
+        'amount_total': fields.float('Total Amount'),
         }
     def write(self, cr, uid, ids, vals, context=None):
         """

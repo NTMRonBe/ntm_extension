@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+            
+        <record id="soa_form" model="ir.ui.view">
+            <field name="name">soa.form</field>
+            <field name="model">soa</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Statement of Account">
+                    <group colspan="4" col="4">
+	                    <group colspan="2" col="2">
+	                       <separator string="Details"/>
+	                       <group colspan="2" col="2">
+		                       <field name="date"/>
+	                           <field name="account_number"/>
+	                           <field name="account_code" readonly="1"/>
+	                           <field name="period_id"/>
+	                           <field name="exchange_rate"/>
+	                       </group>
+	                    </group>
+	                    <group colspan="2" col="2">
+	                    <separator string="Summary"/>
+                           <group colspan="2" col="2">
+                               <field name="prev_balance"/>
+                               <field name="total_income"/>
+                               <field name="total_expense"/>
+                               <field name="inc_exp"/>
+                               <field name="end_balance"/>
+                           </group>
+                        </group>
+                    </group>
+				                
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="soa_tree">
+            <field name="name">soa.tree</field>
+            <field name="model">soa</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Statement of Accounts">
+                    <field name="date"/>
+                    <field name="account_number"/>
+                    <field name="account_code"/>
+                    <field name="period_id"/>
+                    <field name="exchange_rate"/>
+                    <field name="prev_balance"/>
+                    <field name="total_income"/>
+                    <field name="total_expense"/>
+                    <field name="inc_exp"/>
+                    <field name="end_balance"/>
+                </tree>
+            </field>
+        </record>
+        <record id="soa_filter" model="ir.ui.view">
+		    <field name="name">soa.filter</field>
+            <field name="model">soa</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Search Statements">
+                    <field name="date"/>
+                    <field name="account_number"/>
+                    <field name="account_code"/>
+                    <field name="period_id"/>
+                    <field name="exchange_rate"/>
+                    <field name="prev_balance"/>
+                    <field name="total_income"/>
+                    <field name="total_expense"/>
+                    <field name="inc_exp"/>
+                    <field name="end_balance"/>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_soa_form">
+        	<field name="name">Statement of Accounts</field>
+	        <field name="res_model">soa</field>
+		    <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_soa" 
+            action="action_soa_form" 
+            parent="account.menu_finance_payables"
+            sequence="20" 
+            groups="base.group_user"/>  
+            
+            
+            
+            
+        <record id="soa_request_form" model="ir.ui.view">
+            <field name="name">soa.request.form</field>
+            <field name="model">soa.request</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Statement of Account Request">
+                    <field name="name"/>
+                    <field name="email_from"/>
+                    <field name="email_adds" colspan="4"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="soa_request_tree">
+            <field name="name">soa.request.tree</field>
+            <field name="model">soa.request</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Statement of Accounts Request">
+                    <field name="name"/>
+                    <field name="email_from"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_soa_request_form">
+            <field name="name">Statement of Accounts Requests</field>
+            <field name="res_model">soa.request</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_soa_request" 
+            action="action_soa_request_form" 
+            parent="account.menu_finance_payables"
+            sequence="30" 
+            groups="base.group_user"/>  
+    </data>
+</openerp>

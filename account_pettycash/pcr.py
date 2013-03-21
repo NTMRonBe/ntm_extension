@@ -75,6 +75,19 @@ class pcr(osv.osv):
         'denom_breakdown':fields.one2many('pettycash.denom','pcr_id','Denominations Breakdown',ondelete="cascade"),
         }
     
+    def compute_pc(self, cr, uid, ids, context=None):
+        for pcr in self.read(cr, uid, ids, context=None):
+            amount=0.00
+            amount_pca = 0.00
+            for denominations in self.pool.get('pettycash.denom').search(cr, uid, [('pettycash_id','=',pcr['pettycash_id'][0])]):
+                denom_read = self.pool.get('pettycash.denom').read(cr, uid, denominations,context=None)
+                denom_reader = self.pool.get('denominations').read(cr, uid, denom_read['name'][0],['multiplier'])
+                amount = denom_read['quantity'] * denom_reader['multiplier']
+                amount_pca += amount
+                self.pool.get('pettycash.denom').write(cr, uid, denominations,{'amount_total':amount})
+            self.pool.get('account.pettycash').write(cr, uid, pcr['pettycash_id'][0],{'amount':amount_pca})
+        return self.write(cr, uid, ids,{'state':'completed'})
+    
     def complete(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
         move_line_pool = self.pool.get('account.move.line')
@@ -124,5 +137,5 @@ class pcr(osv.osv):
                     quantity = denom_pca_read['quantity'] + denom_read['quantity']
                     pc_denom.write(cr, uid, denom_pca,{'quantity':quantity})
             move_pool.post(cr, uid, [move_id], context={})
-        return True
+        return self.compute_pc(cr, uid,ids)
 pcr()

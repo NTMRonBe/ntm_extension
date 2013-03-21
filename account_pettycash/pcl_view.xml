@@ -25,11 +25,17 @@
                     	<page string="Liquidation Lines">
                     	   <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" height="300">
                                 <tree string="Liquidation Lines" editable="bottom">
-                                <field name="name"/>
-                                <field name="partner_id"/>
-                                <field name="reference"/>
-                                <field name="amount"/>
+	                                <field name="name"/>
+	                                <field name="partner_id"/>
+	                                <field name="reference"/>
+	                                <field name="amount"/>
                                 </tree>
+                                <form string="Liquidation Lines">
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="reference"/>
+                                    <field name="amount"/>
+                                </form>
                            </field>
                         </page>
                     </notebook>

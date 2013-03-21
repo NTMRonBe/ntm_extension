@@ -33,6 +33,10 @@ class account_analytic_account(osv.osv):
             'code_accpac':fields.char('Accpac Code',size=64),
             'code':fields.char('Code',size=64),
             'normal_account':fields.many2one('account.account','Related Normal Account'),
+            'report':fields.selection([
+                                ('pal','Profit and Loss'),
+                                ('soa','Statement of Account')
+                                ], 'Report Type'),
             }
     '''
     def compute_total_balance(self, cr, uid, ids, context=None):

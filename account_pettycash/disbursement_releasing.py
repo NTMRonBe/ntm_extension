@@ -56,9 +56,9 @@ class pettycash_disbursement(osv.osv):
     _name = 'pettycash.disbursement'
     _description = "Petty Cash Disbursement"
     _columns = {
-        'name':fields.char('Disbursement ID',size=64),
-        'journal_id':fields.many2one('account.journal','Journal'),
-        'pc_id':fields.many2one('account.pettycash','Petty Cash ID'),
+        'name':fields.char('Disbursement ID',size=64, readonly=True),
+        'journal_id':fields.many2one('account.journal','Journal',domain=[('type','=','pettycash')]),
+        'pc_id':fields.related('crs_id','pc_id',type='many2one',relation='account.pettycash',store=True, string='Petty Cash Account'),
         'date':fields.date('Disbursement date'),
         'crs_id':fields.many2one('cash.request.slip','Cash Requests Slip'),
         'amount':fields.float('Amount', readonly=True),
@@ -97,18 +97,27 @@ class pcd(osv.osv):
         'denomination_ids':fields.one2many('pettycash.denom','pd_id','Denominations Breakdown', ondelete="cascade"),
         }
     
-    def compute_amount(self, cr, uid, ids, context=None):
+    def comp_amount(self,cr, uid, ids, context=None):
         amount = 0.00
-        for pcd in self.browse(cr, uid, ids):
-            for denom in pcd.denomination_ids:
-                amount += denom.quantity * denom.name.multiplier
-            self.write(cr, uid, ids, {'amount':amount})
-            if pcd.crs_id:
-                if pcd.crs_id.amount > pcd.amount or pcd.crs_id.amount < pcd.amount:
-                    raise osv.except_osv(_('Amount not equal'),
-                                            _('Amounts not equal'))
-                else:
-                    self.write(cr, uid, ids, {'state':'releasing'})
+        for pcd in self.read(cr, uid, ids, context=None):
+            for denoms in self.pool.get('pettycash.denom').search(cr, uid, [('pd_id','=',pcd['id'])]):
+                denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denoms,context=None)
+                denomination = self.pool.get('denominations').read(cr, uid, denom_reader['name'][0],['multiplier'])
+                amount +=denom_reader['quantity'] * denomination['multiplier']
+            self.write(cr, uid, pcd['id'],{'amount':amount,'state':'releasing'})
+        return True
+                
+    
+    def fill_denominations(self, cr, uid, ids, context=None):
+        for form in self.read(cr, uid, ids, context=None):
+            currency_read = self.pool.get('account.pettycash').read(cr, uid, form['pc_id'][0],['currency_id'])
+            for denominations in self.pool.get('denominations').search(cr, uid, [('currency_id','=',currency_read['currency_id'][0])]):
+                denom_reader =self.pool.get('denominations').read(cr, uid, denominations,context=None)
+                values = {
+                    'name':denom_reader['id'],
+                    'pd_id':form['id']
+                    }
+                self.pool.get('pettycash.denom').create(cr, uid, values)
         return True
     
     def complete_pcd(self, cr, uid, ids, context=None):

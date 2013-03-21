@@ -9,16 +9,25 @@
             web_icon_hover="images/people_and_projects_hover.png"/>
         <menuitem id="base.menu_base_partner" groups="base.group_no_one"/>
         <menuitem id="account.menu_action_invoice_tree1" groups="base.group_no_one"/>
+        <menuitem id="account.menu_action_invoice_tree2" groups="base.group_no_one"/>
         <menuitem id="account.menu_action_invoice_tree3" groups="base.group_no_one"/>
+        <menuitem id="account.menu_action_invoice_tree4" groups="base.group_no_one"/>
         <menuitem id="account_voucher.menu_action_sale_receipt" groups="base.group_no_one" parent="account.menu_finance_bank_and_cash"/>
+        <menuitem id="account_voucher.menu_action_purchase_receipt" groups="base.group_no_one" parent="account.menu_finance_bank_and_cash"/>
+        <menuitem id="account_voucher.menu_action_vendor_payment" groups="base.group_no_one" parent="account.menu_finance_bank_and_cash"/>
         <menuitem id="account.menu_account_customer" name="Donors Information" parent="account.menu_finance_receivables"/>
+        <menuitem id="account.menu_account_supplier" name="People and Projects Information" parent="account.menu_finance_payables"/>
         <menuitem id="account_voucher.menu_action_vendor_receipt" groups="base.group_no_one" />
         <menuitem id="fund_transfers" web_icon="images/fund_transfer.png" name="Fund Transfers"
             web_icon_hover="images/fund_transfer_hover.png" sequence="40"/>
         <menuitem id="fund_transfer_b2b" parent="fund_transfers" sequence="10" action="action_fund_transfer_b2b_tree"/>
         <menuitem id="fund_transfer_a2a" parent="fund_transfers" sequence="20" action="action_fund_transfer_a2a_tree"/>
+        <menuitem id="fund_transfer_p2b" parent="fund_transfers" sequence="30" action="action_fund_transfer_p2b_tree"/>
+        <!-- <menuitem id="base.menu_mail_gateway" name="Emails" parent="base.menu_config" sequence="30"/>
+        #<menuitem id="base.menu_base_action_rule" name="Automated Actions" parent="base.menu_config" sequence="30"/> -->
         <menuitem id="account.menu_finance" sequence="50"/>
-        
+        <menuitem id="base.menu_mail_gateway" parent="base.menu_emails" name="POP/IMAP"/>
+        <menuitem id="base.menu_tools" groups="base.group_no_one"/>
         
         
         
@@ -26,6 +35,9 @@
       <!-- Actions -->
         <record id="base.action_partner_customer_form" model="ir.actions.act_window">
             <field name="name">Donors Information</field>
+        </record>
+        <record id="base.action_partner_supplier_form" model="ir.actions.act_window">
+            <field name="name">People and Projects Information</field>
         </record>
         
       <!-- Views Override -->
@@ -44,6 +56,31 @@
                     <field name="country"/>
                     <field name="user_id"/>
                 </tree>
+            </field>
+        </record>
+       <record id="view_res_partner_filter" model="ir.ui.view">
+            <field name="name">res.partner.select</field>
+            <field name="model">res.partner</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Search Entity">
+                   <group col='10' colspan='4'>
+                        <filter string="Donor" name="customer" icon="terp-personal" domain="[('customer','=',1)]" help="Customer Partners"/>
+                        <filter string="People/Project" name="supplier" icon="terp-personal" domain="[('supplier','=',1)]" help="Supplier Partners"/>
+                        <separator orientation="vertical"/>
+                        <field name="name" select="1"/>
+                        <field name="address" select="1"/>
+                        <field name="country" select="1"/>
+                        <field name="category_id" select="1" groups="base.group_extended"/>
+                        <field name="user_id" select="1">
+                            <filter string="My Partners" icon="terp-personal+" domain="[('user_id','=',uid)]"/>
+                        </field>
+                   </group>
+                   <newline />
+                   <group expand="0" string="Group By...">
+                       <filter string="Salesman" icon="terp-personal" domain="[]" context="{'group_by' : 'user_id'}" />
+                   </group>
+               </search>
             </field>
         </record>
        </data>

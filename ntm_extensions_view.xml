@@ -79,6 +79,7 @@
 				    <newline/>
 					<field name="code_short"/>
 					<field name="code_accpac"/>
+					<field name="report"/>
 					<field name="normal_account"  attrs="{'invisible': [('type','=','view')]}"/>
 				</field>
             </field>
@@ -103,7 +104,7 @@
                         <field name="is_pr" attrs="{'invisible': [('type','=','view')]}"/>
                         <field name="reconcile"/>
                         <field name="gain_loss_acc" attrs="{'invisible': [('type','=','view')]}"/>
-                        <field name="gain_loss" attrs="{'invisible': [('gain_loss_acc','=',True)],'required':[('gain_loss_acc','!=',True),('type','!=','view')]}"/>
+                        <field name="gain_loss" attrs="{'invisible': [('gain_loss_acc','=',True)]}"/>
                         <field name="to_be_moved" attrs="{'invisible': [('type','=','view')]}"/>
                         <field name="closing_account" attrs="{'invisible': [('to_be_moved','!=',True)],'required':[('to_be_moved','=',True)]}"/>
                     </group>
