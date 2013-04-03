@@ -10,7 +10,7 @@
             auto="False"
             header = "False"
             menu="True"/>
-            
+        
         <record id="pcr_form" model="ir.ui.view">
             <field name="name">pcr.form</field>
             <field name="model">pettycash.replenishment</field>

@@ -15,7 +15,6 @@ class account_pettycash(osv.osv):
         'manager_id':fields.many2one('res.users','Manager'),
         'date':fields.date('Creation Date'),
         'account_code':fields.many2one('account.account','Account'),
-        'amount':fields.float('Amount'),
         'currency_id':fields.many2one('res.currency','Currency'),
         'state': fields.selection([
             ('draft','Draft'),
@@ -62,11 +61,13 @@ class pettycash_denom(osv.osv):
 pettycash_denom()
 
 class apc(osv.osv):
-	_inherit = "account.pettycash"
-	_columns = {
-	'denomination_ids':fields.one2many('pettycash.denom','pettycash_id','Denominations Breakdown', ondelete="cascade"),
-		}
-	def get_amount(self, cr, uid, ids, context=None):
+    
+    _inherit = 'account.pettycash'
+    _columns = {
+    'denomination_ids':fields.one2many('pettycash.denom','pettycash_id','Denominations Breakdown', ondelete="cascade"),
+        }
+     
+    def get_amount(self, cr, uid, ids, context=None):
 		amount = 0.00
 		for pc in self.browse(cr, uid, ids, context=None):
 			for pc_denom in pc.denomination_ids:
@@ -75,7 +76,8 @@ class apc(osv.osv):
 				amount += quantity * multiplier
 				self.write(cr, uid, ids, {'amount':amount})
 		return True
-	def fill_denominations(self, cr, uid, ids, context=None):
+	
+    def fill_denominations(self, cr, uid, ids, context=None):
 		pc_denom_pool = self.pool.get('pettycash.denom')
 		denominations = self.pool.get('denominations')
 		for inv in self.browse(cr, uid, ids):
@@ -100,6 +102,23 @@ class apc(osv.osv):
 			elif not inv.account_code:
 				raise osv.except_osv(_('Error !'), _('Please define the pettycash account !'))
 		self.write(cr, uid, ids, {'state':'active'})
-		self.get_amount(cr, uid, ids)
 		return True
 apc()
+
+class apc_1(osv.osv):
+    
+    def _compute_amount(self, cr, uid, ids, field, arg, context=None):
+        rec = self.browse(cr, uid, ids, context=None)
+        result = {}
+        for r in rec:
+            amount = 0.00
+            for denoms in r.denomination_ids:
+                amount += denoms.name.multiplier * denoms.quantity
+            result[r.id] = amount
+        return result
+    
+    _inherit = 'account.pettycash'
+    _columns = {
+    'amount': fields.function(_compute_amount, method=True, type='float', string='Total Amount', store=False),
+        }
+apc_1()

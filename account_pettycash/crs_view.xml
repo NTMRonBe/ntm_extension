@@ -12,6 +12,11 @@
                   <field name="requestor_id" domain="[('supplier','=','True')]" attrs="{'readonly':[('state','!=','draft')]}"/>
                   <field name="request_date" attrs="{'readonly':[('state','!=','draft')]}"/>
                   <field name="amount" attrs="{'readonly':[('state','!=','draft')]}"/>
+                  <field name="description" attrs="{'readonly':[('state','!=','draft')]}"/>
+                  <group colspan="4" col="2">
+                  <separator string="Other Details"/>
+                  <field name="note" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}" colspan="4"/>
+                  </group>
                   <group colspan="4" col="13">
                         <field name="state" select="1"/>
 						<button name="approval" attrs="{'invisible':[('state','!=','draft')]}" string="Submit"  type="object" icon="gtk-jump-to"/>
@@ -70,7 +75,7 @@
                 <form string="Cash Disbursement">
                     <group colspan="8" col="8">
 		                  <field name="name"/>
-		                  <field name="pc_id"/>
+		                  <field name="pc_id" readonly="1"/>
 		                  <field name="amount"/>
 		                  <button name="fill_denominations" string="Fill Denominations" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
                   	</group>
@@ -85,6 +90,7 @@
                   	    <field name="state"/>
                   	    <button name="comp_amount" string="Compute" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
                   	    <button name="complete_pcd" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
+                  	    <button string="Print" type="object" name="data_get" icon="gtk-execute"/>
                   	</group>
                 </form>
             </field>

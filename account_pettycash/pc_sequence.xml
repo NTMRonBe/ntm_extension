@@ -48,6 +48,30 @@
             <field name="prefix">PCR/%(y)s/</field>
             <field name="padding">3</field>
         </record>
+        
+        <record id="seq_type_pcl_sequence" model="ir.sequence.type">
+            <field name="name">Petty Cash Liquidation</field>
+            <field name="code">account.pettycash.liquidation</field>
+        </record>
+
+        <record id="seq_pcl_sequence" model="ir.sequence">
+            <field name="name">Petty Cash Liquidation</field>
+            <field name="code">account.pettycash.liquidation</field>
+            <field name="prefix">PCL/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        
+        <record id="seq_type_pcd_sequence" model="ir.sequence.type">
+            <field name="name">Petty Cash Disbursement</field>
+            <field name="code">pettycash.disbursement</field>
+        </record>
+
+        <record id="seq_pcd_sequence" model="ir.sequence">
+            <field name="name">Petty Cash Disbursement</field>
+            <field name="code">pettycash.disbursement</field>
+            <field name="prefix">PCD/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
 
     </data>
 </openerp>

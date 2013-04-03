@@ -1,4 +1,3 @@
-
 import time
 from osv import osv, fields, orm
 import netsvc
@@ -22,6 +21,8 @@ class cash_request_slip(osv.osv):
             ('approved','Approved'),
             ('cancel','Cancelled'),
             ],'Status', select=True, readonly=True),
+        'note':fields.text('Other Details'),
+        'description':fields.char('Description', size=64),
         
         }
     _defaults={
@@ -76,12 +77,6 @@ class pettycash_disbursement(osv.osv):
         'state':'draft',
         }
     
-    def create(self, cr, uid, vals, context=None):
-        vals.update({
-                'name': self.pool.get('ir.sequence').get(cr, uid, 'pettycash.disbursement'),
-        })
-        return super(pettycash_disbursement, self).create(cr, uid, vals, context)
-    
 pettycash_disbursement()
 
 class pettycash_denom(osv.osv):
@@ -104,108 +99,98 @@ class pcd(osv.osv):
                 denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denoms,context=None)
                 denomination = self.pool.get('denominations').read(cr, uid, denom_reader['name'][0],['multiplier'])
                 amount +=denom_reader['quantity'] * denomination['multiplier']
-            self.write(cr, uid, pcd['id'],{'amount':amount,'state':'releasing'})
+            values = {
+                'amount':amount,
+                'state':'releasing',
+                'name': self.pool.get('ir.sequence').get(cr, uid, 'pettycash.disbursement'),
+                }
+            self.write(cr, uid, pcd['id'],values)
         return True
                 
     
     def fill_denominations(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
             currency_read = self.pool.get('account.pettycash').read(cr, uid, form['pc_id'][0],['currency_id'])
-            for denominations in self.pool.get('denominations').search(cr, uid, [('currency_id','=',currency_read['currency_id'][0])]):
-                denom_reader =self.pool.get('denominations').read(cr, uid, denominations,context=None)
-                values = {
-                    'name':denom_reader['id'],
-                    'pd_id':form['id']
-                    }
-                self.pool.get('pettycash.denom').create(cr, uid, values)
+            if not form['denomination_ids']:
+                for denominations in self.pool.get('denominations').search(cr, uid, [('currency_id','=',currency_read['currency_id'][0])]):
+                    denom_reader =self.pool.get('denominations').read(cr, uid, denominations,context=None)
+                    values = {
+                        'name':denom_reader['id'],
+                        'pd_id':form['id']
+                        }
+                    self.pool.get('pettycash.denom').create(cr, uid, values)
         return True
     
-    def complete_pcd(self, cr, uid, ids, context=None):
+    def create_entries(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
         move_line_pool = self.pool.get('account.move.line')
         pc_denom = self.pool.get('pettycash.denom')
         pc_pool = self.pool.get('account.pettycash')
         analytic_pool = self.pool.get('account.analytic.line')
-        rate=0.00
-        for pcd in self.browse(cr, uid, ids):
-            pcd_id = pcd.id
-            pca_id = pcd.pc_id.id
-            rate = pcd.pc_id.account_code.currency_id.rate
-            for pcd_denom in pcd.denomination_ids:
-                denom_id = pcd_denom.name.id
-                quantity = pcd_denom.quantity
-                for pcd_denom_ids in pcd.pc_id.denomination_ids:
-                    pcd_denom_id = pcd_denom_ids.id
-                    if pcd_denom_ids.name.id == denom_id:
-                        new_quantity = pcd_denom_ids.quantity - quantity
-                        pc_denom.write(cr, uid, pcd_denom_id,{'quantity':new_quantity})
-            amount = 0.00
-            query = ("""select * from pettycash_denom where pettycash_id=%s"""%(pca_id))
-            cr.execute(query)
-            for t in cr.dictfetchall():
-                src_quantity = t['quantity']
-                src_denom = t['name']
-                query = ("""select * from denominations where id=%s"""%(src_denom))
-                cr.execute(query)
-                for t in cr.dictfetchall():
-                    multiplier = t['multiplier']
-                    amount+=multiplier*src_quantity
-                query = ("""update account_pettycash set amount=%s where id=%s"""%(amount,pca_id))
-                cr.execute(query)
-            total_amount = pcd.amount / rate
+        for pcd in self.read(cr, uid, ids, context=None):
+            for denominations in pcd['denomination_ids']:
+                denom_read = self.pool.get('pettycash.denom').read(cr, uid, denominations,context=None)
+                if denom_read['quantity']>0.00:
+                    for pca_denom in self.pool.get('pettycash.denom').search(cr, uid, [('name','=',denom_read['name'][0]), ('pettycash_id','=',pcd['pc_id'][0])]):
+                        pca_denom_read = self.pool.get('pettycash.denom').read(cr, uid, pca_denom,context=None)
+                        quantity = pca_denom_read['quantity'] - denom_read['quantity']
+                        self.pool.get('pettycash.denom').write(cr, uid, pca_denom, {'quantity':quantity})
+            crs_read = self.pool.get('cash.request.slip').read(cr, uid, pcd['crs_id'][0],context=None)
+            pc_read = pc_pool.read(cr, uid, pcd['pc_id'][0],context=None)
             move = {
-                'name': pcd.name,
-                'journal_id': pcd.journal_id.id,
-                'date': pcd.date,
-                'period_id': pcd.period_id and pcd.period_id.id or False
-            }
+                'name':pcd['name'],
+                'journal_id':pcd['journal_id'][0],
+                'period_id':pcd['period_id'][0],
+                'date':pcd['date'],
+                'ref':crs_read['name']
+                }
             move_id = move_pool.create(cr, uid, move)
             move_line = {
-                'name': pcd.name or '/',
-                'credit': 0.00,
-                'debit': total_amount,
-                'account_id': pcd.journal_id.default_debit_account_id.id,
-                'move_id': move_id,
-                'journal_id': pcd.journal_id.id,
-                'period_id': pcd.period_id.id,
-                'date': pcd.date,
-                'trans_type':'pc',
-            }
+                        'name':pcd['name'],
+                        'journal_id':pcd['journal_id'][0],
+                        'period_id':pcd['period_id'][0],
+                        'date':pcd['date'],
+                        'ref':crs_read['name'],
+                        'account_id':pc_read['account_code'][0],
+                        'credit':pcd['amount'],
+                        'move_id':move_id,
+                        }
             move_line_pool.create(cr, uid, move_line)
-            move_line = {
-                'name': pcd.name or '/',
-                'debit': 0.00,
-                'credit': total_amount,
-                'account_id': pcd.pc_id.account_code.id,
-                'move_id': move_id,
-                'journal_id': pcd.journal_id.id,
-                'period_id': pcd.period_id.id,
-                'date': pcd.date,
-                'trans_type':'pc',
-            }
-            if pcd.amount > pcd.pc_id.amount:
-                raise osv.except_osv(_('Insufficient funds'),
-                                            _('Petty Cash has insufficient funds'))
-            elif pcd.amount <= pcd.pc_id.amount:
+            get_analytic_account = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',crs_read['requestor_id'][0])])
+            for analytic_id in get_analytic_account:
+                move_line = {
+                            'name':crs_read['description'],
+                            'journal_id':pcd['journal_id'][0],
+                            'period_id':pcd['period_id'][0],
+                            'date':pcd['date'],
+                            'ref':crs_read['name'],
+                            'account_id':pc_read['account_code'][0],
+                            'debit':pcd['amount'],
+                            'analytic_account_id':analytic_id,
+                            'move_id':move_id,
+                            }
                 move_line_pool.create(cr, uid, move_line)
-                move_pool.post(cr, uid, [move_id], context={})
-                self.write(cr, uid, ids, {'state':'released'})
-                partner_id = pcd.crs_id.requestor_id.id
-                query = ("""select * from account_analytic_account where partner_id=%s"""%(partner_id))
-                cr.execute(query)
-                for t in cr.dictfetchall():
-                    partner_id=t['id']
-                analytic_line = {
-                    'name':pcd.name or '/',
-                    'journal_id':pcd.journal_id.analytic_journal_id.id,
-                    'date':pcd.date,
-                    'account_id':partner_id,
-                    'amount':total_amount,
-                    'general_account_id':pcd.journal_id.default_debit_account_id.id,
-                }
-                analytic_pool.create(cr, uid, analytic_line)
         return True
     
+    def data_get(self, cr, uid, ids, context=None):
+        datas = {}
+        statements = []
+        if context is None:
+            context = {}
+        for data in self.read(cr, uid, ids, context=None):
+            rec = data['id']
+            statements.append(rec)
+        datas = {
+            'ids':statements,
+            'model':'pettycash.disbursement',
+            'form':data
+            }
+        return {
+            'type': 'ir.actions.report.xml',
+            'report_name': 'pettycash.disbursement',
+            'nodestroy':True,
+            'datas': datas,
+            }
 pcd()
 
 class account_journal(osv.osv):
