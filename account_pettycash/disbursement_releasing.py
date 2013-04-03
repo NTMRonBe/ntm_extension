@@ -90,11 +90,27 @@ class pcd(osv.osv):
     _inherit = 'pettycash.disbursement'
     _columns = {
         'denomination_ids':fields.one2many('pettycash.denom','pd_id','Denominations Breakdown', ondelete="cascade"),
+        'analytic_id':fields.many2one('account.analytic.account','Debit Account'),
         }
     
-    def comp_amount(self,cr, uid, ids, context=None):
+    def get_account(self, cr, uid, ids, context=None):
         amount = 0.00
+        ctr = 0
+        account_id = 1
         for pcd in self.read(cr, uid, ids, context=None):
+            netsvc.Logger().notifyChannel("pcd", netsvc.LOG_INFO, ' '+str(pcd))
+            crs = self.pool.get('cash.request.slip').read(cr, uid, pcd['crs_id'][0], context=None)
+            account_ids = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',crs['requestor_id'][0])])
+            if not account_ids:
+                raise osv.except_osv(_('Warning!'), _('No Analytic Account for the partner.'))
+            if account_ids:
+                for account in account_ids:
+                    ctr +=1
+                    account_id = account
+                if ctr > 1:
+                    raise osv.except_osv(_('Warning!'), _('You can only define 1 analytic account for a single missionary/project.'))
+                elif ctr==1:
+                     self.write(cr, uid, pcd['id'],{})
             for denoms in self.pool.get('pettycash.denom').search(cr, uid, [('pd_id','=',pcd['id'])]):
                 denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denoms,context=None)
                 denomination = self.pool.get('denominations').read(cr, uid, denom_reader['name'][0],['multiplier'])
@@ -102,6 +118,7 @@ class pcd(osv.osv):
             values = {
                 'amount':amount,
                 'state':'releasing',
+                'analytic_id':account_id,
                 'name': self.pool.get('ir.sequence').get(cr, uid, 'pettycash.disbursement'),
                 }
             self.write(cr, uid, pcd['id'],values)

@@ -1,6 +1,16 @@
 <?xml version="1.0"?>
 <openerp>
-    <data>        
+    <data>
+    
+           <report id="report_pettycash_disbursement_print"
+            string="Disbusement Receipt"
+            model="pettycash.disbursement"
+            name="pettycash.disbursement"
+            rml="ntm_extension/report/pettycash_print_disbursement.rml"
+            auto="False"
+            header = "False"
+            menu="True"/>
+                    
         <record id="crs_form" model="ir.ui.view">
             <field name="name">crs.form</field>
             <field name="model">cash.request.slip</field>
@@ -79,17 +89,18 @@
 		                  <field name="amount"/>
 		                  <button name="fill_denominations" string="Fill Denominations" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
                   	</group>
-                  	<group colspan="6" col="6">
+                  	<group colspan="8" col="8">
                   	    <field name="journal_id" domain="[('type','=','disbursement')]"/>
                   	    <field name="crs_id" domain="[('state','=','approved')]"/>
+                  	    <field name="analytic_id" readonly="1"/>
                   	    <field name="date"/>
                   	    <field name="period_id" invisible="1" readonly="1"/>
                   	</group>
                   	<field name="denomination_ids" nolabel="1" colspan="6" height="300"/>
                   	<group colspan="4" col="13">
                   	    <field name="state"/>
-                  	    <button name="comp_amount" string="Compute" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
-                  	    <button name="complete_pcd" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="get_account" string="Compute" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="create_entries" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
                   	    <button string="Print" type="object" name="data_get" icon="gtk-execute"/>
                   	</group>
                 </form>
