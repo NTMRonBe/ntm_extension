@@ -16,12 +16,40 @@ class ntm_res_partner_extension(osv.osv):
 ntm_res_partner_extension()
 
 class res_partner(osv.osv):
-    _name = 'res.partner'
+    
+    def _get_bank_id(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        type_inv = context.get('type', 'out_invoice')
+        user = self.pool.get('res.partner').browse(cr, uid, uid, context=context)
+        partner_id = context.get('id', user.id)
+        journal_obj = self.pool.get('res.partner.bank')
+        res = journal_obj.search(cr, uid, [('partner_id', '=', partner_id)],limit=1)
+        return res and res[0] or False
+    
     _inherit = 'res.partner'
     _description = 'Partner'
     _columns = {
         'partner_dict':fields.one2many('ntm.res.partner.extension','partner_id','Dictionary'),
-        'account_analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
+        'bank_id':fields.many2one('res.partner.bank','Bank Account'),
+        'property_account_payable': fields.property(
+            'account.account',
+            type='many2one',
+            relation='account.account',
+            string="Account Payable",
+            method=True,
+            view_load=True,
+            domain="[('type', '=', 'payable')]",
+            help="This account will be used instead of the default one as the payable account for the current partner"),
+        'property_account_receivable': fields.property(
+            'account.account',
+            type='many2one',
+            relation='account.account',
+            string="Account Receivable",
+            method=True,
+            view_load=True,
+            domain="[('type', '=', 'receivable')]",
+            help="This account will be used instead of the default one as the receivable account for the current partner"),
         }
 res_partner()
 
@@ -88,3 +116,10 @@ class account_move_line(osv.osv):
         'reval_post_rate':fields.float('Revaluation Post Rate',digits=(16,6)),
         }
 account_move_line()
+
+class account_subscription(osv.osv):
+    _inherit = 'account.subscription'
+    _columns = {
+        'period_nbr': fields.integer('Interval', required=True),
+        }
+account_subscription()

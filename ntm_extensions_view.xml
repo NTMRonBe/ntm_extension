@@ -179,7 +179,7 @@
             <field name="inherit_id" ref="account.view_partner_property_form"/>
             <field name="arch" type="xml">
                 <field name="property_account_position" position="replace">
-                    <field name="account_analytic_id"/>
+                    <field name="bank_id"/>
                 </field>
             </field>
         </record>
