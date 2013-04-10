@@ -104,12 +104,40 @@ class pcl(osv.osv):
                     elif line_read['amount']>0.00:
                         lines_sum += line_read['amount']                
             if denom_sum > 0.00 and lines_sum > 0.00:
-                values = {
-                    'state':'confirmed',
-                    'name':self.pool.get('ir.sequence').get(cr, uid, 'account.pettycash.liquidation'),
-                    'amount':denom_sum,
-                    }
-                self.write(cr, uid, pcl['id'], values)
+                check_amount = 0.00
+                pc_read = self.pool.get('account.pettycash').read(cr, uid, pcl['pc_id'][0],['amount'])
+                pc_amount = pc_read['amount']
+                check_amount = pc_read['amount'] - denom_sum
+                if lines_sum == check_amount:
+                    values = {
+                        'state':'confirmed',
+                        'name':self.pool.get('ir.sequence').get(cr, uid, 'account.pettycash.liquidation'),
+                        'amount':denom_sum,
+                        }
+                    self.write(cr, uid, pcl['id'], values)
+                elif lines_sum > check_amount or lines_sum < check_amount:
+                    raise osv.except_osv(_('Error !'), _('Sum of all liquidation lines (%s) must be equal to the \npetty cash amount (%s) less the summation of remaining denomination (%s)!')%(lines_sum,pc_amount,denom_sum))
+        return True
+    
+    def update_pc(self, cr, uid, ids, context=None):
+        for pcl in self.read(cr, uid, ids, context=None):
+            denoms = self.pool.get('pettycash.denom').search(cr, uid, [('pcl_id','=',pcl['id'])])
+            netsvc.Logger().notifyChannel("denoms", netsvc.LOG_INFO, ' '+str(denoms))
+            denom_ids = []
+            for denom in denoms:
+                denom_read = self.pool.get('pettycash.denom').read(cr, uid, denom, context=None)
+                denom_ids.append(denom_read['name'][0])
+                netsvc.Logger().notifyChannel("denom_read", netsvc.LOG_INFO, ' '+str(denom_read))
+                pc_denoms = self.pool.get('pettycash.denom').search(cr, uid, [('name','=',denom_read['name'][0]),('pettycash_id','=',pcl['pc_id'][0])])
+                netsvc.Logger().notifyChannel("pc_denoms", netsvc.LOG_INFO, ' '+str(pc_denoms))
+                for pc_denom in pc_denoms:
+                    netsvc.Logger().notifyChannel("pc_denoms", netsvc.LOG_INFO, ' '+str(denom_read['quantity']))
+                    self.pool.get('pettycash.denom').write(cr, uid,pc_denom,{'quantity':denom_read['quantity']})
+            pc_denom_uninclude = self.pool.get('pettycash.denom').search(cr, uid, [('name','not in',denom_ids),('pettycash_id','=',pcl['pc_id'][0])])
+            netsvc.Logger().notifyChannel("pc_denom_uninclude", netsvc.LOG_INFO, ' '+str(pc_denom_uninclude))
+            for uninclude in pc_denom_uninclude:
+                netsvc.Logger().notifyChannel("uninclude", netsvc.LOG_INFO, ' '+str(uninclude))
+                self.pool.get('pettycash.denom').write(cr, uid,uninclude,{'quantity':0.00})
         return True
     
     def complete_pcl(self, cr, uid, ids, context=None):
@@ -171,6 +199,7 @@ class pcl(osv.osv):
                         }
             move_line_pool.create(cr, uid, move_line_vals)
             self.write(cr, uid, ids, {'state':'completed','move_id':move_id})
+            self.update_pc(cr, uid, [pcl['id']])
         return True
     
     def cancel(self, cr, uid, ids, context=None):

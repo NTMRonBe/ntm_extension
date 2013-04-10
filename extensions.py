@@ -17,21 +17,10 @@ ntm_res_partner_extension()
 
 class res_partner(osv.osv):
     
-    def _get_bank_id(self, cr, uid, context=None):
-        if context is None:
-            context = {}
-        type_inv = context.get('type', 'out_invoice')
-        user = self.pool.get('res.partner').browse(cr, uid, uid, context=context)
-        partner_id = context.get('id', user.id)
-        journal_obj = self.pool.get('res.partner.bank')
-        res = journal_obj.search(cr, uid, [('partner_id', '=', partner_id)],limit=1)
-        return res and res[0] or False
-    
     _inherit = 'res.partner'
     _description = 'Partner'
     _columns = {
         'partner_dict':fields.one2many('ntm.res.partner.extension','partner_id','Dictionary'),
-        'bank_id':fields.many2one('res.partner.bank','Bank Account'),
         'property_account_payable': fields.property(
             'account.account',
             type='many2one',

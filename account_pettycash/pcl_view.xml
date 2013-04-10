@@ -1,14 +1,6 @@
 <?xml version="1.0"?>
 <openerp>
     <data>        
-           <report id="report_pettycash_disbursement_print"
-            string="Disbursement Report"
-            model="pettycash.disbursement"
-            name="pettycash.disbursement"
-            rml="ntm_extension/report/pettycash_print_disbursement.rml"
-            auto="False"
-            header = "False"
-            menu="True"/>
     <!--Petty Cash Liquidation-->
         <record id="pcl_form" model="ir.ui.view">
             <field name="name">pcl.form</field>

@@ -19,7 +19,9 @@ class cash_request_slip(osv.osv):
             ('draft','Draft'),
             ('approval','For Approval'),
             ('approved','Approved'),
+            ('disapproved','Disapproved'),
             ('cancel','Cancelled'),
+            ('released','Released')
             ],'Status', select=True, readonly=True),
         'note':fields.text('Other Details'),
         'description':fields.char('Description', size=64),
@@ -36,18 +38,28 @@ class cash_request_slip(osv.osv):
         return super(cash_request_slip, self).create(cr, uid, vals, context)
     def approval(self, cr, uid, ids, context=None):
         for crs in self.browse(cr, uid, ids):
-            if crs.pc_id.amount <= 0:
+            if crs.pc_id.amount <crs.amount:
                 self.write(cr, uid, ids, {'state':'cancel'})
-            elif crs.pc_id.amount>0:
+            elif crs.pc_id.amount>crs.amount:
                 self.write(cr, uid, ids, {'state':'approval'})
         return True
     def approved(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state':'approved'})
         return True
+    def disapproved(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state':'disapproved'})
+        return True
 cash_request_slip()
 
 
 class pettycash_disbursement(osv.osv):
+    def _get_journal(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        journal_obj = self.pool.get('account.journal')
+        res = journal_obj.search(cr, uid, [('type', '=', 'disbursement')],limit=1)
+        return res and res[0] or False
+    
     def _get_period(self, cr, uid, context=None):
         if context is None: context = {}
         if context.get('period_id', False):
@@ -58,7 +70,7 @@ class pettycash_disbursement(osv.osv):
     _description = "Petty Cash Disbursement"
     _columns = {
         'name':fields.char('Disbursement ID',size=64, readonly=True),
-        'journal_id':fields.many2one('account.journal','Journal',domain=[('type','=','pettycash')]),
+        'journal_id':fields.many2one('account.journal','Journal'),
         'pc_id':fields.related('crs_id','pc_id',type='many2one',relation='account.pettycash',store=True, string='Petty Cash Account'),
         'date':fields.date('Disbursement date'),
         'crs_id':fields.many2one('cash.request.slip','Cash Requests Slip'),
@@ -75,6 +87,7 @@ class pettycash_disbursement(osv.osv):
     _defaults = {
         'period_id':_get_period,
         'state':'draft',
+        'journal_id':_get_journal,
         }
     
 pettycash_disbursement()
@@ -93,11 +106,33 @@ class pcd(osv.osv):
         'analytic_id':fields.many2one('account.analytic.account','Debit Account'),
         }
     
+    def check_disbursements(self, cr, uid, ids,context=None):
+        for pcd in self.read(cr, uid, ids, context=None):
+            crs = self.pool.get('cash.request.slip').read(cr, uid, pcd['crs_id'][0],['id','amount'])
+            pcd_res = self.pool.get('pettycash.disbursement').search(cr, uid, [('id','!=',pcd['id']),('crs_id','=',crs['id'])])
+            if not pcd_res: 
+                self.pool.get('cash.request.slip').write(cr, uid, crs['id'],{'state':'released'})
+            if pcd_res:
+                netsvc.Logger().notifyChannel("pcd_res", netsvc.LOG_INFO, ' '+str(pcd_res))
+                released = 0.00
+                for pcds in pcd_res:
+                    pcd_read = self.pool.get('pettycash.disbursement').read(cr, uid, pcds,['amount'])
+                    netsvc.Logger().notifyChannel("pcd_read", netsvc.LOG_INFO, ' '+str(pcd_read))
+                    released +=pcd_read['amount']
+                if released>crs['amount']:
+                    raise osv.except_osv(_('Sobra!'), _('Sobra ka na.'))
+                elif released < crs['amount']:
+                    raise osv.except_osv(_('Good!'), _('You are good to go.'))
+                elif released == crs['amount']:
+                    self.pool.get('cash.request.slip').write(cr, uid, crs['id'],{'state':'released'})
+        return True
+                    
     def get_account(self, cr, uid, ids, context=None):
         amount = 0.00
         ctr = 0
         account_id = 1
         for pcd in self.read(cr, uid, ids, context=None):
+            self.check_disbursements(cr, uid, [pcd['id']])
             netsvc.Logger().notifyChannel("pcd", netsvc.LOG_INFO, ' '+str(pcd))
             crs = self.pool.get('cash.request.slip').read(cr, uid, pcd['crs_id'][0], context=None)
             account_ids = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',crs['requestor_id'][0])])
@@ -110,7 +145,7 @@ class pcd(osv.osv):
                 if ctr > 1:
                     raise osv.except_osv(_('Warning!'), _('You can only define 1 analytic account for a single missionary/project.'))
                 elif ctr==1:
-                     self.write(cr, uid, pcd['id'],{})
+                     continue
             for denoms in self.pool.get('pettycash.denom').search(cr, uid, [('pd_id','=',pcd['id'])]):
                 denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denoms,context=None)
                 denomination = self.pool.get('denominations').read(cr, uid, denom_reader['name'][0],['multiplier'])
@@ -123,7 +158,6 @@ class pcd(osv.osv):
                 }
             self.write(cr, uid, pcd['id'],values)
         return True
-                
     
     def fill_denominations(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
@@ -136,7 +170,7 @@ class pcd(osv.osv):
                         'pd_id':form['id']
                         }
                     self.pool.get('pettycash.denom').create(cr, uid, values)
-        return True
+        return True           
     
     def create_entries(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
@@ -187,6 +221,8 @@ class pcd(osv.osv):
                             'move_id':move_id,
                             }
                 move_line_pool.create(cr, uid, move_line)
+            self.write(cr, uid, pcd['id'],{'state':'released'})
+            self.check_disbursements(cr, uid, [pcd['id']])
         return True
     
     def data_get(self, cr, uid, ids, context=None):
@@ -194,7 +230,7 @@ class pcd(osv.osv):
         statements = []
         if context is None:
             context = {}
-        for data in self.read(cr, uid, ids, context=None):
+        for data in self.read(cr, uid, ids, ['id']):
             rec = data['id']
             statements.append(rec)
         datas = {

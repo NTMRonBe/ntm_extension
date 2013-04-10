@@ -82,6 +82,9 @@
 					<field name="report"/>
 					<field name="normal_account"  attrs="{'invisible': [('type','=','view')]}"/>
 				</field>
+				<field name="partner_id" position="replace">
+				    <field name="partner_id" string="Linked Entity"/>
+				</field>
             </field>
         </record>
         <record id="view_ntm_account_account_form" model="ir.ui.view">
@@ -108,6 +111,18 @@
                         <field name="to_be_moved" attrs="{'invisible': [('type','=','view')]}"/>
                         <field name="closing_account" attrs="{'invisible': [('to_be_moved','!=',True)],'required':[('to_be_moved','=',True)]}"/>
                     </group>
+                </field>
+            </field>
+        </record>
+        <record id="view_ntm_account_account_tree" model="ir.ui.view">
+            <field name="name">ntm.account.account.tree.inherit</field>
+            <field name="model">account.account</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="account.view_account_tree"/>
+            <field name="arch" type="xml">
+                <field name="company_currency_id" position="after">
+                    <field name="currency_id"/>
                 </field>
             </field>
         </record>
@@ -167,19 +182,6 @@
                             </group>                        
                         </group>
                     </group>
-                </field>
-            </field>
-        </record>
-        
-        <record id="view_ntm_partner_analytic_form" model="ir.ui.view">
-            <field name="name">ntm.partner.dict.form.inherit</field>
-            <field name="model">res.partner</field>
-            <field name="type">form</field>
-            <field name="priority">2</field>
-            <field name="inherit_id" ref="account.view_partner_property_form"/>
-            <field name="arch" type="xml">
-                <field name="property_account_position" position="replace">
-                    <field name="bank_id"/>
                 </field>
             </field>
         </record>

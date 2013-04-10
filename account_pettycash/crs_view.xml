@@ -31,6 +31,7 @@
                         <field name="state" select="1"/>
 						<button name="approval" attrs="{'invisible':[('state','!=','draft')]}" string="Submit"  type="object" icon="gtk-jump-to"/>
 						<button name="approval" attrs="{'invisible':[('state','!=','cancel')]}" string="Re-Open"  type="object" icon="gtk-jump-to"/>
+						<button name="disapproved" string="Disapproved" type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','!=','approval')]}"/>
                         <button name="approved" string="Approved" type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','!=','approval')]}"/>
 					</group>
                 </form>
@@ -90,7 +91,7 @@
 		                  <button name="fill_denominations" string="Fill Denominations" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
                   	</group>
                   	<group colspan="8" col="8">
-                  	    <field name="journal_id" domain="[('type','=','disbursement')]"/>
+                  	    <field name="journal_id" domain="[('type','=','disbursement')]" widget="selection"/>
                   	    <field name="crs_id" domain="[('state','=','approved')]"/>
                   	    <field name="analytic_id" readonly="1"/>
                   	    <field name="date"/>
