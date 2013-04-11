@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <tree string="Fund Transfer">
                     <field name="name"/>
-                    <field name="journal_id"/>
+                    <field name="journal_id" domain="[('type','=','transfer')]"/>
                     <field name="period_id"/>
                     <field name="type" invisible="1"/>
                     <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}"/>
@@ -29,13 +29,7 @@
                 <search string="Fund Transfer">
                     <field name="name"/>
                     <field name="journal_id"/>
-                    <field name="period_id"/>
-                    <field name="type" invisible="1"/>
-                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}"/>
-                    <field name="src_account" attrs="{'invisible':[('type','!=','b2b')]}"/>
-                    <field name="dest_account" attrs="{'invisible':[('type','not in',['b2b','p2b])]}"/>
-                    <field name="src_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
-                    <field name="dest_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>			    
+                    <field name="period_id"/>		    
                     </search>
             </field>
         </record>      
@@ -46,10 +40,11 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Fund Transfer">
-                    <group colspan="6" col="6">
+                    <group colspan="4" col="4">
 	                    <field name="name"/>
-	                    <field name="journal_id" domain="[('type','=','general')]" widget="selection"/>
-	                    <field name="period_id"/>
+	                    <field name="journal_id" domain="[('type','=','transfer')]" widget="selection"/>
+	                    <field name="date" readonly="1"/>
+	                    <field name="period_id" readonly="1"/>
 	                    <field name="type" invisible="1"/>
                     </group>
                     <separator string="Accounts" colspan="6"/>
@@ -61,7 +56,11 @@
 	                    <field name="dest_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
 	                    <field name="amount"/>
                     </group>
-                    <group colspan="6" col="6">
+                    <group colspan="4" col="13">
+                        <field name="state" select="1"/>
+                        <button name="transfer" attrs="{'invisible':[('state','!=','draft')]}" string="Transfer"  type="object" icon="gtk-jump-to"/>
+                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
+                        <button name="set_to_draft" attrs="{'invisible':[('state','!=','cancel')]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
                     </group>
                 </form>
             </field>
