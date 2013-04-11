@@ -1,10 +1,20 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+    
+           <report id="report_account_soa_print"
+            string="Account Statement"
+            model="account.soa"
+            name="account.soa"
+            rml="ntm_extension/report/account_soa.rml"
+            auto="False"
+            attachment="('SOA of '+(object.account_number.name)+' for '+(object.period_id.name))"
+            header = "False"
+            menu="True"/>
             
-        <record id="soa_form" model="ir.ui.view">
-            <field name="name">soa.form</field>
-            <field name="model">soa</field>
+        <record id="account_soa_form" model="ir.ui.view">
+            <field name="name">account.soa.form</field>
+            <field name="model">account.soa</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string = "Statement of Account">
@@ -49,9 +59,9 @@
                 </form>
             </field>
         </record>        
-        <record model="ir.ui.view" id="soa_tree">
-            <field name="name">soa.tree</field>
-            <field name="model">soa</field>
+        <record model="ir.ui.view" id="account_soa_tree">
+            <field name="name">account.soa.tree</field>
+            <field name="model">account.soa</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Statement of Accounts">
@@ -60,17 +70,17 @@
                     <field name="account_code"/>
                     <field name="period_id"/>
                     <field name="exchange_rate"/>
-                    <field name="prev_balance"/>
-                    <field name="total_income"/>
-                    <field name="total_expense"/>
-                    <field name="inc_exp"/>
-                    <field name="end_balance"/>
+                    <button string="Check"
+                                            type="object"
+                                            name="data_get"
+                                            icon="gtk-execute"
+                                            />
                 </tree>
             </field>
         </record>
-        <record id="soa_filter" model="ir.ui.view">
-		    <field name="name">soa.filter</field>
-            <field name="model">soa</field>
+        <record id="account_soa_filter" model="ir.ui.view">
+		    <field name="name">account.soa.filter</field>
+            <field name="model">account.soa</field>
             <field name="type">search</field>
             <field name="arch" type="xml">
                 <search string="Search Statements">
@@ -78,24 +88,18 @@
                     <field name="account_number"/>
                     <field name="account_code"/>
                     <field name="period_id"/>
-                    <field name="exchange_rate"/>
-                    <field name="prev_balance"/>
-                    <field name="total_income"/>
-                    <field name="total_expense"/>
-                    <field name="inc_exp"/>
-                    <field name="end_balance"/>
                 </search>
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_soa_form">
+        <record model="ir.actions.act_window" id="action_account_soa_form">
         	<field name="name">Statement of Accounts</field>
-	        <field name="res_model">soa</field>
+	        <field name="res_model">account.soa</field>
 		    <field name="view_type">form</field>
         </record>
         
-        <menuitem id="menu_soa" 
-            action="action_soa_form" 
+        <menuitem id="menu_account_soa" 
+            action="action_account_soa_form" 
             parent="account.menu_finance_payables"
             sequence="20" 
             groups="base.group_user"/>  
