@@ -32,13 +32,12 @@
     'update_xml': ["data.xml","ntm_extensions_view.xml"
                    ,"users_view.xml","account_revaluation_view.xml",
                    "wizard/user_set_location_view.xml",
-                   "wizard/soa_sender.xml",
                    "soa_view.xml",
                    "wizard/dbf_reader.xml",
                    "wizard/account_analytic_statement_view.xml"
                    ,"forex_view.xml","forex_data.xml","account_pettycash/account_pettycash_view.xml"
                    ,"account_pettycash/pc_sequence.xml","account_pettycash/pcr_view.xml","account_pettycash/pcl_view.xml","fund_transfer_view.xml"
-                   ,"account_pettycash/crs_view.xml","opening_balance.xml","ntm_menus.xml"],
+                   ,"account_pettycash/crs_view.xml","opening_balance.xml","bank_transfer_view.xml","ntm_menus.xml"],
     'demo_xml': [
     ],
     'test': [
