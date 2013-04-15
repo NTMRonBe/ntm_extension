@@ -70,11 +70,6 @@
                     <field name="account_code"/>
                     <field name="period_id"/>
                     <field name="exchange_rate"/>
-                    <button string="Check"
-                                            type="object"
-                                            name="data_get"
-                                            icon="gtk-execute"
-                                            />
                 </tree>
             </field>
         </record>
@@ -113,9 +108,12 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string = "Statement of Account Request">
-                    <field name="name"/>
-                    <field name="email_from"/>
-                    <field name="email_adds" colspan="4"/>
+                    <group colspan="6" col="6">
+	                    <field name="name"/>
+	                    <field name="email_from"/>
+	                    <field name="generated"/>
+	                    <field name="email_adds" colspan="6"/>
+                    </group>
                 </form>
             </field>
         </record>        
@@ -127,6 +125,11 @@
                 <tree string="Statement of Accounts Request">
                     <field name="name"/>
                     <field name="email_from"/>
+                    <button string="Reply"
+                                            type="object"
+                                            name="create_reply"
+                                            icon="gtk-execute"
+                                            />
                 </tree>
             </field>
         </record>

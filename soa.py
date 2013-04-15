@@ -4,7 +4,11 @@ from osv import osv, fields, orm
 import netsvc
 import pooler
 import psycopg2
+import tools
+import wizard
 from tools.translate import _
+import os
+
 
 class soa_request(osv.osv):
     _name = 'soa.request'
@@ -33,7 +37,52 @@ class soa_request(osv.osv):
     def create_reply(self, cr, uid, ids, context=None):
         for requests in self.pool.get('soa.request').search(cr, uid, [('generated','=',False)]):
             request_read = self.pool.get('soa.request').read(cr, uid, requests, context=None)
-            netsvc.Logger().notifyChannel("request_read", netsvc.LOG_INFO, ' '+str(request_read))
+            subj = request_read['name']
+            subj_split = subj.split(':')
+            subj_split_period_code = subj_split[1].split(',')
+            code = subj_split_period_code[1]
+            period = subj_split_period_code[0]
+            netsvc.Logger().notifyChannel("subj_split", netsvc.LOG_INFO, ' '+str(subj_split_period_code))
+            acc_search = self.pool.get('account.analytic.account').search(cr, uid, [('code','ilike',code)])
+            period_search = self.pool.get('account.period').search(cr, uid, [('name','ilike',period)])
+            netsvc.Logger().notifyChannel("period_search", netsvc.LOG_INFO, ' '+str(period_search))
+            smtp_login = self.pool.get('email_template.account').search(cr, uid, [('smtpuname','ilike','openerp'),('company','=','yes')])
+            use_smtp= False
+            for smtp in smtp_login:
+                use_smtp = smtp
+            if not acc_search:
+                raise osv.except_osv(_('Error !'), _('There is no existing account with account code %s')%code)
+            elif acc_search:
+                netsvc.Logger().notifyChannel("acc_search", netsvc.LOG_INFO, ' '+str(acc_search))
+                if not period_search:
+                    raise osv.except_osv(_('Error !'), _('Period %s is not existing!')%period)
+                elif period_search:
+                    for acc in acc_search:
+                        for period_id in period_search:
+                            check_soa = self.pool.get('account.soa').search(cr, uid, [('account_number','=',acc),('period_id','=',period_id)])
+                            if check_soa:
+                                for soa_id in check_soa:
+                                    smtp_acct = self.pool.get('email_template.account').read(cr, uid, use_smtp,['email_id'])
+                                    account_id = use_smtp
+                                    subject = 'Re:' + subj
+                                    email_to = request_read['email_adds']
+                                    values = {
+                                            'account_id':account_id,
+                                            'email_to':email_to,
+                                            'folder':'outbox',
+                                            'body_text':'This is a test',
+                                            'subject':subject,
+                                            'state':'na',
+                                            'server_ref':0
+                                            }
+                                    email_lists = []
+                                    email_created = self.pool.get('email_template.mailbox').create(cr, uid, values)
+                                    email_lists.append(email_created)
+                                    soa_attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','account.soa'),('res_id','=',soa_id)])
+                                    for soa_attachment in soa_attachments:
+                                        query=("""insert into mail_attachments_rel(mail_id,att_id)values(%s,%s)"""%(email_created,soa_attachment))
+                                        cr.execute(query)
+        return True
             
 soa_request()
 
@@ -83,7 +132,7 @@ class soa_add_line(osv.osv):
             soa_reader = self.pool.get('account.soa').read(cr, uid, statement, context=None)
             for aal in self.pool.get('account.analytic.line').search(cr, uid, [('account_id','=',soa_reader['account_number'][0]),('move_id.period_id','=',soa_reader['period_id'][0])]):
                 aal_read = self.pool.get('account.analytic.line').read(cr, uid, aal, ['date'])
-                netsvc.Logger().notifyChannel("aal_read", netsvc.LOG_INFO, ' '+str(aal_read))
+                #netsvc.Logger().notifyChannel("aal_read", netsvc.LOG_INFO, ' '+str(aal_read))
                 aal_check = self.pool.get('account.soa.line').search(cr, uid, [('link_to','=',aal)])
                 if not aal_check:
                     values = {
@@ -121,18 +170,13 @@ class soa_add_line(osv.osv):
             attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','account.soa'),('res_id','=',rec)])
             self.pool.get('ir.attachment').unlink(cr, uid, attachments)
             statements.append(rec)
-        netsvc.Logger().notifyChannel("statements", netsvc.LOG_INFO, ' '+str(statements))
+        #netsvc.Logger().notifyChannel("statements", netsvc.LOG_INFO, ' '+str(statements))
         datas = {
             'ids':statements,
             'model':'account.soa',
             'form':data
             }
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': 'account.soa',
-            'nodestroy':True,
-            'datas': datas,
-            }
+        return {'type': 'ir.actions.report.xml', 'report_name': 'account.soa', 'nodestroy':True,'datas': datas,}
         
     def data_get_print(self, cr, uid, ids, context=None):
         datas = {}
@@ -142,7 +186,7 @@ class soa_add_line(osv.osv):
         for data in self.read(cr, uid, ids, ['id']):
             rec = data['id']
             statements.append(rec)
-        netsvc.Logger().notifyChannel("statements", netsvc.LOG_INFO, ' '+str(statements))
+        #netsvc.Logger().notifyChannel("statements", netsvc.LOG_INFO, ' '+str(statements))
         datas = {
             'ids':statements,
             'model':'account.soa',
@@ -154,11 +198,35 @@ class soa_add_line(osv.osv):
             'nodestroy':True,
             'datas': datas,
             }
-        
+    def create_soa_attachment(self, cr, uid, ids, context=None):
+        root = tools.config['root_path']
+        try:
+            os.makedirs(root+'/pdfs/')
+        except OSError:
+            pass
+        for soa_read in self.read(cr, uid, ids, context=None):
+            period = soa_read['period_id'][1]
+            netsvc.Logger().notifyChannel("period", netsvc.LOG_INFO, ' '+str(period))
+            split_period = period.split('/')
+            period = str(split_period[0])+'_'+split_period[1]
+            account = soa_read['account_number'][0]
+            account_read = self.pool.get('account.analytic.account').read(cr, uid, account,['name','code'])
+            file_name = account_read['code'] +'_'+period
+            file = root+'/pdfs/'+file_name+'.pdf'
+            service = netsvc.LocalService("report.account.soa")
+            (result,format) = service.create(cr, uid, [soa_read['id']],{'model':'account.soa'})
+            fp = open(file,'w+');
+            try:
+                fp.write(result);
+            finally:
+                fp.close();
+        return (True, file)
+    
     def gen_report(self,cr, uid, ids, context=None):
         date = datetime.datetime.now()
         period = date.strftime("%m/%Y")
         statements = self.pool.get('account.soa').search(cr, uid, [('period_id.name','=',period)])
-        self.pool.get('account.soa').data_get_print(cr, uid, statements)
+        self.pool.get('account.soa').create_soa_attachment(cr, uid, statements)
         return True
+        
 soa_add_line()
