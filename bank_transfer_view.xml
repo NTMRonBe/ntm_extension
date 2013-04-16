@@ -2,22 +2,34 @@
 <openerp>
     <data>
     
-    <record id="view_ntm_res_partner_bank_form" model="ir.ui.view">
+        <record id="view_ntm_res_partner_bank_form" model="ir.ui.view">
             <field name="name">ntm.res.partner.bank.inherit</field>
             <field name="model">res.partner.bank</field>
             <field name="type">form</field>
             <field name="priority">2</field>
             <field name="inherit_id" ref="base.view_partner_bank_form"/>
             <field name="arch" type="xml">
-            <field name="partner_id" position="replace">
-                <field name="partner_id" attrs="{'invisible':[('ownership','=','company')],'required':[('ownership','=','entity')]}"/>
+                <field name="partner_id" position="replace">
+                    <field name="partner_id" attrs="{'invisible':[('ownership','=','company')],'required':[('ownership','=','entity')]}"/>
                 </field>
                 <field name="acc_number" position="after">
                     <field name="ownership" required="1" invisible="1"/>
+                    <field name="type" required="True"/>
                 </field>
             </field>
         </record>
-        
+        <record id="bank_account_journal_ntm_form" model="ir.ui.view">
+            <field name="name">bank.account.journal.ntm.form</field>
+            <field name="model">account.journal</field>
+            <field name="type">form</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <field name="default_credit_account_id" position="after">
+                    <field name="bank_id"/>
+                </field>
+            </field>
+        </record>
 		<record model="ir.ui.view" id="view_bank_transfer_tree">
             <field name="name">bank.transfer.tree</field>
             <field name="model">bank.transfer</field>
@@ -62,21 +74,37 @@
 	                    <field name="handler"/>
 	                    <field name="ref"/>
                     </group>
-                    <separator string="Transfer Lines" colspan="6"/>
-                    <group colspan="6" col="6">
-	                    <field colspan="6" mode="tree,form" name="line_ids" nolabel="1" height="300">
-	                       <tree string="Transfer Lines" editable="bottom">
-	                           <field name="partner_id" on_change="onchange_partner(partner_id)"/>
-	                           <field name="account_number"/>
-	                           <field name="analytic_id" domain="[('partner_id','=',partner_id)]"/>
-	                       </tree>
-	                       <form string="Transfer Line">
-                               <field name="partner_id" on_change="onchange_partner(partner_id)"/>
-                               <field name="account_number"/>
-                               <field name="analytic_id"/>
-                           </form>
-	                    </field>
-                    </group>
+                    <notebook>
+                        <page string="Savings and Checking Accounts">
+		                    <group colspan="6" col="2">
+			                    <field colspan="6" mode="tree,form" name="line_ids" nolabel="1">
+			                       <tree string="Transfer Lines" editable="bottom">
+			                           <field name="partner_id" on_change="onchange_partner(partner_id)"/>
+			                           <field name="account_number" domain="[('type','=',type),('partner_id','=',partner_id)]"/>
+			                           <field name="analytic_id" domain="[('partner_id','=',partner_id)]"/>
+			                           <field name="amount"/>
+			                           <field name="type"/>
+			                       </tree>
+			                       <form string="Transfer Line">
+		                               <field name="partner_id" on_change="onchange_partner(partner_id)"/>
+		                               <field name="account_number"/>
+		                               <field name="analytic_id"/>
+		                               <field name="amount"/>
+		                               <field name="type" invisible="True"/>
+		                           </form>
+			                    </field>
+		                    </group>
+		                    <group colspan="4" col="13">
+		                        <field name="state" select="1"/>
+		                        <button name="complete" attrs="{'invisible':[('state','!=','draft')]}" string="Transfer"  type="object" icon="gtk-jump-to"/>
+		                        <button name="cancel" attrs="{'invisible':[('state','!=','done')]}" string="Transfer"  type="object" icon="gtk-jump-to"/>
+		                    </group>
+	                    </page>
+	                    <page string="Journal Entries">
+	                       <field name="move_id" colspan="6" readonly="1"/>
+	                       <field name="move_ids" colspan="6" readonly="1"/>
+	                    </page>
+                    </notebook>
                 </form>
             </field>
         </record>     

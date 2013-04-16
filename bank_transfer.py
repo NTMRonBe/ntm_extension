@@ -18,7 +18,7 @@ class bank_transfer(osv.osv):
     _name = 'bank.transfer'
     _description = 'Bank Transfer'
     _columns = {
-        'name':fields.char('Transfer ID',size=64),
+        'name':fields.char('Transfer ID',size=64,readonly=True),
         'date':fields.date('Transfer Date'),
         'handler':fields.many2one('res.users','Handler'),
         'journal_id':fields.many2one('account.journal','Bank Journal'),
@@ -26,13 +26,18 @@ class bank_transfer(osv.osv):
         'ref':fields.char('Reference',size=64),
         'state':fields.selection([
                             ('draft','Draft'),
-                            ('confirm','Confirm'),
                             ('done','Transferred'),
                             ],'State'),
+        'move_id':fields.many2one('account.move','Move Name'),
+        'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
+        
         }
     _defaults = {
             'state':'draft',
+            'name':'NEW',
             'period_id':_get_period,
+            'date' : lambda *a: time.strftime('%Y-%m-%d'),
+            'handler' : lambda cr, uid, id, c={}: id,
             }
 bank_transfer()
 
@@ -41,30 +46,18 @@ class bank_transfer_line(osv.osv):
     _description = 'Bank Transfer Lines'
     _columns = {
         'transfer_id':fields.many2one('bank.transfer','Transfer ID',ondelete='cascade'),
-        'partner_id':fields.many2one('res.partner','Partner'),
-        'account_number':fields.many2one('res.partner.bank','Bank Account'),
-        'analytic_id':fields.many2one('account.analytic.account','Account'),
+        'partner_id':fields.many2one('res.partner','Partner', required=True),
+        'account_number':fields.many2one('res.partner.bank','Bank Account', required=True),
+        'analytic_id':fields.many2one('account.analytic.account','Account', required=True),
+        'amount':fields.float('Amount', required=True),
+        'type':fields.selection([
+                            ('savings','Savings'),
+                            ('checking','Checking'),
+                            ],'Type', required=True),
         }
-
-    def on_change_act1(self, cr, uid, ids, bank_account1_id=False):
-        result = {}
-        currency_id=0
-        if bank_account1_id:
-            account = self.pool.get('account.account').browse(cr, uid, bank_account1_id)
-            if account.currency_id:
-                currency_id = account.currency_id.id
-            elif not account.currency_id:
-                currency_id = account.company_currency_id.id
-            result = {'value':{
-                    'currency_one':currency_id,
-                      }
-                }
-        return result
 
     def onchange_partner(self, cr, uid, ids, partner_id=False):
         result = {}
-        ctr = 0
-        bank_account = False
         acc_account = False
         if partner_id:
             partner_read = self.pool.get('res.partner').read(cr, uid, partner_id,['name'])
@@ -72,14 +65,6 @@ class bank_transfer_line(osv.osv):
             bank_ids = self.pool.get('res.partner.bank').search(cr, uid, [('partner_id','=',partner_id)])
             if not bank_ids:
                 raise osv.except_osv(_('Error !'), _('%s has no bank account defined. Please define one.')%partner_name)
-            elif bank_ids:
-                for bank_id in bank_ids:
-                    ctr += 1
-                    bank_account = bank_id
-                if ctr > 1:
-                    raise osv.except_osv(_('Error !'), _('%s has %s bank accounts defined. Multiple bank accounts are not allowed')%(partner_name,ctr))
-                elif ctr==1:
-                    bank_account = bank_account
             acc_ids = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',partner_id)])
             if not acc_ids:
                 raise osv.except_osv(_('Error !'), _('%s has no analytic account defined. Please define one.')%partner_name)
@@ -89,17 +74,15 @@ class bank_transfer_line(osv.osv):
                     acc_ctr += 1
                     acc_account = acc_id
                 if acc_ctr > 1:
-                    raise osv.except_osv(_('Error !'), _('%s has %s bank accounts defined. Multiple bank accounts are not allowed')%(partner_name, ctr))
-                elif ctr==1:
+                    raise osv.except_osv(_('Error !'), _('%s has %s bank accounts defined. Multiple bank accounts are not allowed')%(partner_name, acc_ctr))
+                elif acc_ctr==1:
                     acc_account = acc_account
             result = {'value':{
-                    'account_number':bank_account,
                     'analytic_id':acc_account,
                     }
                 }
         elif not partner_id:
             result = {'value':{
-                    'account_number':False,
                     'analytic_id':False,
                     }
                 }
@@ -111,8 +94,63 @@ class bt(osv.osv):
     _columns = {
         'line_ids':fields.one2many('bank.transfer.line','transfer_id','Transfer Lines'),
         }
-    #def confirm(self, cr, uid, ids, context=None):
-    #    for bt in self.read(cr, uid, ids, context=None):
+    
+    def complete(self, cr, uid, ids, context=None):
+        move_pool = self.pool.get('account.move')
+        journal_pool = self.pool.get('account.journal')
+        move_line_pool = self.pool.get('account.move.line')
+        line_pool = self.pool.get('bank.transfer.line')
+        analytic_pool = self.pool.get('account.analytic.account')
+        for bt in self.read(cr, uid, ids, context=None):
+            move = {
+                        'journal_id':bt['journal_id'][0],
+                        'period_id':bt['period_id'][0],
+                        'date':bt['date'],
+                        'ref':bt['ref'],
+                        }
+            amount = 0.00
+            move_id = move_pool.create(cr, uid, move)
+            for lines in bt['line_ids']:
+                read_line = line_pool.read(cr, uid, lines, context=None)
+                analytic_read = analytic_pool.read(cr, uid, read_line['analytic_id'][0],context=None)
+                netsvc.Logger().notifyChannel("read_line['account_number'][1]", netsvc.LOG_INFO, ' '+str(read_line['account_number'][1]))
+                if analytic_read['normal_account']:
+                    credit = {
+                        'name':read_line['account_number'][1],
+                        'journal_id':bt['journal_id'][0],
+                        'period_id':bt['period_id'][0],
+                        'date':bt['date'],
+                        'account_id':analytic_read['normal_account'][0],
+                        'debit':read_line['amount'],
+                        'analytic_account_id':read_line['analytic_id'][0],
+                        'move_id':move_id,
+                    }
+                    move_line_pool.create(cr, uid, credit)
+                    amount +=read_line['amount']
+            journal_read = journal_pool.read(cr, uid, bt['journal_id'][0],['default_debit_account_id','bank_id'])
+            debit = {
+                        'name':bt['ref'],
+                        'journal_id':bt['journal_id'][0],
+                        'period_id':bt['period_id'][0],
+                        'date':bt['date'],
+                        'account_id':journal_read['default_debit_account_id'][0],
+                        'credit':amount,
+                        'move_id':move_id,
+                        }
+            move_line_pool.create(cr, uid, debit)
+            values = {
+                'state':'done',
+                'move_id':move_id,
+                }
+            self.write(cr, uid, [bt['id']],values)
+        return True       
+    
+    def cancel(self, cr, uid, ids, context=None):
+        for bt in self.read(cr, uid, ids, context=None):
+            move_id = bt['move_id'][0]
+            self.pool.get('account.move').unlink(cr, uid, [move_id])
+        return self.write(cr, uid, ids, {'state':'draft'})
+                
             
             
 bt()
@@ -125,7 +163,18 @@ class res_partner_bank(osv.osv):
         'ownership':fields.selection([
                                  ('company','Company Account'),
                                  ('entity','Entity Account')
-                                 ],'Type'),
+                                 ],'Ownership'),
+        'type':fields.selection([
+                            ('savings','Savings'),
+                            ('checking','Checking'),
+                            ],'Type', required=True),
         }
 res_partner_bank()
-#class 
+
+
+class account_journal(osv.osv):
+    _inherit = 'account.journal'
+    _columns = {
+        'bank_id':fields.many2one('res.partner.bank','Bank'),
+        }
+account_journal()
