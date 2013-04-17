@@ -2,6 +2,44 @@
 <openerp>
     <data>
     
+               <report id="report_bank_transfer_print"
+            string="Bank Transfer"
+            model="bank.transfer"
+            name="bank.transfer"
+            rml="ntm_extension/report/bank_transfer.rml"
+            auto="False"
+            attachment="(object.name)"
+            header = "False"
+            menu="True"/>
+            
+        <record id="btl_add_view" model="ir.ui.view">
+            <field name="name">Add Account</field>
+            <field name="model">bank.transfer.line.add</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+	            <form string="Add Account">
+	                <separator string="Add Account" colspan="6"/>
+		                <group colspan="6" col="6">
+		                    <field name="partner_id" on_change="onchange_partner(partner_id)"/>
+		                    <field name="account_number" domain="[('type','=',type),('partner_id','=',partner_id)]"/>
+                            <field name="analytic_id" domain="[('partner_id','=',partner_id)]"/>
+		                    <field name="amount"/>
+		                    <field name="type"/>
+		                </group>
+		                <button name="add_account" string="Add Account" type="object" icon="terp-camera_test"/>
+	            </form>
+            </field>
+        </record>
+
+        <record id="action_btl_add" model="ir.actions.act_window">
+            <field name="name">Add Account</field>
+            <field name="res_model">bank.transfer.line.add</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="btl_add_view"/>
+            <field name="target">new</field>
+        </record>
+    
         <record id="view_ntm_res_partner_bank_form" model="ir.ui.view">
             <field name="name">ntm.res.partner.bank.inherit</field>
             <field name="model">res.partner.bank</field>
@@ -73,38 +111,61 @@
 	                    <field name="date"/>
 	                    <field name="handler"/>
 	                    <field name="ref"/>
+	                    <field name="amount" readonly="True"/>
                     </group>
                     <notebook>
                         <page string="Savings and Checking Accounts">
+                        <button name="%(action_btl_add)d" states="draft" string="Add Account" type="action" icon="terp-camera_test"/>
+                        <separator string="Savings Accounts" colspan="6"/>
 		                    <group colspan="6" col="2">
-			                    <field colspan="6" mode="tree,form" name="line_ids" nolabel="1">
-			                       <tree string="Transfer Lines" editable="bottom">
-			                           <field name="partner_id" on_change="onchange_partner(partner_id)"/>
+			                    <field colspan="6" mode="tree,form" name="savings_ids" nolabel="1" domain="[('type','=','savings')]" readonly="True">
+			                       <tree string="Savings Accounts" editable="bottom">
+			                           <field name="partner_id"/>
 			                           <field name="account_number" domain="[('type','=',type),('partner_id','=',partner_id)]"/>
 			                           <field name="analytic_id" domain="[('partner_id','=',partner_id)]"/>
 			                           <field name="amount"/>
-			                           <field name="type"/>
+			                           <field name="type" invisible="True"/>
 			                       </tree>
-			                       <form string="Transfer Line">
-		                               <field name="partner_id" on_change="onchange_partner(partner_id)"/>
+			                       <form string="Savings Accounts">
+		                               <field name="partner_id"/>
 		                               <field name="account_number"/>
 		                               <field name="analytic_id"/>
 		                               <field name="amount"/>
-		                               <field name="type" invisible="True"/>
+		                               <field name="type"/>
 		                           </form>
 			                    </field>
 		                    </group>
-		                    <group colspan="4" col="13">
-		                        <field name="state" select="1"/>
-		                        <button name="complete" attrs="{'invisible':[('state','!=','draft')]}" string="Transfer"  type="object" icon="gtk-jump-to"/>
-		                        <button name="cancel" attrs="{'invisible':[('state','!=','done')]}" string="Transfer"  type="object" icon="gtk-jump-to"/>
-		                    </group>
+		                    <separator string="Checking Accounts" colspan="6"/>
+		                    <group colspan="6" col="2">
+                                <field colspan="6" mode="tree,form" name="checking_ids" nolabel="1" readonly="True" domain="[('type','=','checking')]">
+                                   <tree string="Checking Accounts" editable="bottom">
+                                       <field name="partner_id"/>
+                                       <field name="account_number"/>
+                                       <field name="analytic_id"/>
+                                       <field name="amount"/>
+                                       <field name="type" invisible="True"/>
+                                   </tree>
+                                   <form string="Checking Accounts">
+                                       <field name="partner_id"/>
+                                       <field name="account_number"/>
+                                       <field name="analytic_id"/>
+                                       <field name="amount"/>
+                                       <field name="type" invisible="True"/>
+                                   </form>
+                                </field>
+                            </group>
 	                    </page>
 	                    <page string="Journal Entries">
 	                       <field name="move_id" colspan="6" readonly="1"/>
-	                       <field name="move_ids" colspan="6" readonly="1"/>
+	                       <field name="move_ids" colspan="6" readonly="1" nolabel="True"/>
 	                    </page>
                     </notebook>
+                    <group colspan="4" col="13">
+                                <field name="state" select="1"/>
+                                <button name="complete" attrs="{'invisible':[('state','!=','draft')]}" string="Transfer"  type="object" icon="gtk-jump-to"/>
+                                <button name="cancel" attrs="{'invisible':[('state','!=','done')]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
+                                <button string="Print Request" type="object" name="data_get" icon="gtk-execute" attrs="{'invisible':[('state','!=','done')]}" />
+                            </group>
                 </form>
             </field>
         </record>     

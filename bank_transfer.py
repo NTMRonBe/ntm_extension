@@ -30,7 +30,7 @@ class bank_transfer(osv.osv):
                             ],'State'),
         'move_id':fields.many2one('account.move','Move Name'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
-        
+        'amount':fields.float('Total Amount'),
         }
     _defaults = {
             'state':'draft',
@@ -55,7 +55,20 @@ class bank_transfer_line(osv.osv):
                             ('checking','Checking'),
                             ],'Type', required=True),
         }
+bank_transfer_line()
 
+class btl_add(osv.osv_memory):
+    _name = 'bank.transfer.line.add'
+    _columns = {
+        'partner_id':fields.many2one('res.partner','Partner', required=True),
+        'account_number':fields.many2one('res.partner.bank','Bank Account', required=True),
+        'analytic_id':fields.many2one('account.analytic.account','Account', required=True),
+        'amount':fields.float('Amount', required=True),
+        'type':fields.selection([
+                            ('savings','Savings'),
+                            ('checking','Checking'),
+                            ],'Type', required=True),
+        }
     def onchange_partner(self, cr, uid, ids, partner_id=False):
         result = {}
         acc_account = False
@@ -87,13 +100,50 @@ class bank_transfer_line(osv.osv):
                     }
                 }
         return result
-bank_transfer_line()
+    
+    def add_account(self, cr, uid, ids, context=None):
+        for add in self.read(cr, uid, ids, context=context):
+            if add['amount']<1.00:
+                raise osv.except_osv(_('Error !'), _('You can not have 0.00 as the amount for transfer!'))
+            elif add['amount']>0.00:
+                for id in context['active_ids']:
+                    lines = self.pool.get('bank.transfer.line').search(cr, uid, [('partner_id','=',add['partner_id']),
+                                                                                 ('account_number','=',add['account_number']),
+                                                                                 ('transfer_id','=',id)])
+                    if lines:
+                        raise osv.except_osv(_('Error !'), _('The account is already included!'))
+                    elif not lines:
+                        values = {
+                            'partner_id':add['partner_id'],
+                            'account_number':add['account_number'],
+                            'analytic_id':add['analytic_id'],
+                            'amount':add['amount'],
+                            'type':add['type'],
+                            'transfer_id':id,
+                            }
+                        self.pool.get('bank.transfer.line').create(cr, uid,values)
+        return {'type': 'ir.actions.act_window_close'}
+                    
+btl_add()
+    
 
 class bt(osv.osv):
     _inherit = 'bank.transfer'
     _columns = {
-        'line_ids':fields.one2many('bank.transfer.line','transfer_id','Transfer Lines'),
+        'savings_ids':fields.one2many('bank.transfer.line','transfer_id','Transfer Lines',domain=[('type','=','savings')]),
+        'checking_ids':fields.one2many('bank.transfer.line','transfer_id','Transfer Lines',domain=[('type','=','checking')]),
         }
+    
+    def def_name(self, cr, uid, ids, context=None):
+        for bt in self.read(cr, uid, ids, context=None):
+            if bt['name']=='NEW':
+                values = {
+                        'name':self.pool.get('ir.sequence').get(cr, uid, 'bank.transfer'),
+                        }
+                self.write(cr, uid, bt['id'],values)
+            elif bt['name']!='NEW':
+                return True
+        return True
     
     def complete(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
@@ -110,10 +160,25 @@ class bt(osv.osv):
                         }
             amount = 0.00
             move_id = move_pool.create(cr, uid, move)
-            for lines in bt['line_ids']:
+            for lines in bt['savings_ids']:
                 read_line = line_pool.read(cr, uid, lines, context=None)
                 analytic_read = analytic_pool.read(cr, uid, read_line['analytic_id'][0],context=None)
-                netsvc.Logger().notifyChannel("read_line['account_number'][1]", netsvc.LOG_INFO, ' '+str(read_line['account_number'][1]))
+                if analytic_read['normal_account']:
+                    credit = {
+                        'name':read_line['account_number'][1],
+                        'journal_id':bt['journal_id'][0],
+                        'period_id':bt['period_id'][0],
+                        'date':bt['date'],
+                        'account_id':analytic_read['normal_account'][0],
+                        'debit':read_line['amount'],
+                        'analytic_account_id':read_line['analytic_id'][0],
+                        'move_id':move_id,
+                    }
+                    move_line_pool.create(cr, uid, credit)
+                    amount +=read_line['amount']
+            for lines in bt['checking_ids']:
+                read_line = line_pool.read(cr, uid, lines, context=None)
+                analytic_read = analytic_pool.read(cr, uid, read_line['analytic_id'][0],context=None)
                 if analytic_read['normal_account']:
                     credit = {
                         'name':read_line['account_number'][1],
@@ -141,7 +206,9 @@ class bt(osv.osv):
             values = {
                 'state':'done',
                 'move_id':move_id,
+                'amount':amount,
                 }
+            self.def_name(cr, uid, [bt['id']])
             self.write(cr, uid, [bt['id']],values)
         return True       
     
@@ -150,6 +217,28 @@ class bt(osv.osv):
             move_id = bt['move_id'][0]
             self.pool.get('account.move').unlink(cr, uid, [move_id])
         return self.write(cr, uid, ids, {'state':'draft'})
+    
+    def data_get(self, cr, uid, ids, context=None):
+        datas = {}
+        statements = []
+        if context is None:
+            context = {}
+        for data in self.read(cr, uid, ids, ['id']):
+            rec = data['id']
+            attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','bank.transfer'),('res_id','=',rec)])
+            self.pool.get('ir.attachment').unlink(cr, uid, attachments)
+            statements.append(rec)
+        datas = {
+            'ids':statements,
+            'model':'bank.transfer',
+            'form':data
+            }
+        return {
+            'type': 'ir.actions.report.xml',
+            'report_name': 'bank.transfer',
+            'nodestroy':True,
+            'datas': datas,
+            }
                 
             
             
