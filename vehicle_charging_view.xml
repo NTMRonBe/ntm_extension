@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="vehicle_form" model="ir.ui.view">
+            <field name="name">vehicle.form</field>
+            <field name="model">vehicle</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Vehicle">
+                    <field name="name"/>
+                    <field name="km"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="vehicle_tree">
+            <field name="name">vehicle.tree</field>
+            <field name="model">vehicle</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Vehicles">
+                    <field name="name"/>
+                    <field name="km"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_vehicle_form">
+        	<field name="name">Vehicles</field>
+	        <field name="res_model">vehicle</field>
+		    <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_vehicle" 
+            action="action_vehicle_form" 
+            parent="account.menu_finance_payables"
+            sequence="60" 
+            groups="base.group_user"/>
+            
+
+
+        <record id="vehicle_log_form" model="ir.ui.view">
+            <field name="name">vehicle.log.form</field>
+            <field name="model">vehicle.log</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Vehicle Log">
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="start_km"/>
+                    <field name="end_km"/>
+                    <field name="kms"/>
+                    <field name="shared"/>
+                    <field name="distributed"/>
+                    <field name="vehicle_id"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="vehicle_log_tree">
+            <field name="name">vehicle.log.tree</field>
+            <field name="model">vehicle.log</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Vehicle Logs">
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="start_km"/>
+                    <field name="end_km"/>
+                    <field name="kms"/>
+                    <field name="shared"/>
+                    <field name="distributed"/>
+                    <field name="vehicle_id"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_vehicle_log_form">
+            <field name="name">Vehicle Logs</field>
+            <field name="res_model">vehicle.log</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_vehicle_log" 
+            action="action_vehicle_log_form" 
+            parent="account.menu_finance_payables"
+            sequence="70" 
+            groups="base.group_user"/>  
+  
+    </data>
+</openerp>
