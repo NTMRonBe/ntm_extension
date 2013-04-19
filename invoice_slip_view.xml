@@ -64,18 +64,11 @@
             </field>
         </record>      
         <record model="ir.actions.act_window" id="action_invoice_slip_upload_form">
-        	<field name="name">Invoice Slips Uploader</field>
+        	<field name="name">Uploader</field>
 	        <field name="res_model">invoice.slip.upload</field>
 		    <field name="view_type">form</field>
         </record>
 
-        
-        <menuitem id="menu_invoice_slip_upload" 
-            action="action_invoice_slip_upload_form" 
-            parent="account.menu_finance_periodical_processing"
-            sequence="100" 
-            groups="base.group_user"/>  
-         
         
         <!-- Invoice Slips -->
 		<record model="ir.ui.view" id="view_invoice_slip_form">
@@ -152,16 +145,9 @@
             </field>
         </record>      
         <record model="ir.actions.act_window" id="action_invoice_slip_form">
-        	<field name="name">Invoice Slips</field>
+        	<field name="name">Invoices</field>
 	        <field name="res_model">invoice.slip</field>
 		    <field name="view_type">form</field>
         </record>
-
-        
-        <menuitem id="menu_invoice_slip" 
-            action="action_invoice_slip_form" 
-            parent="account.menu_finance_periodical_processing"
-            sequence="110" 
-            groups="base.group_user"/>  
        </data>
 </openerp>

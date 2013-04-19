@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+    <!-- 
     
                <report id="report_bank_transfer_print"
             string="Bank Transfer"
@@ -10,7 +11,7 @@
             auto="False"
             attachment="(object.name)"
             header = "False"
-            menu="True"/>
+            menu="True"/> -->
             
         <record id="btl_add_view" model="ir.ui.view">
             <field name="name">Add Account</field>

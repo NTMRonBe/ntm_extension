@@ -10,3 +10,4 @@ import fund_transfer
 import soa
 import bank_transfer
 import vehicle_charging
+import invoice_slip
