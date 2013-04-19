@@ -160,44 +160,7 @@ class soa_add_line(osv.osv):
                         }
                     self.pool.get('account.soa').create(cr, uid, values)
         return True
-    def data_get(self, cr, uid, ids, context=None):
-        datas = {}
-        statements = []
-        if context is None:
-            context = {}
-        for data in self.read(cr, uid, ids, ['id']):
-            rec = data['id']
-            attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','account.soa'),('res_id','=',rec)])
-            self.pool.get('ir.attachment').unlink(cr, uid, attachments)
-            statements.append(rec)
-        #netsvc.Logger().notifyChannel("statements", netsvc.LOG_INFO, ' '+str(statements))
-        datas = {
-            'ids':statements,
-            'model':'account.soa',
-            'form':data
-            }
-        return {'type': 'ir.actions.report.xml', 'report_name': 'account.soa', 'nodestroy':True,'datas': datas,}
-        
-    def data_get_print(self, cr, uid, ids, context=None):
-        datas = {}
-        statements = []
-        if context is None:
-            context = {}
-        for data in self.read(cr, uid, ids, ['id']):
-            rec = data['id']
-            statements.append(rec)
-        #netsvc.Logger().notifyChannel("statements", netsvc.LOG_INFO, ' '+str(statements))
-        datas = {
-            'ids':statements,
-            'model':'account.soa',
-            'form':data
-            }
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': 'account.soa',
-            'nodestroy':True,
-            'datas': datas,
-            }
+    
     def create_soa_attachment(self, cr, uid, ids, context=None):
         root = tools.config['root_path']
         try:

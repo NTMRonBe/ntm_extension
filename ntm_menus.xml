@@ -6,7 +6,7 @@
         <menuitem id="account.menu_finance_receivables" name="Donors" sequence="10" web_icon="images/donation_box_icon_bw.jpg"
             web_icon_hover="images/donation_box_icon_hover.jpg" action="base.action_partner_customer_form"/>
         <menuitem id="account.menu_finance_payables" name="People and Projects" sequence="20" web_icon="images/people_and_projects.png"
-            web_icon_hover="images/people_and_projects_hover.png"/>
+            web_icon_hover="images/people_and_projects_hover.png" action="base.action_partner_supplier_form"/>
         <menuitem id="base.menu_base_partner" groups="base.group_no_one"/>
         <menuitem id="account.menu_action_invoice_tree1" groups="base.group_no_one"/>
         <menuitem id="account.menu_action_invoice_tree2" groups="base.group_no_one"/>
@@ -23,14 +23,20 @@
         <menuitem id="fund_transfer_b2b" parent="fund_transfers" sequence="10" action="action_fund_transfer_b2b_tree"/>
         <menuitem id="fund_transfer_a2a" parent="fund_transfers" sequence="20" action="action_fund_transfer_a2a_tree"/>
         <menuitem id="fund_transfer_p2b" parent="fund_transfers" sequence="30" action="action_fund_transfer_p2b_tree"/>
+        <menuitem id="bank_transfer" parent="fund_transfers" sequence="40" action="action_bank_transfer_tree"/>
         <!-- <menuitem id="base.menu_mail_gateway" name="Emails" parent="base.menu_config" sequence="30"/>
         #<menuitem id="base.menu_base_action_rule" name="Automated Actions" parent="base.menu_config" sequence="30"/> -->
         <menuitem id="account.menu_finance" sequence="50"/>
         <menuitem id="base.menu_mail_gateway" parent="base.menu_emails" name="POP/IMAP"/>
         <menuitem id="base.menu_tools" groups="base.group_no_one"/>
-        
-        
-        
+        <menuitem id="menu_action_ntm_res_partner_bank_entity_form" parent="account.menu_finance_payables" sequence="50" action="action_ntm_res_partner_bank_entity_tree"/>
+        <menuitem id="menu_action_ntm_res_partner_bank_company_form" parent="base.menu_res_company_global" sequence="50" action="action_ntm_res_partner_bank_company_tree"/>
+        <menuitem id="main_soa" name="Statement of Accounts" parent="account.menu_finance_payables" sequence="20"/>
+        <menuitem id="menu_account_soa" action="action_account_soa_form" parent="main_soa" sequence="20" groups="base.group_user"/> 
+        <menuitem id="menu_soa_request" action="action_soa_request_form" parent="main_soa" sequence="30" groups="base.group_user"/>
+        <menuitem id="main_regional" name="Regional Reports" parent="account.menu_finance_payables" sequence="30"/>
+        <menuitem id="menu_invoice_slip_upload" action="action_invoice_slip_upload_form" parent="main_regional" sequence="20"/>
+        <menuitem id="menu_invoice_slip" action="action_invoice_slip_form" parent="main_regional" sequence="30" groups="base.group_user"/>
         
       <!-- Actions -->
         <record id="base.action_partner_customer_form" model="ir.actions.act_window">
