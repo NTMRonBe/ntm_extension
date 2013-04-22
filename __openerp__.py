@@ -33,6 +33,7 @@
                    ,"users_view.xml","account_revaluation_view.xml",
                    "wizard/user_set_location_view.xml",
                    "soa_view.xml",
+                   "wizard/upload_view.xml",
                    "wizard/dbf_reader.xml",
                    "wizard/account_analytic_statement_view.xml"
                    ,"forex_view.xml","forex_data.xml","account_pettycash/account_pettycash_view.xml"

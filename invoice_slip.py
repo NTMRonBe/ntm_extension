@@ -5,22 +5,56 @@ import pooler
 import psycopg2
 from tools.translate import _
 
+class regional_expenses(osv.osv):
+    _name = 'regional.expenses'
+    _description = 'Regional Expenses'
+    _columns = {
+        'name':fields.char('Expense Name',size=64),
+        'code':fields.char('Code',size=16,help = "Please use small caps"),
+        }
+regional_expenses()
+
+class regional_configuration(osv.osv):
+    _name = 'regional.configuration'
+    _description = "Regional Branches"
+    _columns = {
+        'name':fields.char('Name',size=64),
+        'code':fields.char('Code',size=16),
+        }
+regional_configuration()
+
+class regional_configuration_expenses(osv.osv):
+    _name = 'regional.configuration.expenses'
+    _description = "Branch Expenses"
+    _columns = {
+        'expense_id':fields.many2one('regional.expenses','Expense Name'),
+        'journal_id':fields.many2one('account.journal','Normal Journal'),
+        'analytic_account':fields.many2one('account.analytic.account','Analytic Account'),
+        'regional_config_id':fields.many2one('regional.configuration','Regional Configuration',ondelete='cascade'),
+        }
+regional_configuration_expenses()
+
+class rc(osv.osv):
+    _inherit = 'regional.configuration'
+    _columns = {
+        'expense_ids':fields.one2many('regional.configuration.expenses','regional_config_id','Expenses'),
+        }
+rc()
+
 class invoice_slip_upload(osv.osv):
     _name = 'invoice.slip.upload'
     _description='Invoice Slips / Regional Files Uploader'
     _columns = {
             'transaction_id':fields.char('Transaction ID',size=64),
             'transaction_type':fields.char('Transaction Type',size=64),
-            'debit_account':fields.char('Debit Account',size=16),
-            'debit_fullname':fields.char('Account Name',size=100),
+            'partner_id':fields.char('Missionary',size=64),
             'comment':fields.text('Memo'),
-            'invoice_date':fields.date('Invoice Date'),
+            'trans_date':fields.date('Invoice Date'),
             'user_id':fields.char('Encoder',size=100),
-            'credit_account':fields.char('Credit Account',size=16),
-            'credit_fullname':fields.char('Account Name',size=100),
-            'currency':fields.many2one('res.currency','Currency ID'),
             'imported':fields.boolean('Imported'),
             'amount':fields.float('Amount'),
+            'region_id':fields.char('Region Code',size=6),
+            'expense_code':fields.char('Expense Code',size=16),
             }
 invoice_slip_upload()
 
@@ -36,17 +70,16 @@ class invoice_slip(osv.osv):
     _columns = {
             'transaction_id':fields.char('Transaction ID',size=64),
             'transaction_type':fields.char('Transaction Type',size=64),
-            'debit_account':fields.many2one('account.analytic.account','Debit Account'),
-            'comment':fields.text('Memo'),
-            'journal_id':fields.many2one('account.journal','Journal'),
-            'invoice_date':fields.date('Invoice Date'),
+            'region_id':fields.many2one('regional.configuration','Region'),
+            'trans_date':fields.date('Invoice Date'),
             'period_id':fields.many2one('account.period','Period'),
             'user_id':fields.char('Encoder',size=100),
-            'credit_account':fields.many2one('account.account','Credit Account'),
-            'currency':fields.many2one('res.currency','Currency ID'),
             'line_ids': fields.one2many('invoice.slip.line', 'slip_id', 'Invoice Slip Lines '),
             'state':fields.selection([('draft','Draft'),('posted','Posted')],'State'),
+            'partner_id':fields.many2one('res.partner','Missionary'),
             }
+    
+    _defaults = {'state':'draft'}
     
     _order = 'invoice_date desc'
     def create(self, cr, uid, vals, context=None):
@@ -70,9 +103,10 @@ class invoice_slip_line(osv.osv):
     _name = 'invoice.slip.line'
     _description = "Invoice Slip Lines"
     _columns = {
-        'name':fields.char('Item', size=64),
+        'expense_id':fields.many2one('regional.expenses','Expense Code'),
         'amount':fields.float('Amount',size=64),
-        'slip_id':fields.many2one('invoice.slip','Invoice Slip')
+        'comment':fields.text('Memo'),
+        'slip_id':fields.many2one('invoice.slip','Invoice Slip',ondelete='cascade')
         }
     def create(self, cr, uid, vals, context=None):
         new_id = super(invoice_slip_line, self).create(cr, uid, vals,context)

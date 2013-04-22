@@ -9,7 +9,6 @@
             <field name="arch" type="xml">
             <form string="Upload Slips">
             	<separator string="Fetching Entries" colspan="4"/>
-                <image name="terp-referer"/>
                 <label string="This will upload the regional invoice slips." colspan="2"/>
                 <separator colspan="4"/>
                     <group colspan="4" col="6">
@@ -21,22 +20,12 @@
         </record>
 
         <record id="action_upload_invoice_slips" model="ir.actions.act_window">
-            <field name="name">Upload Invoices</field>
+            <field name="name">Create Invoices from Uploaded Data</field>
             <field name="res_model">invoice.slip.upload.wizard</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
            <field name="view_id" ref="upload_invoice_wizard_view"/>
            <field name="target">new</field>
-        </record>
-
-        <record model="ir.values" id="invoice_slip_upload_values">
-            <field name="model_id" ref="ntm_extension.model_invoice_slip_upload" />
-            <field name="object" eval="1" />
-            <field name="name">Upload Invoices</field>
-            <field name="key2">client_action_multi</field>
-            <field name="value" eval="'ir.actions.act_window,' + str(ref('action_upload_invoice_slips'))" />
-            <field name="key">action</field>
-            <field name="model">invoice.slip.upload</field>
         </record>
 
     </data>
