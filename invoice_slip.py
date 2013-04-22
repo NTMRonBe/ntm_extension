@@ -20,6 +20,7 @@ class regional_configuration(osv.osv):
     _columns = {
         'name':fields.char('Name',size=64),
         'code':fields.char('Code',size=16),
+        'journal_id':fields.many2one('account.journal','Journal')
         }
 regional_configuration()
 
@@ -28,7 +29,6 @@ class regional_configuration_expenses(osv.osv):
     _description = "Branch Expenses"
     _columns = {
         'expense_id':fields.many2one('regional.expenses','Expense Name'),
-        'journal_id':fields.many2one('account.journal','Normal Journal'),
         'analytic_account':fields.many2one('account.analytic.account','Analytic Account'),
         'regional_config_id':fields.many2one('regional.configuration','Regional Configuration',ondelete='cascade'),
         }
@@ -88,14 +88,51 @@ class invoice_slip(osv.osv):
     def create_moves(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
         move_line_pool = self.pool.get('account.move.line')
-        
-        for inv in self.browse(cr, uid, ids):
+        for inv in self.read(cr, uid, ids,context=None):
+            region_read = self.pool.get('regional.configuration').read(cr, uid, inv['region_id'][0],['journal_id'])
+            amount = 0.00
             move = {
-                'name':inv.transaction_id,
-                'journal_id':inv.journal_id.id,
-                'date':inv.invoice_date,
-                'period_id':inv.period_id and inv.period_id.id or False,
+                'ref':inv['transaction_id'],
+                'journal_id':region_read['journal_id'][0],
+                'date':inv['trans_date'],
+                'period_id':inv['period_id'][0],
             }
+            move_id = move_pool.create(cr, uid, move)
+            for line in inv['line_ids']:
+                line_read = self.pool.get('invoice.slip.line').read(cr, uid, line, ['expense_id','amount','comment'])
+                amount +=line_read['amount']
+                expense_search = self.pool.get('regional.configuration.expenses').search(cr, uid, [('expense_id','=',line_read['expense_id'][0]),('regional_config_id','=',inv['region_id'][0])])
+                expense_id=False
+                for expense_line in expense_search:
+                    expense_read = self.pool.get('regional.configuration.expenses').read(cr, uid, expense_line,['analytic_account'])
+                    analytic_read = self.pool.get('account.analytic.account').read(cr, uid, expense_read['analytic_account'][0],['normal_account'])
+                    move_line = {
+                        'ref':inv['transaction_id'],
+                        'name':line_read['comment'],
+                        'journal_id':region_read['journal_id'][0],
+                        'period_id':inv['period_id'][0],
+                        'date':inv['trans_date'],
+                        'account_id':analytic_read['normal_account'][0],
+                        'credit':line_read['amount'],
+                        'analytic_account_id':expense_read['analytic_account'][0],
+                        'move_id':move_id,
+                        }
+                    move_line_pool.create(cr, uid, move_line)
+            partner_analytic = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',inv['partner_id'][0])])
+            if partner_analytic:
+                for partner_acc in partner_analytic:
+                    acc_read = self.pool.get('account.analytic.account').read(cr, uid, partner_acc,['id','normal_account'])
+                    debit = {
+                        'name':inv['transaction_id'],
+                        'journal_id':region_read['journal_id'][0],
+                        'period_id':inv['period_id'][0],
+                        'date':inv['trans_date'],
+                        'account_id':acc_read['normal_account'][0],
+                        'debit':amount,
+                        'analytic_account_id':acc_read['id'],
+                        'move_id':move_id,
+                        }
+                    move_line_pool.create(cr, uid, debit)
         return True
 invoice_slip()
 
