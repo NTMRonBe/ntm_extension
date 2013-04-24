@@ -49,12 +49,18 @@
                     </group>
                     <separator string="Accounts" colspan="6"/>
                     <group colspan="6" col="6">
-	                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}"/>
+	                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}" on_change = "onchange_pettycash(pettycash_id)"/>
+	                    <field name="curr_id" invisible="1"/>
 	                    <field name="src_account" attrs="{'invisible':[('type','!=','b2b')]}" domain="[('type','=','liquidity')]"/>
-	                    <field name="dest_account" attrs="{'invisible':[('type','not in',['b2b','p2b'])]}" domain="[('type','=','liquidity')]"/>
+	                    <field name="dest_account" attrs="{'invisible':[('type','=','p2b')]}" domain="[('type','=','liquidity')]"/>
+	                    <field name="dest_p2b_account" attrs="{'invisible':[('type','=','b2b')]}" domain="[('type','=','liquidity')]"/>
 	                    <field name="src_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
 	                    <field name="dest_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
 	                    <field name="amount"/>
+                    </group>
+                    <group colspan="6" col="2" attrs="{'invisible':[('type','!=','p2b')]}">
+                        <separator string="Denominations" colspan="6"/>
+                        <field name="denom_ids" nolabel="1" colspan="6" domain="[('name.currency_id','=',curr_id)]"/>
                     </group>
                     <group colspan="4" col="13">
                         <field name="state" select="1"/>
