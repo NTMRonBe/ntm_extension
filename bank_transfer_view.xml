@@ -55,6 +55,30 @@
                     <field name="ownership" required="1" invisible="1"/>
                     <field name="type" required="True"/>
                 </field>
+                <field name="state_id" position="after">
+                    <group colspan="6" col="6" attrs="{'invisible':[('ownership','!=','company')]}">
+                        <separator string="Account Details" colspan="6"/>
+                        <field name="journal_id" on_change="onchange_journal(journal_id)" attrs="{'required':[('ownership','=','company')]}"/>
+                        <field name="account_id"/>
+                        <field name="transit_id"/>
+                    </group>
+                </field>
+            </field>
+        </record>
+        
+        <record id="view_ntm_res_partner_bank_tree" model="ir.ui.view">
+            <field name="name">ntm.res.partner.bank.inherit.tree</field>
+            <field name="model">res.partner.bank</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="base.view_partner_bank_tree"/>
+            <field name="arch" type="xml">
+                <field name="owner_name" position="after">
+                    <field name="balance"/>
+                </field>
+                <field name="acc_number" position="after">
+                    <field name="currency_id"/>
+                </field>
             </field>
         </record>
         <record id="bank_account_journal_ntm_form" model="ir.ui.view">

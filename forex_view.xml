@@ -2,12 +2,6 @@
 <openerp>
     <data>
 		
-        <menuitem id="menu_forex_rate_parent"  
-            parent="account.menu_finance_periodical_processing"
-			name="Foreign Exchanges"
-            sequence="400" 
-            groups="base.group_user"/>
-            
     <!--Forex Transactions-->
         <record id="forex_transaction_form" model="ir.ui.view">
             <field name="name">forex.transaction.form</field>
@@ -15,19 +9,34 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string = "Forex Transaction">
+                        <group colspan="6" col="6">
+                        <field name="name"/>
                     	<field name="period_id"/>
                     	<field name="journal_id" domain="[('type','=','general')]"/>
+                    	</group>
                     	<group colspan="4" col="4">
                     	    <group colspan="2" col="2">
-                    	        <field name="currency_one" attrs="{'readonly': [('state','!=','draft')]}"/>
-                    	        <field name="bank_account1_id" on_change="on_change_act1(bank_account1_id)" attrs="{'readonly': [('state','!=','draft')]}"/>
-                    	        <field name="amount_currency1" attrs="{'readonly': [('state','!=','draft')]}"/>
+                    	        <field name="currency_one" attrs="{'readonly': [('state','!=','draft')]}" invisible="True"/>
+                    	        <field name="src" on_change="on_change_act1(src)" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Source Bank"/>
+                    	        <field name="src_amount" attrs="{'readonly': [('state','!=','draft')]}"/>
                     	    </group>
               				<group colspan="2" col="2">
-              				    <field name="currency_two" attrs="{'readonly': [('state','!=','draft')]}"/>
-                        		<field name="bank_account2_id" on_change="on_change_act2(bank_account2_id)" attrs="{'readonly': [('state','!=','draft')]}"/>
-                        		<field name="amount_currency2"/>
+              				    <field name="currency_two" attrs="{'readonly': [('state','!=','draft')]}" invisible="True"/>
+                        		<field name="dest" on_change="on_change_act2(dest)" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Destination Bank"/>
+                        		<field name="dest_amount"/>
               				</group>
+                        </group>
+                        <group colspan="4" col="4">
+                            <field mode="tree"  name="move_ids" colspan="4" nolabel="1">
+                                <tree string="Accounting Entries">
+                                    <field name="date"/>
+                                    <field name="account_id"/>
+                                    <field name="debit"/>
+                                    <field name="credit"/>
+                                    <field name="currency_id" string="Encoding Currency"/>
+                                    <field name="amount_currency" string="Encoding Amount"/>
+                                </tree>
+                            </field>
                         </group>
                         <group colspan="4" col="4">
                     	    <group colspan="2" col="2">
@@ -41,7 +50,7 @@
                     	    		<field name="rate" attrs="{'readonly': [('state','!=','draft')]}"/>
                     	    		<button string="Approve"
                                             type="object"
-                                            name="create_exchange"
+                                            name="post_exchange"
                                             icon="gtk-execute"
                                             attrs="{'invisible': [('state','!=','draft')]}"
                                             />
@@ -57,27 +66,12 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Forex Transaction">
-					    <field name="currency_one"/>
-                        <field name="currency_two"/>
-                        <field name="bank_account1_id"/>
-                        <field name="bank_account2_id"/>
-                        <field name="amount_currency1"/>
-                        <field name="amount_currency2"/>
+                        <field name="src"/>
+                        <field name="dest"/>
+                        <field name="src_amount"/>
+                        <field name="dest_amount"/>
                         <field name="rate"/>
                 </tree> 
-            </field>
-        </record>
-        <record id="forex_transaction_filter" model="ir.ui.view">
-		    <field name="name">forex.transaction.filter</field>
-            <field name="model">forex.transaction</field>
-            <field name="type">search</field>
-            <field name="arch" type="xml">
-                <search string="Forex Transaction">
-					    <field name="currency_one"/>
-                        <field name="currency_two"/>
-                        <field name="bank_account1_id"/>
-                        <field name="bank_account2_id"/>
-                </search>
             </field>
         </record>
         
@@ -85,12 +79,7 @@
         	<field name="name">Exchanges</field>
 	        <field name="res_model">forex.transaction</field>
 		    <field name="view_type">form</field>
+		    <field name="help">Forex transactions are monitored here.</field>
         </record>
-        
-        <menuitem id="menu_forex_transaction" 
-            action="action_forex_transaction_form" 
-            parent="menu_forex_rate_parent"
-            sequence="20" 
-            groups="base.group_user"/>  
     </data>
 </openerp>

@@ -257,7 +257,23 @@ class res_partner_bank(osv.osv):
                             ('savings','Savings'),
                             ('checking','Checking'),
                             ],'Type', required=True),
+        'journal_id':fields.many2one('account.journal','Bank Journal'),
+        'account_id':fields.many2one('account.account','Book Account Name'),
+        'transit_id':fields.many2one('account.account','Transit Account'),
+        'balance': fields.related('account_id','balance', type='float', string='Bank Balance', readonly=True),
+        'currency_id': fields.related('account_id','currency_id', type='many2one',relation='res.currency', string='Bank Balance', readonly=True),
         }
+    
+    def onchange_journal(self, cr, uid, ids, journal_id=False):
+        result = {}
+        if journal_id:
+            for bank in self.read(cr, uid, ids, context=None):
+                journal_read = self.pool.get('account.journal').read(cr, uid, journal_id,['default_debit_account_id','default_credit_account_id'])
+                result = {'value':{
+                            'account_id':journal_read['default_debit_account_id'][0],
+                            }} 
+        return result
+    
 res_partner_bank()
 
 
