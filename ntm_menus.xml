@@ -34,9 +34,19 @@
         <menuitem id="main_soa" name="Statement of Accounts" parent="account.menu_finance_payables" sequence="20"/>
         <menuitem id="menu_account_soa" action="action_account_soa_form" parent="main_soa" sequence="20" groups="base.group_user"/> 
         <menuitem id="menu_soa_request" action="action_soa_request_form" parent="main_soa" sequence="30" groups="base.group_user"/>
-        <menuitem id="main_regional" name="Regional Reports" parent="account.menu_finance_payables" sequence="30"/>
+        <menuitem id="regional_root" name="Regions" sequence="40"/>
+        <menuitem id="regional_config" parent ="regional_root" name="Configuration" sequence="40"/>
+        <menuitem id="main_regional" name="Regional Reports" parent="regional_root" sequence="30"/>
+        <menuitem id="menu_regional_config" action="action_regional_configuration_form" parent="regional_config" sequence="40"/>
+        <menuitem id="menu_regional_expenses" action="action_regional_expenses_form" parent="regional_config" sequence="40"/>
         <menuitem id="menu_invoice_slip_upload" action="action_invoice_slip_upload_form" parent="main_regional" sequence="20"/>
+        <menuitem id="menu_invoice_slip_upload_action" action="action_upload_invoice_slips" parent="main_regional" sequence="30"/>
         <menuitem id="menu_invoice_slip" action="action_invoice_slip_form" parent="main_regional" sequence="30" groups="base.group_user"/>
+        <menuitem id="menu_vehicle_root" name="Vehicles" parent="account.menu_finance_payables" sequence="60"/>
+        <menuitem id="menu_vehicle_log" action="action_vehicle_log_form"  parent="menu_vehicle_root" sequence="20" groups="base.group_user"/>  
+        <menuitem id="menu_vehicle" action="action_vehicle_form" parent="menu_vehicle_root" sequence="30" groups="base.group_user"/>
+        <menuitem id="menu_forex_rate_parent" parent="fund_transfers" name="Foreign Exchanges" sequence="100"  groups="base.group_user"/>
+        <menuitem id="menu_forex_transaction" action="action_forex_transaction_form" parent="menu_forex_rate_parent" sequence="20" groups="base.group_user"/>  
         
       <!-- Actions -->
         <record id="base.action_partner_customer_form" model="ir.actions.act_window">
@@ -64,7 +74,7 @@
                 </tree>
             </field>
         </record>
-       <record id="view_res_partner_filter" model="ir.ui.view">
+       <record id="base.view_res_partner_filter" model="ir.ui.view">
             <field name="name">res.partner.select</field>
             <field name="model">res.partner</field>
             <field name="type">search</field>
@@ -78,16 +88,23 @@
                         <field name="address" select="1"/>
                         <field name="country" select="1"/>
                         <field name="category_id" select="1" groups="base.group_extended"/>
-                        <field name="user_id" select="1">
-                            <filter string="My Partners" icon="terp-personal+" domain="[('user_id','=',uid)]"/>
-                        </field>
                    </group>
                    <newline />
-                   <group expand="0" string="Group By...">
-                       <filter string="Salesman" icon="terp-personal" domain="[]" context="{'group_by' : 'user_id'}" />
-                   </group>
                </search>
             </field>
         </record>
+        
+        
+        
+        
+        <!-- Journal Entries -->
+        
+        
+        
+        
+        
+        
+        
+        
        </data>
 </openerp>

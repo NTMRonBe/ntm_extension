@@ -61,6 +61,7 @@
                         <field name="journal_id" on_change="onchange_journal(journal_id)" attrs="{'required':[('ownership','=','company')]}"/>
                         <field name="account_id"/>
                         <field name="transit_id"/>
+                        <field name="currency_id" invisible="True"/>
                     </group>
                 </field>
             </field>
@@ -81,18 +82,7 @@
                 </field>
             </field>
         </record>
-        <record id="bank_account_journal_ntm_form" model="ir.ui.view">
-            <field name="name">bank.account.journal.ntm.form</field>
-            <field name="model">account.journal</field>
-            <field name="type">form</field>
-            <field name="priority">2</field>
-            <field name="inherit_id" ref="account.view_account_journal_form"/>
-            <field name="arch" type="xml">
-                <field name="default_credit_account_id" position="after">
-                    <field name="bank_id"/>
-                </field>
-            </field>
-        </record>
+        
 		<record model="ir.ui.view" id="view_bank_transfer_tree">
             <field name="name">bank.transfer.tree</field>
             <field name="model">bank.transfer</field>

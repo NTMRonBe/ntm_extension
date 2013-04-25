@@ -261,7 +261,7 @@ class res_partner_bank(osv.osv):
         'account_id':fields.many2one('account.account','Book Account Name'),
         'transit_id':fields.many2one('account.account','Transit Account'),
         'balance': fields.related('account_id','balance', type='float', string='Bank Balance', readonly=True),
-        'currency_id': fields.related('account_id','currency_id', type='many2one',relation='res.currency', string='Bank Balance', readonly=True),
+        'currency_id': fields.many2one('res.currency','Currency'),
         }
     
     def onchange_journal(self, cr, uid, ids, journal_id=False):
@@ -269,17 +269,19 @@ class res_partner_bank(osv.osv):
         if journal_id:
             for bank in self.read(cr, uid, ids, context=None):
                 journal_read = self.pool.get('account.journal').read(cr, uid, journal_id,['default_debit_account_id','default_credit_account_id'])
+                account_id=journal_read['default_debit_account_id'][0]
+                account_read = self.pool.get('account.account').read(cr, uid, account_id,['currency_id','company_currency_id'])
+                netsvc.Logger().notifyChannel("account_read", netsvc.LOG_INFO, ' '+str(account_read))
+                curr_id = False
+                if not account_read['currency_id']:
+                    curr_id = account_read['company_currency_id'][0]
+                if account_read['currency_id']:
+                    curr_id = account_read['currency_id'][0] 
+                netsvc.Logger().notifyChannel("curr_id", netsvc.LOG_INFO, ' '+str(curr_id))
                 result = {'value':{
-                            'account_id':journal_read['default_debit_account_id'][0],
+                            'account_id':account_id,
+                            'currency_id':curr_id,
                             }} 
         return result
     
 res_partner_bank()
-
-
-class account_journal(osv.osv):
-    _inherit = 'account.journal'
-    _columns = {
-        'bank_id':fields.many2one('res.partner.bank','Bank'),
-        }
-account_journal()
