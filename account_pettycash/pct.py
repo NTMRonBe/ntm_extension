@@ -3,7 +3,6 @@ import time
 from osv import osv, fields, orm
 import netsvc
 import pooler
-import psycopg2
 from tools.translate import _
 import decimal_precision as dp
 

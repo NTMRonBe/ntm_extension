@@ -101,7 +101,7 @@
                   	<group colspan="4" col="13">
                   	    <field name="state"/>
                   	    <button name="get_account" string="Compute" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
-                  	    <button name="create_entries" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="post_pcd" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
                   	    <button string="Print" type="object" name="data_get" icon="gtk-execute"/>
                   	</group>
                 </form>

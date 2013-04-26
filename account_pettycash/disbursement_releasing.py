@@ -113,7 +113,7 @@ class pcd(osv.osv):
             if not pcd_res: 
                 self.pool.get('cash.request.slip').write(cr, uid, crs['id'],{'state':'released'})
             if pcd_res:
-                netsvc.Logger().notifyChannel("pcd_res", netsvc.LOG_INFO, ' '+str(pcd_res))
+                #netsvc.Logger().notifyChannel("pcd_res", netsvc.LOG_INFO, ' '+str(pcd_res))
                 released = 0.00
                 for pcds in pcd_res:
                     pcd_read = self.pool.get('pettycash.disbursement').read(cr, uid, pcds,['amount'])
@@ -133,9 +133,10 @@ class pcd(osv.osv):
         account_id = 1
         for pcd in self.read(cr, uid, ids, context=None):
             self.check_disbursements(cr, uid, [pcd['id']])
-            netsvc.Logger().notifyChannel("pcd", netsvc.LOG_INFO, ' '+str(pcd))
+            #netsvc.Logger().notifyChannel("pcd", netsvc.LOG_INFO, ' '+str(pcd))
             crs = self.pool.get('cash.request.slip').read(cr, uid, pcd['crs_id'][0], context=None)
             account_ids = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',crs['requestor_id'][0])])
+            netsvc.Logger().notifyChannel("pcd", netsvc.LOG_INFO, ' '+str(account_ids))
             if not account_ids:
                 raise osv.except_osv(_('Warning!'), _('No Analytic Account for the partner.'))
             if account_ids:
@@ -145,18 +146,20 @@ class pcd(osv.osv):
                 if ctr > 1:
                     raise osv.except_osv(_('Warning!'), _('You can only define 1 analytic account for a single missionary/project.'))
                 elif ctr==1:
-                     continue
-            for denoms in self.pool.get('pettycash.denom').search(cr, uid, [('pd_id','=',pcd['id'])]):
-                denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denoms,context=None)
-                denomination = self.pool.get('denominations').read(cr, uid, denom_reader['name'][0],['multiplier'])
-                amount +=denom_reader['quantity'] * denomination['multiplier']
-            values = {
-                'amount':amount,
-                'state':'releasing',
-                'analytic_id':account_id,
-                'name': self.pool.get('ir.sequence').get(cr, uid, 'pettycash.disbursement'),
-                }
-            self.write(cr, uid, pcd['id'],values)
+                    denoms = self.pool.get('pettycash.denom').search(cr, uid, [('pd_id','=',pcd['id']),('quantity','>','0.00')])
+                    if denoms:
+                        for denom in denoms:
+                            denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denom,context=None)
+                            denomination = self.pool.get('denominations').read(cr, uid, denom_reader['name'][0],['multiplier'])
+                            amount +=denom_reader['quantity'] * denomination['multiplier']
+                        values = {
+                            'amount':amount,
+                            'state':'releasing',
+                            'analytic_id':account_id,
+                            'name': self.pool.get('ir.sequence').get(cr, uid, 'pettycash.disbursement'),
+                            }
+                        netsvc.Logger().notifyChannel("pcd", netsvc.LOG_INFO, ' '+str(values))
+                        self.write(cr, uid, ids,values)
         return True
     
     def fill_denominations(self, cr, uid, ids, context=None):
@@ -170,14 +173,9 @@ class pcd(osv.osv):
                         'pd_id':form['id']
                         }
                     self.pool.get('pettycash.denom').create(cr, uid, values)
-        return True           
-    
-    def create_entries(self, cr, uid, ids, context=None):
-        move_pool = self.pool.get('account.move')
-        move_line_pool = self.pool.get('account.move.line')
-        pc_denom = self.pool.get('pettycash.denom')
-        pc_pool = self.pool.get('account.pettycash')
-        analytic_pool = self.pool.get('account.analytic.line')
+        return True  
+             
+    def post_pcd(self, cr, uid, ids, context=None):
         for pcd in self.read(cr, uid, ids, context=None):
             for denominations in pcd['denomination_ids']:
                 denom_read = self.pool.get('pettycash.denom').read(cr, uid, denominations,context=None)
@@ -187,7 +185,7 @@ class pcd(osv.osv):
                         quantity = pca_denom_read['quantity'] - denom_read['quantity']
                         self.pool.get('pettycash.denom').write(cr, uid, pca_denom, {'quantity':quantity})
             crs_read = self.pool.get('cash.request.slip').read(cr, uid, pcd['crs_id'][0],context=None)
-            pc_read = pc_pool.read(cr, uid, pcd['pc_id'][0],context=None)
+            pc_read = self.pool.get('account.pettycash').read(cr, uid, pcd['pc_id'][0],context=None)
             move = {
                 'name':pcd['name'],
                 'journal_id':pcd['journal_id'][0],
@@ -195,32 +193,50 @@ class pcd(osv.osv):
                 'date':pcd['date'],
                 'ref':crs_read['name']
                 }
-            move_id = move_pool.create(cr, uid, move)
+            move_id = self.pool.get('account.move').create(cr, uid, move)
+            account_read = self.pool.get('account.account').read(cr, uid, pc_read['account_code'][0],['currency_id','company_currency_id'])
+            curr_rate = False
+            curr_id = False
+            amount = False 
+            if account_read['currency_id']:
+                curr_read = self.pool.get('res.currency').read(cr, uid, account_read['currency_id'][0],['rate'])
+                curr_rate = curr_read['rate']
+                curr_id = account_read['currency_id'][0]
+                amount = pcd['amount'] / curr_rate
+            if not account_read['currency_id']:
+                curr_rate = 1.00
+                curr_id = account_read['company_currency_id'][0]
+                amount = pcd['amount']
             move_line = {
-                        'name':pcd['name'],
-                        'journal_id':pcd['journal_id'][0],
-                        'period_id':pcd['period_id'][0],
-                        'date':pcd['date'],
-                        'ref':crs_read['name'],
-                        'account_id':pc_read['account_code'][0],
-                        'debit':pcd['amount'],
-                        'move_id':move_id,
-                        }
-            move_line_pool.create(cr, uid, move_line)
-            get_analytic_account = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',crs_read['requestor_id'][0])])
-            for analytic_id in get_analytic_account:
-                move_line = {
-                            'name':crs_read['description'],
-                            'journal_id':pcd['journal_id'][0],
-                            'period_id':pcd['period_id'][0],
-                            'date':pcd['date'],
-                            'ref':crs_read['name'],
-                            'account_id':pc_read['account_code'][0],
-                            'credit':pcd['amount'],
-                            'analytic_account_id':analytic_id,
-                            'move_id':move_id,
-                            }
-                move_line_pool.create(cr, uid, move_line)
+                'name':'Disbursing Petty Cash',
+                'debit': 0.00,
+                'credit': amount,
+                'account_id': pc_read['account_code'][0],
+                'move_id': move_id,
+                'journal_id':pcd['journal_id'][0],
+                'period_id':pcd['period_id'][0],
+                'date':pcd['date'],
+                'currency_id':curr_id,
+                'amount_currency':pcd['amount'],
+                'post_rate':curr_rate,
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            analytic_read = self.pool.get('account.analytic.account').read(cr, uid, pcd['analytic_id'][0],['normal_account'])
+            move_line = {
+                'name':'Analytic Entry',
+                'debit': amount,
+                'credit': 0.00,
+                'account_id': analytic_read['normal_account'][0],
+                'move_id': move_id,
+                'journal_id':pcd['journal_id'][0],
+                'period_id':pcd['period_id'][0],
+                'date':pcd['date'],
+                'currency_id':curr_id,
+                'analytic_account_id':pcd['analytic_id'][0],
+                'amount_currency':pcd['amount'],
+                'post_rate':curr_rate,
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
             self.write(cr, uid, pcd['id'],{'state':'released'})
             self.check_disbursements(cr, uid, [pcd['id']])
         return True
@@ -245,22 +261,3 @@ class pcd(osv.osv):
             'datas': datas,
             }
 pcd()
-
-class account_journal(osv.osv):
-    _inherit="account.journal"
-    _columns = {
-        'type': fields.selection([('sale', 'Sale'),('sale_refund','Sale Refund'), 
-                                ('purchase', 'Purchase'), ('purchase_refund','Purchase Refund'),
-                                ('transfer','Fund Transfer'), 
-                                ('cash', 'Cash'), ('bank', 'Bank and Cheques'), ('pettycash', 'Petty Cash'), ('disbursement', 'Petty Cash Disbursement'), 
-                                ('general', 'General'), ('situation', 'Opening/Closing Situation')], 'Type', size=32, required=True,
-                                 help="Select 'Sale' for Sale journal to be used at the time of making invoice."\
-                                 " Select 'Purchase' for Purchase Journal to be used at the time of approving purchase order."\
-                                 " Select 'Cash' to be used at the time of making payment."\
-                                 " Select 'General' for miscellaneous operations."\
-                                 " Select 'Petty Cash' for petty cash operations."\
-                                 " Select 'Fund Transfer' for fund transfer operations."\
-                                 " Select 'Opening/Closing Situation' to be used at the time of new fiscal year creation or end of year entries generation."),
-        
-        }
-account_journal()

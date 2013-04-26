@@ -200,3 +200,22 @@ class account_subscription(osv.osv):
         'period_nbr': fields.integer('Interval', required=True),
         }
 account_subscription()
+
+class account_journal(osv.osv):
+    _inherit="account.journal"
+    _columns = {
+        'type': fields.selection([('sale', 'Sale'),('sale_refund','Sale Refund'), 
+                                ('purchase', 'Purchase'), ('purchase_refund','Purchase Refund'),
+                                ('transfer','Fund Transfer'), 
+                                ('cash', 'Cash'), ('bank', 'Bank and Cheques'), ('pettycash', 'Petty Cash'), ('disbursement', 'Petty Cash Disbursement'), 
+                                ('general', 'General'), ('situation', 'Opening/Closing Situation')], 'Type', size=32, required=True,
+                                 help="Select 'Sale' for Sale journal to be used at the time of making invoice."\
+                                 " Select 'Purchase' for Purchase Journal to be used at the time of approving purchase order."\
+                                 " Select 'Cash' to be used at the time of making payment."\
+                                 " Select 'General' for miscellaneous operations."\
+                                 " Select 'Petty Cash' for petty cash operations."\
+                                 " Select 'Fund Transfer' for fund transfer operations."\
+                                 " Select 'Opening/Closing Situation' to be used at the time of new fiscal year creation or end of year entries generation."),
+        
+        }
+account_journal()
