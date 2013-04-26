@@ -261,5 +261,6 @@ class account_journal(osv.osv):
                                  " Select 'Petty Cash' for petty cash operations."\
                                  " Select 'Fund Transfer' for fund transfer operations."\
                                  " Select 'Opening/Closing Situation' to be used at the time of new fiscal year creation or end of year entries generation."),
+        
         }
 account_journal()

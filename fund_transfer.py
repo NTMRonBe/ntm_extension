@@ -5,6 +5,7 @@ import pooler
 import psycopg2
 from tools.translate import _
 import decimal_precision as dp
+from stringprep import b1_set
 
 class fund_transfer(osv.osv):
     def _get_period(self, cr, uid, context=None):
@@ -30,7 +31,7 @@ class fund_transfer(osv.osv):
         'curr_id':fields.many2one('res.currency','Currency'),
         'amount':fields.float('Amount to Transfer'),
         'dest_account':fields.many2one('account.account','Destination Bank Account'),
-        'dest_p2b_account':fields.many2one('account.account','Destination Bank Account'),
+        'dest_p2b_account':fields.many2one('res.partner.bank','Destination Bank Account'),
         'src_analytic_account':fields.many2one('account.analytic.account','Source Analytic Account'),
         'dest_analytic_account':fields.many2one('account.analytic.account','Destination Analytic Account'),
         'move_id':fields.many2one('account.move','Journal Entry'),
@@ -53,9 +54,7 @@ class fund_transfer(osv.osv):
         result = {}
         for b2b in self.read(cr, uid, ids, context=None):
             b1_read = self.pool.get('account.account').read(cr, uid, b2b['src_account'][0],['company_currency_id','currency_id'])
-            netsvc.Logger().notifyChannel("b1_read", netsvc.LOG_INFO, ' '+str(b1_read))
             b2_read = self.pool.get('account.account').read(cr, uid, b2b['dest_account'][0],['company_currency_id','currency_id'])
-            netsvc.Logger().notifyChannel("b2_read", netsvc.LOG_INFO, ' '+str(b2_read))
             b1_curr = False
             b2_curr = False
             if not b1_read['currency_id']:
@@ -68,40 +67,83 @@ class fund_transfer(osv.osv):
                 b2_curr = b2_read['currency_id'][0]
             if b2_curr !=b1_curr:
                 raise osv.except_osv(_('Error !'), _('You cannot create a transfer for accounts with different currencies!'))
-            name = 'Fund transfer from ' + b2b['src_account'][1] + ' to ' + b2b['dest_account'][1]
-            move = {
-                'journal_id':b2b['journal_id'][0],
-                'period_id':b2b['period_id'][0],
-                'date':b2b['date'],
-                'ref':name,
-                }
-            move_id = move_pool.create(cr, uid, move)
-            credit = {
-                'name':name,
-                'journal_id':b2b['journal_id'][0],
-                'period_id':b2b['period_id'][0],
-                'date':b2b['date'],
-                'account_id':b2b['src_account'][0],
-                'credit':b2b['amount'],
-                'move_id':move_id,
-                }
-            move_line_pool.create(cr, uid, credit)
-            debit = {
-                'name':name,
-                'journal_id':b2b['journal_id'][0],
-                'period_id':b2b['period_id'][0],
-                'date':b2b['date'],
-                'account_id':b2b['dest_account'][0],
-                'debit':b2b['amount'],
-                'move_id':move_id,
-                }
-            move_line_pool.create(cr, uid, debit)
-            move_pool.post(cr, uid, [move_id],context={})
-            result = {
-                    'move_id':move_id,
-                    'state':'done',
-                    }
-            self.write(cr, uid, b2b['id'],result)
+            if b2_curr==b1_curr:
+                if b2_curr==b1_read['company_currency_id'][0]:
+                    name = 'Fund transfer from ' + b2b['src_account'][1] + ' to ' + b2b['dest_account'][1]
+                    move = {
+                        'journal_id':b2b['journal_id'][0],
+                        'period_id':b2b['period_id'][0],
+                        'date':b2b['date'],
+                        'ref':name,
+                        }
+                    move_id = move_pool.create(cr, uid, move)
+                    credit = {
+                        'name':name,
+                        'journal_id':b2b['journal_id'][0],
+                        'period_id':b2b['period_id'][0],
+                        'date':b2b['date'],
+                        'account_id':b2b['src_account'][0],
+                        'credit':b2b['amount'],
+                        'move_id':move_id,
+                        }
+                    move_line_pool.create(cr, uid, credit)
+                    debit = {
+                        'name':name,
+                        'journal_id':b2b['journal_id'][0],
+                        'period_id':b2b['period_id'][0],
+                        'date':b2b['date'],
+                        'account_id':b2b['dest_account'][0],
+                        'debit':b2b['amount'],
+                        'move_id':move_id,
+                        }
+                    move_line_pool.create(cr, uid, debit)
+                    move_pool.post(cr, uid, [move_id],context={})
+                    result = {
+                            'move_id':move_id,
+                            'state':'done',
+                            }
+                    self.write(cr, uid, b2b['id'],result)
+                if b2_curr != b1_read['company_currency_id'][0]:
+                    curr_read = self.pool.get('res.currency').read(cr, uid, b2_curr,['rate'])
+                    amount = b2b['amount'] / curr_read['rate']
+                    name = 'Fund transfer from ' + b2b['src_account'][1] + ' to ' + b2b['dest_account'][1]
+                    move = {
+                        'journal_id':b2b['journal_id'][0],
+                        'period_id':b2b['period_id'][0],
+                        'date':b2b['date'],
+                        'ref':name,
+                        }
+                    move_id = move_pool.create(cr, uid, move)
+                    credit = {
+                        'name':name,
+                        'journal_id':b2b['journal_id'][0],
+                        'period_id':b2b['period_id'][0],
+                        'date':b2b['date'],
+                        'account_id':b2b['src_account'][0],
+                        'credit':amount,
+                        'currency_id':b2_curr,
+                        'amount_currency':b2b['amount'],
+                        'move_id':move_id,
+                        }
+                    move_line_pool.create(cr, uid, credit)
+                    debit = {
+                        'name':name,
+                        'journal_id':b2b['journal_id'][0],
+                        'period_id':b2b['period_id'][0],
+                        'date':b2b['date'],
+                        'account_id':b2b['dest_account'][0],
+                        'debit':amount,
+                        'currency_id':b2_curr,
+                        'amount_currency':b2b['amount'],
+                        'move_id':move_id,
+                        }
+                    move_line_pool.create(cr, uid, debit)
+                    move_pool.post(cr, uid, [move_id],context={})
+                    result = {
+                            'move_id':move_id,
+                            'state':'done',
+                            }
+                    self.write(cr, uid, b2b['id'],result)
         return True
     
     def a2a_transfer(self,cr, uid, ids, context=None):
@@ -151,6 +193,34 @@ class fund_transfer(osv.osv):
                     }
             self.write(cr, uid, a2a['id'],result)
         return True
+    def onchange_pettycash(self, cr, uid, ids, pettycash_id=False):
+        result = {}
+        ftp_id = False
+        if pettycash_id:
+            for p2b in self.read(cr, uid, ids, context=None):
+                ftp_id = p2b['id']
+                for p2b_denom in p2b['denom_ids']:
+                    self.pool.get('pettycash.denom').unlink(cr, uid, p2b_denom)
+                ptc_read = self.pool.get('account.pettycash').read(cr, uid, pettycash_id,['currency_id'])
+                currency = ptc_read['currency_id'][1]
+                denominations = self.pool.get('denominations').search(cr, uid, [('currency_id','=',ptc_read['currency_id'][0])])
+                if not denominations:
+                    raise osv.except_osv(_('Error!'), _('%s has no available denominations.Please add them!')%currency)
+                new_denoms=[]
+                if denominations:
+                    for denom in denominations:
+                        values = {
+                            'name':denom,
+                            'ft_id':ftp_id,
+                            }
+                        denom_new= self.pool.get('pettycash.denom').create(cr, uid, values)
+                        new_denoms.append(denom_new)
+                result = {'value':{
+                        'curr_id':ptc_read['currency_id'][0],
+                        'denom_ids':new_denoms,
+                          }
+                    }
+        return result
     
     def p2b_transfer(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
@@ -166,7 +236,6 @@ class fund_transfer(osv.osv):
                     pettycash_name = p2b['pettycash_id'][1]
                     denom_name = denom_check['name'][1]
                     quanti = denom_check['quantity']
-                    netsvc.Logger().notifyChannel("quanti", netsvc.LOG_INFO, ' '+str(quanti))
                     ptc_denom_check = self.pool.get('pettycash.denom').search(cr, uid, [('name','=',denom_check['name'][0]),
                                                                                         ('pettycash_id','=',p2b['pettycash_id'][0]),
                                                                                         ('quantity','>=',denom_check['quantity'])])
@@ -177,18 +246,19 @@ class fund_transfer(osv.osv):
             self.write(cr, uid, [p2b['id']],{'amount':amount})
             if p2b['dest_p2b_account']:
                 ptc_curr = p2b['curr_id'][0]
-                check_bank = self.pool.get('account.account').read(cr, uid, p2b['dest_p2b_account'][0],['currency_id','company_currency_id'])
-                if check_bank['currency_id']:
-                    bank_curr = check_bank['currency_id'][0]
+                check_bank = self.pool.get('res.partner.bank').read(cr, uid, p2b['dest_p2b_account'][0],['account_id'])
+                check_acc_curr = self.pool.get('account.account').read(cr, uid, check_bank['account_id'][0],['currency_id','company_currency_id'])
+                if check_acc_curr['currency_id']:
+                    bank_curr = check_acc_curr['currency_id'][0]
                     if bank_curr !=ptc_curr:
                         raise osv.except_osv(_('Error !'), _('You cannot create a transfer for different currencies!'))
                     if bank_curr ==ptc_curr:
-                        continue
-                if not check_bank['currency_id']:
-                    bank_curr = check_bank['company_currency_id'][0]
+                        self.p2b_entries(cr, uid, ids)
+                if not check_acc_curr['currency_id']:
+                    bank_curr = check_acc_curr['company_currency_id'][0]
                     if bank_curr !=ptc_curr:
                         raise osv.except_osv(_('Error !'), _('You cannot create a transfer for different currencies!'))
-                    if bank_curr ==ptc_curr:
+                    if bank_curr == ptc_curr:
                         self.p2b_entries(cr, uid, ids)
             if not p2b['dest_p2b_account']:
                 raise osv.except_osv(_('Error !'), _('Please choose a destination account.'))
@@ -199,44 +269,68 @@ class fund_transfer(osv.osv):
         move_line_pool = self.pool.get('account.move.line')
         result = {}
         for p2b in self.read(cr, uid, ids, context=None):
-            netsvc.Logger().notifyChannel("quanti", netsvc.LOG_INFO, ' '+str(p2b['amount']))
-            move = {
-                'journal_id':p2b['journal_id'][0],
-                'period_id':p2b['period_id'][0],
-                'date':p2b['date'],
-                }
-            move_id = move_pool.create(cr, uid, move)
-            name = p2b['dest_p2b_account'][1] +' debit ' +str(p2b['amount'])
-            debit = {
-                'name':name,
-                'journal_id':p2b['journal_id'][0],
-                'period_id':p2b['period_id'][0],
-                'date':p2b['date'],
-                'account_id':p2b['dest_p2b_account'][0],
-                'debit':p2b['amount'],
-                'move_id':move_id,
-                }
-            move_line_pool.create(cr, uid, debit)
-            pc_id = p2b['pettycash_id'][0]
-            pettycash_account = self.pool.get('account.pettycash').read(cr, uid, pc_id,['account_code'])
-            name = pettycash_account['account_code'][1] +' credit ' +str(p2b['amount'])
-            credit = {
-                'name':name,
-                'journal_id':p2b['journal_id'][0],
-                'period_id':p2b['period_id'][0],
-                'date':p2b['date'],
-                'account_id':pettycash_account['account_code'][0],
-                'credit':p2b['amount'],
-                'move_id':move_id,
-                }
-            netsvc.Logger().notifyChannel("quanti", netsvc.LOG_INFO, ' '+str(credit))
-            move_line_pool.create(cr, uid, credit)
-            move_pool.post(cr, uid, [move_id],context={})
-            result = {
-                    'move_id':move_id,
-                    'state':'done',
+            netsvc.Logger().notifyChannel("p2b", netsvc.LOG_INFO, ' '+str(p2b))
+            check_bank = self.pool.get('res.partner.bank').read(cr, uid, p2b['dest_p2b_account'][0],['account_id'])
+            check_acc_curr = self.pool.get('account.account').read(cr, uid, check_bank['account_id'][0],['currency_id','company_currency_id'])
+            if p2b['amount']>0.00:
+                amount_currency = False
+                currency = False
+                amount = 0.00
+                netsvc.Logger().notifyChannel("currency", netsvc.LOG_INFO, ' '+str(p2b['curr_id'][1]))
+                if check_acc_curr['company_currency_id'][0]==p2b['curr_id'][0]:
+                    amount = p2b['amount']
+                    currency = p2b['curr_id'][0]
+                    amount_currency = p2b['amount']
+                if check_acc_curr['company_currency_id'][0]!=p2b['curr_id'][0]:
+                    check_curr = self.pool.get('res.currency').read(cr, uid, p2b['curr_id'][0],['rate'])
+                    amount = p2b['amount'] / check_curr['rate']
+                    currency = p2b['curr_id'][0]
+                    amount_currency = p2b['amount']
+                netsvc.Logger().notifyChannel("quanti", netsvc.LOG_INFO, ' '+str(p2b['amount']))
+                move = {
+                    'journal_id':p2b['journal_id'][0],
+                    'period_id':p2b['period_id'][0],
+                    'date':p2b['date'],
                     }
-            self.write(cr, uid, p2b['id'],result)
+                move_id = move_pool.create(cr, uid, move)
+                name = p2b['dest_p2b_account'][1] +' debit ' +str(p2b['amount'])
+                check_bank = self.pool.get('res.partner.bank').read(cr, uid, p2b['dest_p2b_account'][0],['account_id'])
+                account_id = check_bank['account_id'][0] 
+                debit = {
+                    'name':name,
+                    'journal_id':p2b['journal_id'][0],
+                    'period_id':p2b['period_id'][0],
+                    'date':p2b['date'],
+                    'account_id':account_id,
+                    'debit':amount,
+                    'currency_id':currency,
+                    'amount_currency':amount_currency,
+                    'move_id':move_id,
+                    }
+                move_line_pool.create(cr, uid, debit)
+                pc_id = p2b['pettycash_id'][0]
+                pettycash_account = self.pool.get('account.pettycash').read(cr, uid, pc_id,['account_code'])
+                name = pettycash_account['account_code'][1] +' credit ' +str(p2b['amount'])
+                credit = {
+                    'name':name,
+                    'journal_id':p2b['journal_id'][0],
+                    'period_id':p2b['period_id'][0],
+                    'date':p2b['date'],
+                    'account_id':pettycash_account['account_code'][0],
+                    'credit':amount,
+                    'currency_id':currency,
+                    'amount_currency':amount_currency,
+                    'move_id':move_id,
+                    }
+                move_line_pool.create(cr, uid, credit)
+                move_pool.post(cr, uid, [move_id],context={})
+                result = {
+                        'move_id':move_id,
+                        'state':'done',
+                        }
+                self.write(cr, uid, p2b['id'],result)
+            if p2b['amount']==0.00:
+                raise osv.except_osv(_('Error !'), _('You cannot create a transfer with no amount!'))
         return True
                 
     def transfer(self, cr, uid, ids, context=None):

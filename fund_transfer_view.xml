@@ -49,11 +49,11 @@
                     </group>
                     <separator string="Accounts" colspan="6"/>
                     <group colspan="6" col="6">
-	                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}" on_change = "onchange_pettycash(pettycash_id)"/>
-	                    <field name="curr_id" invisible="1"/>
+	                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}" widget="selection" on_change = "onchange_pettycash(pettycash_id)" domain="[('amount','>','0.00')]"/>
+	                    <field name="curr_id"/>
 	                    <field name="src_account" attrs="{'invisible':[('type','!=','b2b')]}" domain="[('type','=','liquidity')]"/>
-	                    <field name="dest_account" attrs="{'invisible':[('type','=','p2b')]}" domain="[('type','=','liquidity')]"/>
-	                    <field name="dest_p2b_account" attrs="{'invisible':[('type','=','b2b')]}" domain="[('type','=','liquidity')]"/>
+	                    <field name="dest_account" attrs="{'invisible':[('type','!=','b2b')]}" domain="[('type','=','liquidity')]"/>
+	                    <field name="dest_p2b_account" attrs="{'invisible':[('type','!=','p2b')]}" domain="[('ownership','=','company')]"/>
 	                    <field name="src_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
 	                    <field name="dest_analytic_account" attrs="{'invisible':[('type','!=','a2a')]}"/>
 	                    <field name="amount"/>

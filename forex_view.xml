@@ -16,13 +16,11 @@
                     	</group>
                     	<group colspan="4" col="4">
                     	    <group colspan="2" col="2">
-                    	        <field name="currency_one" attrs="{'readonly': [('state','!=','draft')]}" invisible="True"/>
-                    	        <field name="src" on_change="on_change_act1(src)" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Source Bank"/>
+                    	        <field name="src" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Source Bank"/>
                     	        <field name="src_amount" attrs="{'readonly': [('state','!=','draft')]}"/>
                     	    </group>
               				<group colspan="2" col="2">
-              				    <field name="currency_two" attrs="{'readonly': [('state','!=','draft')]}" invisible="True"/>
-                        		<field name="dest" on_change="on_change_act2(dest)" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Destination Bank"/>
+                        		<field name="dest" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Destination Bank"/>
                         		<field name="dest_amount"/>
               				</group>
                         </group>

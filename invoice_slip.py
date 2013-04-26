@@ -81,7 +81,7 @@ class invoice_slip(osv.osv):
     
     _defaults = {'state':'draft'}
     
-    _order = 'invoice_date desc'
+    _order = 'trans_date desc'
     def create(self, cr, uid, vals, context=None):
         new_id = super(invoice_slip, self).create(cr, uid, vals,context)
         return new_id
@@ -119,6 +119,9 @@ class invoice_slip(osv.osv):
                         }
                     move_line_pool.create(cr, uid, move_line)
             partner_analytic = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',inv['partner_id'][0])])
+            partner_name = inv['partner_id'][1]
+            if not partner_analytic:
+                raise osv.except_osv(_('Error !'), _('%s doesn\'t have any analytic account!')%partner_name)
             if partner_analytic:
                 for partner_acc in partner_analytic:
                     acc_read = self.pool.get('account.analytic.account').read(cr, uid, partner_acc,['id','normal_account'])

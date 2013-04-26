@@ -104,6 +104,7 @@ class pcl(osv.osv):
                     elif line_read['amount']>0.00:
                         lines_sum += line_read['amount']                
             if denom_sum > 0.00 and lines_sum > 0.00:
+                self.write(cr, uid, pcl['id'],{'amount':denom_sum})
                 check_amount = 0.00
                 pc_read = self.pool.get('account.pettycash').read(cr, uid, pcl['pc_id'][0],['amount'])
                 pc_amount = pc_read['amount']
@@ -112,7 +113,6 @@ class pcl(osv.osv):
                     values = {
                         'state':'confirmed',
                         'name':self.pool.get('ir.sequence').get(cr, uid, 'account.pettycash.liquidation'),
-                        'amount':denom_sum,
                         }
                     self.write(cr, uid, pcl['id'], values)
                 elif lines_sum > check_amount or lines_sum < check_amount:

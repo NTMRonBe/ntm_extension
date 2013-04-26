@@ -163,6 +163,7 @@ class soa_add_line(osv.osv):
     
     def create_soa_attachment(self, cr, uid, ids, context=None):
         root = tools.config['root_path']
+        file = ''
         try:
             os.makedirs(root+'/pdfs/')
         except OSError:

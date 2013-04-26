@@ -215,7 +215,7 @@
       <font color="white"> </font>
     </para>
     <para style="P6">[[bt.date]]</para>
-    <para style="P6">[[bt.handler.name]]</para>
+    <para style="P6">Signed: [[bt.handler.name]]</para>
     <para style="P6">
       <font color="white"> </font>
     </para>

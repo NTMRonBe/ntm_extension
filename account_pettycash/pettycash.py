@@ -56,7 +56,7 @@ account_pettycash()
 class pettycash_denom(osv.osv):
 	_inherit = "pettycash.denom"
 	_columns = {
-		'pettycash_id':fields.many2one('account.pettycash',"Petty Cash ID"),
+		'pettycash_id':fields.many2one('account.pettycash',"Petty Cash ID", ondelete="cascade"),
 		}
 pettycash_denom()
 
@@ -64,7 +64,7 @@ class apc(osv.osv):
     
     _inherit = 'account.pettycash'
     _columns = {
-    'denomination_ids':fields.one2many('pettycash.denom','pettycash_id','Denominations Breakdown', ondelete="cascade"),
+    'denomination_ids':fields.one2many('pettycash.denom','pettycash_id','Denominations Breakdown'),
         }
      
     def get_amount(self, cr, uid, ids, context=None):

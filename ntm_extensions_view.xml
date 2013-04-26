@@ -134,6 +134,7 @@
             <field name="inherit_id" ref="account.view_account_list"/>
             <field name="arch" type="xml">
                 <field name="company_currency_id" position="after">
+                    <field name="post_amount"/>
                     <field name="currency_id"/>
                 </field>
             </field>
@@ -182,6 +183,12 @@
                             </group>                        
                         </group>
                     </group>
+                </field>
+                <field name="customer" position="replace">
+                    <field name="customer" string="Donor"/>
+                </field>
+                <field name="supplier" position="replace">
+                    <field name="supplier" string="People and Projects"/>
                 </field>
             </field>
         </record>

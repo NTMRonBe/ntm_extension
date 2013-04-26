@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+    
         <record id="vehicle_form" model="ir.ui.view">
             <field name="name">vehicle.form</field>
             <field name="model">vehicle</field>
@@ -29,19 +30,11 @@
         </record>
         
         <record model="ir.actions.act_window" id="action_vehicle_form">
-        	<field name="name">Vehicles</field>
-	        <field name="res_model">vehicle</field>
-		    <field name="view_type">form</field>
+            <field name="name">Vehicles</field>
+            <field name="res_model">vehicle</field>
+            <field name="view_type">form</field>
         </record>
         
-        <menuitem id="menu_vehicle" 
-            action="action_vehicle_form" 
-            parent="account.menu_finance_payables"
-            sequence="60" 
-            groups="base.group_user"/>
-            
-
-
         <record id="vehicle_log_form" model="ir.ui.view">
             <field name="name">vehicle.log.form</field>
             <field name="model">vehicle.log</field>
@@ -105,11 +98,7 @@
             <field name="view_type">form</field>
         </record>
         
-        <menuitem id="menu_vehicle_log" 
-            action="action_vehicle_log_form" 
-            parent="account.menu_finance_payables"
-            sequence="70" 
-            groups="base.group_user"/>  
+
   
     </data>
 </openerp>
