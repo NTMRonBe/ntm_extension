@@ -104,15 +104,42 @@
                 <form string = "P/C to P/C Transfer">
                     	<group colspan="4" col="4">
 	                        <field name="name" readonly="1"/>
-	                        <field name="journal_id"/>
-	                        <field name="transaction_date"/>
+	                        <field name="journal_id" attrs="{'readonly': [('state','!=','draft')]}"/>
+	                        <field name="transaction_date" attrs="{'readonly': [('state','!=','draft')]}"/>
 	                        <field name="period_id" readonly="1"/>
 	                        <field name="src_pc_id" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
 	                        <field name="dest_pc_id" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
 	                        <field name="amount" readonly="1"/>
 	                       <field name="state"/>
+	                       <field name="filled" invisible="True"/>
                         </group>
-                        <field name="denom_breakdown" nolabel="1" colspan="4"/>
+                        <notebook colspan="4">
+                        <page string="Denominations Lists">
+                            <button string="Fill Denominations" type="object" name="fill" icon="gtk-cancel" attrs="{'invisible': [('filled','=',True)]}"/>
+                            <group colspan="4" col="2">
+                                <field name="denom_breakdown" mode="tree" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
+                                  <tree string="Denomination Breakdown" editable="top">
+                                      <field name="name"/>
+                                      <field name="quantity"/>
+                                      <field name="amount"/>
+                                  </tree>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Journal Items">
+                            <group colspan="4" col="2">
+                                <group colspan="4" col="2">
+                                    <field name="move_id"  attrs="{'readonly': [('state','!=','confirmed')]}"/>
+                                </group>
+                                <group colspan="4" col="2">
+                                    <separator string="Journal Items"/>
+                                        <group colspan="4" col="2">
+                                            <field name="move_ids" nolabel="1"/>
+                                        </group>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
                         <newline/>
                         <group colspan="4" col="4">
                             <group colspan="2" col="2">
@@ -131,13 +158,13 @@
                                             />
                                     <button string="Confirm"
                                             type="object"
-                                            name="button_confirm"
+                                            name="confirm"
                                             icon="gtk-execute"
                                             attrs="{'invisible': [('state','!=','draft')]}"
                                             />
                                     <button string="Complete"
                                             type="object"
-                                            name="complete_transfer"
+                                            name="denom_change"
                                             icon="gtk-execute"
                                             attrs="{'invisible': [('state','!=','confirmed')]}"
                                             />
@@ -201,7 +228,7 @@
 	                        <field name="name"  readonly="1"/>
 	                        <field name="date"/>
 	                        <field name="manager_id"/>
-	                        <field name="account_code" on_change="on_change_pca(account_code)" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                        <field name="account_code" on_change="on_change_pca(account_code)" attrs="{'readonly':[('state','!=','draft')]}" domain="[('type','=','liquidity')]"/>
 	                        <field name="amount" readonly="True"/>
 	                        <field name="currency_id"/>
 	                        <group colspan="4" col="4">

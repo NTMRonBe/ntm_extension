@@ -35,6 +35,7 @@ class pettycash_denom(osv.osv):
     _columns ={
         'name':fields.many2one('denominations','Denomination'),
         'quantity':fields.float('Quantity'),
+        'currency_id': fields.related('name','currency_id', type='many2one', relation='res.currency', string='Currency', readonly=True),
         'amount': fields.function(_compute_amount, method=True, type='float', string='Total Amount', store=False),
         }
     def write(self, cr, uid, ids, vals, context=None):
