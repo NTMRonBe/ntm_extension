@@ -42,10 +42,12 @@
                     <group colspan="4" col="2">
                     <field colspan="4" mode="tree,form" name="line_ids" nolabel="1" height="300" readonly="1">
                         <tree string="Analytic Lines">
-<field name="date"/>
-<field name="name"/>
-<field name="amount"/>
-<field name="currency_amount"/>
+							<field name="date"/>
+							<field name="name"/>
+							<field name="debit"/>
+							<field name="credit"/>
+							<field name="amount" invisible="1"/>
+							<field name="currency_amount"/>
                         </tree>
                         <form string="Analytic Line">
                             <field name="date"/>
@@ -75,19 +77,6 @@
                                             icon="gtk-execute"
                                             />
                 </tree>
-            </field>
-        </record>
-        <record id="account_soa_filter" model="ir.ui.view">
-<field name="name">account.soa.filter</field>
-            <field name="model">account.soa</field>
-            <field name="type">search</field>
-            <field name="arch" type="xml">
-                <search string="Search Statements">
-                    <field name="date"/>
-                    <field name="account_number"/>
-                    <field name="account_code"/>
-                    <field name="period_id"/>
-                </search>
             </field>
         </record>
         

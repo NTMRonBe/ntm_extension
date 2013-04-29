@@ -34,6 +34,7 @@ class soa_request(osv.osv):
         }
         res = self.create(cr, uid, vals, context)
         return res
+    
     def create_reply(self, cr, uid, ids, context=None):
         for requests in self.pool.get('soa.request').search(cr, uid, [('generated','=',False)]):
             request_read = self.pool.get('soa.request').read(cr, uid, requests, context=None)
@@ -53,7 +54,6 @@ class soa_request(osv.osv):
             if not acc_search:
                 raise osv.except_osv(_('Error !'), _('There is no existing account with account code %s')%code)
             elif acc_search:
-                netsvc.Logger().notifyChannel("acc_search", netsvc.LOG_INFO, ' '+str(acc_search))
                 if not period_search:
                     raise osv.except_osv(_('Error !'), _('Period %s is not existing!')%period)
                 elif period_search:
@@ -79,6 +79,7 @@ class soa_request(osv.osv):
                                     email_created = self.pool.get('email_template.mailbox').create(cr, uid, values)
                                     email_lists.append(email_created)
                                     soa_attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','account.soa'),('res_id','=',soa_id)])
+                                    netsvc.Logger().notifyChannel("soa_attachments", netsvc.LOG_INFO, ' '+str(soa_attachments))
                                     for soa_attachment in soa_attachments:
                                         query=("""insert into mail_attachments_rel(mail_id,att_id)values(%s,%s)"""%(email_created,soa_attachment))
                                         cr.execute(query)
@@ -110,6 +111,8 @@ class account_soa_line(osv.osv):
         'name':fields.related('link_to','name',type='char',size=64,store=True, string='Description'),
         'date':fields.date('Entry Date'),
         'amount':fields.related('link_to','amount',type='float',store=True, string='Amount'),
+        'debit':fields.float('Income'),
+        'credit':fields.float('Expense'),
         'currency_amount':fields.related('link_to','amount_currency',type='float',store=True, string='Encoding Amount'),
         'link_to':fields.many2one('account.analytic.line','Analytic Line', ondelete='cascade'),
         'move_id':fields.related('link_to','move_id',type='many2one',relation='account.move.line',store=True,string='Move ID'),
@@ -128,20 +131,43 @@ class soa_add_line(osv.osv):
         date = datetime.datetime.now()
         period = date.strftime("%m/%Y")
         date_now = date.strftime("%Y/%m/%d %H:%M")
+        debit = 0.00
+        credit=0.00
         for statement in self.pool.get('account.soa').search(cr, uid, [('period_id.name','=',period)]):
             soa_reader = self.pool.get('account.soa').read(cr, uid, statement, context=None)
             for aal in self.pool.get('account.analytic.line').search(cr, uid, [('account_id','=',soa_reader['account_number'][0]),('move_id.period_id','=',soa_reader['period_id'][0])]):
-                aal_read = self.pool.get('account.analytic.line').read(cr, uid, aal, ['date'])
-                #netsvc.Logger().notifyChannel("aal_read", netsvc.LOG_INFO, ' '+str(aal_read))
+                aal_read = self.pool.get('account.analytic.line').read(cr, uid, aal, ['date','amount'])
+                if aal_read['amount']<0.00:
+                    credit = aal_read['amount'] / -1
+                if aal_read['amount']>0.00:
+                    debit = aal_read['amount']
                 aal_check = self.pool.get('account.soa.line').search(cr, uid, [('link_to','=',aal)])
                 if not aal_check:
                     values = {
                         'link_to':aal,
                         'soa_id':statement,
-                        'date':aal_read['date']
+                        'date':aal_read['date'],
+                        'debit':debit,
+                        'credit':credit,
                         }
                     self.pool.get('account.soa.line').create(cr, uid, values)
             self.pool.get('account.soa').write(cr, uid, statement,{'date':date_now})
+        return True
+    
+    def update_details(self, cr, uid, ids, context=None):
+        date = datetime.datetime.now()
+        period = date.strftime("%m/%Y")
+        date_now = date.strftime("%Y/%m/%d %H:%M")
+        for statement in self.pool.get('account.soa').search(cr, uid, [('period_id.name','=',period)]):
+            soa_read = self.pool.get('account.soa').read(cr, uid, statement, context=None)
+            debit = 0.00
+            credit = 0.00
+            for line in self.pool.get('account.soa.line').search(cr, uid, [('soa_id','=',statement)]):
+                line_read = self.pool.get('account.soa.line').read(cr, uid, line,['debit','credit'])
+                debit +=line_read['debit']
+                credit+=line_read['credit']
+            income_expense = debit - credit
+            self.pool.get('account.soa').write(cr, uid, statement,{'total_income':debit,'total_expense':credit,'inc_exp':income_expense})
         return True
     
     def generate_soa(self, cr, uid, ids, context=None):
@@ -169,6 +195,9 @@ class soa_add_line(osv.osv):
         except OSError:
             pass
         for soa_read in self.read(cr, uid, ids, context=None):
+            rec = soa_read['id']
+            attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','account.soa'),('res_id','=',rec)])
+            self.pool.get('ir.attachment').unlink(cr, uid, attachments)
             period = soa_read['period_id'][1]
             netsvc.Logger().notifyChannel("period", netsvc.LOG_INFO, ' '+str(period))
             split_period = period.split('/')
