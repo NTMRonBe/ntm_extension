@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+            
+        <record id="ntm_account_move_form" model="ir.ui.view">
+            <field name="name">ntm.account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Journal Entry">
+                    <field name=""
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="ntm_account_move_tree">
+            <field name="name">ntm.account.move.tree</field>
+            <field name="model">account.soa</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Journal Entries">
+                    
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="ntm_action_account_move_form">
+        	<field name="name">Journal Entries</field>
+	        <field name="res_model">account.move</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+        </record>
+            
+        <record model="ir.actions.act_window.view" id="ntm_action_account_move_form_form">
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="ntm_account_move_form"/>
+            <field name="act_window_id" ref="ntm_action_account_move_form"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="ntm_action_account_move_form_tree">
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="ntm_account_move_tree"/>
+            <field name="act_window_id" ref="ntm_action_account_move_form"/>
+        </record>
+          
+    </data>
+</openerp>
