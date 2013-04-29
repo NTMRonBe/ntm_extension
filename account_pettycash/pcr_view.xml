@@ -46,7 +46,16 @@
 		                    	<group colspan="4" col="2">
 	                    	    	<separator string="Journal Items"/>
 			                    	    <group colspan="4" col="2">
-			                    	    	<field name="move_ids" nolabel="1"/>
+			                    	    	<field name="move_ids" mode="tree" nolabel="1">
+			                    	    	   <tree string="Accounting Entries">
+				                                    <field name="date"/>
+				                                    <field name="account_id"/>
+				                                    <field name="debit"/>
+				                                    <field name="credit"/>
+				                                    <field name="currency_id" string="Encoding Currency"/>
+				                                    <field name="amount_currency" string="Encoding Amount"/>
+				                                </tree>
+			                    	    	</field>
 			                    	    </group>
 	                    	    </group>
                     	    </group>

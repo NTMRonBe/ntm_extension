@@ -246,7 +246,13 @@
                                             />
 	                        </group>
                         </group>
-                        <field name="denomination_ids" nolabel="1" colspan="4" readonly="True"/>
+                        <field name="denomination_ids" mode="tree" nolabel="1" readonly="True" colspan="4">
+                                  <tree string="Denomination Breakdown">
+                                      <field name="name"/>
+                                      <field name="quantity"/>
+                                      <field name="amount"/>
+                                  </tree>
+                        </field>
                         <newline/>
                         <field name="state" colspan="4"/>
                         

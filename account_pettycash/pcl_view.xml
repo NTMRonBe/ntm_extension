@@ -13,19 +13,22 @@
                         <field name="journal_id" widget="selection" domain="[('type','=','pettycash')]" attrs="{'readonly': [('state','!=','draft')]}"/>
                         <field name="date" attrs="{'readonly': [('state','!=','draft')]}"/>
                         <field name="period_id" attrs="{'readonly': [('state','!=','draft')]}"/>
-                        <field name="pc_id" attrs="{'readonly': [('state','!=','draft')]}" domain="[('state','=','active')]"/>
+                        <field name="pc_id" attrs="{'readonly': [('state','!=','draft')]}" domain="[('state','=','active')]" on_change="onchange_pettycash(pc_id)"/>
                         <field name="amount" readonly="1"/>
                         <field name="move_id" invisible="1"/>
                         <field name="type" invisible="1"/>
+                        <field name="denom_filled" invisible="1"/>
+                        <field name="partner_id" attrs="{'readonly': [('state','!=','draft')],'required':[('type','=','missionary')],'invisible':[('type','!=','missionary')]}"/> 
                     </group>
                     <notebook colspan="4">
                         <page string="Denominations Lists" attrs="{'invisible':[('type','=','missionary')]}">
 		                    <group colspan="4" col="2">
+		                        <button string="Fill Denominations" colspan="4" type="object" name="fill_denoms" icon="gtk-execute" attrs="{'invisible':[('denom_filled','=',True)]}"/>
 		                        <field name="denom_breakdown" height="200" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}"/>
 		                    </group>
                     	</page>
                     	<page string="Liquidation Lines">
-                    	   <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" height="300" attrs="{'readonly': [('state','!=','draft')]}">
+                    	   <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" height="300" attrs="{'readonly': [('state','!=','draft')],'invisible': [('type','=','missionary')]}">
                                 <tree string="Liquidation Lines">
 	                                <field name="name"/>
 	                                <field name="account_id" attrs="{'readonly': ['|',('state','!=','draft'),('type','=','missionary')]}"/>
@@ -34,7 +37,19 @@
                                 </tree>
                                 <form string="Liquidation Lines">
                                     <field name="name"/>
-                                    <field name="account_id" attrs="{'readonly': [('state','!=','draft')],'invisible': [('type','=','missionary')],'required':[('type','=','messenger')]}"/>
+                                    <field name="account_id" attrs="{'readonly': [('state','!=','draft')],'required':[('type','=','messenger')]}"/>
+                                    <field name="reference"/>
+                                    <field name="amount" required="1"/>
+                                </form>
+                           </field>
+                           <field colspan="4" mode="tree,form" name="mpcll_ids" nolabel="1" height="300" attrs="{'readonly': [('state','!=','draft')],'invisible': [('type','=','messenger')]}">
+                                <tree string="Liquidation Lines">
+                                    <field name="name"/>
+                                    <field name="reference"/>
+                                    <field name="amount"/>
+                                </tree>
+                                <form string="Liquidation Lines">
+                                    <field name="name"/>
                                     <field name="reference"/>
                                     <field name="amount" required="1"/>
                                 </form>
@@ -46,7 +61,7 @@
                         <button string="Cancel" type="object" name="cancel" icon="gtk-cancel" attrs="{'invisible': ['|',('state','=','cancel'),('type','=','missionary')]}"/>
                         <button string="Set to draft" type="object" name="set_to_draft" icon="terp-stock_effects-object-colorize" attrs="{'invisible': ['|',('state','!=','cancel'),('type','=','missionary')]}"/>
                         <button string="Confirm" type="object" name="confirm_pcl" icon="gtk-execute" attrs="{'invisible': ['|',('state','!=','draft'),('type','=','missionary')]}"/>
-                        <button string="Complete" type="object" name="complete_pcl" icon="gtk-execute" attrs="{'invisible': ['|',('state','!=','confirmed'),('type','=','missionary')]}"/>
+                        <button string="Complete" type="object" name="post_pcl" icon="gtk-execute" attrs="{'invisible': ['|',('state','!=','confirmed'),('type','=','missionary')]}"/>
                     </group>
                 </form>
             </field>

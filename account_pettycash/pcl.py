@@ -29,6 +29,7 @@ class account_pettycash_liquidation(osv.osv):
                         ('messenger','Messenger'),
                         ('missionary','Missionary'),
                         ], 'Type'),
+        'denom_filled':fields.boolean('Filled?'),
         'pc_id':fields.many2one('account.pettycash','PC Account'),
         'period_id':fields.many2one('account.period','Period'),
         'journal_id':fields.many2one('account.journal','Journal'),
@@ -75,7 +76,58 @@ class pcl(osv.osv):
     _columns = {
         'denom_breakdown':fields.one2many('pettycash.denom','pcl_id','Denominations Breakdown'),
         'pcll_ids':fields.one2many('pc.liquidation.lines','pcl_id','Liquidation Lines'),
+        'mpcll_ids':fields.one2many('pc.liquidation.lines','pcl_id','Liquidation Lines'),
+        'partner_id':fields.many2one('res.partner','Missionary'),
         }
+    
+    def fill_denoms(self, cr, uid, ids, context=None):
+        for pcl in self.read(cr, uid, ids, context=None):
+            if pcl['pc_id']:
+                pc_id = self.pool.get('account.pettycash').read(cr, uid, pcl['pc_id'][0],['currency_id'])
+                denom_search = self.pool.get('denominations').search(cr, uid, [('currency_id','=',pc_id['currency_id'][0])])
+                currency = pc_id['currency_id'][0]
+                if not denom_search:
+                    raise osv.except_osv(_('Error !'), _('%s has no available denominations.Please add them!')%currency)
+                if denom_search:
+                    for denoms in denom_search:
+                        values = {
+                            'pcl_id':pcl['id'],
+                            'name':denoms,
+                            }
+                        self.pool.get('pettycash.denom').create(cr, uid, values)
+                self.write(cr, uid, ids,{'denom_filled':True})
+            if not pcl['pc_id']:
+                raise osv.except_osv(_('Error !'), _('Please add pettycash account.'))
+        return True
+    
+    def onchange_pettycash(self, cr, uid, ids, pc_id=False):
+        result = {}
+        ftp_id = False
+        if pc_id:
+            for p2b in self.read(cr, uid, ids, context=None):
+                ftp_id = p2b['id']
+                for p2b_denom in p2b['denom_breakdown']:
+                    self.pool.get('pettycash.denom').unlink(cr, uid, p2b_denom)
+                ptc_read = self.pool.get('account.pettycash').read(cr, uid, pc_id,['currency_id'])
+                currency = ptc_read['currency_id'][1]
+                denominations = self.pool.get('denominations').search(cr, uid, [('currency_id','=',ptc_read['currency_id'][0])])
+                if not denominations:
+                    raise osv.except_osv(_('Error !'), _('%s has no available denominations.Please add them!')%currency)
+                new_denoms=[]
+                if denominations:
+                    for denom in denominations:
+                        values = {
+                            'name':denom,
+                            'pcl_id':ftp_id,
+                            }
+                        denom_new= self.pool.get('pettycash.denom').create(cr, uid, values)
+                        new_denoms.append(denom_new)
+                result = {'value':{
+                        'denom_breakdown':new_denoms,
+                          }
+                    }
+        return result
+            
     
     def confirm_pcl(self, cr, uid, ids, context=None):
         for pcl in self.read(cr, uid, ids, context=None):
@@ -140,9 +192,7 @@ class pcl(osv.osv):
                 self.pool.get('pettycash.denom').write(cr, uid,uninclude,{'quantity':0.00})
         return True
     
-    def complete_pcl(self, cr, uid, ids, context=None):
-        move_pool = self.pool.get('account.move')
-        move_line_pool = self.pool.get('account.move.line')
+    def post_pcl(self, cr, uid, ids, context=None):
         for pcl in self.read(cr, uid, ids, context=None):
             journal_id = pcl['journal_id'][0]
             period_id = pcl['period_id'][0]
@@ -152,19 +202,31 @@ class pcl(osv.osv):
                     'date':pcl['date'],
                     'state':'draft',
                     'ref':pcl['name'],
-                    }
-            move_id = move_pool.create(cr, uid, move_vals)
+                    } 
+            move_id = self.pool.get('account.move').create(cr, uid, move_vals)
             amount = 0.00
+            check_account = self.pool.get('account.pettycash').read(cr, uid,pcl['pc_id'][0],['account_code'])
+            check_currency = self.pool.get('account.account').read(cr, uid, check_account['account_code'][0],['currency_id','company_currency_id'])
+            currency = False
+            rate = False
+            if not check_currency['currency_id']:
+                currency = check_currency['company_currency_id'][0]
+                rate = 1.00
+            if check_currency['currency_id']:
+                curr_read = self.pool.get('res.currency').read(cr, uid, check_currency['currency_id'][0],['rate'])
+                currency = check_currency['currency_id'][0]
+                rate = curr_read['rate']
             for line in pcl['pcll_ids']:
-                line_reader = self.pool.get('pc.liquidation.lines').read(cr, uid, line,context=None)
-                ref_account = line_reader['account_id'].split(',')
+                line_read = self.pool.get('pc.liquidation.lines').read(cr, uid, line, context=None)
+                ref_account = line_read['account_id'].split(',')
                 reference_check = self.pool.get(ref_account[0])
                 acc_id = int(ref_account[1])
-                account = reference_check.read(cr, uid, acc_id,context=None)
-                amount +=line_reader['amount'] 
+                account = reference_check.read(cr, uid, acc_id, context=None)
+                amount += line_read['amount']
+                comp_curr_amount = line_read['amount'] / rate  
                 #netsvc.Logger().notifyChannel("amount", netsvc.LOG_INFO, ' '+str(amount))
                 account_id = 0
-                analytic_id = False,
+                analytic_id = False
                 if ref_account[0]=='account.analytic.account':
                     analytic_name = account['name']
                     if not account['normal_account']:
@@ -175,18 +237,21 @@ class pcl(osv.osv):
                 elif ref_account[0]=='account.account':
                     account_id = acc_id
                 move_line_vals = {
-                        'name':line_reader['name'],
+                        'name':line_read['name'],
                         'journal_id':journal_id,
                         'period_id':period_id,
                         'account_id':account_id,
-                        'debit':line_reader['amount'],
+                        'debit':comp_curr_amount,
                         'analytic_account_id':analytic_id,
                         'date':pcl['date'],
                         'ref':pcl['name'],
                         'move_id':move_id,
+                        'amount_currency':line_read['amount'],
+                        'currency_id':currency,
                         }
-                move_line_pool.create(cr, uid, move_line_vals)
+                self.pool.get('account.move.line').create(cr, uid, move_line_vals)
             pca = self.pool.get('account.pettycash').read(cr, uid, pcl['pc_id'][0],context=None)
+            amount = amount / rate
             move_line_vals = {
                         'name':pcl['name'],
                         'journal_id':journal_id,
@@ -196,8 +261,10 @@ class pcl(osv.osv):
                         'date':pcl['date'],
                         'ref':pcl['name'],
                         'move_id':move_id,
+                        'amount_currency':pcl['amount'],
+                        'currency_id':currency,
                         }
-            move_line_pool.create(cr, uid, move_line_vals)
+            self.pool.get('account.move.line').create(cr, uid, move_line_vals)
             self.write(cr, uid, ids, {'state':'completed','move_id':move_id})
             self.update_pc(cr, uid, [pcl['id']])
         return True
