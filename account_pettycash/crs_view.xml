@@ -30,7 +30,8 @@
                   <group colspan="4" col="13">
                         <field name="state" select="1"/>
 						<button name="approval" attrs="{'invisible':[('state','!=','draft')]}" string="Submit"  type="object" icon="gtk-jump-to"/>
-						<button name="approval" attrs="{'invisible':[('state','!=','cancel')]}" string="Re-Open"  type="object" icon="gtk-jump-to"/>
+						<button name="approval" attrs="{'invisible':[('state','!=','pending')]}" string="Re-Open"  type="object" icon="gtk-jump-to"/>
+						<button name="cancel" attrs="{'invisible':[('state','in',['draft','approval','cancel'])]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
 						<button name="disapproved" string="Disapproved" type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','!=','approval')]}"/>
                         <button name="approved" string="Approved" type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','!=','approval')]}"/>
 					</group>
@@ -93,11 +94,18 @@
                   	<group colspan="8" col="8">
                   	    <field name="journal_id" domain="[('type','=','disbursement')]" widget="selection"/>
                   	    <field name="crs_id" domain="[('state','=','approved')]"/>
-                  	    <field name="analytic_id" readonly="1"/>
+                  	    <field name="analytic_id" domain="[('partner_id','=',partner_id)]"/>
                   	    <field name="date"/>
                   	    <field name="period_id" invisible="1" readonly="1"/>
+                  	    <field name="partner_id" readonly="True"/>
                   	</group>
-                  	<field name="denomination_ids" nolabel="1" colspan="6" height="300"/>
+                  	<field name="denomination_ids" mode="tree" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}" colspan="6">
+                        <tree string="Denomination Breakdown" editable="top">
+                            <field name="name"/>
+                            <field name="quantity"/>
+                            <field name="amount"/>
+                        </tree>
+                    </field>
                   	<group colspan="4" col="13">
                   	    <field name="state"/>
                   	    <button name="get_account" string="Compute" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>

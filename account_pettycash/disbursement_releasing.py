@@ -20,6 +20,7 @@ class cash_request_slip(osv.osv):
             ('approval','For Approval'),
             ('approved','Approved'),
             ('disapproved','Disapproved'),
+            ('pending','Pending'),
             ('cancel','Cancelled'),
             ('released','Released')
             ],'Status', select=True, readonly=True),
@@ -39,13 +40,25 @@ class cash_request_slip(osv.osv):
     def approval(self, cr, uid, ids, context=None):
         for crs in self.browse(cr, uid, ids):
             if crs.pc_id.amount <crs.amount:
-                self.write(cr, uid, ids, {'state':'cancel'})
+                self.write(cr, uid, ids, {'state':'pending'})
             elif crs.pc_id.amount>crs.amount:
                 self.write(cr, uid, ids, {'state':'approval'})
         return True
     def approved(self, cr, uid, ids, context=None):
-        self.write(cr, uid, ids, {'state':'approved'})
+        for crs in self.read(cr, uid, ids, context=None):
+            values = {
+                'crs_id':crs['id'],
+                'state':'draft',
+                }
+            self.pool.get('pettycash.disbursement').create(cr, uid, values)
+            self.write(cr, uid, crs['id'], {'state':'approved'})
         return True
+    
+    def cancel(self, cr, uid, ids, context=None):
+        for crs in self.read(cr, uid, ids, context=None):
+            self.write(cr, uid, crs['id'],{'state':'cancel'})
+        return True
+    
     def disapproved(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state':'disapproved'})
         return True
@@ -104,6 +117,7 @@ class pcd(osv.osv):
     _columns = {
         'denomination_ids':fields.one2many('pettycash.denom','pd_id','Denominations Breakdown', ondelete="cascade"),
         'analytic_id':fields.many2one('account.analytic.account','Debit Account'),
+        'partner_id':fields.related('crs_id','requestor_id',type='many2one',relation='res.partner',store=True, string='Entity'),
         }
     
     def check_disbursements(self, cr, uid, ids,context=None):
@@ -132,34 +146,19 @@ class pcd(osv.osv):
         ctr = 0
         account_id = 1
         for pcd in self.read(cr, uid, ids, context=None):
-            self.check_disbursements(cr, uid, [pcd['id']])
-            #netsvc.Logger().notifyChannel("pcd", netsvc.LOG_INFO, ' '+str(pcd))
-            crs = self.pool.get('cash.request.slip').read(cr, uid, pcd['crs_id'][0], context=None)
-            account_ids = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',crs['requestor_id'][0])])
-            netsvc.Logger().notifyChannel("pcd", netsvc.LOG_INFO, ' '+str(account_ids))
-            if not account_ids:
-                raise osv.except_osv(_('Warning!'), _('No Analytic Account for the partner.'))
-            if account_ids:
-                for account in account_ids:
-                    ctr +=1
-                    account_id = account
-                if ctr > 1:
-                    raise osv.except_osv(_('Warning!'), _('You can only define 1 analytic account for a single missionary/project.'))
-                elif ctr==1:
-                    denoms = self.pool.get('pettycash.denom').search(cr, uid, [('pd_id','=',pcd['id']),('quantity','>','0.00')])
-                    if denoms:
-                        for denom in denoms:
-                            denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denom,context=None)
-                            denomination = self.pool.get('denominations').read(cr, uid, denom_reader['name'][0],['multiplier'])
-                            amount +=denom_reader['quantity'] * denomination['multiplier']
-                        values = {
-                            'amount':amount,
-                            'state':'releasing',
-                            'analytic_id':account_id,
-                            'name': self.pool.get('ir.sequence').get(cr, uid, 'pettycash.disbursement'),
-                            }
-                        netsvc.Logger().notifyChannel("pcd", netsvc.LOG_INFO, ' '+str(values))
-                        self.write(cr, uid, ids,values)
+            denoms = self.pool.get('pettycash.denom').search(cr, uid, [('pd_id','=',pcd['id']),('quantity','>','0')])
+            if denoms:
+                for denom in denoms:
+                    denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denom,context=None)
+                    denomination = self.pool.get('denominations').read(cr, uid, denom_reader['name'][0],['multiplier'])
+                    amount +=denom_reader['quantity'] * denomination['multiplier']
+                values = {
+                    'amount':amount,
+                    'state':'releasing',
+                    'analytic_id':account_id,
+                    'name': self.pool.get('ir.sequence').get(cr, uid, 'pettycash.disbursement'),
+                    }
+                self.write(cr, uid, ids,values)
         return True
     
     def fill_denominations(self, cr, uid, ids, context=None):
