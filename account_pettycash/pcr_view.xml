@@ -77,6 +77,12 @@
                                             icon="gtk-execute"
                                             attrs="{'invisible': [('state','!=','draft')]}"
                                             />
+                         <button string="Cancel and Set to draft"
+                                            type="object"
+                                            name="set_to_draft"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible': [('state','!=','completed')]}"
+                                            />
                                     <button string="Complete"
                                             type="object"
                                             name="post_pcr"

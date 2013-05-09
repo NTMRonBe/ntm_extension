@@ -65,7 +65,7 @@ pettycash_replenishment()
 class pettycash_denom(osv.osv):
     _inherit = "pettycash.denom"
     _columns ={
-        'pcr_id':fields.many2one('pettycash.replenishment','Petty Cash ID'),
+        'pcr_id':fields.many2one('pettycash.replenishment','Petty Cash ID', ondelete='cascade'),
         }    
 pettycash_denom()
 
@@ -76,6 +76,22 @@ class pcr(osv.osv):
         'filled':fields.boolean('Filled'),
         }
       
+    def set_to_draft(self, cr, uid, ids, context=None):
+        for pcr in self.read(cr, uid, ids, context=None):
+            move_id = pcr['move_id'][0]
+            netsvc.Logger().notifyChannel("move_id", netsvc.LOG_INFO, ' '+str(move_id))
+            self.pool.get('account.move').button_cancel(cr, uid, [move_id])
+            self.pool.get('account.move').unlink(cr, uid, [move_id])
+            self.write(cr, uid, pcr['id'],{'state':'draft'})
+            for pcr_denoms in pcr['denom_breakdown']:
+                pcr_denom_read = self.pool.get('pettycash.denom').read(cr, uid, pcr_denoms,['name','quantity'])
+                pca_denom_search = self.pool.get('pettycash.denom').search(cr, uid, [('pettycash_id','=',pcr['pettycash_id'][0]),('name','=',pcr_denom_read['name'][0])])
+                if pca_denom_search:
+                    for pca_denoms in pca_denom_search:
+                        pca_denom_read = self.pool.get('pettycash.denom').read(cr, uid, pca_denoms,['quantity'])
+                        pca_new_quantity = pca_denom_read['quantity'] - pcr_denom_read['quantity']
+                        self.pool.get('pettycash.denom').write(cr, uid, pca_denoms,{'quantity':pca_new_quantity})
+        return True
     
     def onchange_pettycash(self, cr, uid, ids, pettycash_id=False):
         result = {}
@@ -151,7 +167,7 @@ class pcr(osv.osv):
     
     def post_pcr(self, cr, uid, ids, context=None):
         for pcr in self.read(cr, uid, ids, context=None):
-            bank_read = self.pool.get('res.partner.bank').read(cr, uid, pcr['bank_id'][0],['account_id','journal_id'])
+            bank_read = self.pool.get('res.partner.bank').read(cr, uid, pcr['bank_id'][0],['account_id','journal_id','transit_id'])
             account_read = self.pool.get('account.account').read(cr, uid, bank_read['account_id'][0],['currency_id','company_currency_id'])
             pettycash_read = self.pool.get('account.pettycash').read(cr, uid, pcr['pettycash_id'][0],['account_code'])
             curr_rate = False
@@ -187,6 +203,34 @@ class pcr(osv.osv):
                 }
             self.pool.get('account.move.line').create(cr, uid, move_line)
             move_line = {
+                    'name': 'Transit to Petty Cash Account',
+                    'credit': amount,
+                    'debit': 0.00,
+                    'account_id': bank_read['transit_id'][0],
+                    'move_id': move_id,
+                    'journal_id': journal_id,
+                    'date': date,
+                    'period_id': period_id,
+                    'currency_id':pcr['curr_id'][0],
+                    'amount_currency':pcr['total_amount'],
+                    'post_rate':curr_rate,
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            move_line = {
+                    'name': 'Transit from Bank Account',
+                    'credit': 0.00,
+                    'debit': amount,
+                    'account_id': bank_read['transit_id'][0],
+                    'move_id': move_id,
+                    'journal_id': journal_id,
+                    'date': date,
+                    'period_id': period_id,
+                    'currency_id':pcr['curr_id'][0],
+                    'amount_currency':pcr['total_amount'],
+                    'post_rate':curr_rate,
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            move_line = {
                     'name': 'Bank Account',
                     'credit': amount,
                     'debit': 0.00,
@@ -200,6 +244,7 @@ class pcr(osv.osv):
                     'post_rate':curr_rate,
                 }
             self.pool.get('account.move.line').create(cr, uid, move_line)
+            
             pca_id = pcr['pettycash_id'][0]
             for denominations in pcr['denom_breakdown']:
                 denom_read = self.pool.get('pettycash.denom').read(cr, uid, denominations,context=None)
