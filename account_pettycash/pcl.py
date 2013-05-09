@@ -9,9 +9,51 @@ import decimal_precision as dp
 
 def _links_get(self, cr, uid, context={}):
     obj = self.pool.get('res.request.link')
-    ids = obj.search(cr, uid, [])
+    ids = obj.search(cr, uid, [('for_liquidation','=',True)])
     res = obj.read(cr, uid, ids, ['object', 'name'], context)
     return [(r['object'], r['name']) for r in res]
+
+class bill_exchange(osv.osv):
+    _name = 'bill.exchange'
+    _description = "Bills Exchange"
+    _columns = {
+        'name':fields.char('Exchange#',size=64),
+        'denom_id':fields.many2one('denominations','Denomination'),
+        'date':fields.date('Exchange Date'),
+        'currency_id':fields.many2one('res.currency','Currency'),
+        'pettycash_id':fields.many2one('account.pettycash','Petty Cash'),
+        'quantity':fields.integer('Quantity'),
+        'curr_quantity':fields.integer('Current Quantity'),
+        }
+    def on_change_pca(self, cr, uid, ids, pettycash_id=False):
+        result = {}
+        currency_id=0
+        if pettycash_id:
+            pettycash = self.pool.get('account.pettycash').browse(cr, uid, pettycash_id)
+            currency_id = pettycash.currency_id.id
+            result = {'value':{
+                    'currency_id':currency_id,
+                      }
+                }
+        return result
+    
+    def on_change_denom(self, cr, uid, ids, denom_id=False):
+        result = {}
+        quantity = 0
+        if denom_id:
+            for be in self.read(cr, uid, ids, context=None):
+                pc_id = be['pettycash_id']['0']
+                pc_denom = self.pool.get('pettycash.denom').search(cr, uid, [('pettycash_id','=',pc_id),('name','=',denom_id)])
+                for denoms in pc_denom:
+                    denom_read = self.pool.get('pettycash.denom').read(cr, uid, denoms,['quantity'])
+                    quantity = denom_read['quantity']
+            result = {'value':{
+                    'curr_quantity':quantity,
+                    }
+                }
+        return result
+                    
+bill_exchange()
 
 class account_pettycash_liquidation(osv.osv):
     def _get_period(self, cr, uid, context=None):
@@ -55,6 +97,7 @@ class pettycash_denom(osv.osv):
     _inherit = "pettycash.denom"
     _columns ={
         'pcl_id':fields.many2one('account.pettycash.liquidation','Liquidation',ondelete="cascade"),
+        'be_id':fields.many2one('bill.exchange','Bill Exchange',ondelete="cascade"),
         }
 pettycash_denom()
 
@@ -142,9 +185,7 @@ class pcl(osv.osv):
             if denoms:
                 for denom in denoms:
                     denom_read = self.pool.get('pettycash.denom').read(cr, uid, denom, context=None)
-                    if not denom_read['quantity']:
-                        raise osv.except_osv(_('Error !'), _('Denomination lines with 0.00 quantity are not allowed'))
-                    elif denom_read['quantity']:
+                    if denom_read['quantity']:
                         denom_reader = self.pool.get('denominations').read(cr, uid, denom_read['name'][0],['multiplier'])
                         product = denom_reader['multiplier'] * denom_read['quantity']
                         denom_sum += product
@@ -155,8 +196,8 @@ class pcl(osv.osv):
                         raise osv.except_osv(_('Error !'), _('Liquidation lines that is less than or equal to 0.00 are not allowed'))
                     elif line_read['amount']>0.00:
                         lines_sum += line_read['amount']                
-            if denom_sum > 0.00 and lines_sum > 0.00:
-                self.write(cr, uid, pcl['id'],{'amount':denom_sum})
+            if lines_sum > 0.00:
+                self.write(cr, uid, pcl['id'],{'amount':lines_sum})
                 check_amount = 0.00
                 pc_read = self.pool.get('account.pettycash').read(cr, uid, pcl['pc_id'][0],['amount'])
                 pc_amount = pc_read['amount']
@@ -282,3 +323,10 @@ class pcl(osv.osv):
             self.write(cr, uid, pcl['id'],{'state':'draft'})
         return True
 pcl()
+
+class be(osv.osv):
+    _inherit = 'bill.exchange'
+    _columns = {
+        'denom_breakdown':fields.one2many('pettycash.denom','be_id','Denomination Breakdown'),
+        }
+be()

@@ -23,9 +23,14 @@
                     <notebook colspan="4">
                         <page string="Denominations Lists" attrs="{'invisible':[('type','=','missionary')]}">
 		                    <group colspan="4" col="2">
-		                        <button string="Fill Denominations" colspan="4" type="object" name="fill_denoms" icon="gtk-execute" attrs="{'invisible':[('denom_filled','=',True)]}"/>
-		                        <field name="denom_breakdown" height="200" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}"/>
-		                    </group>
+                                <field name="denom_breakdown" mode="tree" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
+                                  <tree string="Denomination Breakdown" editable="top">
+                                      <field name="name"/>
+                                      <field name="quantity"/>
+                                      <field name="amount"/>
+                                  </tree>
+                                </field>
+                            </group>
                     	</page>
                     	<page string="Liquidation Lines">
                     	   <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" height="300" attrs="{'readonly': [('state','!=','draft')],'invisible': [('type','=','missionary')]}">
@@ -122,6 +127,77 @@
             parent="main_pettycash"
             sequence="70" 
             groups="base.group_user"/>  
+            
+            
+            
+            
+ 
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        <record id="be_form" model="ir.ui.view">
+            <field name="name">be.form</field>
+            <field name="model">bill.exchange</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Bill Exchange">
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="pettycash_id" on_change="on_change_pca(pettycash_id)"/>
+                    <field name="currency_id"/>
+                    <field name="denom_id" domain="[('currency_id','=',currency_id)]" on_change="on_change_pca(pettycash_id)"/>
+                    <field name="curr_quantity"/>
+                    <field name="quantity"/>
+                    <group colspan="4">
+                       <field name="denom_breakdown" mode="tree" nolabel="1">
+                                  <tree string="Denomination Breakdown" editable="top">
+                                      <field name="name"/>
+                                      <field name="quantity"/>
+                                      <field name="amount"/>
+                                  </tree>
+                                </field>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <!--         
+        <record model="ir.ui.view" id="crs_tree">
+            <field name="name">crs.tree</field>
+            <field name="model">cash.request.slip</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Cash Request">
+                        <field name="name"/>
+                  <field name="pc_id"/>
+                  <field name="amount"/>
+                  <field name="state"/>
+                </tree>
+            </field>
+        </record>
+         -->
+        <record model="ir.actions.act_window" id="action_be_form">
+            <field name="name">Bills Exchange</field>
+            <field name="res_model">bill.exchange</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        <menuitem id="menu_be" 
+            action="action_be_form" 
+            parent="main_pettycash"
+            sequence="20" 
+            groups="base.group_user"/> 
 
     </data>
 </openerp>

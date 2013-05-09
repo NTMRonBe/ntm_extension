@@ -49,6 +49,7 @@
       <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
     </blockTableStyle>
     <blockTableStyle id="Table8">
       <blockAlignment value="LEFT"/>
@@ -57,6 +58,7 @@
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="2,-1" stop="2,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="4,-1" stop="4,-1"/>
     </blockTableStyle>
     <initialize>
       <paraStyle name="all" alignment="justify"/>
@@ -71,12 +73,10 @@
     <paraStyle name="P8" fontName="Helvetica" fontSize="10.0" leading="13"/>
     <paraStyle name="P9" fontName="Helvetica" fontSize="10.0" leading="13" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="P10" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P11" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P12" fontName="Helvetica" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P13" fontName="Helvetica" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P11" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P12" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P13" fontName="Helvetica" fontSize="7.0" leading="9" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="P14" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P15" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P16" rightIndent="0.0" leftIndent="9.0" fontName="Helvetica-Oblique" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="List" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
@@ -127,10 +127,10 @@
     <para style="Standard">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="362.0,166.0" style="Table2">
+    <blockTable colWidths="363.0,167.0" style="Table2">
       <tr>
         <td>
-          <para style="P1">Date of Statement: [[soa.date]]</para>
+          <para style="P13">Date of Statement: [[soa.date]]</para>
         </td>
         <td>
           <para style="P4">
@@ -140,7 +140,7 @@
       </tr>
       <tr>
         <td>
-          <para style="P1">Account: [[ soa.account_number.code ]]</para>
+          <para style="P13">Account: [[ soa.account_number.code ]]</para>
         </td>
         <td>
           <para style="P2">
@@ -150,7 +150,7 @@
       </tr>
       <tr>
         <td>
-          <para style="P1">Account Description: [[ soa.account_number.name ]]</para>
+          <para style="P13">Account Description: [[ soa.account_number.name ]]</para>
         </td>
         <td>
           <para style="P2">
@@ -160,7 +160,7 @@
       </tr>
       <tr>
         <td>
-          <para style="P1">Period of Time: [[ soa.period_id.name ]]</para>
+          <para style="P13">Period of Time: [[ soa.period_id.name ]]</para>
         </td>
         <td>
           <para style="P2">
@@ -170,7 +170,7 @@
       </tr>
       <tr>
         <td>
-          <para style="P1">Exchange Rate:</para>
+          <para style="P13">Exchange Rate:</para>
         </td>
         <td>
           <para style="P2">
@@ -214,9 +214,7 @@
           <para style="P1">Total Income</para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
+          <para style="P1">[[soa.total_income]]</para>
         </td>
         <td>
           <para style="P1">
@@ -229,9 +227,7 @@
           <para style="P1">Total Expenses</para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
+          <para style="P1">[[soa.total_expense]]</para>
         </td>
         <td>
           <para style="P1">
@@ -244,9 +240,7 @@
           <para style="P1">Income - Expenses</para>
         </td>
         <td>
-          <para style="P1">
-            <font color="white"> </font>
-          </para>
+          <para style="P1">[[soa.inc_exp]]</para>
         </td>
         <td>
           <para style="P1">
@@ -270,7 +264,7 @@
         </td>
       </tr>
     </blockTable>
-    <blockTable colWidths="88.0,244.0,98.0,101.0" style="Table7">
+    <blockTable colWidths="74.0,207.0,82.0,82.0,85.0" style="Table7">
       <tr>
         <td>
           <para style="terp_tblheader_Details">Date</para>
@@ -279,7 +273,10 @@
           <para style="terp_tblheader_Details_Centre">Description</para>
         </td>
         <td>
-          <para style="terp_tblheader_Details_Centre">PHP Amount</para>
+          <para style="terp_tblheader_Details_Centre">Debit</para>
+        </td>
+        <td>
+          <para style="terp_tblheader_Details_Centre">Credit</para>
         </td>
         <td>
           <para style="terp_tblheader_Details_Right">USD Amount</para>
@@ -288,19 +285,22 @@
     </blockTable>
     <section>
       <para style="P10">[[ repeatIn(soa.line_ids,'l') ]]</para>
-      <blockTable colWidths="88.0,244.0,98.0,101.0" style="Table8">
+      <blockTable colWidths="74.0,206.0,82.0,82.0,85.0" style="Table8">
         <tr>
           <td>
-            <para style="P14">[[l.date]]</para>
+            <para style="P11">[[l.date]]</para>
           </td>
           <td>
-            <para style="P14">[[ l.name ]]</para>
+            <para style="P11">[[ l.name ]]</para>
           </td>
           <td>
-            <para style="P15">[[l.amount]]</para>
+            <para style="P12">[[l.debit]]</para>
           </td>
           <td>
-            <para style="P15">[[l.currency_amount]]</para>
+            <para style="P12">[[l.credit]]</para>
+          </td>
+          <td>
+            <para style="P12">[[l.currency_amount]]</para>
           </td>
         </tr>
         <tr>
@@ -309,6 +309,11 @@
           </td>
           <td>
             <para style="terp_default_9">
+              <font color="white"> </font>
+            </para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">
               <font color="white"> </font>
             </para>
           </td>

@@ -83,6 +83,7 @@ class soa_request(osv.osv):
                                     for soa_attachment in soa_attachments:
                                         query=("""insert into mail_attachments_rel(mail_id,att_id)values(%s,%s)"""%(email_created,soa_attachment))
                                         cr.execute(query)
+                                    self.pool.get('email_template.mailbox').send_this_mail(cr, uid, email_lists)
         return True
             
 soa_request()

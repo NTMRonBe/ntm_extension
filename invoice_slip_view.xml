@@ -2,32 +2,32 @@
 <openerp>
     <data>
     
-    <record id="regional_expenses_form" model="ir.ui.view">
-            <field name="name">regional.expenses.form</field>
-            <field name="model">regional.expenses</field>
+    <record id="regional_income_form" model="ir.ui.view">
+            <field name="name">regional.income.form</field>
+            <field name="model">regional.income</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string = "Regional Expenses">
+                <form string = "Regional Income">
                     <field name="code"/>
                     <field name="name"/>
                 </form>
             </field>
         </record>        
-        <record model="ir.ui.view" id="regional_expenses_tree">
-            <field name="name">regional.expenses.tree</field>
-            <field name="model">regional.expenses</field>
+        <record model="ir.ui.view" id="regional_income_tree">
+            <field name="name">regional.income.tree</field>
+            <field name="model">regional.income</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Regional Expenses">
+                <tree string="Regional Income">
                     <field name="name"/>
                     <field name="code"/>
                 </tree>
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_regional_expenses_form">
-            <field name="name">Regional Expenses</field>
-            <field name="res_model">regional.expenses</field>
+        <record model="ir.actions.act_window" id="action_regional_income_form">
+            <field name="name">Regional Income</field>
+            <field name="res_model">regional.income</field>
             <field name="view_type">form</field>
         </record>
     
@@ -41,13 +41,13 @@
                     <field name="name"/>
                     <field name="code"/>
                     <field name="journal_id"/>
-                    <field colspan="4" mode="tree,form" name="expense_ids" nolabel="1">
-                        <form string="Expense">
-                            <field name="expense_id"/>
+                    <field colspan="4" mode="tree,form" name="income_ids" nolabel="1">
+                        <form string="Income">
+                            <field name="income_id"/>
                             <field name="analytic_account"/>
                         </form>
-                        <tree string="Expense" editable="bottom">
-                            <field name="expense_id"/>
+                        <tree string="income" editable="bottom">
+                            <field name="income_id"/>
                             <field name="analytic_account"/>
                         </tree>
                     </field>
@@ -81,7 +81,7 @@
             <field name="arch" type="xml">
                 <tree string="Invoice Slip Uploader">
                         <field name="region_id"/>
-                        <field name="expense_code"/>
+                        <field name="income_code"/>
 					    <field name="transaction_id"/>
 					    <field name="transaction_type"/>
 					    <field name="partner_id"/>
@@ -103,7 +103,7 @@
                 <form string="Invoice Slip Uploader">
                     <group colspan="4" col="4">
                     	<field name="region_id"/>
-                    	<field name="expense_code"/>
+                    	<field name="income_code"/>
                         <field name="transaction_id"/>
                         <field name="transaction_type"/>
                         <field name="partner_id"/>
@@ -141,11 +141,11 @@
 					    <group colspan="4" col="2">
 					         <field name="line_ids" nolabel="1" colspan="4" height="300">
                                     <tree string="Invoice Lines">
-                                        <field name="expense_id"/>
+                                        <field name="income_id"/>
                                         <field name="amount" sum="Total Amount"/>
                                 	</tree>
                                 	<form string="Invoice Lines">
-										   <field name="expense_id"/>
+										   <field name="income_id"/>
 										   <field name="amount"/>
 										   <separator string="Comment" colspan="4"/>
 										   <field name="comment" colspan="4" nolabel="True"/>

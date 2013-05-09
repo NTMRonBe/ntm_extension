@@ -102,7 +102,6 @@ class account_account(osv.osv):
                        "- COALESCE(SUM(l.credit), 0) as balance",
             'debit': "COALESCE(SUM(l.debit), 0) as debit",
             'credit': "COALESCE(SUM(l.credit), 0) as credit",
-            'post_amount':"COALESCE(SUM(l.amount_currency), 0) as post_amount",
         }
         #get all the necessary accounts
         children_and_consolidated = self._get_children_and_consol(cr, uid, ids, context=context)
@@ -169,6 +168,26 @@ class account_account(osv.osv):
         for id in ids:
             res[id] = sums.get(id, null_result)
         return res
+    
+    def _compute_amount(self, cr, uid, ids, field, arg, context=None):
+        rec = self.browse(cr, uid, ids, context=None)
+        result = {}
+        for r in rec:
+            amount1 = 0.00
+            amount2 = 0.00
+            amount = 0.00
+            for accounts in self.pool.get('account.move.line').search(cr, uid,[('account_id','=',r.id)]):
+                print accounts
+                account = self.pool.get('account.move.line').read(cr, uid, accounts,['debit','credit','amount_currency'])
+                if account['debit']>0.00:
+                    amount1 += account['amount_currency']
+                if account['credit']>0.00:
+                    amount2 += account['amount_currency']
+            amount = amount1 - amount2
+            result[r.id] = amount
+            print amount
+        return result
+    
     _inherit = 'account.account'
     _columns = {
         'is_pr':fields.boolean('Partially Revaluated'),
@@ -179,7 +198,7 @@ class account_account(osv.osv):
         'code_short':fields.char('Code Short',size=16),
         'code_accpac':fields.char('Code Accpac',size=16),
         'closing_account':fields.many2one('account.account','Closing Account'),
-        'post_amount': fields.function(__compute, digits_compute=dp.get_precision('Account'), method=True, string='Posting Amount', multi='balance'),
+        'post_amount': fields.function(_compute_amount, digits_compute=dp.get_precision('Account'), method=True, type='float', string='Total Amount', store=False),
         }
 account_account()
 
@@ -191,6 +210,9 @@ class account_move_line(osv.osv):
         'br_credit':fields.float('Before Revaluation Credit'),
         'br_debit':fields.float('Before Revaluation Debit'),
         'reval_post_rate':fields.float('Revaluation Post Rate',digits=(16,6)),
+        'partner_id': fields.many2one('res.partner', 'Entity', select=1, ondelete='restrict'),
+        'currency_id': fields.many2one('res.currency', 'Encoding Currency', help="The optional other currency if it is a multi-currency entry."),
+        'amount_currency': fields.float('Encoding Amount', help="The amount expressed in an optional other currency if it is a multi-currency entry.", digits_compute=dp.get_precision('Account')),
         }
 account_move_line()
 
@@ -201,12 +223,20 @@ class account_subscription(osv.osv):
         }
 account_subscription()
 
+class res_request_link(osv.osv):
+    _inherit = 'res.request.link'
+    _columns = {
+        'for_liquidation':fields.boolean('For Liquidation'),
+        }
+res_request_link()
+
 class account_journal(osv.osv):
     _inherit="account.journal"
     _columns = {
         'type': fields.selection([('sale', 'Sale'),('sale_refund','Sale Refund'), 
                                 ('purchase', 'Purchase'), ('purchase_refund','Purchase Refund'),
                                 ('transfer','Fund Transfer'), 
+                                ('forex','Foreign Exchanges'),
                                 ('cash', 'Cash'), ('bank', 'Bank and Cheques'), ('pettycash', 'Petty Cash'), ('disbursement', 'Petty Cash Disbursement'), 
                                 ('general', 'General'), ('situation', 'Opening/Closing Situation')], 'Type', size=32, required=True,
                                  help="Select 'Sale' for Sale journal to be used at the time of making invoice."\

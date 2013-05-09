@@ -24,8 +24,8 @@
         <menuitem id="fund_transfer_a2a" parent="fund_transfers" sequence="20" action="action_fund_transfer_a2a_tree"/>
         <menuitem id="fund_transfer_p2b" parent="fund_transfers" sequence="30" action="action_fund_transfer_p2b_tree"/>
         <menuitem id="bank_transfer" parent="fund_transfers" sequence="40" action="action_bank_transfer_tree"/>
-        <!-- <menuitem id="base.menu_mail_gateway" name="Emails" parent="base.menu_config" sequence="30"/>
-        #<menuitem id="base.menu_base_action_rule" name="Automated Actions" parent="base.menu_config" sequence="30"/> -->
+        <menuitem id="base.menu_mail_gateway" name="Emails" parent="base.menu_config" sequence="30"/>
+        <menuitem id="base.menu_base_action_rule" name="Automated Actions" parent="base.menu_config" sequence="30"/> 
         <menuitem id="account.menu_finance" sequence="50"/>
         <menuitem id="base.menu_mail_gateway" parent="base.menu_emails" name="POP/IMAP"/>
         <menuitem id="base.menu_tools" groups="base.group_no_one"/>
@@ -38,7 +38,7 @@
         <menuitem id="regional_config" parent ="regional_root" name="Configuration" sequence="40"/>
         <menuitem id="main_regional" name="Regional Reports" parent="regional_root" sequence="30"/>
         <menuitem id="menu_regional_config" action="action_regional_configuration_form" parent="regional_config" sequence="40"/>
-        <menuitem id="menu_regional_expenses" action="action_regional_expenses_form" parent="regional_config" sequence="40"/>
+        <menuitem id="menu_regional_income" action="action_regional_income_form" parent="regional_config" sequence="40"/>
         <menuitem id="menu_invoice_slip_upload" action="action_invoice_slip_upload_form" parent="main_regional" sequence="20"/>
         <menuitem id="menu_invoice_slip_upload_action" action="action_upload_invoice_slips" parent="main_regional" sequence="30"/>
         <menuitem id="menu_invoice_slip" action="action_invoice_slip_form" parent="main_regional" sequence="30" groups="base.group_user"/>
@@ -47,7 +47,7 @@
         <menuitem id="menu_vehicle" action="action_vehicle_form" parent="menu_vehicle_root" sequence="30" groups="base.group_user"/>
         <menuitem id="menu_forex_rate_parent" parent="fund_transfers" name="Foreign Exchanges" sequence="100"  groups="base.group_user"/>
         <menuitem id="menu_forex_transaction" action="action_forex_transaction_form" parent="menu_forex_rate_parent" sequence="20" groups="base.group_user"/>  
-        
+        <menuitem id="menu_manual_entries" action="ntm_action_account_move_form" parent="account.menu_finance_payables" sequence="100"/>
       <!-- Actions -->
         <record id="base.action_partner_customer_form" model="ir.actions.act_window">
             <field name="name">Donors Information</field>

@@ -19,11 +19,11 @@ class pettycash_replenishment(osv.osv):
     _description = "PettyCash Replenishment"
     _columns = {
         'name':fields.char('Replenishment ID',size=64, readonly=True),
-        'date':fields.date('Replenishment Date'),
+        'date':fields.date('Replenishment Date', required=True),
         'total_amount':fields.float('Total Amount'),
-        'pettycash_id':fields.many2one('account.pettycash','Petty Cash Account'),
+        'pettycash_id':fields.many2one('account.pettycash','Petty Cash Account', required=True),
         'curr_id':fields.many2one('res.currency','Currency'),
-        'bank_id':fields.many2one('res.partner.bank','Bank Name'),
+        'bank_id':fields.many2one('res.partner.bank','Bank Name', required=True),
         'period_id':fields.many2one('account.period','Period'),
         'move_id':fields.many2one('account.move','Move Name'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
@@ -53,6 +53,8 @@ class pettycash_replenishment(osv.osv):
                  quantity = pc_denom.quantity
                  multiplier = pc_denom.name.multiplier
                  amount += quantity * multiplier
+            if amount == 0.00 or amount < 0.00:
+                raise osv.except_osv(_('Error !'), _('ERR1 Replenishments with no amount are not allowed!'))
         return self.write(cr, uid, ids, {'state': 'confirmed','total_amount':amount})
     
     def button_cancel(self, cr, uid, ids, context=None):
@@ -71,13 +73,24 @@ class pcr(osv.osv):
     _inherit = 'pettycash.replenishment'
     _columns = {
         'denom_breakdown':fields.one2many('pettycash.denom','pcr_id','Denominations Breakdown',ondelete="cascade"),
+        'filled':fields.boolean('Filled'),
         }
+      
+    
     def onchange_pettycash(self, cr, uid, ids, pettycash_id=False):
         result = {}
-        ftp_id = False
+        netsvc.Logger().notifyChannel("ids", netsvc.LOG_INFO, ' '+str(ids))
         if pettycash_id:
+            ptc_read = self.pool.get('account.pettycash').read(cr, uid, pettycash_id,['currency_id'])
+            result = {'value':{
+                        'curr_id':ptc_read['currency_id'][0],
+                        'bank_id':False,
+                          }
+                    }
+        if ids:
             for p2b in self.read(cr, uid, ids, context=None):
                 ftp_id = p2b['id']
+                filled=False
                 for p2b_denom in p2b['denom_breakdown']:
                     self.pool.get('pettycash.denom').unlink(cr, uid, p2b_denom)
                 ptc_read = self.pool.get('account.pettycash').read(cr, uid, pettycash_id,['currency_id'])
@@ -98,9 +111,30 @@ class pcr(osv.osv):
                         'curr_id':ptc_read['currency_id'][0],
                         'denom_breakdown':new_denoms,
                         'bank_id':False,
+                        'filled':True,
                           }
                     }
         return result
+    
+    def fill(self, cr, uid, ids, context=None):
+        for pcr in self.read(cr, uid, ids, context=None):
+            curr_id = pcr['curr_id'][0]
+            currency = pcr['curr_id'][1]
+            denoms = self.pool.get('denominations').search(cr, uid, [('currency_id','=',curr_id)])
+            if not denoms:
+                raise osv.except_osv(_('Error !'), _('%s has no available denominations.Please add them!')%currency)
+            if denoms:
+                for denom in denoms:
+                    values = {
+                        'name':denom,
+                        'pcr_id':pcr['id'],
+                    }
+                    self.pool.get('pettycash.denom').create(cr, uid, values)
+            self.write(cr, uid,pcr['id'],{'filled':True})
+        return True
+                        
+            
+            
                 
     def compute_pc(self, cr, uid, ids, context=None):
         for pcr in self.read(cr, uid, ids, context=None):

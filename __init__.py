@@ -11,3 +11,4 @@ import soa
 import bank_transfer
 import vehicle_charging
 import invoice_slip
+import account_move

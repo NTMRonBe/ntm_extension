@@ -260,7 +260,7 @@ class res_partner_bank(osv.osv):
         'journal_id':fields.many2one('account.journal','Bank Journal'),
         'account_id':fields.many2one('account.account','Book Account Name'),
         'transit_id':fields.many2one('account.account','Transit Account'),
-        'balance': fields.related('account_id','balance', type='float', string='Bank Balance', readonly=True),
+		'balance':fields.related('account_id','post_amount', type='float', string='Bank Balance', readonly=True),
         'currency_id': fields.many2one('res.currency','Currency'),
         }
     

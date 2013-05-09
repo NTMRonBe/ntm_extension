@@ -1,20 +1,10 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-            
-        <record id="ntm_account_move_form" model="ir.ui.view">
-            <field name="name">ntm.account.move.form</field>
-            <field name="model">account.move</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <form string = "Journal Entry">
-                    <field name=""
-                </form>
-            </field>
-        </record>
+
         <record model="ir.ui.view" id="ntm_account_move_tree">
             <field name="name">ntm.account.move.tree</field>
-            <field name="model">account.soa</field>
+            <field name="model">account.move</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Journal Entries">
@@ -22,6 +12,18 @@
                 </tree>
             </field>
         </record>
+                    
+        <record id="ntm_account_move_form" model="ir.ui.view">
+            <field name="name">ntm.account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Journal Entry">
+                    <field name="name"/>
+                </form>
+            </field>
+        </record>
+        
         
         <record model="ir.actions.act_window" id="ntm_action_account_move_form">
         	<field name="name">Journal Entries</field>

@@ -11,7 +11,7 @@ class denominations(osv.osv):
     _description="Denominations"
     _columns = {
         'name':fields.char('Denomination Name',size=64),
-        'multiplier':fields.float('Multiplier'),
+        'multiplier':fields.integer('Multiplier'),
         'currency_id':fields.many2one('res.currency','Currency'),
         'sequence':fields.integer('Sequence'),
         }
@@ -34,7 +34,7 @@ class pettycash_denom(osv.osv):
     _description = "Petty Cash Denomination Breakdown"
     _columns ={
         'name':fields.many2one('denominations','Denomination'),
-        'quantity':fields.float('Quantity'),
+        'quantity':fields.integer('Quantity'),
         'currency_id': fields.related('name','currency_id', type='many2one', relation='res.currency', string='Currency', readonly=True),
         'amount': fields.function(_compute_amount, method=True, type='float', string='Total Amount', store=False),
         }

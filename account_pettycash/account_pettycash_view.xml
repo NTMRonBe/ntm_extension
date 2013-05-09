@@ -107,8 +107,8 @@
 	                        <field name="journal_id" attrs="{'readonly': [('state','!=','draft')]}"/>
 	                        <field name="transaction_date" attrs="{'readonly': [('state','!=','draft')]}"/>
 	                        <field name="period_id" readonly="1"/>
-	                        <field name="src_pc_id" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
-	                        <field name="dest_pc_id" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
+	                        <field name="src_pc_id" required="1" attrs="{'readonly': [('filled','=',True)]}"/>
+	                        <field name="dest_pc_id" required="1" attrs="{'readonly': [('filled','=',True)]}"/>
 	                        <field name="amount" readonly="1"/>
 	                       <field name="state"/>
 	                       <field name="filled" invisible="True"/>
@@ -269,6 +269,7 @@
                         <field name="manager_id"/>
                         <field name="date"/>
                         <field name="account_code"/>
+                        <field name="currency_id"/>
                         <field name="amount"/>
                 </tree>
             </field>

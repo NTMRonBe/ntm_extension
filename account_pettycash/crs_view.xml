@@ -31,7 +31,7 @@
                         <field name="state" select="1"/>
 						<button name="approval" attrs="{'invisible':[('state','!=','draft')]}" string="Submit"  type="object" icon="gtk-jump-to"/>
 						<button name="approval" attrs="{'invisible':[('state','!=','pending')]}" string="Re-Open"  type="object" icon="gtk-jump-to"/>
-						<button name="cancel" attrs="{'invisible':[('state','in',['draft','approval','cancel'])]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
+						<button name="cancel" attrs="{'invisible':[('state','in',['released','cancel'])]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
 						<button name="disapproved" string="Disapproved" type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','!=','approval')]}"/>
                         <button name="approved" string="Approved" type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','!=','approval')]}"/>
 					</group>
@@ -49,19 +49,6 @@
                   <field name="amount"/>
                   <field name="state"/>
                 </tree>
-            </field>
-        </record>
-        <record id="crs_filter" model="ir.ui.view">
-		    <field name="name">crs.filter</field>
-            <field name="model">cash.request.slip</field>
-            <field name="type">search</field>
-            <field name="arch" type="xml">
-                <search string="Cash Request">
-					    <field name="name"/>
-                  <field name="pc_id"/>
-                  <field name="amount"/>
-                  <field name="state"/>
-                </search>
             </field>
         </record>
         
@@ -85,30 +72,60 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Cash Disbursement">
-                    <group colspan="8" col="8">
+                    <group colspan="4" col="4">
 		                  <field name="name"/>
 		                  <field name="pc_id" readonly="1"/>
-		                  <field name="amount"/>
-		                  <button name="fill_denominations" string="Fill Denominations" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
+		                  <field name="amount" invisible="1"/>
+		                  <field name="filled" invisible="1"/>
                   	</group>
-                  	<group colspan="8" col="8">
-                  	    <field name="journal_id" domain="[('type','=','disbursement')]" widget="selection"/>
-                  	    <field name="crs_id" domain="[('state','=','approved')]"/>
-                  	    <field name="analytic_id" domain="[('partner_id','=',partner_id)]"/>
-                  	    <field name="date"/>
+                  	<group colspan="4" col="4">
+                  	    <field name="journal_id" domain="[('type','=','disbursement')]" widget="selection" attrs="{'required':[('state','=','draft')],'readonly':[('state','!=','draft')]}"/>
+                  	    <field name="crs_id" domain="[('state','=','approved')]" attrs="{'required':[('state','=','draft')],'readonly':[('state','!=','draft')]}"/>
+                  	    <field name="analytic_id" domain="[('partner_id','=',partner_id)]" attrs="{'required':[('state','=','draft')],'readonly':[('state','!=','draft')]}"/>
+                  	    <field name="date" attrs="{'required':[('state','=','draft')],'readonly':[('state','!=','draft')]}"/>
                   	    <field name="period_id" invisible="1" readonly="1"/>
-                  	    <field name="partner_id" readonly="True"/>
+                  	    <field name="partner_id" readonly="True" invisible="1"/>
                   	</group>
-                  	<field name="denomination_ids" mode="tree" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}" colspan="6">
-                        <tree string="Denomination Breakdown" editable="top">
-                            <field name="name"/>
-                            <field name="quantity"/>
-                            <field name="amount"/>
-                        </tree>
-                    </field>
+                  	<notebook colspan="4">
+                        <page string="Denominations Lists">
+                            <button name="fill_denominations" colspan="4" string="Fill Denominations" attrs="{'invisible':[('filled','=',True)]}" type="object" icon="gtk-jump-to"/>
+                            <group colspan="4" col="2">
+                                <field name="denomination_ids" mode="tree" nolabel="1" attrs="{'readonly': [('state','not in',['draft','change_denom'])]}">
+                                  <tree string="Denomination Breakdown" editable="top">
+                                      <field name="name"/>
+                                      <field name="quantity"/>
+                                      <field name="amount" sum="Total Amount"/>
+                                  </tree>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Journal Items">
+                            <group colspan="4" col="2">
+                                <group colspan="4" col="2">
+                                    <field name="move_id"  attrs="{'readonly': [('state','!=','confirmed')]}"/>
+                                </group>
+                                <group colspan="4" col="2">
+                                    <separator string="Journal Items"/>
+                                        <group colspan="4" col="2">
+                                            <field name="move_ids" mode="tree" nolabel="1">
+                                               <tree string="Accounting Entries">
+                                                    <field name="date"/>
+                                                    <field name="account_id"/>
+                                                    <field name="debit"/>
+                                                    <field name="credit"/>
+                                                    <field name="currency_id" string="Encoding Currency"/>
+                                                    <field name="amount_currency" string="Encoding Amount"/>
+                                                </tree>
+                                            </field>
+                                        </group>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
                   	<group colspan="4" col="13">
                   	    <field name="state"/>
-                  	    <button name="get_account" string="Compute" attrs="{'invisible':[('state','!=','draft')]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="get_account" string="Compute" attrs="{'invisible':[('state','in',['releasing','released','cancel'])]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="change_denominations" string="Edit Denominations" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
                   	    <button name="post_pcd" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
                   	    <button string="Print" type="object" name="data_get" icon="gtk-execute"/>
                   	</group>
@@ -151,5 +168,6 @@
             parent="main_pettycash"
             sequence="30" 
             groups="base.group_user"/>  
+            
     </data>
 </openerp>

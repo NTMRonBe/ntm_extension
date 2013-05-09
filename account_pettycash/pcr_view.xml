@@ -19,21 +19,23 @@
                 <form string="Replenishment">
                     <group colspan="4" col="4">
                         <field name="name"/>
-                        <field name="bank_id" domain="[('ownership','=','company'),('currency_id','=',curr_id)]"/>
-                        <field name="date" attrs="{'readonly': [('state','!=','draft')]}"/>
-                        <field name="period_id" attrs="{'readonly': [('state','!=','draft')]}"/>
-                        <field name="pettycash_id" attrs="{'readonly': [('state','!=','draft')]}" on_change="onchange_pettycash(pettycash_id)" widget="selection"/>
-                        <field name="curr_id"/>
-                        <field name="total_amount" readonly="1"/>
+                        <field name="bank_id" domain="[('ownership','=','company'),('currency_id','=',curr_id)]" attrs="{'readonly': [('state','!=','draft'),('date','=',False)]}" />
+                        <field name="date" attrs="{'readonly': [('state','!=','draft')]}" required="True"/>
+                        <field name="period_id" attrs="{'readonly': [('state','!=','draft')]}" required="True"/>
+                        <field name="pettycash_id" attrs="{'readonly': [('state','!=','draft'),('date','=',False)]}" on_change="onchange_pettycash(pettycash_id)"/>
+                        <field name="curr_id" attrs="{'readonly': [('state','!=','draft'),('date','=',False)]}" required="True"/>
+                        <field name="total_amount" invisible="1"/>
+                        <field name="filled" invisible="1"/>
                     </group>
                     <notebook colspan="4">
                         <page string="Denominations Lists">
+                            <button string="Fill Denominations" type="object" name="fill" icon="gtk-execute" attrs="{'invisible': [('filled','=',True)]}"/>
 		                    <group colspan="4" col="2">
 		                        <field name="denom_breakdown" mode="tree" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
 		                          <tree string="Denomination Breakdown" editable="top">
 		                              <field name="name"/>
 		                              <field name="quantity"/>
-		                              <field name="amount"/>
+		                              <field name="amount" sum="Total Amount"/>
 		                          </tree>
 		                        </field>
 		                    </group>
@@ -62,7 +64,7 @@
                     	</page>
                     </notebook>
                     <group col="10" colspan="4">
-                        <field name="state"/>
+                        <field name="state" readonly="True"/>
                         <button string="Cancel"
                                             type="object"
                                             name="button_cancel"

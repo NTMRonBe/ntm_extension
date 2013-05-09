@@ -20,7 +20,7 @@ class account_pettycash_transfer(osv.osv):
         'transaction_date':fields.date('Transaction Date'),
         'src_pc_id':fields.many2one('account.pettycash','Source Petty Cash'),
         'period_id':fields.many2one('account.period','Period'),
-        'journal_id':fields.many2one('account.journal','Journal'),
+        'journal_id':fields.many2one('account.journal','Journal',domain=[('type','=','pettycash')]),
         'dest_pc_id':fields.many2one('account.pettycash','Destination Petty Cash'),
         'amount':fields.float('Amount to Transfer'),
         'move_id':fields.many2one('account.move','Move Name'),
@@ -30,7 +30,7 @@ class account_pettycash_transfer(osv.osv):
             ('confirmed','Confirmed'),
             ('completed','Completed'),
             ('cancel','Cancelled'),
-            ],'Status', select=True, readonly=True),
+            ],'Status', select=True),
         'filled':fields.boolean('Filled?'),
         }
     _defaults = {
@@ -44,20 +44,6 @@ class account_pettycash_transfer(osv.osv):
                 'name': self.pool.get('ir.sequence').get(cr, uid, 'account.pettycash.transfer'),
         })
         return super(account_pettycash_transfer, self).create(cr, uid, vals, context)
-    
-    def button_confirm(self, cr, uid, ids, context=None):
-        amount = 0.00
-        for pct in self.browse(cr, uid, ids, context=None):
-            if pct.src_pc_id.currency_id.id!=pct.dest_pc_id.currency_id.id:
-                raise osv.except_osv(_('Currency Error'),
-                                            _('Currencies are not the same'))
-            else:
-                for pc_denom in pct.denom_breakdown:
-                     quantity = pc_denom.quantity
-                     multiplier = pc_denom.name.multiplier
-                     amount += quantity * multiplier
-                self.write(cr, uid, ids, {'state': 'confirmed','amount':amount})
-        return True
     
     def button_cancel(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'cancel'})    
@@ -81,7 +67,7 @@ class apt(osv.osv):
         for pct in self.read(cr, uid, ids, context=None):
             src_pc = pct['src_pc_id'][0]
             dest_pc = pct['dest_pc_id'][0]
-            pct_denom_check = self.pool.get('pettycash.denom').search(cr, uid, [('pct_id','=',pct['id']),('quantity','>','0.00')])
+            pct_denom_check = self.pool.get('pettycash.denom').search(cr, uid, [('pct_id','=',pct['id']),('quantity','>','0')])
             if not pct_denom_check:
                 raise osv.except_osv(_('Error !'), _('Kindly change the quantity of the denomination to transfer!'))
             if pct_denom_check:
@@ -125,7 +111,7 @@ class apt(osv.osv):
         for pct in self.read(cr, uid, ids, context=None):
             src_pc = pct['src_pc_id'][0]
             dest_pc = pct['dest_pc_id'][0]
-            pct_denom_check = self.pool.get('pettycash.denom').search(cr, uid, [('pct_id','=',pct['id']),('quantity','>','0.00')])
+            pct_denom_check = self.pool.get('pettycash.denom').search(cr, uid, [('pct_id','=',pct['id']),('quantity','>','0')])
             for pct_denoms in  pct_denom_check:
                 denom_read = self.pool.get('pettycash.denom').read(cr, uid, pct_denoms,['quantity','name'])
                 src_pc_denom_check= self.pool.get('pettycash.denom').search(cr, uid, [('pettycash_id','=',src_pc),('name','=',denom_read['name'][0])])

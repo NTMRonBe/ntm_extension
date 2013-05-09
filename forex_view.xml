@@ -10,9 +10,9 @@
             <field name="arch" type="xml">
                 <form string = "Forex Transaction">
                         <group colspan="6" col="6">
-                        <field name="name"/>
-                    	<field name="period_id"/>
-                    	<field name="journal_id" domain="[('type','=','general')]"/>
+                        <field name="name" readonly="True"/>
+                    	<field name="period_id" attrs="{'readonly': [('state','!=','draft')]}"/>
+                    	<field name="journal_id" domain="[('type','=','forex')]" widget="selection"/>
                     	</group>
                     	<group colspan="4" col="4">
                     	    <group colspan="2" col="2">
@@ -21,7 +21,7 @@
                     	    </group>
               				<group colspan="2" col="2">
                         		<field name="dest" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Destination Bank"/>
-                        		<field name="dest_amount"/>
+                        		<field name="dest_amount" attrs="{'readonly': [('state','!=','draft')]}"/>
               				</group>
                         </group>
                         <group colspan="4" col="4">
@@ -39,8 +39,8 @@
                         <group colspan="4" col="4">
                     	    <group colspan="2" col="2">
                     	        <group colspan="4" col="4">
-                    	    		<field name="transact_date"/>
-                    	    		<field name="state"/>
+                    	    		<field name="transact_date" attrs="{'readonly': [('state','!=','draft')]}"/>
+                    	    		<field name="state" readonly="True"/>
                         		</group>
                     	    </group>
               				<group colspan="2" col="2">
@@ -64,11 +64,12 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Forex Transaction">
-                        <field name="src"/>
-                        <field name="dest"/>
-                        <field name="src_amount"/>
-                        <field name="dest_amount"/>
-                        <field name="rate"/>
+                    <field name="name"/>
+                    <field name="src"/>
+                    <field name="dest"/>
+                    <field name="src_amount"/>
+                    <field name="dest_amount"/>
+                    <field name="rate"/>
                 </tree> 
             </field>
         </record>

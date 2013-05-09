@@ -5,14 +5,14 @@ import pooler
 import psycopg2
 from tools.translate import _
 
-class regional_expenses(osv.osv):
-    _name = 'regional.expenses'
-    _description = 'Regional Expenses'
+class regional_income(osv.osv):
+    _name = 'regional.income'
+    _description = 'Regional Income'
     _columns = {
-        'name':fields.char('Expense Name',size=64),
+        'name':fields.char('Income Name',size=64),
         'code':fields.char('Code',size=16,help = "Please use small caps"),
         }
-regional_expenses()
+regional_income()
 
 class regional_configuration(osv.osv):
     _name = 'regional.configuration'
@@ -24,20 +24,20 @@ class regional_configuration(osv.osv):
         }
 regional_configuration()
 
-class regional_configuration_expenses(osv.osv):
-    _name = 'regional.configuration.expenses'
-    _description = "Branch Expenses"
+class regional_configuration_income(osv.osv):
+    _name = 'regional.configuration.income'
+    _description = "Branch Income"
     _columns = {
-        'expense_id':fields.many2one('regional.expenses','Expense Name'),
+        'income_id':fields.many2one('regional.income','Expense Name'),
         'analytic_account':fields.many2one('account.analytic.account','Analytic Account'),
         'regional_config_id':fields.many2one('regional.configuration','Regional Configuration',ondelete='cascade'),
         }
-regional_configuration_expenses()
+regional_configuration_income()
 
 class rc(osv.osv):
     _inherit = 'regional.configuration'
     _columns = {
-        'expense_ids':fields.one2many('regional.configuration.expenses','regional_config_id','Expenses'),
+        'income_ids':fields.one2many('regional.configuration.income','regional_config_id','Expenses'),
         }
 rc()
 
@@ -99,13 +99,13 @@ class invoice_slip(osv.osv):
             }
             move_id = move_pool.create(cr, uid, move)
             for line in inv['line_ids']:
-                line_read = self.pool.get('invoice.slip.line').read(cr, uid, line, ['expense_id','amount','comment'])
+                line_read = self.pool.get('invoice.slip.line').read(cr, uid, line, ['income_id','amount','comment'])
                 amount +=line_read['amount']
-                expense_search = self.pool.get('regional.configuration.expenses').search(cr, uid, [('expense_id','=',line_read['expense_id'][0]),('regional_config_id','=',inv['region_id'][0])])
-                expense_id=False
-                for expense_line in expense_search:
-                    expense_read = self.pool.get('regional.configuration.expenses').read(cr, uid, expense_line,['analytic_account'])
-                    analytic_read = self.pool.get('account.analytic.account').read(cr, uid, expense_read['analytic_account'][0],['normal_account'])
+                income_search = self.pool.get('regional.configuration.income').search(cr, uid, [('income_id','=',line_read['income_id'][0]),('regional_config_id','=',inv['region_id'][0])])
+                income_id=False
+                for income_line in income_search:
+                    income_read = self.pool.get('regional.configuration.income').read(cr, uid, income_line,['analytic_account'])
+                    analytic_read = self.pool.get('account.analytic.account').read(cr, uid, income_read['analytic_account'][0],['normal_account'])
                     move_line = {
                         'ref':inv['transaction_id'],
                         'name':line_read['comment'],
@@ -114,7 +114,7 @@ class invoice_slip(osv.osv):
                         'date':inv['trans_date'],
                         'account_id':analytic_read['normal_account'][0],
                         'credit':line_read['amount'],
-                        'analytic_account_id':expense_read['analytic_account'][0],
+                        'analytic_account_id':income_read['analytic_account'][0],
                         'move_id':move_id,
                         }
                     move_line_pool.create(cr, uid, move_line)
@@ -143,7 +143,7 @@ class invoice_slip_line(osv.osv):
     _name = 'invoice.slip.line'
     _description = "Invoice Slip Lines"
     _columns = {
-        'expense_id':fields.many2one('regional.expenses','Expense Code'),
+        'income_id':fields.many2one('regional.income','Income Code'),
         'amount':fields.float('Amount',size=64),
         'comment':fields.text('Memo'),
         'slip_id':fields.many2one('invoice.slip','Invoice Slip',ondelete='cascade')
