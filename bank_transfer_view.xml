@@ -60,7 +60,7 @@
                         <separator string="Account Details" colspan="6"/>
                         <field name="journal_id" on_change="onchange_journal(journal_id)" attrs="{'required':[('ownership','=','company')]}"/>
                         <field name="account_id"/>
-                        <field name="transit_id"/>
+                        <field name="transit_id" domain="[('type','!=','view')]"/>
                         <field name="currency_id" invisible="True"/>
                     </group>
                 </field>
@@ -74,8 +74,16 @@
             <field name="priority">2</field>
             <field name="inherit_id" ref="base.view_partner_bank_tree"/>
             <field name="arch" type="xml">
+                <field name="partner_id" position="replace">
+                    <field name="partner_id" attrs="{'invisible':[('ownership','=','company')]}"/>
+                </field>
                 <field name="owner_name" position="after">
                     <field name="balance"/>
+                </field>
+                <field name="owner_name" position="before">
+                    <field name="bank"/>
+                    <field name="account_id"/>
+                    <field name="transit_id"/>
                 </field>
                 <field name="acc_number" position="after">
                     <field name="currency_id"/>

@@ -267,21 +267,17 @@ class res_partner_bank(osv.osv):
     def onchange_journal(self, cr, uid, ids, journal_id=False):
         result = {}
         if journal_id:
-            for bank in self.read(cr, uid, ids, context=None):
-                journal_read = self.pool.get('account.journal').read(cr, uid, journal_id,['default_debit_account_id','default_credit_account_id'])
-                account_id=journal_read['default_debit_account_id'][0]
-                account_read = self.pool.get('account.account').read(cr, uid, account_id,['currency_id','company_currency_id'])
-                netsvc.Logger().notifyChannel("account_read", netsvc.LOG_INFO, ' '+str(account_read))
-                curr_id = False
-                if not account_read['currency_id']:
-                    curr_id = account_read['company_currency_id'][0]
-                if account_read['currency_id']:
-                    curr_id = account_read['currency_id'][0] 
-                netsvc.Logger().notifyChannel("curr_id", netsvc.LOG_INFO, ' '+str(curr_id))
-                result = {'value':{
+            journal_read = self.pool.get('account.journal').read(cr, uid, journal_id, ['default_debit_account_id'])
+            account_id = journal_read['default_debit_account_id'][0]
+            account_read = self.pool.get('account.account').read(cr, uid, account_id,['currency_id','company_currency_id'])
+            curr_id = False
+            if not account_read['currency_id']:
+                curr_id = account_read['company_currency_id'][0]
+            if account_read['currency_id']:
+                curr_id = account_read['currency_id'][0]
+            result = {'value':{
                             'account_id':account_id,
                             'currency_id':curr_id,
                             }} 
         return result
-    
 res_partner_bank()
