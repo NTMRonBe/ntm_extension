@@ -15,6 +15,14 @@ class ntm_res_partner_extension(osv.osv):
             }
 ntm_res_partner_extension()
 
+class res_company(osv.osv):
+    _inherit = 'res.company'
+    _columns = {
+        'transit_php':fields.many2one('account.account','PHP Transit Account'),
+        'transit_usd':fields.many2one('account.account','USD Transit Account'),
+        }
+res_company()
+
 class res_partner(osv.osv):
     
     _inherit = 'res.partner'
