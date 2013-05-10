@@ -245,6 +245,7 @@ class account_journal(osv.osv):
                                 ('purchase', 'Purchase'), ('purchase_refund','Purchase Refund'),
                                 ('transfer','Fund Transfer'), 
                                 ('forex','Foreign Exchanges'),
+                                ('pc_transfer','Petty Cash Transfers'),
                                 ('cash', 'Cash'), ('bank', 'Bank and Cheques'), ('pettycash', 'Petty Cash'), ('disbursement', 'Petty Cash Disbursement'), 
                                 ('general', 'General'), ('situation', 'Opening/Closing Situation')], 'Type', size=32, required=True,
                                  help="Select 'Sale' for Sale journal to be used at the time of making invoice."\
