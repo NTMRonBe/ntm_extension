@@ -18,11 +18,11 @@
             <field name="arch" type="xml">
                 <form string="Cash Request">
                   <field name="name"/>
-                  <field name="pc_id" attrs="{'readonly':[('state','!=','draft')]}"/>
-                  <field name="requestor_id" domain="[('supplier','=','True')]" attrs="{'readonly':[('state','!=','draft')]}"/>
-                  <field name="request_date" attrs="{'readonly':[('state','!=','draft')]}"/>
-                  <field name="amount" attrs="{'readonly':[('state','!=','draft')]}"/>
-                  <field name="description" attrs="{'readonly':[('state','!=','draft')]}"/>
+                  <field name="pc_id" attrs="{'readonly':[('state','!=','draft')]}" required="True"/>
+                  <field name="requestor_id" domain="[('supplier','=','True')]" attrs="{'readonly':[('state','!=','draft')]}" required="True"/>
+                  <field name="request_date" attrs="{'readonly':[('state','!=','draft')]}" required="True"/>
+                  <field name="amount" attrs="{'readonly':[('state','!=','draft')]}" required="True"/>
+                  <field name="description" attrs="{'readonly':[('state','!=','draft')]}" required="True"/>
                   <group colspan="4" col="2">
                   <separator string="Other Details"/>
                   <field name="note" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}" colspan="4"/>
@@ -31,7 +31,7 @@
                         <field name="state" select="1"/>
 						<button name="approval" attrs="{'invisible':[('state','!=','draft')]}" string="Submit"  type="object" icon="gtk-jump-to"/>
 						<button name="approval" attrs="{'invisible':[('state','!=','pending')]}" string="Re-Open"  type="object" icon="gtk-jump-to"/>
-						<button name="cancel" attrs="{'invisible':[('state','in',['released','cancel'])]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
+						<button name="cancel" attrs="{'invisible':[('state','in',['released','cancel','disapproved'])]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
 						<button name="disapproved" string="Disapproved" type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','!=','approval')]}"/>
                         <button name="approved" string="Approved" type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','!=','approval')]}"/>
 					</group>
@@ -99,10 +99,10 @@
                                 </field>
                             </group>
                         </page>
-                        <page string="Journal Items">
+                        <page string="Journal Items" attrs="{'invisible': [('state','=','draft')]}">
                             <group colspan="4" col="2">
                                 <group colspan="4" col="2">
-                                    <field name="move_id"  attrs="{'readonly': [('state','!=','confirmed')]}"/>
+                                    <field name="move_id"  attrs="{'readonly': [('state','!=','draft')]}"/>
                                 </group>
                                 <group colspan="4" col="2">
                                     <separator string="Journal Items"/>
@@ -120,13 +120,34 @@
                                         </group>
                                 </group>
                             </group>
+                            <group colspan="4" col="2">
+                                <group colspan="4" col="2">
+                                    <field name="move_id2"  attrs="{'readonly': [('state','=','draft')]}"/>
+                                </group>
+                                <group colspan="4" col="2">
+                                    <separator string="Journal Items"/>
+                                        <group colspan="4" col="2">
+                                            <field name="move_ids2" mode="tree" nolabel="1">
+                                               <tree string="Accounting Entries">
+                                                    <field name="date"/>
+                                                    <field name="account_id"/>
+                                                    <field name="debit"/>
+                                                    <field name="credit"/>
+                                                    <field name="currency_id" string="Encoding Currency"/>
+                                                    <field name="amount_currency" string="Encoding Amount"/>
+                                                </tree>
+                                            </field>
+                                        </group>
+                                </group>
+                            </group>
                         </page>
                     </notebook>
                   	<group colspan="4" col="13">
                   	    <field name="state"/>
-                  	    <button name="get_account" string="Compute" attrs="{'invisible':[('state','in',['releasing','released','cancel'])]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="get_account" string="Compute" attrs="{'invisible':[('state','in',['releasing','released','received','cancel'])]}" type="object" icon="gtk-jump-to"/>
                   	    <button name="change_denominations" string="Edit Denominations" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
-                  	    <button name="post_pcd" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="in_transit" string="Release" attrs="{'invisible':[('state','!=','releasing')]}" type="object" icon="gtk-jump-to"/>
+                  	    <button name="receive_intransit" string="Receive" attrs="{'invisible':[('state','!=','released')]}" type="object" icon="gtk-jump-to"/>
                   	    <button string="Print" type="object" name="data_get" icon="gtk-execute"/>
                   	</group>
                 </form>

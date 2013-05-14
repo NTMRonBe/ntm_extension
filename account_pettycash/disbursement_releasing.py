@@ -5,6 +5,7 @@ import pooler
 import psycopg2
 from tools.translate import _
 import decimal_precision as dp
+import re
 
 class cash_request_slip(osv.osv):
     _name='cash.request.slip'
@@ -39,6 +40,8 @@ class cash_request_slip(osv.osv):
         return super(cash_request_slip, self).create(cr, uid, vals, context)
     def approval(self, cr, uid, ids, context=None):
         for crs in self.browse(cr, uid, ids):
+            if crs.amount == 0.00:
+                raise osv.except_osv(_('Error!'), _('You are not allowed to request with no amounts.'))
             if crs.pc_id.amount <crs.amount:
                 self.write(cr, uid, ids, {'state':'pending'})
             elif crs.pc_id.amount>crs.amount:
@@ -52,19 +55,32 @@ class cash_request_slip(osv.osv):
             values = {
                 'crs_id':crs['id'],
                 'state':'draft',
+                'filled':True,
                 }
-            self.pool.get('pettycash.disbursement').create(cr, uid, values)
+            disbursement_id = self.pool.get('pettycash.disbursement').create(cr, uid, values)
+            pca_read = self.pool.get('account.pettycash').read(cr, uid, crs['pc_id'][0],['currency_id'])
+            denoms_search = self.pool.get('denominations').search(cr, uid, [('currency_id','=',pca_read['currency_id'][0])])
+            currency = pca_read['currency_id'][1]
+            if not denoms_search:
+                raise osv.except_osv(_('Error !'), _('%s has no available denominations.Please add them!')%currency)
+            if denoms_search:
+                for denom in denoms_search:
+                    values = {
+                        'pd_id':disbursement_id,
+                        'name':denom,
+                        }
+                    self.pool.get('pettycash.denom').create(cr, uid, values)
             self.write(cr, uid, crs['id'], {'state':'approved'})
         return True
     
     def cancel(self, cr, uid, ids, context=None):
         for crs in self.read(cr, uid, ids, context=None):
-            releases = self.pool.get('pettycash.disbursement').search(cr, uid, [('crs_id','=',crs['id']),('state','=','released')])
+            releases = self.pool.get('pettycash.disbursement').search(cr, uid, [('crs_id','=',crs['id']),('state','in',['released','received'])])
             if releases:
                 raise osv.except_osv(_('Error!'), _('You are not allowed to cancel requests that has been partially released.'))
             if not releases:
                 self.write(cr, uid, crs['id'],{'state':'cancel'})
-            not_releases = self.pool.get('pettycash.disbursement').search(cr, uid, [('crs_id','=',crs['id']),('state','!=','released')])
+            not_releases = self.pool.get('pettycash.disbursement').search(cr, uid, [('crs_id','=',crs['id']),('state','not in',['released','received'])])
             if not_releases:
                 for unreleased in not_releases:
                     self.pool.get('pettycash.disbursement').cancel(cr, uid, unreleased)
@@ -106,7 +122,8 @@ class pettycash_disbursement(osv.osv):
         'state': fields.selection([
             ('draft','Draft'),
             ('releasing','For Releasing'),
-            ('released','Released'),
+            ('released','In Transit'),
+            ('received','Received'),
             ('change_denom','Edit Denominations'),
             ('cancel','Cancelled'),
             ],'Status', select=True),
@@ -116,6 +133,11 @@ class pettycash_disbursement(osv.osv):
         'state':'draft',
         'journal_id':_get_journal,
         }
+    def create(self, cr, uid, vals, context=None):
+        vals.update({
+                'name': self.pool.get('ir.sequence').get(cr, uid, 'pettycash.disbursement'),
+        })
+        return super(pettycash_disbursement, self).create(cr, uid, vals, context)
     
     def cancel(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state':'cancel'})
@@ -125,7 +147,7 @@ pettycash_disbursement()
 class pettycash_denom(osv.osv):
     _inherit = "pettycash.denom"
     _columns ={
-        'pd_id':fields.many2one('pettycash.disbursement','Petty Cash Disbursement ID'),
+        'pd_id':fields.many2one('pettycash.disbursement','Petty Cash Disbursement ID', ondelete='cascade'),
         }
 pettycash_denom()
 
@@ -135,8 +157,10 @@ class pcd(osv.osv):
         'denomination_ids':fields.one2many('pettycash.denom','pd_id','Denominations Breakdown', ondelete="cascade"),
         'analytic_id':fields.many2one('account.analytic.account','Debit Account'),
         'partner_id':fields.related('crs_id','requestor_id',type='many2one',relation='res.partner',store=True, string='Entity'),
-        'move_id':fields.many2one('account.move','Move Name'),
-        'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
+        'move_id':fields.many2one('account.move','Releasing Entries'),
+        'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Releasing Journal Items', readonly=True),
+        'move_id2':fields.many2one('account.move','Receiving Entries'),
+        'move_ids2': fields.related('move_id2','line_id', type='one2many', relation='account.move.line', string='Receiving Journal Items', readonly=True),
         'filled':fields.boolean('Filled'),
         }
     
@@ -207,12 +231,12 @@ class pcd(osv.osv):
                         }
                     self.pool.get('pettycash.denom').create(cr, uid, values)
             self.write(cr, uid, form['id'],{'filled':True})
-        return True  
-             
-    def post_pcd(self, cr, uid, ids, context=None):
+        return True
+    
+    def in_transit(self, cr, uid, ids, context=None):
         for pcd in self.read(cr, uid, ids, context=None):
             for denominations in pcd['denomination_ids']:
-                denom_read = self.pool.get('pettycash.denom').read(cr, uid, denominations,context=None)
+                denom_read = self.pool.get('pettycash.denom').read(cr, uid, denominations, context=None)
                 if denom_read['quantity']>0.00:
                     for pca_denom in self.pool.get('pettycash.denom').search(cr, uid, [('name','=',denom_read['name'][0]), ('pettycash_id','=',pcd['pc_id'][0])]):
                         pca_denom_read = self.pool.get('pettycash.denom').read(cr, uid, pca_denom,context=None)
@@ -220,26 +244,31 @@ class pcd(osv.osv):
                         self.pool.get('pettycash.denom').write(cr, uid, pca_denom, {'quantity':quantity})
             crs_read = self.pool.get('cash.request.slip').read(cr, uid, pcd['crs_id'][0],context=None)
             pc_read = self.pool.get('account.pettycash').read(cr, uid, pcd['pc_id'][0],context=None)
+            name = 'Releasing of ' + pcd['name']
             move = {
-                'name':pcd['name'],
+                'name':name,
                 'journal_id':pcd['journal_id'][0],
                 'period_id':pcd['period_id'][0],
                 'date':pcd['date'],
                 'ref':crs_read['name']
                 }
             move_id = self.pool.get('account.move').create(cr, uid, move)
-            account_read = self.pool.get('account.account').read(cr, uid, pc_read['account_code'][0],['currency_id','company_currency_id'])
+            account_read = self.pool.get('account.account').read(cr, uid, pc_read['account_code'][0],['currency_id','company_currency_id','company_id'])
+            company_read = self.pool.get('res.company').read(cr, uid, account_read['company_id'][0],['transit_php','transit_usd'])
             curr_rate = False
             curr_id = False
             amount = False 
+            transit_id = False
             if account_read['currency_id']:
                 curr_read = self.pool.get('res.currency').read(cr, uid, account_read['currency_id'][0],['rate'])
                 curr_rate = curr_read['rate']
+                transit_id = company_read['transit_usd'][0]
                 curr_id = account_read['currency_id'][0]
                 amount = pcd['amount'] / curr_rate
             if not account_read['currency_id']:
                 curr_rate = 1.00
                 curr_id = account_read['company_currency_id'][0]
+                transit_id = company_read['transit_php'][0]
                 amount = pcd['amount']
             move_line = {
                 'name':'Disbursing Petty Cash',
@@ -257,7 +286,71 @@ class pcd(osv.osv):
             self.pool.get('account.move.line').create(cr, uid, move_line)
             analytic_read = self.pool.get('account.analytic.account').read(cr, uid, pcd['analytic_id'][0],['normal_account'])
             move_line = {
-                'name':'Analytic Entry',
+                'name':'In Transit Amount',
+                'debit': amount,
+                'credit': 0.00,
+                'account_id': transit_id,
+                'move_id': move_id,
+                'journal_id':pcd['journal_id'][0],
+                'period_id':pcd['period_id'][0],
+                'date':pcd['date'],
+                'currency_id':curr_id,
+                'amount_currency':pcd['amount'],
+                'post_rate':curr_rate,
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            self.pool.get('account.move').post(cr, uid, [move_id])
+            self.write(cr, uid, pcd['id'],{'state':'released','move_id':move_id})
+            self.check_disbursements(cr, uid, [pcd['id']])
+        return True
+    
+    def receive_intransit(self, cr, uid, ids, context=None):
+        for pcd in self.read(cr, uid, ids, context=None):
+            crs_read = self.pool.get('cash.request.slip').read(cr, uid, pcd['crs_id'][0],context=None)
+            pc_read = self.pool.get('account.pettycash').read(cr, uid, pcd['pc_id'][0],context=None)
+            name = 'Receiving of ' + pcd['name']
+            move = {
+                'name':name,
+                'journal_id':pcd['journal_id'][0],
+                'period_id':pcd['period_id'][0],
+                'date':pcd['date'],
+                'ref':crs_read['name']
+                }
+            move_id = self.pool.get('account.move').create(cr, uid, move)
+            account_read = self.pool.get('account.account').read(cr, uid, pc_read['account_code'][0],['currency_id','company_currency_id','company_id'])
+            company_read = self.pool.get('res.company').read(cr, uid, account_read['company_id'][0],['transit_php','transit_usd'])
+            curr_rate = False
+            curr_id = False
+            amount = False 
+            transit_id = False
+            if account_read['currency_id']:
+                curr_read = self.pool.get('res.currency').read(cr, uid, account_read['currency_id'][0],['rate'])
+                curr_rate = curr_read['rate']
+                transit_id = company_read['transit_usd'][0]
+                curr_id = account_read['currency_id'][0]
+                amount = pcd['amount'] / curr_rate
+            if not account_read['currency_id']:
+                curr_rate = 1.00
+                curr_id = account_read['company_currency_id'][0]
+                transit_id = company_read['transit_php'][0]
+                amount = pcd['amount']
+            move_line = {
+                'name':'In Transit Amount',
+                'debit': 0.00,
+                'credit': amount,
+                'account_id': transit_id,
+                'move_id': move_id,
+                'journal_id':pcd['journal_id'][0],
+                'period_id':pcd['period_id'][0],
+                'date':pcd['date'],
+                'currency_id':curr_id,
+                'amount_currency':pcd['amount'],
+                'post_rate':curr_rate,
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            analytic_read = self.pool.get('account.analytic.account').read(cr, uid, pcd['analytic_id'][0],['normal_account'])
+            move_line = {
+                'name':'In Transit Amount',
                 'debit': amount,
                 'credit': 0.00,
                 'account_id': analytic_read['normal_account'][0],
@@ -271,8 +364,8 @@ class pcd(osv.osv):
                 'post_rate':curr_rate,
                 }
             self.pool.get('account.move.line').create(cr, uid, move_line)
-            self.write(cr, uid, pcd['id'],{'state':'released'})
-            self.check_disbursements(cr, uid, [pcd['id']])
+            self.pool.get('account.move').post(cr, uid, [move_id])
+            self.write(cr, uid, pcd['id'],{'state':'received','move_id2':move_id})
         return True
     
     def data_get(self, cr, uid, ids, context=None):
