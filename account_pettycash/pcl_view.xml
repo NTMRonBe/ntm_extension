@@ -142,26 +142,22 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Bill Exchange">
-                   <!--  <field name="name"/>
-                    <field name="date" required="True"/> -->
+                    <field name="name"/>
+                    <field name="date" required="True"/> 
                     <field name="pettycash_id" on_change="on_change_pca(pettycash_id)" required="True" attrs="{'readonly': [('filled','=',True)]}"/>
                     <field name="currency_id" required="True" attrs="{'readonly': [('filled','=',True)]}"/>
-                    <field name="denom_id" domain="[('currency_id','=',currency_id)]" on_change="on_change_pca(pettycash_id)" attrs="{'required': [('filled','=',True)]}"/>
-                    <field name="quantity" attrs="{'required': [('filled','=',True)]}"/>
                     <field name="filled" invisible="1"/>
+                    <separator colspan="4"/>
                     <group colspan="4" col="4">
                     <button string="Fill Denominations" type="object" name="fill" icon="gtk-execute" attrs="{'invisible': [('filled','=',True)]}" colspan="4"/>
 	                    <group colspan="2" col="2">
-	                       <field name="denom_pca_ids" mode="tree" nolabel="1">
-                                  <tree string="Petty Cash Denominations">
-                                      <field name="name"/>
-                                      <field name="quantity"/>
-                                      <field name="amount" sum="Total"/>
-                                  </tree>
-                           </field>
+	                       <field name="denom_id" domain="[('currency_id','=',currency_id)]" on_change="on_change_denom(denom_id)" attrs="{'required': [('filled','=',True)]}"/>
+	                       <field name="curr_quantity" readonly="1"/>
+                           <field name="quantity" attrs="{'required': [('filled','=',True)]}"/>
+                           <field name="total" readonly="1"/>
 	                    </group>
 	                    <group colspan="2" col="2">
-                           <field name="denom_breakdown" mode="tree" nolabel="1">
+                           <field name="denom_breakdown" mode="tree" nolabel="1" colspan="2">
                                   <tree string="To Exchange Denominations" editable="top">
                                       <field name="name"/>
                                       <field name="quantity"/>
@@ -170,16 +166,9 @@
                            </field>
 	                    </group>
                     </group>
-                    <group colspan="4" col="4">
-                        <group colspan="2" col="2">
-                            <separator/>
-                        </group>
-                        <group colspan="2" col="2">
-                            <group colspan="4" col="4">
-                                <separator/>
-                                <button string="Exchange" type="object" name="exchange" icon="gtk-execute"/>                                
-                            </group>
-                        </group>
+                    <group colspan="4" col="10">
+                        <field name="state" readonly="1"/>
+                        <button string="Exchange" type="object" name="exchange" icon="gtk-execute" colspan="2" attrs="{'invisible': [('state','=','done')]}"/>
                     </group>
                 </form>
             </field>

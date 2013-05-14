@@ -2,6 +2,19 @@
 <openerp>
     <data noupdate="1">
         <!-- Sequences for operations.servicing -->
+        <record id="seq_type_be_sequence" model="ir.sequence.type">
+            <field name="name">Bill Exchange</field>
+            <field name="code">bill.exchange</field>
+        </record>
+
+        <record id="seq_be_sequence" model="ir.sequence">
+            <field name="name">Bill Exchange</field>
+            <field name="code">bill.exchange</field>
+            <field name="prefix">BE/%(y)s/</field>
+            <field name="padding">4</field>
+        </record>
+        
+        
         <record id="seq_type_pc_sequence" model="ir.sequence.type">
             <field name="name">Petty Cash Account</field>
             <field name="code">account.pettycash</field>
