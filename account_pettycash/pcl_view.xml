@@ -16,9 +16,7 @@
                         <field name="pc_id" attrs="{'readonly': [('state','!=','draft')]}" domain="[('state','=','active')]" on_change="onchange_pettycash(pc_id)"/>
                         <field name="amount" readonly="1"/>
                         <field name="move_id" invisible="1"/>
-                        <field name="type" invisible="1"/>
                         <field name="denom_filled" invisible="1"/>
-                        <field name="partner_id" attrs="{'readonly': [('state','!=','draft')],'required':[('type','=','missionary')],'invisible':[('type','!=','missionary')]}"/> 
                     </group>
                     <notebook colspan="4">
                         <page string="Denominations Lists" attrs="{'invisible':[('type','=','missionary')]}">
@@ -33,39 +31,44 @@
                             </group>
                     	</page>
                     	<page string="Liquidation Lines">
-                    	   <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" height="300" attrs="{'readonly': [('state','!=','draft')],'invisible': [('type','=','missionary')]}">
+                    	   <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" height="300" attrs="{'readonly': [('state','!=','draft')]}">
                                 <tree string="Liquidation Lines">
 	                                <field name="name"/>
-	                                <field name="account_id" attrs="{'readonly': ['|',('state','!=','draft'),('type','=','missionary')]}"/>
+	                                <field name="account_id" attrs="{'readonly': [('state','!=','draft')]}"/>
 	                                <field name="reference"/>
 	                                <field name="amount"/>
                                 </tree>
                                 <form string="Liquidation Lines">
                                     <field name="name"/>
-                                    <field name="account_id" attrs="{'readonly': [('state','!=','draft')],'required':[('type','=','messenger')]}"/>
-                                    <field name="reference"/>
-                                    <field name="amount" required="1"/>
-                                </form>
-                           </field>
-                           <field colspan="4" mode="tree,form" name="mpcll_ids" nolabel="1" height="300" attrs="{'readonly': [('state','!=','draft')],'invisible': [('type','=','messenger')]}">
-                                <tree string="Liquidation Lines">
-                                    <field name="name"/>
-                                    <field name="reference"/>
-                                    <field name="amount"/>
-                                </tree>
-                                <form string="Liquidation Lines">
-                                    <field name="name"/>
+                                    <field name="account_id" attrs="{'readonly': [('state','!=','draft')]"/>
                                     <field name="reference"/>
                                     <field name="amount" required="1"/>
                                 </form>
                            </field>
                         </page>
+                        <page string="Journal Items" attrs="{'invisible': [('state','=','draft')]}">
+                            <group colspan="4" col="2">
+                                <separator string="Journal Items"/>
+                                <group colspan="4" col="2">
+                                    <field name="move_ids" mode="tree" nolabel="1">
+                                        <tree string="Accounting Entries">
+                                            <field name="date"/>
+                                            <field name="account_id"/>
+                                            <field name="debit"/>
+                                            <field name="credit"/>
+                                            <field name="currency_id" string="Encoding Currency"/>
+                                            <field name="amount_currency" string="Encoding Amount"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                        </page>
                     </notebook>
                     <group col="10" colspan="4">
                         <field name="state"/>
-                        <button string="Cancel" type="object" name="cancel" icon="gtk-cancel" attrs="{'invisible': ['|',('state','=','cancel'),('type','=','missionary')]}"/>
+                        <button string="Cancel" type="object" name="cancel" icon="gtk-cancel" attrs="{'invisible': ['|',('state','=','cancel')}"/>
                         <button string="Set to draft" type="object" name="set_to_draft" icon="terp-stock_effects-object-colorize" attrs="{'invisible': ['|',('state','!=','cancel'),('type','=','missionary')]}"/>
-                        <button string="Confirm" type="object" name="confirm_pcl" icon="gtk-execute" attrs="{'invisible': ['|',('state','!=','draft'),('type','=','missionary')]}"/>
+                        <button string="Confirm" type="object" name="confirm_pcl" icon="gtk-execute" attrs="{'invisible': ('state','!=','draft')}"/>
                         <button string="Complete" type="object" name="post_pcl" icon="gtk-execute" attrs="{'invisible': ['|',('state','!=','confirmed'),('type','=','missionary')]}"/>
                     </group>
                 </form>
@@ -76,7 +79,7 @@
             <field name="model">account.pettycash.liquidation</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Replenishments">
+                <tree string="Liquidations">
 					    <field name="name"/>
                         <field name="date"/>
                         <field name="journal_id"/>
@@ -104,29 +107,13 @@
 		    <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>
             <field name="view_id" ref="pcl_tree"/>
-            <field name="context">{'type':'messenger'}</field>
-            <field name="domain">[('type','=','messenger')]</field>
         </record>
         
-        <record id="action_pcl_missionary_tree" model="ir.actions.act_window">
-            <field name="name">Missionaries Liquidations</field>
-            <field name="res_model">account.pettycash.liquidation</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="pcl_tree"/>
-            <field name="context">{'type':'missionary'}</field>
-            <field name="domain">[('type','=','missionary')]</field>
-        </record>
         <menuitem id="menu_pcl" 
             action="action_pcl_form" 
             parent="main_pettycash"
             sequence="60" 
-            groups="base.group_user"/>  
-        <menuitem id="menu_pcl_missionary" 
-            action="action_pcl_missionary_tree" 
-            parent="main_pettycash"
-            sequence="70" 
-            groups="base.group_user"/>  
+            groups="base.group_user"/>
             
             
             
@@ -202,7 +189,7 @@
             <field name="view_type">form</field>
             <!-- <field name="view_mode">form</field>
             <field name="view_id" ref="be_form"/>
-            <field name="target">new</field> -->
+            <field name="target">new</field>-->
         </record>
         
         <menuitem id="menu_be" 

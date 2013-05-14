@@ -105,22 +105,19 @@ class account_pettycash_liquidation(osv.osv):
     _columns = {
         'name':fields.char('Liquidation ID', size=64),
         'date':fields.date('Date'),
-        'type':fields.selection([
-                        ('messenger','Messenger'),
-                        ('missionary','Missionary'),
-                        ], 'Type'),
         'denom_filled':fields.boolean('Filled?'),
         'pc_id':fields.many2one('account.pettycash','PC Account'),
         'period_id':fields.many2one('account.period','Period'),
         'journal_id':fields.many2one('account.journal','Journal'),
         'amount':fields.float('Total Amount'),
         'move_id':fields.many2one('account.move','Journal Entry'),
+        'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Releasing Journal Items', readonly=True),
         'state': fields.selection([
             ('draft','Draft'),
             ('confirmed','Confirmed'),
             ('completed','Completed'),
             ('cancel','Cancelled'),
-            ],'Status', select=True, readonly=True),
+            ],'Status', select=True),
         }
     _defaults = {
             'name':'NEW',
@@ -157,8 +154,6 @@ class pcl(osv.osv):
     _columns = {
         'denom_breakdown':fields.one2many('pettycash.denom','pcl_id','Denominations Breakdown'),
         'pcll_ids':fields.one2many('pc.liquidation.lines','pcl_id','Liquidation Lines'),
-        'mpcll_ids':fields.one2many('pc.liquidation.lines','pcl_id','Liquidation Lines'),
-        'partner_id':fields.many2one('res.partner','Missionary'),
         }
     
     def fill_denoms(self, cr, uid, ids, context=None):

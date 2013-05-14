@@ -193,6 +193,9 @@
                 <field name="supplier" position="replace">
                     <field name="supplier" string="People and Projects"/>
                 </field>
+                <field name="lang" position="after">
+                    <field name="phone_pin"/>
+                </field>
             </field>
         </record>
         

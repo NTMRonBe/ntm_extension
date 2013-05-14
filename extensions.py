@@ -29,6 +29,7 @@ class res_partner(osv.osv):
     _description = 'Partner'
     _columns = {
         'partner_dict':fields.one2many('ntm.res.partner.extension','partner_id','Dictionary'),
+        'phone_pin':fields.char('Phone Pin',size=12),
         'property_account_payable': fields.property(
             'account.account',
             type='many2one',

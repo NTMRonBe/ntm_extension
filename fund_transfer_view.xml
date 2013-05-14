@@ -83,7 +83,7 @@
             <field name="search_view_id" ref="view_fund_transfer_filter"/>
         </record>
         <record id="action_fund_transfer_a2a_tree" model="ir.actions.act_window">
-            <field name="name">Analytic to Analytic</field>
+            <field name="name">Internal Accounts</field>
             <field name="res_model">fund.transfer</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>
