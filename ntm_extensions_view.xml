@@ -88,6 +88,15 @@
 				<field name="partner_id" position="replace">
 				    <field name="partner_id" string="Linked Entity"/>
 				</field>
+				<field name="type" position="replace">
+				    <group colspan="4" col="4">
+				        <field name="type"/>
+				        <group colspan="2" col="2" attrs="{'invisible': [('partner_id','=',False)]}">
+					        <field name="supplier" attrs="{'invisible': [('proj','=',True)]}"/>
+					        <field name="proj" attrs="{'invisible': [('pat','=',True)]}"/>
+				        </group>
+				    </group>
+				</field>
             </field>
         </record>
         <record id="view_ntm_account_account_form" model="ir.ui.view">
@@ -191,7 +200,8 @@
                     <field name="customer" string="Donor"/>
                 </field>
                 <field name="supplier" position="replace">
-                    <field name="supplier" string="People and Projects"/>
+                    <field name="supplier" string="People and Teams"/>
+                    <field name="project"/>
                 </field>
                 <field name="lang" position="after">
                     <field name="phone_pin"/>
@@ -260,6 +270,18 @@
                     </group>
                 </field>
             </field>
+        </record>
+        
+        
+        <record id="action_partner_project_form" model="ir.actions.act_window">
+            <field name="name">Project</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_type">form</field>
+            <field name="domain">[]</field>
+            <field name="context">{'default_customer':0, 'search_default_project': 1, 'default_project':1}</field>
+            <field name="filter" eval="True"/>
+            <field name="help">You can access all information regarding your projects  from the projects form: accounting data, history of emails, meetings, purchases, etc. You can uncheck the 'Projects' filter button in order to search in all your partners, including donors and prospects.</field>
         </record>
         
        </data>

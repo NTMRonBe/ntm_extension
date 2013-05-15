@@ -16,13 +16,18 @@
         <menuitem id="account_voucher.menu_action_purchase_receipt" groups="base.group_no_one" parent="account.menu_finance_bank_and_cash"/>
         <menuitem id="account_voucher.menu_action_vendor_payment" groups="base.group_no_one" parent="account.menu_finance_bank_and_cash"/>
         <menuitem id="account.menu_account_customer" name="Donors Information" parent="account.menu_finance_receivables"/>
-        <menuitem id="account.menu_account_supplier" name="People and Projects Information" parent="account.menu_finance_payables"/>
+        <menuitem id="account.menu_account_supplier" name="People and Teams Information" parent="account.menu_finance_payables"/>
+        <menuitem id="menu_account_projects" name="Projects Information" parent="account.menu_finance_payables" sequence="100" action="action_partner_project_form"/>
         <menuitem id="account_voucher.menu_action_vendor_receipt" groups="base.group_no_one" />
         <menuitem id="fund_transfers" web_icon="images/fund_transfer.png" name="Fund Transfers"
             web_icon_hover="images/fund_transfer_hover.png" sequence="40"/>
         <menuitem id="fund_transfer_b2b" parent="fund_transfers" sequence="10" action="action_fund_transfer_b2b_tree"/>
-        <menuitem id="fund_transfer_a2a" parent="fund_transfers" sequence="20" action="action_fund_transfer_a2a_tree"/>
         <menuitem id="fund_transfer_p2b" parent="fund_transfers" sequence="30" action="action_fund_transfer_p2b_tree"/>
+        <menuitem id="iat_main" name="Internal Account Transfers" parent="fund_transfers" sequence="20"/>
+        <menuitem id="iat_people2proj" parent="iat_main" sequence="10" action="action_people2proj_tree"/>
+        <menuitem id="iat_proj2people" parent="iat_main" sequence="20" action="action_proj2people_tree"/>
+        <menuitem id="iat_people2bank" parent="iat_main" sequence="30" action="action_people2bank_tree"/>
+        <menuitem id="iat_people2pc" parent="iat_main" sequence="40" action="action_people2pc_tree"/>
         <menuitem id="bank_transfer" parent="fund_transfers" sequence="40" action="action_bank_transfer_tree"/>
         <menuitem id="base.menu_mail_gateway" name="Emails" parent="base.menu_config" sequence="30"/>
         <menuitem id="base.menu_base_action_rule" name="Automated Actions" parent="base.menu_config" sequence="30"/> 
@@ -34,7 +39,7 @@
         <menuitem id="main_soa" name="Statement of Accounts" parent="account.menu_finance_payables" sequence="20"/>
         <menuitem id="menu_account_soa" action="action_account_soa_form" parent="main_soa" sequence="20" groups="base.group_user"/> 
         <menuitem id="menu_soa_request" action="action_soa_request_form" parent="main_soa" sequence="30" groups="base.group_user"/>
-        <menuitem id="regional_root" name="Regions" sequence="40"/>
+        <menuitem id="regional_root" name="Regions" sequence="70" parent="account.menu_finance_payables"/>
         <menuitem id="regional_config" parent ="regional_root" name="Configuration" sequence="40"/>
         <menuitem id="main_regional" name="Regional Reports" parent="regional_root" sequence="30"/>
         <menuitem id="menu_regional_config" action="action_regional_configuration_form" parent="regional_config" sequence="40"/>
@@ -42,7 +47,8 @@
         <menuitem id="menu_invoice_slip_upload" action="action_invoice_slip_upload_form" parent="main_regional" sequence="20"/>
         <menuitem id="menu_invoice_slip_upload_action" action="action_upload_invoice_slips" parent="main_regional" sequence="30"/>
         <menuitem id="menu_invoice_slip" action="action_invoice_slip_form" parent="main_regional" sequence="30" groups="base.group_user"/>
-        <menuitem id="menu_vehicle_root" name="Vehicles" parent="account.menu_finance_payables" sequence="60"/>
+        <menuitem id="menu_expense_disribution_main" name="Expense Distribution" parent="account.menu_finance_payables" sequence="60"/>
+        <menuitem id="menu_vehicle_root" name="Vehicles" parent="menu_expense_disribution_main" sequence="10"/>
         <menuitem id="menu_vehicle_log" action="action_vehicle_log_form"  parent="menu_vehicle_root" sequence="20" groups="base.group_user"/>  
         <menuitem id="menu_vehicle" action="action_vehicle_form" parent="menu_vehicle_root" sequence="30" groups="base.group_user"/>
         <menuitem id="menu_forex_rate_parent" parent="fund_transfers" name="Foreign Exchanges" sequence="100"  groups="base.group_user"/>
@@ -53,7 +59,7 @@
             <field name="name">Donors Information</field>
         </record>
         <record id="base.action_partner_supplier_form" model="ir.actions.act_window">
-            <field name="name">People and Projects Information</field>
+            <field name="name">People and Teams Information</field>
         </record>
         
       <!-- Views Override -->
@@ -81,8 +87,9 @@
             <field name="arch" type="xml">
                 <search string="Search Entity">
                    <group col='10' colspan='4'>
-                        <filter string="Donor" name="customer" icon="terp-personal" domain="[('customer','=',1)]" help="Customer Partners"/>
-                        <filter string="People/Project" name="supplier" icon="terp-personal" domain="[('supplier','=',1)]" help="Supplier Partners"/>
+                        <filter string="Donor" name="customer" icon="terp-personal" domain="[('customer','=',1)]" help="Donors"/>
+                        <filter string="People and Teams" name="supplier" icon="terp-personal" domain="[('supplier','=',1)]" help="People and Teams"/>
+                        <filter string="Projects" name="project" icon="terp-personal" domain="[('project','=',1)]" help="Projects"/>
                         <separator orientation="vertical"/>
                         <field name="name" select="1"/>
                         <field name="address" select="1"/>

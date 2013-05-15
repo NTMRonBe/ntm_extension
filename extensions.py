@@ -30,6 +30,7 @@ class res_partner(osv.osv):
     _columns = {
         'partner_dict':fields.one2many('ntm.res.partner.extension','partner_id','Dictionary'),
         'phone_pin':fields.char('Phone Pin',size=12),
+        'project':fields.boolean('Projects'),
         'property_account_payable': fields.property(
             'account.account',
             type='many2one',
@@ -58,6 +59,8 @@ class account_analytic_account(osv.osv):
             'code_short':fields.char('Short Code',size=64),
             'code_accpac':fields.char('Accpac Code',size=64),
             'code':fields.char('Code',size=64),
+            'supplier':fields.related('partner_id','supplier',type='boolean',store=True, string='People and Team',readonly=True),
+            'project':fields.related('partner_id','project',type='boolean',store=True, string='Project',readonly=True),
             'normal_account':fields.many2one('account.account','Related Normal Account'),
             'report':fields.selection([
                                 ('pal','Profit and Loss'),
@@ -247,6 +250,7 @@ class account_journal(osv.osv):
                                 ('transfer','Fund Transfer'), 
                                 ('forex','Foreign Exchanges'),
                                 ('pc_transfer','Petty Cash Transfers'),
+                                ('iat','Internal Account Transfers'),
                                 ('cash', 'Cash'), ('bank', 'Bank and Cheques'), ('pettycash', 'Petty Cash'), ('disbursement', 'Petty Cash Disbursement'), 
                                 ('general', 'General'), ('situation', 'Opening/Closing Situation')], 'Type', size=32, required=True,
                                  help="Select 'Sale' for Sale journal to be used at the time of making invoice."\
