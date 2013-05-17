@@ -94,7 +94,7 @@ class account_soa(osv.osv):
     _columns = {
             'date':fields.datetime('Statement Date'),
             'account_number':fields.many2one('account.analytic.account','Account'),
-            'account_code':fields.related('account_number','code',type='char',size=64,store=True, string='Code'),
+            'name':fields.related('account_number','code',type='char',size=64,store=True, string='Code'),
             'period_id':fields.many2one('account.period','Period of Time'),
             'exchange_rate':fields.float('Exchange Rate'),
             'prev_balance':fields.float('Previous Balance'),
