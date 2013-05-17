@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+    
+        <record id="seq_type_b2b_transfer_sequence" model="ir.sequence.type">
+            <field name="name">Bank to Bank Transfer</field>
+            <field name="code">b2btf</field>
+        </record>
+
+        <record id="seq_b2b_transfer_sequence" model="ir.sequence">
+            <field name="name">Bank to Bank Transfer</field>
+            <field name="code">b2btf</field>
+            <field name="prefix">B2B/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+
+        <record id="seq_type_bank_transfer_sequence" model="ir.sequence.type">
+            <field name="name">Bank Transfer</field>
+            <field name="code">bank.transfer</field>
+        </record>
+
+        <record id="seq_bank_transfer_sequence" model="ir.sequence">
+            <field name="name">Bank Transfer</field>
+            <field name="code">bank.transfer</field>
+            <field name="prefix">BT/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+
+        <record id="seq_type_p2b_transfer_sequence" model="ir.sequence.type">
+            <field name="name">Petty Cash to Bank Transfer</field>
+            <field name="code">p2btf</field>
+        </record>
+
+        <record id="seq_p2b_transfer_sequence" model="ir.sequence">
+            <field name="name">Petty Cash to Bank Transfer</field>
+            <field name="code">p2btf</field>
+            <field name="prefix">P2B/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        
+        <record forcecreate="1" id="b2bft_journal" model="account.journal">
+            <field name="name">Bank to Bank Transfer</field>
+            <field name="code">B2BFT</field>
+            <field name="type">transfer</field>
+            <field name="view_id" ref="account.account_journal_view"/>
+            <field name="sequence_id" ref="seq_b2b_transfer_sequence"/>
+            <field name="user_id" ref="base.user_root"/>
+        </record>
+        <record forcecreate="1" id="p2bft_journal" model="account.journal">
+            <field name="name">Petty Cash to Bank Transfer</field>
+            <field name="code">P2BFT</field>
+            <field name="type">transfer</field>
+            <field name="view_id" ref="account.account_journal_view"/>
+            <field name="sequence_id" ref="seq_p2b_transfer_sequence"/>
+            <field name="user_id" ref="base.user_root"/>
+        </record>
+        
+
+        <record id="analytic_journal_iat" model="account.analytic.journal">
+            <field name="name">Internal Account Transfer</field>
+            <field name="code">IAT</field>
+            <field name="active" eval="1"/>
+            <field name="type">general</field>
+        </record>
+
+
+
+         <record id="seq_type_iat_sequence" model="ir.sequence.type">
+            <field name="name">Internal Account Transfer</field>
+            <field name="code">iat</field>
+        </record>
+
+        <record id="seq_iat_sequence" model="ir.sequence">
+            <field name="name">Internal Account Transfer</field>
+            <field name="code">iat</field>
+            <field name="prefix">IAT/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        
+        <record forcecreate="1" id="iat_journal" model="account.journal">
+            <field name="name">Internal Account Transfer</field>
+            <field name="code">IAT</field>
+            <field name="type">iat</field>
+            <field name="view_id" ref="account.account_journal_view"/>
+            <field name="sequence_id" ref="seq_iat_sequence"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="analytic_journal_id" ref="analytic_journal_iat"/>
+        </record>
+        
+        
+         <record id="seq_type_iat_people2proj_sequence" model="ir.sequence.type">
+            <field name="name">People and Team to Project</field>
+            <field name="code">iat.people2proj</field>
+        </record>
+        <record id="seq_type_iat_proj2people_sequence" model="ir.sequence.type">
+            <field name="name">Project to People and Team </field>
+            <field name="code">iat.proj2people</field>
+        </record>
+        <record id="seq_type_iat_people2bank_sequence" model="ir.sequence.type">
+            <field name="name">People and Team to Bank</field>
+            <field name="code">iat.people2bank</field>
+        </record>
+        <record id="seq_type_iat_people2pc_sequence" model="ir.sequence.type">
+            <field name="name">People and Team to Petty Cash</field>
+            <field name="code">iat.people2pc</field>
+        </record>
+        <record id="seq_type_iat_people2people_sequence" model="ir.sequence.type">
+            <field name="name">PAT to PAT</field>
+            <field name="code">iat.people2people</field>
+        </record>
+        <record id="seq_type_iat_proj2proj_sequence" model="ir.sequence.type">
+            <field name="name">Project to Project</field>
+            <field name="code">iat.proj2proj</field>
+        </record>
+
+        <record id="seq_iat_people2proj_sequence" model="ir.sequence">
+            <field name="name">People and Team to Project</field>
+            <field name="code">iat.people2proj</field>
+            <field name="prefix">PATP/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        <record id="seq_iat_proj2people_sequence" model="ir.sequence">
+            <field name="name">Project to People and Team </field>
+            <field name="code">iat.proj2people</field>
+            <field name="prefix">PPAT/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        <record id="seq_iat_people2bank_sequence" model="ir.sequence">
+            <field name="name">People and Team to Bank</field>
+            <field name="code">iat.people2bank</field>
+            <field name="prefix">PATB/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        <record id="seq_iat_people2pc_sequence" model="ir.sequence">
+            <field name="name">People and Team to Petty Cash</field>
+            <field name="code">iat.people2pc</field>
+            <field name="prefix">PATPC/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        <record id="seq_iat_people2people_sequence" model="ir.sequence">
+            <field name="name">PAT to PAT</field>
+            <field name="code">iat.people2people</field>
+            <field name="prefix">PAT2/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        <record id="seq_iat_proj2proj_sequence" model="ir.sequence">
+            <field name="name">Project to Project</field>
+            <field name="code">iat.proj2proj</field>
+            <field name="prefix">PROJ2/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+
+    </data>
+</openerp>

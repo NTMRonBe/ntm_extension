@@ -1,0 +1,145 @@
+import time
+from osv import osv, fields, orm
+import netsvc
+import pooler
+import psycopg2
+from tools.translate import _
+import decimal_precision as dp
+from stringprep import b1_set
+
+class iat(osv.osv):
+    _inherit = 'internal.account.transfer'
+    
+    def transfer(self, cr, uid, ids, context=None):
+        if 'transfer_type' in context:
+            if context['transfer_type']=='people2proj':
+                return True
+            if context['transfer_type']=='proj2people':
+                return True
+            if context['transfer_type']=='people2bank':
+                self.people2bank(cr, uid, ids)
+            if context['transfer_type']=='people2pc':
+                self.people2pc(cr, uid, ids)
+            if context['transfer_type']=='people2people':
+                return True
+            if context['transfer_type']=='proj2proj':
+                return True
+        
+    
+    def people2pc(self, cr, uid, ids, context=None):
+        for iat in self.read(cr, uid, ids, context=None):
+            journal_id = iat['journal_id'][0]
+            period_id = iat['period_id'][0]
+            move = {
+                'ref':iat['name'],
+                'journal_id':iat['journal_id'][0],
+                'period_id':iat['period_id'][0],
+                'date':iat['date'],
+                }
+            move_id = self.pool.get('account.move').create(cr, uid, move)
+            analytic_read = self.pool.get('account.analytic.account').read(cr, uid, iat['src_pat_analytic_id'][0],context=None)
+            analytic_name = analytic_read['name']
+            pc_read = self.pool.get('account.pettycash').read(cr, uid, iat['pettycash_id'][0],context=None)
+            check_currency = self.pool.get('account.account').read(cr, uid, pc_read['account_code'][0],['currency_id','company_currency_id'])
+            currency = False
+            rate = False
+            if not check_currency['currency_id']:
+                currency = check_currency['company_currency_id'][0]
+                rate = 1.00
+            if check_currency['currency_id']:
+                curr_read = self.pool.get('res.currency').read(cr, uid, check_currency['currency_id'][0],['rate'])
+                currency = check_currency['currency_id'][0]
+                rate = curr_read['rate']
+            amount = iat['amount'] / rate
+            if not analytic_read['normal_account']:
+                raise osv.except_osv(_('Error !'), _('Please add a related account to %s')%analytic_name)
+            move_line = {
+                    'name':'Source Account',
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':analytic_read['normal_account'][0],
+                    'credit':amount,
+                    'analytic_account_id':analytic_read['id'],
+                    'date':iat['date'],
+                    'ref':iat['name'],
+                    'move_id':move_id,
+                    'amount_currency':iat['amount'],
+                    'currency_id':currency,
+                    }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            move_line = {
+                    'name':'Destination Petty Cash',
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':pc_read['account_code'][0],
+                    'debit':amount,
+                    'date':iat['date'],
+                    'ref':iat['name'],
+                    'move_id':move_id,
+                    'amount_currency':iat['amount'],
+                    'currency_id':currency,
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            self.pool.get('account.move').post(cr, uid, [move_id])
+            self.write(cr, uid, ids, {'move_id':move_id,'state':'transfer'})
+        return True
+    
+    def people2bank(self, cr, uid, ids, context=None):
+        for iat in self.read(cr, uid, ids, context=None):
+            journal_id = iat['journal_id'][0]
+            period_id = iat['period_id'][0]
+            move = {
+                'ref':iat['name'],
+                'journal_id':iat['journal_id'][0],
+                'period_id':iat['period_id'][0],
+                'date':iat['date'],
+                }
+            move_id = self.pool.get('account.move').create(cr, uid, move)
+            analytic_read = self.pool.get('account.analytic.account').read(cr, uid, iat['src_pat_analytic_id'][0],context=None)
+            analytic_name = analytic_read['name']
+            bank_read = self.pool.get('res.partner.bank').read(cr, uid, iat['bank_account'][0],context=None)
+            check_currency = self.pool.get('account.account').read(cr, uid, bank_read['account_id'][0],['currency_id','company_currency_id'])
+            currency = False
+            rate = False
+            if not check_currency['currency_id']:
+                currency = check_currency['company_currency_id'][0]
+                rate = 1.00
+            if check_currency['currency_id']:
+                curr_read = self.pool.get('res.currency').read(cr, uid, check_currency['currency_id'][0],['rate'])
+                currency = check_currency['currency_id'][0]
+                rate = curr_read['rate']
+            amount = iat['amount'] / rate
+            if not analytic_read['normal_account']:
+                raise osv.except_osv(_('Error !'), _('Please add a related account to %s')%analytic_name)
+            move_line = {
+                    'name':'Source Account',
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':analytic_read['normal_account'][0],
+                    'credit':amount,
+                    'date':iat['date'],
+                    'ref':iat['name'],
+                    'move_id':move_id,
+                    'amount_currency':iat['amount'],
+                    'currency_id':currency,
+                    }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            move_line = {
+                    'name':'Destination Bank',
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':bank_read['account_id'][0],
+                    'debit':amount,
+                    'analytic_account_id':analytic_read['id'],
+                    'date':iat['date'],
+                    'ref':iat['name'],
+                    'move_id':move_id,
+                    'amount_currency':iat['amount'],
+                    'currency_id':currency,
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            self.pool.get('account.move').post(cr, uid, [move_id])
+            self.write(cr, uid, ids, {'move_id':move_id,'state':'transfer'})
+        return True
+iat()
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:,

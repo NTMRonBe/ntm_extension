@@ -38,23 +38,16 @@ class pettycash_denom(osv.osv):
         'currency_id': fields.related('name','currency_id', type='many2one', relation='res.currency', string='Currency', readonly=True),
         'amount': fields.function(_compute_amount, method=True, type='float', string='Total Amount', store=False),
         }
+    
     def write(self, cr, uid, ids, vals, context=None):
-        """
-        Update redord(s) comes in {ids}, with new value comes as {vals}
-        return True on success, False otherwise
-    
-        @param cr: cursor to database
-        @param user: id of current user
-        @param ids: list of record ids to be update
-        @param vals: dict of new values to be set
-        @param context: context arguments, like lang, time zone
-        
-        @return: True on success, False otherwise
-        """
-    
-        #TODO: process before updating resource
-        res = super(pettycash_denom, self).write(cr, uid, ids, vals, context)
-        return res
+        print context
+        if not context or ('be' not in context):
+            res = super(pettycash_denom, self).write(cr, uid, ids, vals, context)
+            return res
+        if 'be' in context:
+            print context
+            res = super(pettycash_denom, self).write(cr, uid, ids, vals, context)
+            return res
     
     def create(self, cr, uid, vals, context=None):
         new_id = super(pettycash_denom, self).create(cr, uid, vals,context)

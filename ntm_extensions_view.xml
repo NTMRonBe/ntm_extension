@@ -92,8 +92,8 @@
 				    <group colspan="4" col="4">
 				        <field name="type"/>
 				        <group colspan="2" col="2" attrs="{'invisible': [('partner_id','=',False)]}">
-					        <field name="supplier" attrs="{'invisible': [('proj','=',True)]}"/>
-					        <field name="proj" attrs="{'invisible': [('pat','=',True)]}"/>
+					        <field name="supplier" attrs="{'invisible': [('project','=',True)]}"/>
+					        <field name="project" attrs="{'invisible': [('supplier','=',True)]}"/>
 				        </group>
 				    </group>
 				</field>

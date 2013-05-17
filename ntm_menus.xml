@@ -24,10 +24,12 @@
         <menuitem id="fund_transfer_b2b" parent="fund_transfers" sequence="10" action="action_fund_transfer_b2b_tree"/>
         <menuitem id="fund_transfer_p2b" parent="fund_transfers" sequence="30" action="action_fund_transfer_p2b_tree"/>
         <menuitem id="iat_main" name="Internal Account Transfers" parent="fund_transfers" sequence="20"/>
-        <menuitem id="iat_people2proj" parent="iat_main" sequence="10" action="action_people2proj_tree"/>
-        <menuitem id="iat_proj2people" parent="iat_main" sequence="20" action="action_proj2people_tree"/>
+        <menuitem id="iat_people2people" parent="iat_main" sequence="10" action="action_people2people_tree"/>
+        <menuitem id="iat_people2proj" parent="iat_main" sequence="20" action="action_people2proj_tree"/>
         <menuitem id="iat_people2bank" parent="iat_main" sequence="30" action="action_people2bank_tree"/>
         <menuitem id="iat_people2pc" parent="iat_main" sequence="40" action="action_people2pc_tree"/>
+        <menuitem id="iat_proj2people" parent="iat_main" sequence="50" action="action_proj2people_tree"/>
+        <menuitem id="iat_proj2proj" parent="iat_main" sequence="50" action="action_proj2proj_tree"/>
         <menuitem id="bank_transfer" parent="fund_transfers" sequence="40" action="action_bank_transfer_tree"/>
         <menuitem id="base.menu_mail_gateway" name="Emails" parent="base.menu_config" sequence="30"/>
         <menuitem id="base.menu_base_action_rule" name="Automated Actions" parent="base.menu_config" sequence="30"/> 
