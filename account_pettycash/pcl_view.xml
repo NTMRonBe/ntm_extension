@@ -19,7 +19,7 @@
                         <field name="denom_filled" invisible="1"/>
                     </group>
                     <notebook colspan="4">
-                        <page string="Denominations Lists">
+                        <page string="Remaining Fund">
                         <button string="Fill Denominations" type="object" name="fill_denoms" icon="gtk-execute" attrs="{'invisible': [('denom_filled','=',True)]}" colspan="4"/>
 		                    <group colspan="4" col="2">
                                 <field name="denom_breakdown" mode="tree" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
@@ -35,7 +35,7 @@
                     	   <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
                                 <tree string="Liquidation Lines">
 	                                <field name="name"/>
-	                                <field name="type"/>
+	                                <field name="type" invisible="1"/>
 	                                <field name="acc_name"/>
 	                                <field name="reference"/>
 	                                <field name="amount" sum="Total Liquidations"/>
@@ -57,6 +57,7 @@
                                     <tree string="Accounting Entries">
                                         <field name="date"/>
                                         <field name="account_id"/>
+					                    <field name="analytic_account_id"/>
                                         <field name="debit"/>
                                         <field name="credit"/>
                                         <field name="currency_id" string="Encoding Currency"/>
@@ -151,14 +152,17 @@
                     <group colspan="4" col="4">
                     <button string="Fill Denominations" type="object" name="fill" icon="gtk-execute" attrs="{'invisible': [('filled','=',True)]}" colspan="4"/>
 	                    <group colspan="2" col="2">
-	                       <field name="denom_id" domain="[('currency_id','=',currency_id)]" on_change="on_change_denom(denom_id)" attrs="{'required': [('filled','=',True)]}"/>
-	                       <field name="curr_quantity" readonly="1"/>
-                           <field name="quantity" attrs="{'required': [('filled','=',True)]}"/>
-                           <field name="total" readonly="1"/>
+	                       <field name="cash_in" mode="tree" nolabel="1" colspan="2">
+                                  <tree string="Cash IN" editable="top" >
+                                      <field name="name"/>
+                                      <field name="quantity"/>
+                                      <field name="amount" sum="Total"/>
+                                  </tree>
+                           </field>
 	                    </group>
 	                    <group colspan="2" col="2">
-                           <field name="denom_breakdown" mode="tree" nolabel="1" colspan="2">
-                                  <tree string="To Exchange Denominations" editable="top">
+                           <field name="cash_out" mode="tree" nolabel="1" colspan="2">
+                                  <tree string="Cash OUT" editable="top" >
                                       <field name="name"/>
                                       <field name="quantity"/>
                                       <field name="amount" sum="Total"/>

@@ -14,29 +14,15 @@ def _links_get(self, cr, uid, context={}):
     return [(r['object'], r['name']) for r in res]
 
 class bill_exchange(osv.osv):
-    def _compute_amount(self, cr, uid, ids, field, arg, context=None):
-        rec = self.browse(cr, uid, ids, context=None)
-        result = {}
-        for r in rec:
-            if r.denom_id:
-                amount = r.quantity * r.denom_id.multiplier
-            else:
-                amount=0.00
-            result[r.id] = amount
-        return result
     
     _name = 'bill.exchange'
     _description = "Bills Exchange"
     _columns = {
         'name':fields.char('Exchange#',size=64, readonly=True),
-        'denom_id':fields.many2one('denominations','Denomination'),
         'date':fields.date('Exchange Date'),
         'currency_id':fields.many2one('res.currency','Currency'),
-        'curr_quantity':fields.integer('Current Quantity'),
         'pettycash_id':fields.many2one('account.pettycash','Petty Cash'),
-        'quantity':fields.integer('Quantity'),
         'filled':fields.boolean('Filled'),
-        'total':fields.function(_compute_amount, method=True, type='float', string='Total Amount', store=False),
         'state':fields.selection([
                         ('draft','Draft'),
                         ('done','Done'),
@@ -45,7 +31,6 @@ class bill_exchange(osv.osv):
     
     _defaults = {
             'state':'draft',
-            'quantity':0,
             'date': lambda *a: time.strftime('%Y-%m-%d'),
             }
     
@@ -81,10 +66,54 @@ class bill_exchange(osv.osv):
                         'be_id':pcr['id'],
                     }
                     self.pool.get('pettycash.denom').create(cr, uid, values)
+                    values = {
+                        'name':denom,
+                        'be_id2':pcr['id'],
+                    }
+                    self.pool.get('pettycash.denom').create(cr, uid, values)
             self.write(cr, uid,pcr['id'],{'filled':True})
         return True
     
     def exchange(self, cr, uid, ids, context=None):
+        for be in self.read(cr, uid, ids, context=None):
+            cash_in_search = self.pool.get('pettycash.denom').search(cr, uid, [('be_id','=',be['id']),('quantity','>',0)])
+            cash_out_search = self.pool.get('pettycash.denom').search(cr, uid, [('be_id2','=',be['id']),('quantity','>',0)])
+            if not cash_in_search:
+                raise osv.except_osv(_('Error !'), _('Please indicate the quantities of the denominations to be exchanged!'))
+            if not cash_out_search:
+                raise osv.except_osv(_('Error !'), _('Please indicate the quantities of the denominations to be released!'))
+            if cash_in_search and cash_out_search:
+                cash_in_amount = 0
+                cash_out_amount = 0
+                for cash_in_id in cash_in_search:
+                    cash_in_read = self.pool.get('pettycash.denom').read(cr, uid, cash_in_id, ['name', 'quantity'])
+                    denom_read = self.pool.get('denominations').read(cr, uid, cash_in_read['name'][0],['multiplier'])
+                    cash_in_amount +=cash_in_read['quantity'] * denom_read['multiplier']
+                for cash_out_id in cash_out_search:
+                    cash_out_read = self.pool.get('pettycash.denom').read(cr, uid, cash_out_id, ['name', 'quantity'])
+                    denom_read = self.pool.get('denominations').read(cr, uid, cash_out_read['name'][0],['multiplier'])
+                    cash_out_amount +=cash_out_read['quantity'] * denom_read['multiplier']
+                if cash_in_amount != cash_out_amount:
+                    raise osv.except_osv(_('Error !'), _('Total amounts are not equal!'))
+                elif cash_in_amount==cash_out_amount:
+                    pc_id = be['pettycash_id'][0]
+                    for cash_in_id in cash_in_search:
+                        cash_in_read = self.pool.get('pettycash.denom').read(cr, uid, cash_in_id, ['name', 'quantity'])
+                        pc_search = self.pool.get('pettycash.denom').search(cr, uid, [('name','=',cash_in_read['name'][0]),('pettycash_id','=',pc_id)])
+                        for denom_id in pc_search:
+                            denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denom_id,['quantity'])
+                            new_qty = denom_reader['quantity'] + cash_in_read['quantity'] 
+                            self.pool.get('pettycash.denom').write(cr, uid, denom_id,{'quantity':new_qty})
+                    for cash_out_id in cash_out_search:
+                        cash_out_read = self.pool.get('pettycash.denom').read(cr, uid, cash_out_id, ['name', 'quantity'])
+                        pc_search = self.pool.get('pettycash.denom').search(cr, uid, [('name','=',cash_out_read['name'][0]),('pettycash_id','=',pc_id)])
+                        for denom_id in pc_search:
+                            denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denom_id,['quantity'])
+                            new_qty = denom_reader['quantity'] - cash_out_read['quantity'] 
+                            self.pool.get('pettycash.denom').write(cr, uid, denom_id,{'quantity':new_qty})
+                    self.write(cr, uid, ids, {'state':'done'})
+        return True
+    def exchange2(self, cr, uid, ids, context=None):
         for be in self.read(cr, uid, ids, context=None):
             denom_read = self.pool.get('denominations').read(cr, uid, be['denom_id'][0],['multiplier'])
             #netsvc.Logger().notifyChannel("denom_read", netsvc.LOG_INFO, ' '+str(denom_read))
@@ -97,6 +126,8 @@ class bill_exchange(osv.osv):
                 denom_amount = 0.00
                 for denom_exchange in be['denom_breakdown']:
                     denom_ex_read = self.pool.get('pettycash.denom').read(cr, uid, denom_exchange,['name','quantity'])
+                    if be['denom_id'][0]== denom_ex_read['name'][0] and denom_ex_read['quantity']>0:
+                        raise osv.except_osv(('Error !'),('Can not exchange with the same denomination! '))
                     denom_ex_2_read = self.pool.get('denominations').read(cr, uid, denom_ex_read['name'][0],['multiplier'])
                     denom_amount+=denom_ex_read['quantity'] * denom_ex_2_read['multiplier']
                 if amount != denom_amount:
@@ -117,39 +148,8 @@ class bill_exchange(osv.osv):
                         self.pool.get('pettycash.denom').write(cr, uid, denom_id, {'quantity':new_quantity})
                     self.write(cr, uid, ids, {'state':'done'})
         return True
-    
-    def on_change_denom(self, cr, uid, ids, denom_id=False):
-        result = {}
-        quantity = 0
-        netsvc.Logger().notifyChannel("ids", netsvc.LOG_INFO, ' '+str(ids))
-        if denom_id:
-            denom_reader = self.pool.get('denominations').read(cr, uid, denom_id,['multiplier'])
-            for be in self.read(cr, uid, ids, context=None):
-                pc_id = be['pettycash_id'][0]
-                pc_denom = self.pool.get('pettycash.denom').search(cr, uid, [('pettycash_id','=',pc_id),('name','=',denom_id)])
-                for denoms in pc_denom:
-                    denom_read = self.pool.get('pettycash.denom').read(cr, uid, denoms,['quantity'])
-                    quantity = denom_read['quantity']
-            result = {'value':{
-                    'curr_quantity':quantity,
-                    }
-                }
-        return result
-    
+       
     def write(self, cr, uid, ids, vals,context=None):
-        if 'denom_id' in vals:
-            total=0.00
-            for be in self.read(cr, uid, ids, context=None):
-                netsvc.Logger().notifyChannel("be", netsvc.LOG_INFO, ' '+str(be))
-                denom_reader = self.pool.get('denominations').read(cr, uid, vals['denom_id'],['multiplier'])
-                pc_id = be['pettycash_id'][0]
-                pc_denom = self.pool.get('pettycash.denom').search(cr, uid, [('pettycash_id','=',pc_id),('name','=',vals['denom_id'])])
-                for denoms in pc_denom:
-                    denom_read = self.pool.get('pettycash.denom').read(cr, uid, denoms,['quantity'])
-                    quantity = denom_read['quantity']
-                    total = be['quantity'] * denom_reader['multiplier']
-            vals['curr_quantity']= quantity
-            vals['total']=total
         return super(bill_exchange, self).write(cr, uid, ids, vals,context=None)
     
     
@@ -196,6 +196,7 @@ class pettycash_denom(osv.osv):
     _columns ={
         'pcl_id':fields.many2one('account.pettycash.liquidation','Liquidation',ondelete="cascade"),
         'be_id':fields.many2one('bill.exchange','Bill Exchange',ondelete="cascade"),
+        'be_id2':fields.many2one('bill.exchange','Bill Exchange',ondelete="cascade"),
         }
 pettycash_denom()
 
@@ -435,6 +436,7 @@ pcl()
 class be(osv.osv):
     _inherit = 'bill.exchange'
     _columns = {
-        'denom_breakdown':fields.one2many('pettycash.denom','be_id','Denomination Breakdown'),
+        'cash_in':fields.one2many('pettycash.denom','be_id','Cash IN'),
+        'cash_out':fields.one2many('pettycash.denom','be_id2','Cash OUT'),
         }
 be()
