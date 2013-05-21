@@ -27,15 +27,16 @@ class fund_transfer(osv.osv):
                                  ],'Type'),
         'period_id':fields.many2one('account.period','Period'),
         'journal_id':fields.many2one('account.journal','Journal', required=True),
-        'src_account':fields.many2one('account.account','Source Bank Account'),
+        'src_account':fields.many2one('res.partner.bank','Source Bank Account'),
         'pettycash_id':fields.many2one('account.pettycash','Petty Cash Account'),
         'curr_id':fields.many2one('res.currency','Currency'),
         'amount':fields.float('Amount to Transfer'),
-        'dest_account':fields.many2one('account.account','Destination Bank Account'),
+        'dest_account':fields.many2one('res.partner.bank','Destination Bank Account'),
         'dest_p2b_account':fields.many2one('res.partner.bank','Destination Bank Account'),
         'src_analytic_account':fields.many2one('account.analytic.account','Source Analytic Account'),
         'dest_analytic_account':fields.many2one('account.analytic.account','Destination Analytic Account'),
         'move_id':fields.many2one('account.move','Journal Entry'),
+        'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Releasing Journal Items', readonly=True),
         'state':fields.selection([
                             ('draft','Draft'),
                             ('done','Transferred'),
@@ -52,100 +53,73 @@ class fund_transfer(osv.osv):
     def b2b_transfer(self, cr, uid, ids, context=None):
         move_pool = self.pool.get('account.move')
         move_line_pool = self.pool.get('account.move.line')
-        result = {}
         for b2b in self.read(cr, uid, ids, context=None):
-            b1_read = self.pool.get('account.account').read(cr, uid, b2b['src_account'][0],['company_currency_id','currency_id'])
-            b2_read = self.pool.get('account.account').read(cr, uid, b2b['dest_account'][0],['company_currency_id','currency_id'])
-            b1_curr = False
-            b2_curr = False
-            if not b1_read['currency_id']:
-                b1_curr = b1_read['company_currency_id'][0]
-            if b1_read['currency_id']:
-                b1_curr = b1_read['currency_id'][0]
-            if not b2_read['currency_id']:
-                b2_curr = b2_read['company_currency_id'][0]
-            if b2_read['currency_id']:
-                b2_curr = b2_read['currency_id'][0]
-            if b2_curr !=b1_curr:
-                raise osv.except_osv(_('Error !'), _('You cannot create a transfer for accounts with different currencies!'))
-            if b2_curr==b1_curr:
-                if b2_curr==b1_read['company_currency_id'][0]:
-                    name = 'Fund transfer from ' + b2b['src_account'][1] + ' to ' + b2b['dest_account'][1]
-                    move = {
-                        'journal_id':b2b['journal_id'][0],
-                        'period_id':b2b['period_id'][0],
-                        'date':b2b['date'],
-                        'ref':name,
-                        }
-                    move_id = move_pool.create(cr, uid, move)
-                    credit = {
-                        'name':name,
-                        'journal_id':b2b['journal_id'][0],
-                        'period_id':b2b['period_id'][0],
-                        'date':b2b['date'],
-                        'account_id':b2b['src_account'][0],
-                        'credit':b2b['amount'],
-                        'move_id':move_id,
-                        }
-                    move_line_pool.create(cr, uid, credit)
-                    debit = {
-                        'name':name,
-                        'journal_id':b2b['journal_id'][0],
-                        'period_id':b2b['period_id'][0],
-                        'date':b2b['date'],
-                        'account_id':b2b['dest_account'][0],
-                        'debit':b2b['amount'],
-                        'move_id':move_id,
-                        }
-                    move_line_pool.create(cr, uid, debit)
-                    move_pool.post(cr, uid, [move_id],context={})
-                    result = {
-                            'move_id':move_id,
-                            'state':'done',
-                            }
-                    self.write(cr, uid, b2b['id'],result)
-                if b2_curr != b1_read['company_currency_id'][0]:
-                    curr_read = self.pool.get('res.currency').read(cr, uid, b2_curr,['rate'])
-                    amount = b2b['amount'] / curr_read['rate']
-                    name = 'Fund transfer from ' + b2b['src_account'][1] + ' to ' + b2b['dest_account'][1]
-                    move = {
-                        'journal_id':b2b['journal_id'][0],
-                        'period_id':b2b['period_id'][0],
-                        'date':b2b['date'],
-                        'ref':name,
-                        }
-                    move_id = move_pool.create(cr, uid, move)
-                    credit = {
-                        'name':name,
-                        'journal_id':b2b['journal_id'][0],
-                        'period_id':b2b['period_id'][0],
-                        'date':b2b['date'],
-                        'account_id':b2b['src_account'][0],
-                        'credit':amount,
-                        'currency_id':b2_curr,
-                        'amount_currency':b2b['amount'],
-                        'move_id':move_id,
-                        }
-                    move_line_pool.create(cr, uid, credit)
-                    debit = {
-                        'name':name,
-                        'journal_id':b2b['journal_id'][0],
-                        'period_id':b2b['period_id'][0],
-                        'date':b2b['date'],
-                        'account_id':b2b['dest_account'][0],
-                        'debit':amount,
-                        'currency_id':b2_curr,
-                        'amount_currency':b2b['amount'],
-                        'move_id':move_id,
-                        }
-                    move_line_pool.create(cr, uid, debit)
-                    move_pool.post(cr, uid, [move_id],context={})
-                    result = {
-                            'move_id':move_id,
-                            'state':'done',
-                            }
-                    self.write(cr, uid, b2b['id'],result)
+            b1_read = self.pool.get('res.partner.bank').read(cr, uid, b2b['src_account'][0],context=None)
+            b2_read = self.pool.get('res.partner.bank').read(cr, uid, b2b['dest_account'][0],context=None)
+            b1_curr = self.pool.get('account.account').read(cr, uid, b1_read['account_id'][0],['company_currency_id','currency_id'])
+            currency = False
+            rate = False
+            name = 'Fund transfer from ' + b2b['src_account'][1] + ' to ' + b2b['dest_account'][1]
+            journal_id =b2b['journal_id'][0]
+            period_id = b2b['period_id'][0]
+            date = b2b['date']
+            move = {
+                'journal_id':journal_id,
+                'period_id':period_id,
+                'date':date,
+                'ref':name
+                }
+            move_id = move_pool.create(cr, uid, move)
+            if not b1_curr['currency_id']:
+                currency = b1_curr['company_currency_id'][0]
+                rate = 1.00
+            if b1_curr['currency_id']:
+                curr_read = self.pool.get('res.currency').read(cr, uid, b1_curr['currency_id'][0],['rate'])
+                currency = b1_curr['currency_id'][0]
+                rate = curr_read['rate']
+            amount = b2b['amount'] / rate
+            move_line = {
+                    'name':b1_read['owner_name'],
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':b1_read['account_id'][0],
+                    'credit':amount,
+                    'date':date,
+                    'ref':name,
+                    'move_id':move_id,
+                    'amount_currency':b2b['amount'],
+                    'currency_id':currency,
+                    }
+            move_line_pool.create(cr, uid, move_line)
+            move_line = {
+                    'name':b2_read['owner_name'],
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':b2_read['account_id'][0],
+                    'debit':amount,
+                    'date':date,
+                    'ref':name,
+                    'move_id':move_id,
+                    'amount_currency':b2b['amount'],
+                    'currency_id':currency,
+                    }
+            move_line_pool.create(cr, uid, move_line)
+            self.pool.get('account.move').post(cr, uid, [move_id])
+            move_read = self.pool.get('account.move').read(cr, uid, move_id,['name'])
+            move_name = move_read['name']
+            self.write(cr, uid, ids, {'move_id':move_id,'state':'done','name':move_name})
         return True
+    
+    def onchange_srcaccount(self, cr, uid, ids, src_account=False):
+        result = {}
+        if src_account:
+            acc_read = self.pool.get('res.partner.bank').read(cr, uid, src_account,['currency_id'])
+            result = {'value':{
+                        'curr_id':acc_read['currency_id'][0],
+                        'dest_account':False,
+                          }
+                    }
+        return result
     
     def onchange_pettycash(self, cr, uid, ids, pettycash_id=False):
         result = {}
@@ -354,7 +328,6 @@ class internal_account_transfer(osv.osv):
                                 ('proj2proj','Project to Project Account'),
                                 ('people2people','PAT to PAT Account'),
                                 ('proj2people','Project to PAT Account'),
-                                ('people2bank','PAT to Bank Account'),
                                 ('people2pc','PAT to Petty Cash Account'),
                                 ],'Transfer Type'),
         'bank_account':fields.many2one('res.partner.bank','Bank Account'),
@@ -379,6 +352,7 @@ class internal_account_transfer(osv.osv):
             'journal_id':_get_journal,
             'currency_id':'base.PHP',
             'distribute_type':'fixed',
+            'state':'draft',
             }
     
     def onchange_multiple(self, cr, uid, ids, multiple=False):
@@ -650,10 +624,6 @@ class internal_account_transfer(osv.osv):
                 vals.update({
                 'name': self.pool.get('ir.sequence').get(cr, uid, 'iat.proj2people'),
                 })
-            if context['transfer_type']=='people2bank':
-                vals.update({
-                'name': self.pool.get('ir.sequence').get(cr, uid, 'iat.people2bank'),
-                })
             if context['transfer_type']=='people2pc':
                 vals.update({
                 'name': self.pool.get('ir.sequence').get(cr, uid, 'iat.people2pc'),
@@ -681,7 +651,44 @@ class internal_account_transfer_destination(osv.osv):
         'amount':fields.float('Amount/Percentage', digits_compute=dp.get_precision('Account')),
         'proj_iat_id':fields.many2one('internal.account.transfer','Transfer ID',ondelete='cascade'),
         'pat_iat_id':fields.many2one('internal.account.transfer','Transfer ID',ondelete='cascade'),
+        'remarks':fields.text('Remarks'),
+        'percentage':fields.float('Percentage(%)'),
+        'percentage_bool':fields.boolean('Percentage?'),
         }
+    
+    def onchange_percentage(self,cr, uid, ids, percentage=False):
+        result = {}
+        if percentage:
+            amount = 0.00
+            for iatd in self.read(cr, uid, ids, context=None):
+                if iatd['proj_iat_id']:
+                    iat_read = self.pool.get('internal.account.transfer').read(cr, uid, iatd['proj_iat_id'][0],['amount'])
+                    amount = iat_read['amount']
+                elif iatd['pat_iat_id']:
+                    iat_read = self.pool.get('internal.account.transfer').read(cr, uid, iatd['pat_iat_id'][0],['amount'])
+                    amount=iat_read['amount']
+            amount = (amount * percentage) / 100
+            result = {'value':{
+                'amount':amount,
+                }
+            }
+        return result 
+    
+    def write(self,cr, uid,ids,vals, context=None):
+        if 'percentage' in vals:
+            amount = 0.00
+            for iatd in self.read(cr, uid, ids, context=None):
+                if iatd['proj_iat_id']:
+                    iat_read = self.pool.get('internal.account.transfer').read(cr, uid, iatd['proj_iat_id'][0],['amount'])
+                    amount = iat_read['amount']
+                elif iatd['pat_iat_id']:
+                    iat_read = self.pool.get('internal.account.transfer').read(cr, uid, iatd['pat_iat_id'][0],['amount'])
+                    amount=iat_read['amount']
+            amount = (amount * vals['percentage']) / 100
+            vals['amount']=amount
+        return super(internal_account_transfer_destination,self).write(cr, uid,ids, vals,context=None)
+                    
+                
     
 internal_account_transfer_destination()
 
@@ -700,8 +707,6 @@ class iat(osv.osv):
             for iat in self.read(cr, uid, ids, context=None):
                 if iat['transfer_type']=='people2pc':
                     result = {'value':{'pettycash_id':False}}
-                if iat['transfer_type']=='people2bank':
-                    result = {'value':{'bank_account':False}}
         return result
 iat()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:,

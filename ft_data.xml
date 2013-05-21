@@ -96,10 +96,6 @@
             <field name="name">Project to People and Team </field>
             <field name="code">iat.proj2people</field>
         </record>
-        <record id="seq_type_iat_people2bank_sequence" model="ir.sequence.type">
-            <field name="name">People and Team to Bank</field>
-            <field name="code">iat.people2bank</field>
-        </record>
         <record id="seq_type_iat_people2pc_sequence" model="ir.sequence.type">
             <field name="name">People and Team to Petty Cash</field>
             <field name="code">iat.people2pc</field>
