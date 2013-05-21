@@ -2,182 +2,71 @@
 <openerp>
     <data>
     
-    <record id="regional_income_form" model="ir.ui.view">
-            <field name="name">regional.income.form</field>
-            <field name="model">regional.income</field>
+    <record id="regional_uploader_form" model="ir.ui.view">
+            <field name="name">regional.uploader.form</field>
+            <field name="model">regional.uploader</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string = "Regional Income">
-                    <field name="code"/>
-                    <field name="name"/>
+                <form string = "Regional Uploader">
+                    <field name="acctid"/>
+                    <field name="scuramt"/>
+                    <field name="currency"/>
+                    <field name="ref"/>
+                    <field name="transdesc"/>
+                    <field name="date"/>
+                    <field name="uploaded"/>
                 </form>
             </field>
         </record>        
-        <record model="ir.ui.view" id="regional_income_tree">
-            <field name="name">regional.income.tree</field>
-            <field name="model">regional.income</field>
+        <record model="ir.ui.view" id="regional_uploader_tree">
+            <field name="name">regional.uploader.tree</field>
+            <field name="model">regional.uploader</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Regional Income">
-                    <field name="name"/>
-                    <field name="code"/>
+                <tree string="Regional uploader">
+                    <field name="acctid"/>
+                    <field name="scuramt"/>
+                    <field name="currency"/>
+                    <field name="ref"/>
+                    <field name="transdesc"/>
+                    <field name="date"/>
+                    <field name="uploaded"/>
                 </tree>
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_regional_income_form">
-            <field name="name">Regional Income</field>
-            <field name="res_model">regional.income</field>
-            <field name="view_type">form</field>
-        </record>
-    
-    <record id="regional_configuration_form" model="ir.ui.view">
-            <field name="name">regional.configuration.form</field>
-            <field name="model">regional.configuration</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <form string = "Regional Branch">
-                    <group colspan="4" col="4">
-                    <field name="name"/>
-                    <field name="code"/>
-                    <field name="journal_id"/>
-                    <field colspan="4" mode="tree,form" name="income_ids" nolabel="1">
-                        <form string="Income">
-                            <field name="income_id"/>
-                            <field name="analytic_account"/>
-                        </form>
-                        <tree string="income" editable="bottom">
-                            <field name="income_id"/>
-                            <field name="analytic_account"/>
-                        </tree>
-                    </field>
-                    </group>
-                </form>
-            </field>
-        </record>        
-        <record model="ir.ui.view" id="regional_configuration_tree">
-            <field name="name">regional.configuration.tree</field>
-            <field name="model">regional.configuration</field>
-            <field name="type">tree</field>
-            <field name="arch" type="xml">
-                <tree string="Regional Branches">
-                    <field name="name"/>
-                    <field name="code"/>
-                </tree>
-            </field>
-        </record>
-        
-        <record model="ir.actions.act_window" id="action_regional_configuration_form">
-            <field name="name">Regional Branches</field>
-            <field name="res_model">regional.configuration</field>
+        <record model="ir.actions.act_window" id="action_regional_uploader_form">
+            <field name="name">Regional Uploader</field>
+            <field name="res_model">regional.uploader</field>
             <field name="view_type">form</field>
         </record>
         
-        <!-- Invoice Slip Uploader -->
-		<record model="ir.ui.view" id="view_invoice_slip_upload_tree">
-            <field name="name">invoice.slip.upload.tree</field>
-            <field name="model">invoice.slip.upload</field>
-            <field name="type">tree</field>
-            <field name="arch" type="xml">
-                <tree string="Invoice Slip Uploader">
-                        <field name="region_id"/>
-                        <field name="income_code"/>
-					    <field name="transaction_id"/>
-					    <field name="transaction_type"/>
-					    <field name="partner_id"/>
-					    <field name="imported"/>
-					    <field name="trans_date"/>
-					    <field name="user_id"/>
-					    <field name="comment"/>
-					    <field name="amount"/>
-                </tree>
-            </field>
-        </record>
-		    
-		
-		<record model="ir.ui.view" id="view_invoice_slip_upload_form">
-            <field name="name">invoice.slip.upload.form</field>
-            <field name="model">invoice.slip.upload</field>
+        
+        <record id="upload_invoice_wizard_view" model="ir.ui.view">
+            <field name="name">Upload Slips</field>
+            <field name="model">regional.upload</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Invoice Slip Uploader">
-                    <group colspan="4" col="4">
-                    	<field name="region_id"/>
-                    	<field name="income_code"/>
-                        <field name="transaction_id"/>
-                        <field name="transaction_type"/>
-                        <field name="partner_id"/>
-                        <field name="imported"/>
-                        <field name="trans_date"/>
-                        <field name="user_id"/>
-                        <field name="amount"/>
-					</group>
-					    <field name="comment"/>
-                </form>
+            <form string="Upload Regional Report">
+                <separator string="Fetching Entries" colspan="4"/>
+                <label string="This will upload the regional reports." colspan="2"/>
+                <separator colspan="4"/>
+                    <group colspan="4" col="6">
+                        <button icon="gtk-cancel" special="cancel" string="Cancel"/>
+                        <button icon="gtk-ok" string="Upload" name="upload" type="object" default_focus="1"/>
+                   </group>
+            </form>
             </field>
-        </record>      
-        <record model="ir.actions.act_window" id="action_invoice_slip_upload_form">
-        	<field name="name">Uploader</field>
-	        <field name="res_model">invoice.slip.upload</field>
-		    <field name="view_type">form</field>
         </record>
 
-        
-        <!-- Invoice Slips -->
-		<record model="ir.ui.view" id="view_invoice_slip_form">
-            <field name="name">invoice.slip.form</field>
-            <field name="model">invoice.slip</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <form string="Invoice Slip">
-					    <group colspan="4" col="4">
-					    	<field name="transaction_id"/>
-					    	<field name="transaction_type"/>
-					    	<field name="region_id"/>
-					    	<field name="partner_id"/>
-					    	<field name="trans_date"/>
-					    	<field name="period_id"/>
-					    </group>
-					    <group colspan="4" col="2">
-					         <field name="line_ids" nolabel="1" colspan="4" height="300">
-                                    <tree string="Invoice Lines">
-                                        <field name="income_id"/>
-                                        <field name="amount" sum="Total Amount"/>
-                                	</tree>
-                                	<form string="Invoice Lines">
-										   <field name="income_id"/>
-										   <field name="amount"/>
-										   <separator string="Comment" colspan="4"/>
-										   <field name="comment" colspan="4" nolabel="True"/>
-					                </form>
-                                </field>
-					    </group>
-					    <group colspan="13" col="4">
-					        <field name="state"/>
-					        <button icon="gtk-ok" string="Post" name="create_moves" type="object" default_focus="1"/>
-					    </group>
-                </form>
-            </field>
+        <record id="action_upload_invoice_slips" model="ir.actions.act_window">
+            <field name="name">Create Entries from Uploaded Data</field>
+            <field name="res_model">regional.upload</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+           <field name="view_id" ref="upload_invoice_wizard_view"/>
+           <field name="target">new</field>
         </record>
         
-        <record model="ir.ui.view" id="view_invoice_slip_tree">
-            <field name="name">invoice.slip.tree</field>
-            <field name="model">invoice.slip</field>
-            <field name="type">tree</field>
-            <field name="arch" type="xml">
-                <tree string="Invoice Slip">
-                        <field name="region_id"/>
-                        <field name="transaction_id"/>
-                        <field name="partner_id"/>
-                        <field name="trans_date"/>
-                </tree>
-            </field>
-        </record>
-		
-        <record model="ir.actions.act_window" id="action_invoice_slip_form">
-        	<field name="name">Invoices</field>
-	        <field name="res_model">invoice.slip</field>
-		    <field name="view_type">form</field>
-        </record>
        </data>
 </openerp>

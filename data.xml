@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data noupdate="1">
+    
+        <record id="analytic_rrj_iat" model="account.analytic.journal">
+            <field name="name">Regional Report</field>
+            <field name="code">RRJ</field>
+            <field name="active" eval="1"/>
+            <field name="type">general</field>
+        </record>
+        
+        <record id="seq_type_regional_sequence" model="ir.sequence.type">
+            <field name="name">Regional Report</field>
+            <field name="code">regional</field>
+        </record>
+
+        <record id="seq_regional_sequence" model="ir.sequence">
+            <field name="name">Regional Report</field>
+            <field name="code">regional</field>
+            <field name="prefix">RRJ/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+
+        <record forcecreate="1" id="regional_report_journal" model="account.journal">
+            <field name="name">Regional Report Journal</field>
+            <field name="code">RRJ</field>
+            <field name="type">regional_report</field>
+            <field name="view_id" ref="account.account_journal_view"/>
+            <field name="sequence_id" ref="seq_regional_sequence"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="analytic_journal_id" ref="analytic_rrj_iat"/>
+        </record>
+        
         <record forcecreate="True" id="ir_cron_analytic_scheduler_action" model="ir.cron">
             <field name="name">Compute Balances for Analytic Accounts</field>
             <field eval="False" name="active"/>

@@ -2,155 +2,95 @@ import time
 from osv import osv, fields, orm
 import netsvc
 import pooler
+import datetime
 import psycopg2
 from tools.translate import _
 
-class regional_income(osv.osv):
-    _name = 'regional.income'
-    _description = 'Regional Income'
+class regional_uploader(osv.osv):
+    _name = 'regional.uploader'
     _columns = {
-        'name':fields.char('Income Name',size=64),
-        'code':fields.char('Code',size=16,help = "Please use small caps"),
+        'acctid':fields.char('Acct ID',size=32),
+        'scuramt':fields.float('Amount'),
+        'currency':fields.char('Currency',size=32),
+        'ref':fields.char('Transref',size=64),
+        'transdesc':fields.char('Description',size=64),
+        'date':fields.date('Date'),
+        'uploaded':fields.boolean('Uploaded'),
         }
-regional_income()
+regional_uploader()
 
-class regional_configuration(osv.osv):
-    _name = 'regional.configuration'
-    _description = "Regional Branches"
-    _columns = {
-        'name':fields.char('Name',size=64),
-        'code':fields.char('Code',size=16),
-        'journal_id':fields.many2one('account.journal','Journal')
-        }
-regional_configuration()
-
-class regional_configuration_income(osv.osv):
-    _name = 'regional.configuration.income'
-    _description = "Branch Income"
-    _columns = {
-        'income_id':fields.many2one('regional.income','Expense Name'),
-        'analytic_account':fields.many2one('account.analytic.account','Analytic Account'),
-        'regional_config_id':fields.many2one('regional.configuration','Regional Configuration',ondelete='cascade'),
-        }
-regional_configuration_income()
-
-class rc(osv.osv):
-    _inherit = 'regional.configuration'
-    _columns = {
-        'income_ids':fields.one2many('regional.configuration.income','regional_config_id','Expenses'),
-        }
-rc()
-
-class invoice_slip_upload(osv.osv):
-    _name = 'invoice.slip.upload'
-    _description='Invoice Slips / Regional Files Uploader'
-    _columns = {
-            'transaction_id':fields.char('Transaction ID',size=64),
-            'transaction_type':fields.char('Transaction Type',size=64),
-            'partner_id':fields.char('Missionary',size=64),
-            'comment':fields.text('Memo'),
-            'trans_date':fields.date('Invoice Date'),
-            'user_id':fields.char('Encoder',size=100),
-            'imported':fields.boolean('Imported'),
-            'amount':fields.float('Amount'),
-            'region_id':fields.char('Region Code',size=6),
-            'expense_code':fields.char('Expense Code',size=16),
-            }
-invoice_slip_upload()
-
-class invoice_slip(osv.osv):
-    def _get_period(self, cr, uid, context=None):
-        if context is None: context = {}
-        if context.get('period_id', False):
-            return context.get('period_id')
-        periods = self.pool.get('account.period').find(cr, uid, context=context)
-        return periods and periods[0] or False
-    _name = 'invoice.slip'
-    _description = "Invoice Slips / Regional Files"
-    _columns = {
-            'transaction_id':fields.char('Transaction ID',size=64),
-            'transaction_type':fields.char('Transaction Type',size=64),
-            'region_id':fields.many2one('regional.configuration','Region'),
-            'trans_date':fields.date('Invoice Date'),
-            'period_id':fields.many2one('account.period','Period'),
-            'user_id':fields.char('Encoder',size=100),
-            'line_ids': fields.one2many('invoice.slip.line', 'slip_id', 'Invoice Slip Lines '),
-            'state':fields.selection([('draft','Draft'),('posted','Posted')],'State'),
-            'partner_id':fields.many2one('res.partner','Missionary'),
-            }
-    
-    _defaults = {'state':'draft'}
-    
-    _order = 'trans_date desc'
-    def create(self, cr, uid, vals, context=None):
-        new_id = super(invoice_slip, self).create(cr, uid, vals,context)
-        return new_id
-    def create_moves(self, cr, uid, ids, context=None):
-        move_pool = self.pool.get('account.move')
-        move_line_pool = self.pool.get('account.move.line')
-        for inv in self.read(cr, uid, ids,context=None):
-            region_read = self.pool.get('regional.configuration').read(cr, uid, inv['region_id'][0],['journal_id'])
-            amount = 0.00
+class regional_upload(osv.osv):
+    _name = 'regional.upload'
+    def upload(self, cr, uid, ids, context=None):
+        regional_entries = self.pool.get('regional.uploader').search(cr, uid, [('uploaded','=',False)])
+        if regional_entries:
+            date = datetime.datetime.now()
+            period = date.strftime("%m/%Y")
+            date_now = date.strftime("%Y/%m/%d")
+            period_search = self.pool.get('account.period').search(cr, uid, [('name','=',period)])
+            journal_search = self.pool.get('account.journal').search(cr, uid, [('type','=','regional_report')],limit=1)
+            journal_id = False
+            period_id = False
+            for journal in journal_search:
+                journal_id = journal
+            for period in period_search:
+                period_id = period
             move = {
-                'ref':inv['transaction_id'],
-                'journal_id':region_read['journal_id'][0],
-                'date':inv['trans_date'],
-                'period_id':inv['period_id'][0],
-            }
-            move_id = move_pool.create(cr, uid, move)
-            for line in inv['line_ids']:
-                line_read = self.pool.get('invoice.slip.line').read(cr, uid, line, ['income_id','amount','comment'])
-                amount +=line_read['amount']
-                income_search = self.pool.get('regional.configuration.income').search(cr, uid, [('income_id','=',line_read['income_id'][0]),('regional_config_id','=',inv['region_id'][0])])
-                income_id=False
-                for income_line in income_search:
-                    income_read = self.pool.get('regional.configuration.income').read(cr, uid, income_line,['analytic_account'])
-                    analytic_read = self.pool.get('account.analytic.account').read(cr, uid, income_read['analytic_account'][0],['normal_account'])
-                    move_line = {
-                        'ref':inv['transaction_id'],
-                        'name':line_read['comment'],
-                        'journal_id':region_read['journal_id'][0],
-                        'period_id':inv['period_id'][0],
-                        'date':inv['trans_date'],
-                        'account_id':analytic_read['normal_account'][0],
-                        'credit':line_read['amount'],
-                        'analytic_account_id':income_read['analytic_account'][0],
-                        'move_id':move_id,
-                        }
-                    move_line_pool.create(cr, uid, move_line)
-            partner_analytic = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',inv['partner_id'][0])])
-            partner_name = inv['partner_id'][1]
-            if not partner_analytic:
-                raise osv.except_osv(_('Error !'), _('%s doesn\'t have any analytic account!')%partner_name)
-            if partner_analytic:
-                for partner_acc in partner_analytic:
-                    acc_read = self.pool.get('account.analytic.account').read(cr, uid, partner_acc,['id','normal_account'])
-                    debit = {
-                        'name':inv['transaction_id'],
-                        'journal_id':region_read['journal_id'][0],
-                        'period_id':inv['period_id'][0],
-                        'date':inv['trans_date'],
-                        'account_id':acc_read['normal_account'][0],
-                        'debit':amount,
-                        'analytic_account_id':acc_read['id'],
-                        'move_id':move_id,
-                        }
-                    move_line_pool.create(cr, uid, debit)
-        return True
-invoice_slip()
-
-class invoice_slip_line(osv.osv):
-    _name = 'invoice.slip.line'
-    _description = "Invoice Slip Lines"
-    _columns = {
-        'income_id':fields.many2one('regional.income','Income Code'),
-        'amount':fields.float('Amount',size=64),
-        'comment':fields.text('Memo'),
-        'slip_id':fields.many2one('invoice.slip','Invoice Slip',ondelete='cascade')
-        }
-    def create(self, cr, uid, vals, context=None):
-        new_id = super(invoice_slip_line, self).create(cr, uid, vals,context)
-        return new_id
-    
-        
-invoice_slip_line()
+                'journal_id':journal_id,
+                'period_id':period_id,
+                'date':date_now
+                }
+            move_id = self.pool.get('account.move').create(cr, uid, move)
+            for regional_entry in regional_entries:
+                curr_id = False
+                account_id = False
+                analytic_id = False
+                account_search = False
+                analytic_search = False
+                regional_entries_read = self.pool.get('regional.uploader').read(cr, uid, regional_entry,context=None)
+                account_search = self.pool.get('account.account').search(cr, uid,['|',('code','=',regional_entries_read['acctid']),('code_accpac','=',regional_entries_read['acctid'])])
+                if not account_search:
+                    analytic_search = self.pool.get('account.analytic.account').search(cr, uid,['|',('code','=',regional_entries_read['acctid']),('code_accpac','=',regional_entries_read['acctid'])])
+                    if not analytic_search:
+                        raise osv.except_osv(_('Error !'), _('Account ID not existing!'))
+                    elif analytic_search:
+                        for analytic in analytic_search:
+                            analytic_id = analytic
+                            analytic_read = self.pool.get('account.analytic.account').read(cr, uid, analytic, ['normal_account'])
+                            account_id = analytic_read['normal_account'][0]
+                elif account_search:
+                    for account in account_search:
+                        account_id = account
+                curr_search = self.pool.get('res.currency').search(cr, uid, [('name','ilike',regional_entries_read['currency'])])
+                for currency in curr_search:
+                    curr_id = currency
+                currency_read = self.pool.get('res.currency').read(cr, uid, curr_id, ['rate'])
+                amount = regional_entries_read['scuramt'] / currency_read['rate']
+                credit = 0.00
+                debit = 0.00
+                if amount > 0.00:
+                    credit = 0.00
+                    debit = amount
+                elif amount < 0.00:
+                    credit = amount * -1
+                    debit = 0.00
+                move_line = {
+                    'name':regional_entries_read['transdesc'],
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':account_id,
+                    'credit':credit,
+                    'debit':debit,
+                    'analytic_account_id':analytic_read['id'],
+                    'date':regional_entries_read['date'],
+                    'ref':regional_entries_read['ref'],
+                    'move_id':move_id,
+                    'amount_currency':regional_entries_read['scuramt'],
+                    'currency_id':curr_id,
+                    }
+                self.pool.get('account.move.line').create(cr, uid, move_line)
+                print regional_entry
+                self.pool.get('regional.uploader').write(cr, uid, regional_entry, {'uploaded':True})
+            self.pool.get('account.move').post(cr, uid, [move_id])
+        return {'type': 'ir.actions.act_window_close'}
+regional_upload()

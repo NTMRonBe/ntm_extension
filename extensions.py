@@ -251,6 +251,7 @@ class account_journal(osv.osv):
                                 ('forex','Foreign Exchanges'),
                                 ('pc_transfer','Petty Cash Transfers'),
                                 ('iat','Internal Account Transfers'),
+                                ('regional_report','Regional Report'),
                                 ('cash', 'Cash'), ('bank', 'Bank and Cheques'), ('pettycash', 'Petty Cash'), ('disbursement', 'Petty Cash Disbursement'), 
                                 ('general', 'General'), ('situation', 'Opening/Closing Situation')], 'Type', size=32, required=True,
                                  help="Select 'Sale' for Sale journal to be used at the time of making invoice."\

@@ -219,5 +219,67 @@
             <field name="domain">[('ownership','=','entity')]</field>
         </record>
 
+
+
+        <record model="ir.ui.view" id="view_bank_transfer_recurring_tree">
+            <field name="name">bank.transfer.recurring.tree</field>
+            <field name="model">bank.transfer.recurring</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Bank Transfer">
+	                <field name="name"/>
+	                <field name="bank_account"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="view_bank_transfer_recurring_form" model="ir.ui.view">
+            <field name="name">bank.transfer.recurring.form</field>
+            <field name="model">bank.transfer.recurring</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Bank Transfer">
+                     <group col="6" colspan="4">
+                        <field name="name" select="1"/>
+                        <field name="bank_account"/>
+                        <field name="ref" select="1"/>
+                    </group>
+                    <group col="2" colspan="2">
+                        <separator colspan="4" string="Starts on"/>
+                        <field name="date_start" select="1"/>
+                        <field name="period_total"/>
+                    </group>
+
+                    <group col="2" colspan="2">
+                        <separator colspan="4" string="Valid Up to"/>
+                        <field name="period_nbr"/>
+                        <field name="period_type"/>
+                    </group>
+                    <group col="2" colspan="2">
+                    </group>
+                    <separator colspan="4"/>
+                    <field colspan="4" mode="tree" name="lines_id" nolabel="1">
+                        <tree string="Schedule">
+                            <field name="date"/>
+                            <field name="move_id"/>
+                        </tree>
+                    </field>
+                    <group col="6" colspan="4">
+                        <field name="state"/>
+                        <button name="state_draft" states="done" string="Set to Draft" type="object"  icon="gtk-convert" />
+                        <button name="compute" states="draft" string="Compute" type="object" icon="terp-stock_format-scientific"/>
+                        <button name="remove_line" states="running" string="Remove Lines" type="object" icon="gtk-remove"/>
+                    </group>
+                </form>
+            </field>
+        </record>   
+          
+        <record id="action_bank_transfer_recurring_tree" model="ir.actions.act_window">
+            <field name="name">Bank Transfer Schedules</field>
+            <field name="res_model">bank.transfer.recurring</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="view_id" ref="view_bank_transfer_recurring_tree"/>
+        </record>
        </data>
 </openerp>

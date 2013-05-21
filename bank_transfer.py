@@ -5,6 +5,112 @@ import pooler
 import psycopg2
 from tools.translate import _
 import decimal_precision as dp
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from operator import itemgetter    
+    
+class bank_transfer_recurring(osv.osv):
+    _name = "bank.transfer.recurring"
+    _description = "Bank Transfer Subscription"
+    _columns = {
+        'name':fields.related('bank_account','name',type='char',size=64,store=True, string='Bank Description',readonly=True),
+        'ref': fields.char('Reference', size=16),
+        'bank_account': fields.many2one('res.partner.bank', 'Bank', required=True, domain=[('ownership','=','entity')]),
+
+        'date_start': fields.date('Start Date', required=True),
+        'period_total': fields.integer('Number of Periods', required=True),
+        'period_nbr': fields.integer('Period', required=True),
+        'period_type': fields.selection([('day','days'),('month','month'),('year','year')], 'Period Type', required=True),
+        'state': fields.selection([('draft','Draft'),('running','Running'),('done','Done')], 'State', required=True, readonly=True),
+    }
+    _defaults = {
+        'date_start': lambda *a: time.strftime('%Y-%m-%d'),
+        'period_type': 'month',
+        'period_total': 12,
+        'period_nbr': 1,
+        'state': 'draft',
+    }
+    def state_draft(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state':'draft'})
+        return False
+
+    def check(self, cr, uid, ids, context=None):
+        todone = []
+        for sub in self.browse(cr, uid, ids, context=context):
+            ok = True
+            for line in sub.lines_id:
+                if not line.move_id.id:
+                    ok = False
+                    break
+            if ok:
+                todone.append(sub.id)
+        if todone:
+            self.write(cr, uid, todone, {'state':'done'})
+        return False
+
+    def remove_line(self, cr, uid, ids, context=None):
+        toremove = []
+        for sub in self.browse(cr, uid, ids, context=context):
+            for line in sub.lines_id:
+                if not line.move_id.id:
+                    toremove.append(line.id)
+        if toremove:
+            self.pool.get('bank.transfer.recurring.line').unlink(cr, uid, toremove)
+        self.write(cr, uid, ids, {'state':'draft'})
+        return False
+
+    def compute(self, cr, uid, ids, context=None):
+        for sub in self.browse(cr, uid, ids, context=context):
+            ds = sub.date_start
+            for i in range(sub.period_total):
+                self.pool.get('bank.transfer.recurring.line').create(cr, uid, {
+                    'date': ds,
+                    'subscription_id': sub.id,
+                })
+                if sub.period_type=='day':
+                    ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(days=sub.period_nbr)).strftime('%Y-%m-%d')
+                if sub.period_type=='month':
+                    ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(months=sub.period_nbr)).strftime('%Y-%m-%d')
+                if sub.period_type=='year':
+                    ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(years=sub.period_nbr)).strftime('%Y-%m-%d')
+        self.write(cr, uid, ids, {'state':'running'})
+        return True
+bank_transfer_recurring()
+
+class bank_transfer_recurring_line(osv.osv):
+    _name = "bank.transfer.recurring.line"
+    _description = "Bank Transfer Subscription Line"
+    _columns = {
+        'subscription_id': fields.many2one('bank.transfer.recurring', 'Subscription', required=True, select=True),
+        'date': fields.date('Date', required=True),
+        'move_id': fields.many2one('account.move', 'Entry'),
+    }
+
+    def move_create(self, cr, uid, ids, context=None):
+        tocheck = {}
+        all_moves = []
+        obj_model = self.pool.get('account.model')
+        for line in self.browse(cr, uid, ids, context=context):
+            datas = {
+                'date': line.date,
+            }
+            move_ids = obj_model.generate(cr, uid, [line.subscription_id.model_id.id], datas, context)
+            tocheck[line.subscription_id.id] = True
+            self.write(cr, uid, [line.id], {'move_id':move_ids[0]})
+            all_moves.extend(move_ids)
+        if tocheck:
+            self.pool.get('account.subscription').check(cr, uid, tocheck.keys(), context)
+        return all_moves
+
+    _rec_name = 'date'
+bank_transfer_recurring_line()
+
+class btr(osv.osv):
+    _inherit = 'bank.transfer.recurring'
+    _columns = {
+        'lines_id': fields.one2many('bank.transfer.recurring.line', 'subscription_id', 'Subscription Lines')
+        }
+btr()
 
 class bank_transfer(osv.osv):
     
@@ -60,7 +166,7 @@ bank_transfer_line()
 class btl_add(osv.osv_memory):
     _name = 'bank.transfer.line.add'
     _columns = {
-        'partner_id':fields.many2one('res.partner','Partner', required=True),
+        'partner_id':fields.many2one('res.partner','People/Project', required=True),
         'account_number':fields.many2one('res.partner.bank','Bank Account', required=True),
         'analytic_id':fields.many2one('account.analytic.account','Account', required=True),
         'amount':fields.float('Amount', required=True),
@@ -247,7 +353,7 @@ bt()
 class res_partner_bank(osv.osv):
     _inherit = 'res.partner.bank'
     _columns = {
-        'partner_id': fields.many2one('res.partner', 'Partner', ondelete='cascade', select=True),
+        'partner_id': fields.many2one('res.partner', 'People/Project', ondelete='cascade', select=True),
         'bank': fields.many2one('res.bank', 'Bank'),
         'ownership':fields.selection([
                                  ('company','Company Account'),
