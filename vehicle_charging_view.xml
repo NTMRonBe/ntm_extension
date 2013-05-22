@@ -2,16 +2,98 @@
 <openerp>
     <data>
     
+        <record id="view_add_vehicle" model="ir.ui.view">
+            <field name="name">add.vehicle.form</field>
+            <field name="model">add.vehicle</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Add Account">
+                    <group colspan="4" col="6">
+                        <group colspan="4" col="2">
+                            <field name="account_id"/>
+                        </group>
+                        <group colspan="2" col="6">
+                            <field name="start_km"/>
+                            <field name="end_km"/>
+                            <field name="shared"/>
+                            <field name="main_trip"/>
+                        </group>
+                    </group>
+                    <group colspan="4" col="2" attrs="{'invisible':[('shared','=',False)]}">
+	                    <separator string="Sharing Details" colspan="4"/>
+	                    <group colspan="4" col="6">
+	                        <group colspan="4" col="2">
+	                            <field name="share_with" domain="[('main_trip','=',True)]"  attrs="{'invisible':[('main_trip','=',True)]}" on_change="onchange_sharewith(share_with)"/>
+	                        </group>
+	                        <group colspan="2" col="6">
+	                            <field name="percentage" attrs="{'required':[('shared','=',True)]}" />
+	                        </group>
+	                    </group>
+                    </group>
+                    <button name="data_save" string="Add"  type="object" icon="gtk-jump-to"/>
+               </form>
+            </field>
+        </record>
+
+        <record id="action_add_vehicle" model="ir.actions.act_window">
+            <field name="name">Add Account</field>
+            <field name="res_model">add.vehicle</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_add_vehicle"/>
+            <field name="target">new</field>
+        </record>
+    
+        <record id="vehicle_brand_form" model="ir.ui.view">
+            <field name="name">vehicle.brand.form</field>
+            <field name="model">vehicle.brand</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Brand">
+                    <field name="name"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="vehicle_brand_tree">
+            <field name="name">vehicle.brand.tree</field>
+            <field name="model">vehicle.brand</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Brand">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+    
         <record id="vehicle_form" model="ir.ui.view">
             <field name="name">vehicle.form</field>
             <field name="model">vehicle</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string = "Vehicle">
+                <separator string="Information" colspan="4"/>
+                    <group colspan="4" col="4">
                     <field name="name"/>
+                    <field name="brand"/>
+                    <field name="model"/>
+                    <field name="color"/>
+                    </group>
+                    <separator string="Location and Account Details"/>
+                    <group colspan="4" col="4">
+                    <field name="account_id"/>
                     <field name="km"/>
                     <field name="perkmcharge"/>
                     <field name="perkmcharge150"/>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" colspan="4" nolabel="1"/>
+                        </page>
+                        <page string="Trips">
+                            <field name="trip_ids" colspan="4" nolabel="1"/>
+                        </page>
+                    </notebook>
+                    
                 </form>
             </field>
         </record>        
@@ -25,6 +107,9 @@
                     <field name="km"/>
                     <field name="perkmcharge"/>
                     <field name="perkmcharge150"/>
+                    <field name="brand"/>
+                    <field name="model"/>
+                    <field name="color"/>
                 </tree>
             </field>
         </record>
@@ -41,38 +126,76 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string = "Vehicle Log">
-                    <group colspan="6" col="6">
-                        <field name="name"/>
-                        <field name="date"/>
-                        <group colspan="2" col="2">
-                            <field name="shared"/>
-                            <field name="distributed"/>
+                    <group colspan="4" col="6">
+                        <field name="name" invisible="1"/>
+                        <field name="date" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        <field name="vehicle_id" on_change="onchange_vehicle(vehicle_id,shared_trip)" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        <group colspan="2" col="4">
+                            <field name="shared_trip" attrs="{'readonly':[('state','!=','draft')]}"/>
                         </group>
-                        <field name="vehicle_id" on_change="onchange_vehicle(vehicle_id)"/>
-                        <field name="partner_id" attrs="{'invisible':[('shared','=',True)]}"/>
+                        <field name="perkmcharge" string="Charge/KM" readonly="1"/>
+                        <field name="total"/>
                     </group>
-                    <group colspan="6" col="6">
-	                    <field name="start_km"/>
-	                    <field name="end_km"/>
-	                    <field name="kms"/>
-	                    <field name="perkmcharge"/>
-	                    <field name="perkmcharge150"/>
-                    </group>
-                    <group colspan="6" col="2" attrs="{'invisible':[('shared','=',False)]}">
-                    <separator string="Expense Distribution" colspan="6"/>
-                            <group colspan="6" col="2">
-                                <field colspan="6" mode="tree,form" name="shared_ids" nolabel="1" readonly="True" >
-                                   <tree string="Expense Distribution" editable="bottom">
-                                       <field name="partner_id"/>
-                                       <field name="percentage"/>
-                                   </tree>
-                                   <form string="Expense Distribution">
-                                       <field name="partner_id"/>
-                                       <field name="percentage"/>
-                                   </form>
+                    <notebook>
+                        <page string="Single Trip" attrs="{'invisible':[('shared_trip','=',True)]}">
+	                        <group colspan="4" col="6">
+	                            <group colspan="4" col="2">
+	                                <field name="account_id" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                                <separator string="Trip Details" colspan="2"/>
+	                                <field name="details" nolabel="1" colspan="4" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                            </group>
+	                            <group colspan="2" col="2">
+	                                <field name="start_km" attrs="{'readonly':[('state','!=','draft')]}" />
+	                                <field name="end_km" attrs="{'readonly':[('state','!=','draft')]}" on_change="onchange_ending(end_km)"/>
+	                                <field name="kms" readonly="1"/>
+	                                <field name="journal_id" invisible="1"/>
+	                                <field name="period_id" invisible="1"/>
+	                            </group>
+	                        </group>
+                        </page>
+                        <page string="Shared Trip" attrs="{'invisible':[('shared_trip','=',False)]}">
+                            <group colspan="4" col="4" attrs="{'invisible':[('state','!=','draft')]}">
+                                <group colspan="2" col="2"/>
+                                <group colspan="2" col="2">
+                                    <button name="%(action_add_vehicle)d" attrs="{'invisible':[('state','!=','draft')]}" string="Add Account" type="action" icon="terp-camera_test"/>
+                                </group>
+                            </group>
+                            <field colspan="6" mode="tree,form" name="shared_ids" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1">
+                                <tree string="Expense Distribution" editable="bottom">
+	                                <field name="account_id" readonly="1"/>
+	                                <field name="start_km" readonly="1"/>
+	                                <field name="end_km" readonly="1"/>
+	                                <field name="kms" readonly="1"/>
+	                                <field name="shared" readonly="1"/>
+	                                <field name="share_with" readonly="1"/>
+	                                <field name="percentage" attrs="{'readonly':[('shared','=',False)]}"/>
+	                                <field name="amount" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Journal Entries">
+                            <group colspan="4" col="2">
+                                <field name="move_id" invisible="1"/>
+                                <field name="move_ids" mode="tree" nolabel="1">
+                                    <tree string="Accounting Entries">
+                                        <field name="date"/>
+                                        <field name="account_id"/>
+                                        <field name="analytic_account_id"/>
+                                        <field name="debit"/>
+                                        <field name="credit"/>
+                                        <field name="currency_id" string="Encoding Currency"/>
+                                        <field name="amount_currency" string="Encoding Amount"/>
+                                    </tree>
                                 </field>
                             </group>
-                            </group>
+                        </page>
+                    </notebook>
+                     <group colspan="4" col="13">
+                        <field name="state" select="1"/>
+                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
+                        <button name="confirm" attrs="{'invisible':[('state','!=','draft')]}" string="Confirm"  type="object" />
+                        <button name="distribute" attrs="{'invisible':[('state','!=','confirm')]}" string="Distribute"  type="object" />
+                    </group>
                 </form>
             </field>
         </record>        

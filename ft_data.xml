@@ -13,6 +13,30 @@
             <field name="prefix">B2B/%(y)s/</field>
             <field name="padding">3</field>
         </record>
+        
+        <record id="seq_type_bank_transfer_schedule_sequence" model="ir.sequence.type">
+            <field name="name">Bank Transfer Schedule</field>
+            <field name="code">bank.transfer.schedule</field>
+        </record>
+
+        <record id="seq_bank_transfer_schedule_sequence" model="ir.sequence">
+            <field name="name">Bank Transfer Schedule</field>
+            <field name="code">bank.transfer.schedule</field>
+            <field name="prefix">BTS/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        
+        <record id="seq_type_bank_transfer_request_sequence" model="ir.sequence.type">
+            <field name="name">Bank Transfer Request</field>
+            <field name="code">bank.transfer.request</field>
+        </record>
+
+        <record id="seq_bank_transfer_request_sequence" model="ir.sequence">
+            <field name="name">Bank Transfer</field>
+            <field name="code">bank.transfer.request</field>
+            <field name="prefix">BTR/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
 
         <record id="seq_type_bank_transfer_sequence" model="ir.sequence.type">
             <field name="name">Bank Transfer</field>
@@ -144,6 +168,42 @@
             <field name="code">iat.proj2proj</field>
             <field name="prefix">PROJ2/%(y)s/</field>
             <field name="padding">3</field>
+        </record>
+        
+        
+        
+        <!-- Vehicle Expense Distribution -->
+        
+        
+        <record id="analytic_journal_ved" model="account.analytic.journal">
+            <field name="name">Vehicle Expense Distribution</field>
+            <field name="code">VED</field>
+            <field name="active" eval="1"/>
+            <field name="type">general</field>
+        </record>
+
+
+
+         <record id="seq_type_ved_sequence" model="ir.sequence.type">
+            <field name="name">Vehicle Expense Distribution</field>
+            <field name="code">ved</field>
+        </record>
+
+        <record id="seq_ved_sequence" model="ir.sequence">
+            <field name="name">Vehicle Expense Distribution</field>
+            <field name="code">ved</field>
+            <field name="prefix">VED/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        
+        <record forcecreate="1" id="ved_journal" model="account.journal">
+            <field name="name">Vehicle Expense Distribution</field>
+            <field name="code">VED</field>
+            <field name="type">ved</field>
+            <field name="view_id" ref="account.account_journal_view"/>
+            <field name="sequence_id" ref="seq_ved_sequence"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="analytic_journal_id" ref="analytic_journal_ved"/>
         </record>
 
     </data>

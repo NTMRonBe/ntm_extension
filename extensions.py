@@ -250,6 +250,7 @@ class account_journal(osv.osv):
                                 ('transfer','Fund Transfer'), 
                                 ('forex','Foreign Exchanges'),
                                 ('pc_transfer','Petty Cash Transfers'),
+                                ('ved','Vehicle Expense Distribution'),
                                 ('iat','Internal Account Transfers'),
                                 ('regional_report','Regional Report'),
                                 ('cash', 'Cash'), ('bank', 'Bank and Cheques'), ('pettycash', 'Petty Cash'), ('disbursement', 'Petty Cash Disbursement'), 

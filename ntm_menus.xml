@@ -29,8 +29,10 @@
         <menuitem id="iat_people2pc" parent="main_pettycash" sequence="40" action="action_people2pc_tree"/>
         <menuitem id="iat_proj2people" parent="iat_main" sequence="50" action="action_proj2people_tree"/>
         <menuitem id="iat_proj2proj" parent="iat_main" sequence="50" action="action_proj2proj_tree"/>
-        <menuitem id="bank_transfer" parent="fund_transfers" sequence="40" action="action_bank_transfer_tree"/>
-        <menuitem id="bank_transfer_recurring" parent="fund_transfers" sequence="50" action="action_bank_transfer_recurring_tree"/>
+        <menuitem id="bank_transfer_main" name="Bank Transfers" parent="fund_transfers" sequence="40"/>
+        <menuitem id="bank_transfer" parent="bank_transfer_main" sequence="10" action="action_bank_transfer_tree"/>
+        <menuitem id="bank_transfer_schedule" parent="bank_transfer_main" sequence="10" action="action_bank_transfer_schedule_tree"/>
+        <menuitem id="bank_transfer_requests" parent="bank_transfer_main" sequence="10" action="action_bank_transfer_request_tree"/>
         <menuitem id="base.menu_mail_gateway" name="Emails" parent="base.menu_config" sequence="30"/>
         <menuitem id="base.menu_base_action_rule" name="Automated Actions" parent="base.menu_config" sequence="30"/> 
         <menuitem id="account.menu_finance" sequence="50"/>
