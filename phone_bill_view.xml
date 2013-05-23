@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+    
+        <record id="phone_provider_form" model="ir.ui.view">
+            <field name="name">phone.provider.form</field>
+            <field name="model">phone.provider</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Telecommunications Company">
+                    <field name="name"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="phone_provider_tree">
+            <field name="name">phone.provider.tree</field>
+            <field name="model">phone.provider</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Telecommunications Companies">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_phone_provider_form">
+            <field name="name">Telecommunications Companies</field>
+            <field name="res_model">phone.provider</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        
+        
+        <record id="phone_line_form" model="ir.ui.view">
+            <field name="name">phone.line.form</field>
+            <field name="model">phone.line</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Phone Lines">
+                    <group colspan="4" col="4">
+                        <field name="name"/>
+                        <field name="company_id"/>
+                        <field name="number"/>
+                        <field name="account_id"/>
+                    </group>
+                    <separator string="Fees" colspan="4"/>
+                    <group colspan="6" col="6">
+                        <field name="monthly_recur"/>
+                        <field name="nat_direct_dial"/>
+                        <field name="int_direct_dial"/>
+                    </group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="phone_line_tree">
+            <field name="name">phone.line.tree</field>
+            <field name="model">phone.line</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Phone Lines">
+                    <field name="name"/>
+                    <field name="company_id"/>
+                    <field name="number"/>
+                    <field name="account_id"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_phone_line_form">
+            <field name="name">Phone Lines</field>
+            <field name="res_model">phone.line</field>
+            <field name="view_type">form</field>
+        </record>
+
+        
+        
+        
+        
+        
+        <record id="phone_statement_form" model="ir.ui.view">
+            <field name="name">phone.statement.form</field>
+            <field name="model">phone.statement</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Statement of Account">
+                    <group colspan="4" col="4">
+	                    <field name="name"/>
+	                    <field name="line_id"/>
+                    </group>
+                    <notebook>
+                        <page string="Expense Distribution">
+                        </page>
+                        <page string="Call logs">
+                            <field mode="tree,form" name="log_ids" nolabel="1">
+                                <tree string="Call Logs" editable="top">
+                                    <field name="name" readonly="1"/>
+                                    <field name="line_id" readonly="1"/>
+                                    <field name="extension" readonly="1"/>
+                                    <field name="phone_pin" readonly="1"/>
+                                    <field name="number" readonly="1"/>
+                                    <field name="duration" readonly="1"/>
+                                    <field name="status" readonly="1"/>
+                                    <field name="price" readonly="1"/>
+                                    <field name="statement_price"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="phone_statement_tree">
+            <field name="name">phone.statement.tree</field>
+            <field name="model">phone.statement</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Statement of Account">
+                    <field name="name"/>
+                    <field name="line_id"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_phone_statement_form">
+            <field name="name">Statement of Account</field>
+            <field name="res_model">phone.statement</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        
+        
+        
+        
+        
+        <record id="callsdbf_reader_view" model="ir.ui.view">
+            <field name="name">Call Log Cleaner</field>
+            <field name="model">callsdbf.reader</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Clean Call Log">
+                <separator string="Post Journal Entries of a Journal" colspan="4"/>
+               <button string="Check"
+                                            type="object"
+                                            name="clean_file"
+                                            icon="gtk-execute"
+                                            />
+               </form>
+            </field>
+        </record>
+
+        <record id="action_callsdbf_reader" model="ir.actions.act_window">
+            <field name="name">Call Log Cleaner</field>
+            <field name="res_model">callsdbf.reader</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="callsdbf_reader_view"/>
+            <field name="target">new</field>
+        </record>
+        
+        
+    </data>
+</openerp>

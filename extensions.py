@@ -20,6 +20,7 @@ class res_company(osv.osv):
     _columns = {
         'transit_php':fields.many2one('account.account','PHP Transit Account'),
         'transit_usd':fields.many2one('account.account','USD Transit Account'),
+        'calls_dbf':fields.char('Calls.dbf location',size=64),
         }
 res_company()
 
