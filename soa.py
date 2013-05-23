@@ -128,6 +128,33 @@ class soa_add_line(osv.osv):
     _columns = {
         'line_ids':fields.one2many('account.soa.line','soa_id','Details')
         }
+    
+    
+    def update_lines(self, cr, uid, ids, context=None):
+        for soa in self.read(cr, uid, ids, context=None):
+            date = datetime.datetime.now()
+            date_now = date.strftime("%Y/%m/%d %H:%M")
+            debit = 0.00
+            credit=0.00
+            for aal in self.pool.get('account.analytic.line').search(cr, uid, [('account_id','=',soa['account_number'][0]),('move_id.period_id','=',soa['period_id'][0])]):
+                aal_read = self.pool.get('account.analytic.line').read(cr, uid, aal, ['date','amount'])
+                if aal_read['amount']<0.00:
+                    credit = aal_read['amount'] / -1
+                if aal_read['amount']>0.00:
+                    debit = aal_read['amount']
+                aal_check = self.pool.get('account.soa.line').search(cr, uid, [('link_to','=',aal)])
+                if not aal_check:
+                    values = {
+                        'link_to':aal,
+                        'soa_id':soa['id'],
+                        'date':aal_read['date'],
+                        'debit':debit,
+                        'credit':credit,
+                        }
+                    self.pool.get('account.soa.line').create(cr, uid, values)
+            self.pool.get('account.soa').write(cr, uid, ids,{'date':date_now})
+        return True
+            
     def get_lines(self,cr, uid, ids, context=None):
         date = datetime.datetime.now()
         period = date.strftime("%m/%Y")

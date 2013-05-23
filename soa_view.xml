@@ -36,6 +36,11 @@
                                <field name="total_expense"/>
                                <field name="inc_exp"/>
                                <field name="end_balance"/>
+                               <button string="Check"
+                                            type="object"
+                                            name="update_lines"
+                                            icon="gtk-execute"
+                                            />
                            </group>
                         </group>
                     </group>

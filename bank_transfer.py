@@ -9,19 +9,25 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from operator import itemgetter    
     
-class bank_transfer_recurring(osv.osv):
-    _name = "bank.transfer.recurring"
-    _description = "Bank Transfer Subscription"
+class bank_transfer_schedule(osv.osv):
+    _name = "bank.transfer.schedule"
+    _description = "Bank Transfer Schedule"
     _columns = {
-        'name':fields.related('bank_account','name',type='char',size=64,store=True, string='Bank Description',readonly=True),
-        'ref': fields.char('Reference', size=16),
-        'bank_account': fields.many2one('res.partner.bank', 'Bank', required=True, domain=[('ownership','=','entity')]),
-
+        'name':fields.char('Schedule ID',size=32),
+        'company_bank_id':fields.many2one('res.partner.bank','Account #',domain=[('ownership','=','company')]),
+        'company_bank_name':fields.related('company_bank_id','bank', type='many2one',relation="res.bank", string='Company Name', readonly=True,store=True),
+        'company_acc_name':fields.related('company_bank_id','owner_name', type='char',size=64, string='Account Name', readonly=True,store=True),
+        'entity_bank_id':fields.many2one('res.partner.bank','Account #',domain=[('ownership','=','entity')]),
+        'entity_bank_name':fields.related('entity_bank_id','owner_name', type='char',size=64, string='Account Name', readonly=True,store=True),
+        'account_id':fields.many2one('account.analytic.account','Recipient Name'),
+        'account_name':fields.related('account_id','name', type='char',size=64, string='Account Name', readonly=True,store=True),
         'date_start': fields.date('Start Date', required=True),
         'period_total': fields.integer('Number of Periods', required=True),
         'period_nbr': fields.integer('Period', required=True),
-        'period_type': fields.selection([('day','days'),('month','month'),('year','year')], 'Period Type', required=True),
+        'period_type': fields.selection([('day','days'),('month','month'),('year','year'),('bimonthly','bimonthly')], 'Period Type', required=True),
         'state': fields.selection([('draft','Draft'),('running','Running'),('done','Done')], 'State', required=True, readonly=True),
+        'amount':fields.float('Amount'),
+        'remarks':fields.text('Remarks'),
     }
     _defaults = {
         'date_start': lambda *a: time.strftime('%Y-%m-%d'),
@@ -52,10 +58,9 @@ class bank_transfer_recurring(osv.osv):
         toremove = []
         for sub in self.browse(cr, uid, ids, context=context):
             for line in sub.lines_id:
-                if not line.move_id.id:
-                    toremove.append(line.id)
+                toremove.append(line.id)
         if toremove:
-            self.pool.get('bank.transfer.recurring.line').unlink(cr, uid, toremove)
+            self.pool.get('bank.transfer.request').unlink(cr, uid, toremove)
         self.write(cr, uid, ids, {'state':'draft'})
         return False
 
@@ -63,52 +68,73 @@ class bank_transfer_recurring(osv.osv):
         for sub in self.browse(cr, uid, ids, context=context):
             ds = sub.date_start
             for i in range(sub.period_total):
-                self.pool.get('bank.transfer.recurring.line').create(cr, uid, {
+                request_id = self.pool.get('bank.transfer.request').create(cr, uid, {
                     'date': ds,
-                    'subscription_id': sub.id,
+                    'schedule_id': sub.id,
+                    'company_bank_id':sub.company_bank_id.id,
+                    'entity_bank_id':sub.entity_bank_id.id,
+                    'account_id':sub.account_id.id,
+                    'remarks':sub.remarks,
+                    'amount':sub.amount,
+                    'state':'confirm',
                 })
                 if sub.period_type=='day':
                     ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(days=sub.period_nbr)).strftime('%Y-%m-%d')
                 if sub.period_type=='month':
                     ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(months=sub.period_nbr)).strftime('%Y-%m-%d')
+                if sub.period_type=='bimonthly':
+                    ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(weeks=+2)).strftime('%Y-%m-%d')
                 if sub.period_type=='year':
                     ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(years=sub.period_nbr)).strftime('%Y-%m-%d')
         self.write(cr, uid, ids, {'state':'running'})
         return True
-bank_transfer_recurring()
+bank_transfer_schedule()
 
-class bank_transfer_recurring_line(osv.osv):
-    _name = "bank.transfer.recurring.line"
-    _description = "Bank Transfer Subscription Line"
+class bank_transfer_request(osv.osv):
+    _name = "bank.transfer.request"
+    _description = "Bank Transfer Requests"
     _columns = {
-        'subscription_id': fields.many2one('bank.transfer.recurring', 'Subscription', required=True, select=True),
-        'date': fields.date('Date', required=True),
-        'move_id': fields.many2one('account.move', 'Entry'),
+        'name':fields.char('Request ID',size=32),
+        'schedule_id': fields.many2one('bank.transfer.schedule', select=True, ondelete='cascade'),
+        'company_bank_name':fields.related('company_bank_id','bank', type='many2one',relation="res.bank", string='Account Name', readonly=True,store=True),
+        'company_bank_id':fields.many2one('res.partner.bank','Company Bank Account',domain=[('ownership','=','company')]),
+        'company_acc_name':fields.related('company_bank_id','owner_name', type='char',size=64, string='Account Name', readonly=True,store=True),
+        'entity_bank_id':fields.many2one('res.partner.bank','Account #',domain=[('ownership','=','entity')]),
+        'entity_bank_name':fields.related('entity_bank_id','owner_name', type='char',size=64, string='Account Name', readonly=True,store=True),
+        'account_id':fields.many2one('account.analytic.account','Name Account'),
+        'account_name':fields.related('account_id','name', type='char',size=64, string='Account Name', readonly=True,store=True),
+        'date':fields.date('Effective Date'),
+        'remarks':fields.text('Remarks'),
+        'amount':fields.float('Amount'),
+        'is_special':fields.boolean('Special Request?'),
+        'state':fields.selection([
+                            ('confirm','Confirm'),
+                            ('cancel','Cancelled'),
+                            ],'State'),
     }
+    
+    def create(self, cr, uid, vals, context=None):
+        vals.update({
+                'name': self.pool.get('ir.sequence').get(cr, uid, 'bank.transfer.request'),
+        })
+        return super(bank_transfer_request, self).create(cr, uid, vals, context)
+    
+    def confirm(self, cr, uid, ids, context=None):
+        for btr in self.read(cr, uid, ids, context=None):
+            self.write(cr, uid, ids, {'state':'confirm'})
+        return True
+    
+    def cancel(self, cr, uid, ids, context=None):
+        for btr in self.read(cr, uid, ids, context=None):
+            self.write(cr, uid, ids, {'state':'cancel'})
+        return True
 
-    def move_create(self, cr, uid, ids, context=None):
-        tocheck = {}
-        all_moves = []
-        obj_model = self.pool.get('account.model')
-        for line in self.browse(cr, uid, ids, context=context):
-            datas = {
-                'date': line.date,
-            }
-            move_ids = obj_model.generate(cr, uid, [line.subscription_id.model_id.id], datas, context)
-            tocheck[line.subscription_id.id] = True
-            self.write(cr, uid, [line.id], {'move_id':move_ids[0]})
-            all_moves.extend(move_ids)
-        if tocheck:
-            self.pool.get('account.subscription').check(cr, uid, tocheck.keys(), context)
-        return all_moves
-
-    _rec_name = 'date'
-bank_transfer_recurring_line()
+bank_transfer_request()
 
 class btr(osv.osv):
-    _inherit = 'bank.transfer.recurring'
+    _inherit = 'bank.transfer.schedule'
     _columns = {
-        'lines_id': fields.one2many('bank.transfer.recurring.line', 'subscription_id', 'Subscription Lines')
+        'lines_id': fields.one2many('bank.transfer.request', 'schedule_id', 'Subscription Lines')
         }
 btr()
 
