@@ -1,6 +1,64 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+
+        <record id="pay_phone_bill_view" model="ir.ui.view">
+            <field name="name">Pay Phone Bill</field>
+            <field name="model">phone.statement.payment</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Pay Bill">
+                <group colspan="4" col="4">
+                    <field name="bank_id" required="1"/>
+                    <field name="check_date" required="1"/>
+                    <field name="check_number" required="1"/>
+                </group>
+               <button string="Pay and Release Check"
+                                            type="object"
+                                            name="paybill"
+                                            icon="gtk-execute"
+                                            />
+               </form>
+            </field>
+        </record>
+
+        <record id="action_pay_phone_bill" model="ir.actions.act_window">
+            <field name="name">Pay Phone Bill</field>
+            <field name="res_model">phone.statement.payment</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="pay_phone_bill_view"/>
+            <field name="target">new</field>
+        </record>
+        
+        <record id="additional_charge_view" model="ir.ui.view">
+            <field name="name">Add Additional Charge</field>
+            <field name="model">phone.statement.additional.wizard</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Create Statement">
+                <group colspan="4" col="4">
+                    <field name="account_id" required="1"/>
+                    <field name="amount" required="1"/>
+                    <field name="description" required="1"/>
+                </group>
+               <button string="Check"
+                                            type="object"
+                                            name="add"
+                                            icon="gtk-execute"
+                                            />
+               </form>
+            </field>
+        </record>
+
+        <record id="action_additional_charge" model="ir.actions.act_window">
+            <field name="name">Add Additional Charge</field>
+            <field name="res_model">phone.statement.additional.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="additional_charge_view"/>
+            <field name="target">new</field>
+        </record>
     
         <record id="phone_provider_form" model="ir.ui.view">
             <field name="name">phone.provider.form</field>
@@ -43,11 +101,13 @@
                         <field name="number"/>
                         <field name="account_id"/>
                     </group>
-                    <separator string="Fees" colspan="4"/>
-                    <group colspan="6" col="6">
+                    <separator string="Fees and Taxes" colspan="4"/>
+                    <group colspan="4" col="4">
+                        <field name="lt_bool"/>
+                        <field name="lt_value" attrs="{'readonly':[('lt_bool','=',True)],'required':[('lt_bool','=',False)]}"/>
+                        <field name="it_bool"/>
+                        <field name="it_value" attrs="{'readonly':[('it_bool','=',True)],'required':[('it_bool','=',False)]}"/>
                         <field name="monthly_recur"/>
-                        <field name="nat_direct_dial"/>
-                        <field name="int_direct_dial"/>
                     </group>
                 </form>
             </field>
@@ -86,26 +146,118 @@
                     <group colspan="4" col="4">
 	                    <field name="name"/>
 	                    <field name="line_id"/>
+	                    <field name="bill_start"/>
+	                    <field name="bill_end"/>
+	                    <field name="journal_id"/>
+	                    <field name="amount"/>
                     </group>
                     <notebook>
-                        <page string="Expense Distribution">
-                        </page>
-                        <page string="Call logs">
-                            <field mode="tree,form" name="log_ids" nolabel="1">
-                                <tree string="Call Logs" editable="top">
+                        <page string="Call logs and Additional Charges">
+                            <button name="%(action_additional_charge)d" colspan="4" attrs="{'invisible':[('state','!=','draft')]}" string="Add Additional Charge" icon="gtk-execute" type="action"/>
+                            <separator string="Additional Charges" colspan="4"/>
+                            <field mode="tree" name="additional_ids" nolabel="1" readonly="1">
+                                <tree string="Additional Charges">
                                     <field name="name" readonly="1"/>
-                                    <field name="line_id" readonly="1"/>
-                                    <field name="extension" readonly="1"/>
+                                    <field name="description" readonly="1"/>
+                                    <field name="account_id" invisible="1"/>
+                                    <field name="phone_pin" readonly="1"/>
+                                    <field name="amount" readonly="1" sum="Total"/>
+                                </tree>
+                            </field>
+                            <separator string="Call Logs" colspan="4"/>
+                            <field mode="tree" name="log_ids" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
+                                <tree string="Call Logs" editable="top" colors="red:price!=statement_price">
+                                    <field name="name" readonly="1"/>
+                                    <field name="time" readonly="1"/>
+                                    <field name="line_id" invisible="1"/>
+                                    <field name="extension" invisible="1"/>
                                     <field name="phone_pin" readonly="1"/>
                                     <field name="number" readonly="1"/>
                                     <field name="duration" readonly="1"/>
                                     <field name="status" readonly="1"/>
-                                    <field name="price" readonly="1"/>
-                                    <field name="statement_price"/>
+                                    <field name="location" attrs="{'readonly':[('reconcile','=',True)]}"/>
+                                    <field name="price" readonly="1" sum="Total Log Price"/>
+                                    <field name="reconcile" readonly="1"/>
+                                    <field name="statement_price" attrs="{'readonly':[('reconcile','=',True)]}" sum="Total Statement Price"/>
+                                    <field name="taxed_price" readonly="1" sum="Total Tax Price"/>
+                                    <button name="reconcile" attrs="{'invisible':[('reconcile','=',True)]}" icon="gtk-execute" type="object"/>
                                 </tree>
                             </field>
                         </page>
+                        <page string="Payment and Distribution Details" attrs="{'invisible':[('state','=','draft')]}">
+                            <field mode="tree" name="distribution_ids" nolabel="1" readonly="1">
+                                <tree string="Distribution Lists">
+                                    <field name="name" readonly="1"/>
+                                    <field name="account_id" invisible="1"/>
+                                    <field name="phone_pin"/>
+                                    <field name="amount" sum="Total Charged Amount"/>
+                                </tree>
+                                <form string="Account Distribution">
+                                    <field name="name" readonly="1"/>
+                                    <field name="amount" readonly="1"/>
+                                </form>
+                            </field>
+                            <group colspan="4" col="2" attrs="{'invisible':[('state','in',['reconciled','distributed','draft'])]}">
+                                <separator string="Payment Details"/>
+                                <group colspan="4" col="4">
+                                    <field name="bank_id"/>
+                                    <field name="check_number"/>
+                                    <field name="check_date"/>
+                                    <field name="check_amount"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Journal Entries">
+                            <group colspan="4" col="2">
+                                <field name="distribution_move_id" invisible="1"/>
+                                <field name="distribution_move_ids" mode="tree" nolabel="1">
+                                    <tree string="Distribution Entries">
+                                        <field name="date"/>
+                                        <field name="account_id"/>
+                                        <field name="analytic_account_id"/>
+                                        <field name="debit" sum="Total Debit"/>
+                                        <field name="credit" sum="Total Credit"/>
+                                        <field name="currency_id" string="Encoding Currency"/>
+                                        <field name="amount_currency" string="Encoding Amount"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group colspan="4" col="2">
+                                <field name="payment_move_id" invisible="1"/>
+                                <field name="payment_move_ids" mode="tree" nolabel="1">
+                                    <tree string="Payment Entries">
+                                        <field name="date"/>
+                                        <field name="account_id"/>
+                                        <field name="debit" sum="Total Debit"/>
+                                        <field name="credit" sum="Total Credit"/>
+                                        <field name="currency_id" string="Encoding Currency"/>
+                                        <field name="amount_currency" string="Encoding Amount"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group colspan="4" col="2">
+                                <field name="clearing_move_id" invisible="1"/>
+                                <field name="clearing_move_ids" mode="tree" nolabel="1">
+                                    <tree string="Clearing Entries">
+                                        <field name="date"/>
+                                        <field name="account_id"/>
+                                        <field name="debit" sum="Total Debit"/>
+                                        <field name="credit" sum="Total Credit"/>
+                                        <field name="currency_id" string="Encoding Currency"/>
+                                        <field name="amount_currency" string="Encoding Amount"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
                     </notebook>
+                    <group colspan="4" col="13">
+                        <field name="state" select="1"/>
+                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
+                        <button name="reconcile" attrs="{'invisible':[('state','!=','draft')]}" string="Reconcile"  type="object" />
+                        <button name="%(action_pay_phone_bill)d" attrs="{'invisible':[('state','!=','distributed')]}" 
+                        string="Pay Bill" icon="gtk-go-forward" type="action"/>
+                        <button name="distribute" attrs="{'invisible':[('state','!=','reconciled')]}" string="Distribute"  type="object" />
+                    </group>
                 </form>
             </field>
         </record>        
@@ -132,13 +284,21 @@
         
         
         
+        
+        
         <record id="callsdbf_reader_view" model="ir.ui.view">
-            <field name="name">Call Log Cleaner</field>
+            <field name="name">Create Statement</field>
             <field name="model">callsdbf.reader</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-            <form string="Clean Call Log">
-                <separator string="Post Journal Entries of a Journal" colspan="4"/>
+            <form string="Create Statement">
+                <separator string="Create Statement" colspan="4"/>
+                <group colspan="4" col="4">
+                    <field name="provider" widget="selection" required="1"/>
+                    <field name="line_id" required="1" domain="[('company_id','=',provider)]"/>
+                    <field name="bill_start" required="1"/>
+                    <field name="bill_end" required="1"/>
+                </group>
                <button string="Check"
                                             type="object"
                                             name="clean_file"
@@ -149,7 +309,7 @@
         </record>
 
         <record id="action_callsdbf_reader" model="ir.actions.act_window">
-            <field name="name">Call Log Cleaner</field>
+            <field name="name">Create Statement</field>
             <field name="res_model">callsdbf.reader</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>

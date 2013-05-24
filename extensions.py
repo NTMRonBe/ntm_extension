@@ -18,9 +18,11 @@ ntm_res_partner_extension()
 class res_company(osv.osv):
     _inherit = 'res.company'
     _columns = {
-        'transit_php':fields.many2one('account.account','PHP Transit Account'),
-        'transit_usd':fields.many2one('account.account','USD Transit Account'),
+        'transit_php':fields.many2one('account.account','PHP Transit Account', required=True),
+        'transit_usd':fields.many2one('account.account','USD Transit Account', required=True),
         'calls_dbf':fields.char('Calls.dbf location',size=64),
+        'phone_bill_ap':fields.many2one('account.account','Phonebill Payable Account', required=True),
+        'other_ap':fields.many2one('account.account','Other Payable Accounts', required=True),
         }
 res_company()
 
@@ -30,7 +32,6 @@ class res_partner(osv.osv):
     _description = 'Partner'
     _columns = {
         'partner_dict':fields.one2many('ntm.res.partner.extension','partner_id','Dictionary'),
-        'phone_pin':fields.char('Phone Pin',size=12),
         'project':fields.boolean('Projects'),
         'property_account_payable': fields.property(
             'account.account',
@@ -57,6 +58,7 @@ class account_analytic_account(osv.osv):
         
     _inherit = 'account.analytic.account'
     _columns = {
+            'phone_pin':fields.char('Phone Pin',size=12),
             'code_short':fields.char('Short Code',size=64),
             'code_accpac':fields.char('Accpac Code',size=64),
             'code':fields.char('Code',size=64),
@@ -251,6 +253,7 @@ class account_journal(osv.osv):
                                 ('transfer','Fund Transfer'), 
                                 ('forex','Foreign Exchanges'),
                                 ('pc_transfer','Petty Cash Transfers'),
+                                ('pbd','Phone Bill Distribution'),
                                 ('ved','Vehicle Expense Distribution'),
                                 ('iat','Internal Account Transfers'),
                                 ('regional_report','Regional Report'),

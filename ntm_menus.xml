@@ -50,12 +50,12 @@
         <menuitem id="menu_expense_disribution_main" name="Expense Distribution" parent="account.menu_finance_payables" sequence="60"/>
         <menuitem id="menu_vehicle_root" name="Vehicles" parent="menu_expense_disribution_main" sequence="10"/>
         <menuitem id="menu_communications_root" name="Communications" parent="menu_expense_disribution_main" sequence="20"/>
-        <menuitem id="menu_communications_config" name="Configuration" parent="menu_communications_root" sequence="50"/>
+        <menuitem id="menu_ed_config" name="Configuration" parent="menu_expense_disribution_main" sequence="50"/>
         <menuitem id="menu_communications_cleaner" parent="menu_communications_root" sequence="20" action="action_callsdbf_reader"/>
         <menuitem id="menu_communications_statement" parent="menu_communications_root" sequence="30" action="action_phone_statement_form"/>
-        <menuitem id="menu_communications_line" parent="menu_communications_config" sequence="30" action="action_phone_line_form"/>
-        <menuitem id="menu_communications_company" parent="menu_communications_config" sequence="50" action="action_phone_provider_form"/>
-        <menuitem id="menu_vehicle" action="action_vehicle_form" parent="menu_vehicle_root" sequence="30" groups="base.group_user"/>
+        <menuitem id="menu_communications_line" parent="menu_ed_config" sequence="30" action="action_phone_line_form"/>
+        <menuitem id="menu_communications_company" parent="menu_ed_config" sequence="50" action="action_phone_provider_form"/>
+        <menuitem id="menu_vehicle_config" action="action_vehicle_form" parent="menu_ed_config" sequence="30" groups="base.group_user"/>
         <menuitem id="menu_vehicle_log" action="action_vehicle_log_form"  parent="menu_vehicle_root" sequence="20" groups="base.group_user"/>  
         <menuitem id="menu_vehicle" action="action_vehicle_form" parent="menu_vehicle_root" sequence="30" groups="base.group_user"/>
         <menuitem id="menu_forex_rate_parent" parent="fund_transfers" name="Foreign Exchanges" sequence="100"  groups="base.group_user"/>

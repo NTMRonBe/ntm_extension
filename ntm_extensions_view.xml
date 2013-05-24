@@ -88,6 +88,9 @@
 				<field name="partner_id" position="replace">
 				    <field name="partner_id" string="Linked Entity"/>
 				</field>
+				<field name="quantity_max" position="replace">
+				    <field name="phone_pin"/>
+				</field>
 				<field name="type" position="replace">
 				    <group colspan="4" col="4">
 				        <field name="type"/>
@@ -203,9 +206,6 @@
                     <field name="supplier" string="People and Teams"/>
                     <field name="project"/>
                 </field>
-                <field name="lang" position="after">
-                    <field name="phone_pin"/>
-                </field>
             </field>
         </record>
         
@@ -267,6 +267,11 @@
                     <group colspan="4" col="4">
 	                    <field name="transit_php"/>
 	                    <field name="transit_usd"/>
+                    </group>
+                    <separator string="Payable Accounts" colspan="4"/>
+                    <group colspan="4" col="4">
+                        <field name="phone_bill_ap"/>
+                        <field name="other_ap"/>
                     </group>
                     <separator string="File Locations" colspan="4"/>
                     <group colspan="4" col="2">
