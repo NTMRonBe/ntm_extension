@@ -9,26 +9,8 @@
             <field name="arch" type="xml">
                 <form string="Add Account">
                     <group colspan="4" col="6">
-                        <group colspan="4" col="2">
-                            <field name="account_id"/>
-                        </group>
-                        <group colspan="2" col="6">
-                            <field name="start_km"/>
-                            <field name="end_km"/>
-                            <field name="shared"/>
-                            <field name="main_trip"/>
-                        </group>
-                    </group>
-                    <group colspan="4" col="2" attrs="{'invisible':[('shared','=',False)]}">
-	                    <separator string="Sharing Details" colspan="4"/>
-	                    <group colspan="4" col="6">
-	                        <group colspan="4" col="2">
-	                            <field name="share_with" domain="[('main_trip','=',True)]"  attrs="{'invisible':[('main_trip','=',True)]}" on_change="onchange_sharewith(share_with)"/>
-	                        </group>
-	                        <group colspan="2" col="6">
-	                            <field name="percentage" attrs="{'required':[('shared','=',True)]}" />
-	                        </group>
-	                    </group>
+                        <field name="account_id" colspan="4"/>
+                        <field name="percentage" colspan="2"/>
                     </group>
                     <button name="data_save" string="Add"  type="object" icon="gtk-jump-to"/>
                </form>
@@ -126,52 +108,45 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string = "Vehicle Log">
-                    <group colspan="4" col="6">
+                    <group colspan="4" col="4">
                         <field name="name" invisible="1"/>
                         <field name="date" attrs="{'readonly':[('state','!=','draft')]}"/>
-                        <field name="vehicle_id" on_change="onchange_vehicle(vehicle_id,shared_trip)" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
-                        <group colspan="2" col="4">
-                            <field name="shared_trip" attrs="{'readonly':[('state','!=','draft')]}"/>
-                        </group>
-                        <field name="perkmcharge" string="Charge/KM" readonly="1"/>
-                        <field name="total"/>
+                        <field name="vehicle_id" on_change="onchange_vehicle(vehicle_id,shared_trip)" required="1" attrs="{'readonly':[('name','!=',False)]}"/>
                     </group>
+                    <group colspan="4" col="4">
+                        <group colspan="2" col="2">
+                            <separator string="Travel Log"/>
+                            <field name="shared_trip" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="start_km" readonly="1"/>
+                            <field name="end_km" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="kms" readonly="1"/>
+                        </group>
+                        <group colspan="2" col="2">
+                            <separator string="Charging"/>
+                            <field name="perkmcharge" string="Charge/KM" readonly="1"/>
+                            <field name="total"/>
+                            <field name="journal_id" invisible="1"/>
+                            <field name="period_id" invisible="1"/>
+                        </group>
+                    </group> 
                     <notebook>
-                        <page string="Single Trip" attrs="{'invisible':[('shared_trip','=',True)]}">
-	                        <group colspan="4" col="6">
-	                            <group colspan="4" col="2">
-	                                <field name="account_id" attrs="{'readonly':[('state','!=','draft')]}"/>
-	                                <separator string="Trip Details" colspan="2"/>
-	                                <field name="details" nolabel="1" colspan="4" attrs="{'readonly':[('state','!=','draft')]}"/>
-	                            </group>
-	                            <group colspan="2" col="2">
-	                                <field name="start_km" attrs="{'readonly':[('state','!=','draft')]}" />
-	                                <field name="end_km" attrs="{'readonly':[('state','!=','draft')]}" on_change="onchange_ending(end_km)"/>
-	                                <field name="kms" readonly="1"/>
-	                                <field name="journal_id" invisible="1"/>
-	                                <field name="period_id" invisible="1"/>
-	                            </group>
-	                        </group>
-                        </page>
-                        <page string="Shared Trip" attrs="{'invisible':[('shared_trip','=',False)]}">
-                            <group colspan="4" col="4" attrs="{'invisible':[('state','!=','draft')]}">
-                                <group colspan="2" col="2"/>
-                                <group colspan="2" col="2">
-                                    <button name="%(action_add_vehicle)d" attrs="{'invisible':[('state','!=','draft')]}" string="Add Account" type="action" icon="terp-camera_test"/>
-                                </group>
-                            </group>
-                            <field colspan="6" mode="tree,form" name="shared_ids" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1">
-                                <tree string="Expense Distribution" editable="bottom">
-	                                <field name="account_id" readonly="1"/>
-	                                <field name="start_km" readonly="1"/>
-	                                <field name="end_km" readonly="1"/>
-	                                <field name="kms" readonly="1"/>
-	                                <field name="shared" readonly="1"/>
-	                                <field name="share_with" readonly="1"/>
-	                                <field name="percentage" attrs="{'readonly':[('shared','=',False)]}"/>
-	                                <field name="amount" readonly="1"/>
-                                </tree>
-                            </field>
+                        <page string="Trip Details" >
+	                       <group col="2" attrs="{'invisible':[('shared_trip','=',True)]}">
+                                <field name="account_id" attrs="{'readonly':[('state','!=','draft')]}" colspan="4"/>
+                                <separator string="Trip Details" colspan="4"/>
+                                <field name="details" nolabel="1" colspan="4" attrs="{'readonly':[('state','!=','draft')]}"/>
+                           </group>
+                           <group col="2"  attrs="{'invisible':[('shared_trip','=',False)]}">
+	                           <button name="%(action_add_vehicle)d" attrs="{'invisible':[('state','!=','draft')]}" string="Add Account" type="action" icon="terp-camera_test"/>
+	                           <field colspan="4" mode="tree" name="shared_ids"  readonly="1" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1">
+	                               <tree string="Expense Distribution">
+		                               <field name="name"/>
+		                               <field name="account_id" invisible="1"/>
+		                               <field name="percentage" readonly="1" sum="Total Percentage"/>
+		                               <field name="amount" readonly="1" sum="Total Charges"/>
+	                               </tree>
+	                           </field>
+                           </group>
                         </page>
                         <page string="Journal Entries">
                             <group colspan="4" col="2">
@@ -181,8 +156,8 @@
                                         <field name="date"/>
                                         <field name="account_id"/>
                                         <field name="analytic_account_id"/>
-                                        <field name="debit"/>
-                                        <field name="credit"/>
+                                        <field name="debit" sum="Total Debit"/>
+                                        <field name="credit" sum="Total Credit"/>
                                         <field name="currency_id" string="Encoding Currency"/>
                                         <field name="amount_currency" string="Encoding Amount"/>
                                     </tree>

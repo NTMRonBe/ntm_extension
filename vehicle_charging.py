@@ -83,6 +83,12 @@ class vehicle_log(osv.osv):
     _order = 'date asc'
     
     def create(self, cr, uid, vals, context=None):
+        print vals
+        if 'vehicle_id' in vals:
+            vread = self.pool.get('vehicle').read(cr, uid, vals['vehicle_id'],['km'])
+            vals.update({
+                    'start_km':vread['km']
+                    })
         vals.update({
             'name': self.pool.get('ir.sequence').get(cr, uid, 'ved'),
         })
@@ -91,24 +97,21 @@ class vehicle_log(osv.osv):
        
     def onchange_vehicle(self, cr, uid, ids, vehicle_id=False,shared_trip=False):
         result = {}
-        if vehicle_id and not shared_trip:
+        if vehicle_id:
             vehicle_read= self.pool.get('vehicle').read(cr, uid, vehicle_id, ['km','perkmcharge150','perkmcharge'])
             end_km = False
-            for trips in self.pool.get('vehicle.log').search(cr, uid, [('vehicle_id','=',vehicle_id),('state','=','distributed')],limit=1, order='end_km desc'):
-                trip_read = self.pool.get('vehicle.log').read(cr, uid, trips,['end_km'])
-                end_km = trip_read['end_km']
-                self.onchange_ending(cr, uid, ids, end_km)
             result = {'value':{
-                        'start_km':end_km,
+                        'start_km':vehicle_read['km'],
                         }
                 }
         return result
     
-    def onchange_ending(self, cr, uid, ids, end_km=False):
+    def onchange_ending(self, cr, uid, ids, end_km=False,start_km=False):
         result = {}
         if end_km:
             for log in self.read(cr, uid, ids, context=None):
-                kms = end_km - log['start_km']
+                kms = end_km - start_km
+                print start_km
                 vehicle_read = self.pool.get('vehicle').read(cr, uid, log['vehicle_id'][0],['perkmcharge','perkmcharge150'])
                 charge=0.00
                 if kms > 150.00:
@@ -149,45 +152,26 @@ class vehicle_log(osv.osv):
                 self.confirm_shared(cr, uid, ids)
             elif not log['shared_trip']:
                 total = log['kms'] * log['perkmcharge']
-                self.write(cr, uid, ids, {'total':total,'state':'confirm'})
+                self.write(cr, uid, ids, {'state':'confirm','total':total})
         return True
     
     def confirm_shared(self, cr, uid, ids, context=None):
         for log in self.read(cr, uid, ids, context=None):
-            total_km = 0.00
-            total_amount = 0.00
+            total_amount = log['kms'] * log['perkmcharge']
             for trip_id in self.pool.get('vehicle.log.shared').search(cr, uid, [('log_id','=',log['id'])]):
                 trip_read = self.pool.get('vehicle.log.shared').read(cr, uid, trip_id,context=None)
-                kms = trip_read['end_km'] - trip_read['start_km']
-                total_km += kms
-            vehicle_read = self.pool.get('vehicle').read(cr, uid, log['vehicle_id'][0],['perkmcharge','perkmcharge150'])
-            charge=0.00
-            if total_km > 150.00:
-                charge=vehicle_read['perkmcharge150']
-            elif total_km<151 and total_km>0:
-                charge=vehicle_read['perkmcharge']
-            for trip_id in self.pool.get('vehicle.log.shared').search(cr, uid, [('log_id','=',log['id'])]):
-                trip_read = self.pool.get('vehicle.log.shared').read(cr, uid, trip_id,context=None)
-                print trip_read
-                kms = trip_read['end_km'] - trip_read['start_km']
-                amount = 0.00
-                if trip_read['shared']:
-                    amount = ((kms * trip_read['percentage'])/100) * charge
-                elif not trip_read['shared']:
-                    amount = kms * charge
-                total_amount +=amount
-                self.pool.get('vehicle.log.shared').write(cr, uid, trip_id,{'amount':amount,'kms':kms})
+                amount = (trip_read['percentage']/100)*total_amount
+                amount = "%.2f" % amount
+                amount = float(amount)
+                self.pool.get('vehicle.log.shared').write(cr, uid, trip_id,{'amount':amount})
             vals = {
-                'perkmcharge':charge,
                 'total':total_amount,
                 'state':'confirm',
                 }
             self.write(cr, uid, ids, vals)
         return True
-                    
-                
     
-    def distribute(self, cr, uid, ids, context=None):
+    def distribute_shared(self, cr, uid, ids, context=None):
         for log in self.read(cr, uid, ids, context=None):
             journal_id = log['journal_id'][0]
             period_id = log['period_id'][0]
@@ -199,9 +183,66 @@ class vehicle_log(osv.osv):
                 'date':date,
                 }
             move_id = self.pool.get('account.move').create(cr, uid, move)
+            amount = log['total']
+            vread = self.pool.get('vehicle').read(cr, uid, log['vehicle_id'][0],context=None)
+            self.pool.get('vehicle').write(cr, uid, log['vehicle_id'][0],{'km':log['end_km']})
+            analytic_vread = self.pool.get('account.analytic.account').read(cr, uid, vread['account_id'][0],['normal_account'])
+            check_curr = self.pool.get('account.account').read(cr, uid, analytic_vread['normal_account'][0],['company_currency_id'])
+            move_line = {
+                    'name':'Vehicle Income',
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':analytic_vread['normal_account'][0],
+                    'credit':amount,
+                    'analytic_account_id':vread['account_id'][0],
+                    'date':date,
+                    'ref':log['name'],
+                    'move_id':move_id,
+                    'amount_currency':amount,
+                    'currency_id':check_curr['company_currency_id'][0],
+                    }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            for log_ids in log['shared_ids']:
+                share_read = self.pool.get('vehicle.log.shared').read(cr, uid, log_ids, ['account_id','amount'])
+                amount = share_read['amount']
+                account_read = self.pool.get('account.analytic.account').read(cr, uid, share_read['account_id'][0],['normal_account']) 
+                move_line = {
+                    'name':'Expense',
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':account_read['normal_account'][0],
+                    'debit':amount,
+                    'analytic_account_id':share_read['account_id'][0],
+                    'date':date,
+                    'ref':log['name'],
+                    'move_id':move_id,
+                    'amount_currency':amount,
+                    'currency_id':check_curr['company_currency_id'][0],
+                    }
+                self.pool.get('account.move.line').create(cr, uid, move_line)
+            self.pool.get('account.move').post(cr, uid, [move_id])
+            self.write(cr, uid, ids, {'move_id':move_id,'state':'distributed'})
+        return True
+                
+    
+    def distribute(self, cr, uid, ids, context=None):
+        for log in self.read(cr, uid, ids, context=None):
+            if log['shared_trip']:
+                self.distribute_shared(cr, uid, ids)
             if not log['shared_trip']:
+                journal_id = log['journal_id'][0]
+                period_id = log['period_id'][0]
+                date = log['date']
+                move = {
+                    'name':log['name'],
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'date':date,
+                    }
+                move_id = self.pool.get('account.move').create(cr, uid, move)
                 amount = log['total']
                 vehicle_read = self.pool.get('vehicle').read(cr, uid, log['vehicle_id'][0],['account_id'])
+                self.pool.get('vehicle').write(cr, uid, log['vehicle_id'][0],{'km':log['end_km']})
                 analytic_acc_v = self.pool.get('account.analytic.account').read(cr, uid, vehicle_read['account_id'][0],['normal_account'])
                 check_curr = self.pool.get('account.account').read(cr, uid, analytic_acc_v['normal_account'][0],['company_currency_id'])
                 user_read = self.pool.get('account.analytic.account').read(cr, uid, log['account_id'][0],['normal_account'])
@@ -254,13 +295,7 @@ class vehicle_log_shared(osv.osv):
         'log_id':fields.many2one('vehicle.log','Vehicle Log ID',ondelete='cascade'),
         'account_id':fields.many2one('account.analytic.account','Charged Account'),
         'amount':fields.float('Charge Amount'),
-        'start_km':fields.float('Starting KM'),
-        'kms':fields.float('Total KMS'),
-        'end_km':fields.float('Ending KM'),
-        'shared':fields.boolean('Shared'),
-        'share_with':fields.many2one('vehicle.log.shared','Shared with?'),
         'percentage':fields.float('Percentage'),
-        'main_trip':fields.boolean('Main Trip'),
         }
     _order = 'start_km asc'
 vehicle_log_shared()
@@ -277,62 +312,38 @@ class add_vehicle(osv.osv_memory):
     _name = 'add.vehicle'
     _columns = {
         'account_id':fields.many2one('account.analytic.account','Charged Account', required=True),
-        'start_km':fields.float('Starting KM'),
-        'end_km':fields.float('Ending KM', required=True),
-        'shared':fields.boolean('Shared'),
-        'share_with':fields.many2one('vehicle.log.shared','Shared with?'),
         'percentage':fields.float('Percentage'),
-        'main_trip':fields.boolean('Main Trip'),
         }
     def data_save(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=context):
-            print form
-            share_with = False
-            shared = False
-            percentage = 0.00
-            main_trip=False
-            if form['shared']:
-                shared=True
-                main_trip=form['main_trip']
-                share_with = form['share_with']
-                print share_with
-                percentage = form['percentage']
-                if share_with:
-                    shared_with_read = self.pool.get('vehicle.log.shared').read(cr, uid, share_with,['log_id','main_trip','shared','percentage'])
-                    main_trip_share = self.pool.get('vehicle.log.shared').search(cr, uid, [('share_with','=',share_with)])
-                    total_percentage=shared_with_read['percentage'] + percentage
-                    for trips in main_trip_share:
-                        trip_read = self.pool.get('vehicle.log.shared').read(cr, uid, trips,['percentage'])
-                        total_percentage += trip_read['percentage']
-                    if total_percentage > 100:
-                        raise osv.except_osv(_('Error!'), _('Total percentage for the main trip together with it\'s subtrips is greater than 100\%!'))
-                    if shared_with_read['log_id'][0]!=context['active_id']:
-                        raise osv.except_osv(_('Error!'), _('Share with account is not with the same log!'))
-            vals = {
-                'account_id':form['account_id'],
-                'end_km':form['end_km'],
-                'start_km':form['start_km'],
-                'log_id':context['active_id'],
-                'percentage':percentage,
-                'shared':shared,
-                'share_with':share_with,
-                'main_trip':main_trip,
-                }
-            self.pool.get('vehicle.log.shared').create(cr, uid, vals)
-            self.pool.get('vehicle.log').write(cr, uid, context['active_id'],{'log_id':context['active_id']})
-        return {'type': 'ir.actions.act_window_close'}
-    
-    def onchange_sharewith(self, cr, uid, ids, share_with=False,context=None):
-        result = {}
-        if share_with:
-            for form in self.read(cr, uid, ids, context=context):
-                share_read = self.pool.get('vehicle.log.shared').read(cr, uid, form['share_with'],['end_km','start_km'])
-                result = {'values':{
-                        'end_km':share_read['end_km'],
-                        'start_km':share_read['start_km'],
-                        }
+            shares = self.pool.get('vehicle.log.shared').search(cr, uid, [('log_id','=',context['active_id'])])
+            if not shares:
+                vals = {
+                    'account_id':form['account_id'],
+                    'percentage':form['percentage'],
+                    'log_id':context['active_id'],
                     }
-        return result
+                self.pool.get('vehicle.log.shared').create(cr, uid, vals)
+            elif shares:
+                total_percent = 0.00
+                for share in shares:
+                    share_read = self.pool.get('vehicle.log.shared').read(cr, uid, share,['percentage'])
+                    total_percent +=share_read['percentage']
+                if total_percent==100.00:
+                    raise osv.except_osv(_('Error!'), _('Percentage of all shared trips is already 100%!'))
+                elif total_percent <100.00:
+                    total_percent+=form['percentage']
+                    if total_percent>100.00:
+                        over = total_percent - 100.00
+                        raise osv.except_osv(_('Error!'), _('Shared trips is over by %s! Adjust your percentage!')%over)
+                    elif total_percent<=100:
+                        vals = {
+                        'account_id':form['account_id'],
+                        'percentage':form['percentage'],
+                        'log_id':context['active_id'],
+                        }
+                        self.pool.get('vehicle.log.shared').create(cr, uid, vals)
+        return {'type': 'ir.actions.act_window_close'}
 add_vehicle()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:,
