@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record id="edg_form" model="ir.ui.view">
+            <field name="name">edg.form</field>
+            <field name="model">expense.distribution.generic</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Expense Distribution">
+                    <group colspan="4" col="4">
+                        <field name="name" invisible="1"/>
+                        <field name="bank_id"/>
+                        <field name="date"/>
+                        <field name="amount"/>
+                    </group>
+                    <notebook>
+                        <page string="Distribution Details">
+                            <field mode="tree" name="distribution_ids" nolabel="1" colspan="4">
+                                <tree string="Distribution Lines" editable="top">
+                                    <field name="account_id"/>
+                                    <field name="amount"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Description">
+                            <field name="description" colspan="4" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="edg_tree">
+            <field name="name">edg.tree</field>
+            <field name="model">expense.distribution.generic</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Expense Distribution">
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="bank_id"/>
+                    <field name="amount"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_edg_form">
+            <field name="name">Expense Distribution</field>
+            <field name="res_model">expense.distribution.generic</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        
+        
+        
+        <!-- Check Payment -->
+        
+        
+        <record id="ecp_form" model="ir.ui.view">
+            <field name="name">ecp.form</field>
+            <field name="model">expense.check.payment</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Check Payment">
+                    <group colspan="4" col="4">
+                        <field name="bank_account_id"/>
+                        <field name="check_number" domain="[('bank_account_id','=',bank_account_id)]"/>
+                        <field name="ap_id" widget="selection" on_change="onchange_payables(ap_id,amount2pay)"/>
+                        <field name="amount2pay"/>
+                    </group>
+                    <group colspan="4" col="2">
+                        <field mode="tree" name="payment_lines" nolabel="1" colspan="4">
+                            <tree string="Unpaid Expenses" editable="top">
+                                <field name="name" readonly="1"/>
+                                <field name="move_line_id" readonly="1"/>
+                                <field name="amount_orig" readonly="1"/>
+                                <field name="amount_unpaid" sum="Total" readonly="1"/>
+                                <field name="amount2pay" sum="Total"/>
+                            </tree>
+                        </field>
+                    </group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="ecp_tree">
+            <field name="name">ecp.tree</field>
+            <field name="model">expense.check.payment</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Check Payments">
+                    <field name="bank_account_id"/>
+                        <field name="check_number"/>
+                        <field name="ap_id"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_ecp_form">
+            <field name="name">Check Payments</field>
+            <field name="res_model">expense.check.payment</field>
+            <field name="view_type">form</field>
+        </record>
+        
+    </data>
+</openerp>
