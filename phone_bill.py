@@ -25,6 +25,7 @@ class phone_line(osv.osv):
         'company_id':fields.many2one('phone.provider','Company'),
         'number':fields.char('Phone Number',size=10),
         'monthly_recur':fields.float('Monthly Recurring Charges'),
+        'account_number':fields.char('Account Number',size=32),
         'lt_bool':fields.boolean('Local Tax included?'),
         'it_bool':fields.boolean('International Tax included?'),
         'lt_value':fields.float('Local Tax Rate'),
@@ -152,12 +153,12 @@ class phone_statement_payment(osv.osv_memory):
             move_id = self.pool.get('account.move').create(cr, uid,move)
             user_id = uid
             user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
-            company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['phone_bill_ap','currency_id'])
+            company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['phone_bill_ap','currency_id','transit_php'])
             move_line = {
                     'name':form['check_number'],
                     'journal_id':journal_id,
                     'period_id':period_id,
-                    'account_id':bank_read['account_id'][0],
+                    'account_id':company_read['transit_php'][0],
                     'credit':amount,
                     'date':date_now,
                     'ref':statement_read['name'],
@@ -170,7 +171,7 @@ class phone_statement_payment(osv.osv_memory):
                     'name':form['check_number'],
                     'journal_id':journal_id,
                     'period_id':period_id,
-                    'account_id':company_read['account_id'][0],
+                    'account_id':company_read['phone_bill_ap'][0],
                     'debit':amount,
                     'date':date_now,
                     'ref':statement_read['name'],
@@ -179,8 +180,17 @@ class phone_statement_payment(osv.osv_memory):
                     'currency_id':company_read['currency_id'][0],
                     }
             self.pool.get('account.move.line').create(cr, uid, move_line)
-            
-        return True
+            self.pool.get('account.move').post(cr, uid, [move_id])
+            vals_update = {
+                    'payment_move_id':move_id,
+                    'check_number':form['check_number'],
+                    'check_date':form['check_date'],
+                    'bank_id':form['bank_id'],
+                    'check_amount':amount,
+                    'state':'paid',
+                    }
+            self.pool.get('phone.statement').write(cr, uid, context['active_id'],vals_update)
+        return {'type': 'ir.actions.act_window_close'}
         
 phone_statement_payment()
 
@@ -310,7 +320,7 @@ class phone_statement_logs(osv.osv):
             user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
             company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['phone_bill_ap','currency_id'])
             move_line = {
-                    'name':'Phone Bill Payable',
+                    'name':statement['name'],
                     'journal_id':journal_id,
                     'period_id':period_id,
                     'account_id':company_read['phone_bill_ap'][0],
@@ -322,6 +332,7 @@ class phone_statement_logs(osv.osv):
                     'currency_id':company_read['currency_id'][0],
                     }
             self.pool.get('account.move.line').create(cr, uid, move_line)
+            print move_line
             for distribution in statement['distribution_ids']:
                 dist_read = self.pool.get('phone.statement.distribution').read(cr, uid, distribution, context=None)
                 analytic_read = self.pool.get('account.analytic.account').read(cr, uid, dist_read['account_id'][0],['normal_account'])
@@ -341,6 +352,7 @@ class phone_statement_logs(osv.osv):
                     'currency_id':company_read['currency_id'][0],
                     }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
+                print move_line
             for additional_charges in statement['additional_ids']:
                 dist_read = self.pool.get('phone.statement.additional').read(cr, uid, additional_charges, context=None)
                 analytic_read = self.pool.get('account.analytic.account').read(cr, uid, dist_read['account_id'][0],['normal_account'])
@@ -360,6 +372,7 @@ class phone_statement_logs(osv.osv):
                     'currency_id':company_read['currency_id'][0],
                     }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
+                print move_line
             self.pool.get('account.move').post(cr, uid, [move_id])
             self.write(cr, uid, ids,{'distribution_move_id':move_id})
         return True
