@@ -376,9 +376,25 @@ class bt(osv.osv):
             
 bt()
 
+class res_partner_check_numbers(osv.osv):
+    _name = 'res.partner.check.numbers'
+    _description = "Check Sequences"
+    _columns = {
+        'bank_account_id':fields.many2one('res.partner.bank','Bank Account', ondelete='cascade'),
+        'name':fields.integer('Check Number'),
+        'state':fields.selection([
+                            ('available','Available'),
+                            ('assigned','Assigned'),
+                            ('released','Released'),
+                            ('cleared','Cleared'),
+                            ],'Check State'),
+        }
+res_partner_check_numbers()
+
 class res_partner_bank(osv.osv):
     _inherit = 'res.partner.bank'
     _columns = {
+        'check_numbers':fields.one2many('res.partner.check.numbers','bank_account_id','Check Numbers'),
         'partner_id': fields.many2one('res.partner', 'People/Project', ondelete='cascade', select=True),
         'bank': fields.many2one('res.bank', 'Bank'),
         'ownership':fields.selection([
@@ -394,6 +410,8 @@ class res_partner_bank(osv.osv):
         'transit_id':fields.many2one('account.account','Transit Account'),
 		'balance':fields.related('account_id','post_amount', type='float', string='Bank Balance', readonly=True),
         'currency_id': fields.many2one('res.currency','Currency'),
+        'starting_sequence':fields.integer('Starting Sequence'),
+        'ending_sequence':fields.integer('Ending Sequence'),
         }
     
     def onchange_journal(self, cr, uid, ids, journal_id=False):
@@ -413,3 +431,45 @@ class res_partner_bank(osv.osv):
                             }} 
         return result
 res_partner_bank()
+
+class check_sequence_wizard(osv.osv_memory):
+    _name = 'check.sequence.wizard'
+    _columns = {
+        'start_sequence':fields.integer('Start Sequence'),
+        'end_sequence':fields.integer('Start Sequence'),
+        }
+    def add_sequence(self, cr, uid, ids, context=None):
+        for form in self.read(cr, uid, ids, context=None):
+            print context
+            if form['start_sequence']<form['end_sequence']:
+                seq_search = self.pool.get('res.partner.check.numbers').search(cr, uid, [('name','=',form['start_sequence'])])
+                if not seq_search:
+                    seq_search = self.pool.get('res.partner.check.numbers').search(cr, uid, [('name','=',form['end_sequence'])])
+                    if not seq_search:
+                        check_range = form['end_sequence']-form['start_sequence']
+                        start = form['start_sequence']
+                        end = form['end_sequence']
+                        end = end+1
+                        ctr=0.00
+                        for x in xrange(start,end):
+                            print x
+                            if x<=form['end_sequence']:
+                                vals = {
+                                    'bank_account_id':context['active_id'],
+                                    'name':x,
+                                    'state':'available',
+                                    }
+                                self.pool.get('res.partner.check.numbers').create(cr, uid, vals)
+                            elif x>form['end_sequence']:
+                                break
+            elif form['start_sequence']>form['end_sequence']:
+                raise osv.except_osv(_('Error !'), _('Start sequence greater than end sequence'))
+        return {'type': 'ir.actions.act_window_close'}
+check_sequence_wizard()
+'''
+class bank_transfer_wizard(osv.osv_memory):
+    _name = 'bank.transfer.wizard'
+    _columns = {
+        ''
+        }
+'''

@@ -12,7 +12,46 @@
             attachment="(object.name)"
             header = "False"
             menu="True"/> -->
-            
+        
+        <record id="check_sequence_wizard_view" model="ir.ui.view">
+            <field name="name">Add Check Sequence</field>
+            <field name="model">check.sequence.wizard</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Add Check Sequence">
+                <group colspan="4" col="4">
+                    <field name="start_sequence" required="1"/>
+                    <field name="end_sequence" required="1"/>
+                </group>
+               <button string="Create Sequences"
+                                            type="object"
+                                            name="add_sequence"
+                                            icon="gtk-execute"
+                                            />
+               </form>
+            </field>
+        </record>
+
+        <record id="action_check_sequence_wizard" model="ir.actions.act_window">
+            <field name="name">Add Check Sequence</field>
+            <field name="res_model">check.sequence.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="check_sequence_wizard_view"/>
+            <field name="target">new</field>
+        </record>
+        
+        <record id="action_check_sequence_wizard" model="ir.values">
+            <field name="model_id" ref="model_res_partner_bank" />
+            <field name="object" eval="1" />
+            <field name="name">Add Check Sequence</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.act_window,' + str(ref('action_check_sequence_wizard'))"/>
+            <field name="key">action</field>
+            <field name="model">res.partner.bank</field>
+        </record>
+        
+        
         <record id="btl_add_view" model="ir.ui.view">
             <field name="name">Add Account</field>
             <field name="model">bank.transfer.line.add</field>
@@ -56,14 +95,25 @@
                     <field name="type" required="True"/>
                 </field>
                 <field name="state_id" position="after">
-                    <group colspan="6" col="6" attrs="{'invisible':[('ownership','!=','company')]}">
+                    <group colspan="4" col="4" attrs="{'invisible':[('ownership','!=','company')]}">
                         <separator string="Account Details" colspan="6"/>
                         <field name="journal_id" on_change="onchange_journal(journal_id)" attrs="{'required':[('ownership','=','company')]}"/>
                         <field name="account_id"/>
                         <field name="transit_id" domain="[('type','!=','view')]"/>
                         <field name="currency_id" invisible="True"/>
                     </group>
+                    <group colspan="4" col="2" attrs="{'invisible':[('ownership','!=','company')]}">
+                        <group colspan="4" col="4" attrs="{'invisible':[('type','!=','checking')]}">
+                            <field colspan="4" mode="tree,form" name="check_numbers" nolabel="1" readonly="True">
+                                <tree string="Check Sequence Numbers">
+	                                <field name="name" align="left"/>
+	                                <field name="state"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </group>
                 </field>
+                
             </field>
         </record>
         
@@ -184,7 +234,7 @@
 	                    </page>
                     </notebook>
                     <group colspan="4" col="13">
-                                <field name="state" select="1"/>
+                                <field name="state"/>
                                 <button name="complete" attrs="{'invisible':[('state','!=','draft')]}" string="Transfer"  type="object" icon="gtk-jump-to"/>
                                 <button name="cancel" attrs="{'invisible':[('state','!=','done')]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
                                 <button string="Print Request" type="object" name="data_get" icon="gtk-execute" attrs="{'invisible':[('state','!=','done')]}" />
@@ -259,7 +309,7 @@
                     <separator string="Transfer Details" colspan="4"/>
                     <group col="2" colspan="2">
                         <separator colspan="4" string="Starts on"/>
-                        <field name="date_start" select="1"/>
+                        <field name="date_start" />
                         <field name="period_total"/>
                         <field name="amount"/>
                     </group>
@@ -287,7 +337,7 @@
         </record> 
           
         <record id="action_bank_transfer_schedule_tree" model="ir.actions.act_window">
-            <field name="name">Bank Transfer Schedules</field>
+            <field name="name">Schedule</field>
             <field name="res_model">bank.transfer.schedule</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>
@@ -353,13 +403,20 @@
         </record> 
         
         <record id="action_bank_transfer_request_tree" model="ir.actions.act_window">
-            <field name="name">Transfer Request</field>
+            <field name="name">Special</field>
+            <field name="res_model">bank.transfer.request</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="view_id" ref="view_bank_transfer_request_tree"/>
+            <field name="domain">[('is_special','=',True)]</field>
+        </record>
+        <record id="action_bank_transfer_all_tree" model="ir.actions.act_window">
+            <field name="name">All Requests</field>
             <field name="res_model">bank.transfer.request</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>
             <field name="view_id" ref="view_bank_transfer_request_tree"/>
         </record>
-        
         
        </data>
 </openerp>

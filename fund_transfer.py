@@ -692,11 +692,19 @@ class internal_account_transfer_destination(osv.osv):
     
 internal_account_transfer_destination()
 
+
+class pcdenom(osv.osv):
+    _inherit = 'pettycash.denom'
+    _columns = {
+        'iat_id':fields.many2one('internal.account.transfer','IAT ID', ondelete='cascade'),
+        }
+pcdenom()
 class iat(osv.osv):
     _inherit = 'internal.account.transfer'
     _columns = {
         'pat_iatd_ids':fields.one2many('internal.account.transfer.destination','pat_iat_id','Destinations'),
         'proj_iatd_ids':fields.one2many('internal.account.transfer.destination','proj_iat_id','Destinations'),
+        'denom_ids':fields.one2many('pettycash.denom','iat_id','Denominations'),
         'move_id':fields.many2one('account.move','Journal Entry'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Releasing Journal Items', readonly=True),
         }
@@ -708,5 +716,32 @@ class iat(osv.osv):
                 if iat['transfer_type']=='people2pc':
                     result = {'value':{'pettycash_id':False}}
         return result
+    
+    def onchange_pcid(self, cr, uid, ids, pettycash_id=False, context=None):
+        result = {}
+        if pettycash_id:
+            print ids
+            iat_ids = ids
+            iat_id = iat_ids[0]
+            pc_read = self.pool.get('account.pettycash').read(cr,uid, pettycash_id, ['currency_id'])
+            print pc_read
+            denom_search = self.pool.get('denominations').search(cr, uid, [('currency_id','=',pc_read['currency_id'][0])])
+            print denom_search
+            currency = pc_read['currency_id'][1]
+            if not denom_search:
+                raise osv.except_osv(_('Error!'), _('%s has no available denominations.Please add them!')%currency)
+            elif denom_search:
+                denominations = []
+                denom_del = self.pool.get('pettycash.denom').search(cr, uid, [('iat_id','=',iat_id)])
+                self.pool.get('pettycash.denom').unlink(cr, uid, denom_del)
+                for denom in denom_search:
+                    vals = {
+                        'name':denom,
+                        'iat_id':iat_id,
+                        }
+                    newd = self.pool.get('pettycash.denom').create(cr, uid, vals)
+                    denominations.append(newd)
+                result = {'values':{'denom_ids':denominations}}
+            return result
 iat()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:,

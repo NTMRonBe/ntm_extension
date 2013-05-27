@@ -14,3 +14,5 @@ import invoice_slip
 import account_move
 import iat_transfer
 import phone_bill
+import income_distribution
+import expense_distribution

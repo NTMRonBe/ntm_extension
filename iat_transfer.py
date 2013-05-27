@@ -26,7 +26,7 @@ class iat(osv.osv):
                     if iat['multiple']:
                         self.ifmultiple(cr, uid, ids)
             if context['transfer_type']=='people2pc':
-                self.people2pc(cr, uid, ids)
+                self.check_denoms(cr, uid, ids)
             if context['transfer_type']=='people2people':
                 for iat in self.read(cr, uid, ids, context=None):
                     if not iat['multiple']:
@@ -97,6 +97,31 @@ class iat(osv.osv):
             self.pool.get('account.move').post(cr, uid, [move_id])
             self.write(cr, uid, ids, {'move_id':move_id,'state':'transfer'})
         return True
+    
+    def check_denoms(self, cr, uid, ids, context=None):
+        for iat in self.read(cr, uid, ids, context=None):
+            total_denom_amount=0.00
+            for iatd in iat['denom_ids']:
+                iatd_read = self.pool.get('pettycash.denom').read(cr, uid, iatd, ['quantity','name'])
+                denom_check = self.pool.get('denominations').read(cr, uid, iatd_read['name'][0],['multiplier'])
+                total_denom_amount +=iatd_read['quantity']*denom_check['multiplier']
+            print total_denom_amount
+            print iat
+            if total_denom_amount!=iat['amount']:
+                raise osv.except_osv(_('Error!'), _('Sum of all denominations is not equal to the amount to be transferred!'))
+            elif total_denom_amount==iat['amount']:
+                for iatd in iat['denom_ids']:
+                    iatd_read = self.pool.get('pettycash.denom').read(cr, uid, iatd, ['quantity','name'])
+                    pc_check = self.pool.get('pettycash.denom').search(cr, uid, [('pettycash_id','=',iat['pettycash_id'][0]),
+                                                                                ('name','=',iatd_read['name'][0])])
+                    pc_read = self.pool.get('pettycash.denom').read(cr, uid, pc_check[0],['quantity'])
+                    newdenom = iatd_read['quantity'] + pc_read['quantity']
+                    self.pool.get('pettycash.denom').write(cr, uid, pc_check[0],{'quantity':newdenom})
+                self.people2pc(cr, uid, ids)
+        return True
+                    
+                    
+                    
         
     def notmultiple(self, cr, uid, ids, context=None):
         for iat in self.read(cr, uid, ids, context=None):

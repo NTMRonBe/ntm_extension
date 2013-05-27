@@ -108,9 +108,13 @@ class bill_exchange(osv.osv):
                         cash_out_read = self.pool.get('pettycash.denom').read(cr, uid, cash_out_id, ['name', 'quantity'])
                         pc_search = self.pool.get('pettycash.denom').search(cr, uid, [('name','=',cash_out_read['name'][0]),('pettycash_id','=',pc_id)])
                         for denom_id in pc_search:
-                            denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denom_id,['quantity'])
-                            new_qty = denom_reader['quantity'] - cash_out_read['quantity'] 
-                            self.pool.get('pettycash.denom').write(cr, uid, denom_id,{'quantity':new_qty})
+                            denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denom_id,['quantity','name'])
+                            denomination = denom_reader['name'][1]
+                            if denom_reader['quantity'] < cash_out_read['quantity']:
+                                raise osv.except_osv(_('Error !'), _('Quantity to release is greater than the cash on petty cash for denomination %s!')%denomination)
+                            else:
+                                new_qty = denom_reader['quantity'] - cash_out_read['quantity'] 
+                                self.pool.get('pettycash.denom').write(cr, uid, denom_id,{'quantity':new_qty})
                     self.write(cr, uid, ids, {'state':'done'})
         return True
     def exchange2(self, cr, uid, ids, context=None):

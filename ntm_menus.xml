@@ -29,10 +29,10 @@
         <menuitem id="iat_people2pc" parent="main_pettycash" sequence="40" action="action_people2pc_tree"/>
         <menuitem id="iat_proj2people" parent="iat_main" sequence="50" action="action_proj2people_tree"/>
         <menuitem id="iat_proj2proj" parent="iat_main" sequence="50" action="action_proj2proj_tree"/>
-        <menuitem id="bank_transfer_main" name="Bank Transfers" parent="fund_transfers" sequence="40"/>
-        <menuitem id="bank_transfer" parent="bank_transfer_main" sequence="10" action="action_bank_transfer_tree"/>
-        <menuitem id="bank_transfer_schedule" parent="bank_transfer_main" sequence="10" action="action_bank_transfer_schedule_tree"/>
+        <menuitem id="bank_transfer_main" parent="fund_transfers" sequence="40" action="action_bank_transfer_tree"/>
+        <menuitem id="bank_transfer_schedule" parent="bank_transfer_main" sequence="20" action="action_bank_transfer_schedule_tree"/>
         <menuitem id="bank_transfer_requests" parent="bank_transfer_main" sequence="10" action="action_bank_transfer_request_tree"/>
+        <menuitem id="bank_transfer_requests_all" parent="bank_transfer_main" sequence="30" action="action_bank_transfer_all_tree"/>
         <menuitem id="base.menu_mail_gateway" name="Emails" parent="base.menu_config" sequence="30"/>
         <menuitem id="base.menu_base_action_rule" name="Automated Actions" parent="base.menu_config" sequence="30"/> 
         <menuitem id="account.menu_finance" sequence="50"/>
@@ -47,10 +47,14 @@
         <menuitem id="main_regional" name="Regional Reports" parent="regional_root" sequence="30"/>
         <menuitem id="menu_invoice_slip_upload" action="action_regional_uploader_form" parent="main_regional" sequence="20"/>
         <menuitem id="menu_invoice_slip_upload_action" action="action_upload_invoice_slips" parent="main_regional" sequence="30"/>
-        <menuitem id="menu_expense_disribution_main" name="Expense Distribution" parent="account.menu_finance_payables" sequence="60"/>
-        <menuitem id="menu_vehicle_root" name="Vehicles" parent="menu_expense_disribution_main" sequence="10"/>
-        <menuitem id="menu_communications_root" name="Communications" parent="menu_expense_disribution_main" sequence="20"/>
-        <menuitem id="menu_ed_config" name="Configuration" parent="menu_expense_disribution_main" sequence="50"/>
+        <menuitem id="menu_income_distribution_main" name="Income Distribution" parent="account.menu_finance_payables" sequence="50"/>
+        <menuitem id="menu_idg" action="action_idg_form" parent="menu_income_distribution_main" sequence="10"/>
+        <menuitem id="menu_expense_distribution_main" name="Expense Distribution" parent="account.menu_finance_payables" sequence="60"/>
+        <menuitem id="menu_edg" action="action_edg_form" parent="menu_expense_distribution_main" sequence="10"/>
+        <menuitem id="menu_ecp" action="action_ecp_form" parent="menu_expense_distribution_main" sequence="15"/>
+        <menuitem id="menu_vehicle_root" name="Vehicles" parent="menu_expense_distribution_main" sequence="20"/>
+        <menuitem id="menu_communications_root" name="Communications" parent="menu_expense_distribution_main" sequence="30"/>
+        <menuitem id="menu_ed_config" name="Configuration" parent="menu_expense_distribution_main" sequence="50"/>
         <menuitem id="menu_communications_cleaner" parent="menu_communications_root" sequence="20" action="action_callsdbf_reader"/>
         <menuitem id="menu_communications_statement" parent="menu_communications_root" sequence="30" action="action_phone_statement_form"/>
         <menuitem id="menu_communications_line" parent="menu_ed_config" sequence="30" action="action_phone_line_form"/>
@@ -60,8 +64,8 @@
         <menuitem id="menu_vehicle" action="action_vehicle_form" parent="menu_vehicle_root" sequence="30" groups="base.group_user"/>
         <menuitem id="menu_forex_rate_parent" parent="fund_transfers" name="Foreign Exchanges" sequence="100"  groups="base.group_user"/>
         <menuitem id="menu_forex_transaction" action="action_forex_transaction_form" parent="menu_forex_rate_parent" sequence="20" groups="base.group_user"/>  
-        <menuitem id="menu_manual_entries" action="ntm_action_account_move_form" parent="account.menu_finance_payables" sequence="100"/>
-      <!-- Actions -->
+       <!-- <menuitem id="menu_manual_entries" action="ntm_action_account_move_form" parent="account.menu_finance_payables" sequence="100"/>
+       Actions -->
         <record id="base.action_partner_customer_form" model="ir.actions.act_window">
             <field name="name">Donors Information</field>
         </record>
