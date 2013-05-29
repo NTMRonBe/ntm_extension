@@ -35,10 +35,6 @@
         
         
         
-        <menuitem id="menu_vehicle_root" name="Vehicles" parent="menu_expense_distribution_main" sequence="20"/>
-        <menuitem id="menu_communications_root" name="Communications" parent="menu_expense_distribution_main" sequence="30"/>
-        <menuitem id="menu_ed_config" name="Configuration" parent="menu_expense_distribution_main" sequence="50"/>
-        
         <menuitem id="pat_reports_main" name="Reports" sequence="40" parent="account.menu_finance_payables"/>
         <menuitem id="main_soa" name="Statement of Accounts" parent="pat_reports_main" sequence="20"/>
         <menuitem id="menu_account_soa" action="action_account_soa_form" parent="main_soa" sequence="20" groups="base.group_user"/> 
@@ -87,12 +83,17 @@
         <menuitem id="iat_people2proj" parent="iat_main" sequence="20" action="action_people2proj_tree"/>
         <menuitem id="iat_proj2people" parent="iat_main" sequence="50" action="action_proj2people_tree"/>
         <menuitem id="iat_proj2proj" parent="iat_main" sequence="50" action="action_proj2proj_tree"/>
+        
         <menuitem id="bank_transfer_main" parent="fund_transfers" sequence="40" action="action_bank_transfer_tree"/>
         <menuitem id="bank_transfer_schedule" parent="bank_transfer_main" sequence="20" action="action_bank_transfer_schedule_tree"/>
         <menuitem id="bank_transfer_requests" parent="bank_transfer_main" sequence="10" action="action_bank_transfer_request_tree"/>
         <menuitem id="bank_transfer_requests_all" parent="bank_transfer_main" sequence="30" action="action_bank_transfer_all_tree"/>
+        <menuitem id="bank_transfer_generate" parent="bank_transfer_main" sequence="40" action="action_bank_transfer_wizard"/>
+        
         <menuitem id="ntm_checks_main" name="Checks" sequence="40" parent="ntm_bankandcash_root"/>
         <menuitem id="menu_ecp" action="action_ecp_form" parent="ntm_checks_main" sequence="15"/>
+        <menuitem id="menu_rpcn" action="action_rpcn_form" parent="ntm_checks_main" sequence="15"/>
+        
         <menuitem id="menu_forex_transaction" action="action_forex_transaction_form" parent="ntm_bankandcash_root" sequence="60" groups="base.group_user"/>
         <menuitem id="ntm_bankandcash_config" name="Configuration" sequence="100" parent="ntm_bankandcash_root"/>
         <menuitem id="menu_denom" action="action_denom_form"  parent="ntm_bankandcash_config" sequence="20" groups="base.group_user"/>

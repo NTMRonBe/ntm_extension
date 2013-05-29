@@ -7,7 +7,7 @@
             <field name="model">phone.statement.additional.wizard</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-            <form string="Create Statement">
+            <form string="Add Additional Charge">
                 <group colspan="4" col="4">
                     <field name="account_id" required="1"/>
                     <field name="amount" required="1"/>
@@ -73,6 +73,11 @@
                         <field name="number"/>
                         <field name="account_id"/>
                     </group>
+                    <separator string="Billing Periods" colspan="4"/>
+                    <group colspan="4" col="4">
+                        <field name="phone_bill_start"/>
+                        <field name="phone_bill_end"/>
+                    </group>
                     <separator string="Fees and Taxes" colspan="4"/>
                     <group colspan="4" col="4">
                         <field name="lt_bool"/>
@@ -117,26 +122,15 @@
             <field name="arch" type="xml">
                 <form string = "Statement of Account">
                     <group colspan="4" col="4">
-	                    <field name="name"/>
-	                    <field name="line_id"/>
-	                    <field name="bill_start"/>
-	                    <field name="bill_end"/>
-	                    <field name="journal_id"/>
+	                    <field name="name" readonly="1"/>
+	                    <field name="line_id" readonly="1"/>
+	                    <field name="bill_period" readonly="1"/>
+	                    <field name="due_date" readonly="1"/>
+	                    <field name="journal_id" invisible="1"/>
 	                    <field name="amount"/>
                     </group>
                     <notebook>
                         <page string="Call logs and Additional Charges">
-                            <button name="%(action_additional_charge)d" colspan="4" attrs="{'invisible':[('state','!=','draft')]}" string="Add Additional Charge" icon="gtk-execute" type="action"/>
-                            <separator string="Additional Charges" colspan="4"/>
-                            <field mode="tree" name="additional_ids" nolabel="1" readonly="1">
-                                <tree string="Additional Charges">
-                                    <field name="name" readonly="1"/>
-                                    <field name="description" readonly="1"/>
-                                    <field name="account_id" invisible="1"/>
-                                    <field name="phone_pin" readonly="1"/>
-                                    <field name="amount" readonly="1" sum="Total"/>
-                                </tree>
-                            </field>
                             <separator string="Call Logs" colspan="4"/>
                             <field mode="tree" name="log_ids" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
                                 <tree string="Call Logs" editable="top" colors="red:price!=statement_price">
@@ -154,6 +148,17 @@
                                     <field name="statement_price" attrs="{'readonly':[('reconcile','=',True)]}" sum="Total Statement Price"/>
                                     <field name="taxed_price" readonly="1" sum="Total Tax Price"/>
                                     <button name="reconcile" attrs="{'invisible':[('reconcile','=',True)]}" icon="gtk-execute" type="object"/>
+                                </tree>
+                            </field>
+                            <button name="%(action_additional_charge)d" colspan="4" attrs="{'invisible':[('state','!=','draft')]}" string="Add Additional Charge" icon="gtk-execute" type="action"/>
+                            <separator string="Additional Charges" colspan="4"/>
+                            <field mode="tree" name="additional_ids" nolabel="1" readonly="1">
+                                <tree string="Additional Charges">
+                                    <field name="name" readonly="1"/>
+                                    <field name="description" readonly="1"/>
+                                    <field name="account_id" invisible="1"/>
+                                    <field name="phone_pin" readonly="1"/>
+                                    <field name="amount" readonly="1" sum="Total"/>
                                 </tree>
                             </field>
                         </page>
@@ -183,7 +188,7 @@
                         <page string="Journal Entries">
                             <group colspan="4" col="2">
                                 <field name="distribution_move_id" invisible="1"/>
-                                <field name="distribution_move_ids" mode="tree" nolabel="1">
+                                <field name="distribution_move_ids" mode="tree" nolabel="1" colspan="4">
                                     <tree string="Distribution Entries">
                                         <field name="date"/>
                                         <field name="account_id"/>
@@ -241,8 +246,9 @@
                 <group colspan="4" col="4">
                     <field name="provider" widget="selection" required="1"/>
                     <field name="line_id" required="1" domain="[('company_id','=',provider)]"/>
-                    <field name="bill_start" required="1"/>
-                    <field name="bill_end" required="1"/>
+                    <field name="bill_period" required="1" widget="selection" domain="[('state','=','draft')]"/>
+                    <field name="due_date" required="1"/>
+                    <field name="name" required="1"/>
                 </group>
                <button string="Check"
                                             type="object"

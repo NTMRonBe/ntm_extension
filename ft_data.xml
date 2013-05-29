@@ -145,12 +145,6 @@
             <field name="prefix">PPAT/%(y)s/</field>
             <field name="padding">3</field>
         </record>
-        <record id="seq_iat_people2bank_sequence" model="ir.sequence">
-            <field name="name">People and Team to Bank</field>
-            <field name="code">iat.people2bank</field>
-            <field name="prefix">PATB/%(y)s/</field>
-            <field name="padding">3</field>
-        </record>
         <record id="seq_iat_people2pc_sequence" model="ir.sequence">
             <field name="name">People and Team to Petty Cash</field>
             <field name="code">iat.people2pc</field>

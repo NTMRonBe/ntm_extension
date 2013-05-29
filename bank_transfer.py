@@ -24,6 +24,7 @@ class bank_transfer_schedule(osv.osv):
         'date_start': fields.date('Start Date', required=True),
         'period_total': fields.integer('Number of Periods', required=True),
         'period_nbr': fields.integer('Period', required=True),
+        'compute':fields.boolean('Computed'),
         'period_type': fields.selection([('day','days'),('month','month'),('year','year'),('bimonthly','bimonthly')], 'Period Type', required=True),
         'state': fields.selection([('draft','Draft'),('running','Running'),('done','Done')], 'State', required=True, readonly=True),
         'amount':fields.float('Amount'),
@@ -63,6 +64,8 @@ class bank_transfer_schedule(osv.osv):
             self.pool.get('bank.transfer.request').unlink(cr, uid, toremove)
         self.write(cr, uid, ids, {'state':'draft'})
         return False
+    
+
 
     def compute(self, cr, uid, ids, context=None):
         for sub in self.browse(cr, uid, ids, context=context):
@@ -86,7 +89,7 @@ class bank_transfer_schedule(osv.osv):
                     ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(weeks=+2)).strftime('%Y-%m-%d')
                 if sub.period_type=='year':
                     ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(years=sub.period_nbr)).strftime('%Y-%m-%d')
-        self.write(cr, uid, ids, {'state':'running'})
+        self.write(cr, uid, ids, {'state':'running','compute':True})
         return True
 bank_transfer_schedule()
 
@@ -108,10 +111,16 @@ class bank_transfer_request(osv.osv):
         'amount':fields.float('Amount'),
         'is_special':fields.boolean('Special Request?'),
         'state':fields.selection([
+                            ('draft','Draft'),
                             ('confirm','Confirm'),
                             ('cancel','Cancelled'),
+                            ('transferred','Transferred'),
                             ],'State'),
     }
+    
+    _defaults = {
+                'state':'draft',
+                }
     
     def create(self, cr, uid, vals, context=None):
         vals.update({
@@ -122,6 +131,10 @@ class bank_transfer_request(osv.osv):
     def confirm(self, cr, uid, ids, context=None):
         for btr in self.read(cr, uid, ids, context=None):
             self.write(cr, uid, ids, {'state':'confirm'})
+        return True
+    def transfer(self, cr, uid, ids, context=None):
+        for btr in self.read(cr, uid, ids, context=None):
+            self.write(cr, uid, ids, {'state':'transferred'})
         return True
     
     def cancel(self, cr, uid, ids, context=None):
@@ -140,21 +153,13 @@ btr()
 
 class bank_transfer(osv.osv):
     
-    def _get_period(self, cr, uid, context=None):
-        if context is None: context = {}
-        if context.get('period_id', False):
-            return context.get('period_id')
-        periods = self.pool.get('account.period').find(cr, uid, context=context)
-        return periods and periods[0] or False
-    
     _name = 'bank.transfer'
     _description = 'Bank Transfer'
     _columns = {
         'name':fields.char('Transfer ID',size=64,readonly=True),
-        'date':fields.date('Transfer Date'),
+        'date':fields.date('Effective Transfer Date'),
         'handler':fields.many2one('res.users','Handler'),
-        'journal_id':fields.many2one('account.journal','Bank Journal'),
-        'period_id':fields.many2one('account.period','Transfer Period'),
+        'journal_id':fields.many2one('res.partner.bank','Bank'),
         'ref':fields.char('Reference',size=64),
         'state':fields.selection([
                             ('draft','Draft'),
@@ -167,8 +172,6 @@ class bank_transfer(osv.osv):
     _defaults = {
             'state':'draft',
             'name':'NEW',
-            'period_id':_get_period,
-            'date' : lambda *a: time.strftime('%Y-%m-%d'),
             'handler' : lambda cr, uid, id, c={}: id,
             }
 bank_transfer()
@@ -178,8 +181,8 @@ class bank_transfer_line(osv.osv):
     _description = 'Bank Transfer Lines'
     _columns = {
         'transfer_id':fields.many2one('bank.transfer','Transfer ID',ondelete='cascade'),
-        'partner_id':fields.many2one('res.partner','Partner', required=True),
         'account_number':fields.many2one('res.partner.bank','Bank Account', required=True),
+        'name': fields.related('analytic_id','name', type='char',size=64,string='Account Name', readonly=True),
         'analytic_id':fields.many2one('account.analytic.account','Account', required=True),
         'amount':fields.float('Amount', required=True),
         'type':fields.selection([
@@ -376,6 +379,26 @@ class bt(osv.osv):
             
 bt()
 
+class check_cancellation(osv.osv_memory):
+    _name = 'check.cancellation'
+    _columns = {
+        'name':fields.char('Cancellation Reason',size=100)
+        }
+    def cancel(self, cr, uid, ids, context=None):
+        for form in self.read(cr, uid, ids, context=None):
+            check_read = self.pool.get('res.partner.check.numbers').read(cr, uid, context['active_id'],['state'])
+            if check_read['state']=='available':
+                vals = {
+                    'cancellation_reason':form['name'],
+                    'state':'cancelled',
+                    }
+                self.pool.get('res.partner.check.numbers').write(cr, uid, context['active_id'],vals)
+                return {'type': 'ir.actions.act_window_close'}
+            else:
+                return {'type': 'ir.actions.act_window_close'}
+            
+check_cancellation()
+
 class res_partner_check_numbers(osv.osv):
     _name = 'res.partner.check.numbers'
     _description = "Check Sequences"
@@ -384,10 +407,12 @@ class res_partner_check_numbers(osv.osv):
         'name':fields.integer('Check Number'),
         'state':fields.selection([
                             ('available','Available'),
-                            ('assigned','Assigned'),
                             ('released','Released'),
+                            ('assigned','Assigned'),
                             ('cleared','Cleared'),
+                            ('cancelled','Cancelled')
                             ],'Check State'),
+        'cancellation_reason':fields.char('Cancellation Reason',size=100),
         }
 res_partner_check_numbers()
 
@@ -466,10 +491,53 @@ class check_sequence_wizard(osv.osv_memory):
                 raise osv.except_osv(_('Error !'), _('Start sequence greater than end sequence'))
         return {'type': 'ir.actions.act_window_close'}
 check_sequence_wizard()
-'''
+
 class bank_transfer_wizard(osv.osv_memory):
     _name = 'bank.transfer.wizard'
     _columns = {
-        ''
+        'name':fields.date('Transfer Date'),
+        'bank_id':fields.many2one('res.partner.bank','Bank Name', domain=[('ownership','=','company')]),
         }
-'''
+    
+    _defaults = {
+            'name' : lambda *a: time.strftime('%Y-%m-%d'),
+            }
+    
+    def generate(self, cr, uid, ids, context=None):
+        for form in self.read(cr, uid, ids, context=None):
+            req_search = self.pool.get('bank.transfer.request').search(cr, uid, [('state','=','confirm'),('date','<=',form['name']),('company_bank_id','=',form['bank_id'])])
+            if req_search:
+                transfer = {
+                    'journal_id':form['bank_id'],
+                    'date':form['name'],
+                    }
+                transfer_id = self.pool.get('bank.transfer').create(cr, uid, transfer)
+                for requests in req_search:
+                    req_read = self.pool.get('bank.transfer.request').read(cr, uid, requests,context=None)
+                    bank_read = self.pool.get('res.partner.bank').read(cr, uid, req_read['entity_bank_id'][0],['type'])
+                    vals = {
+                        'account_number':req_read['entity_bank_id'][0],
+                        'analytic_id':req_read['account_id'][0],
+                        'amount':req_read['amount'],
+                        'transfer_id':transfer_id,
+                        }
+                    if bank_read['type']=='savings':
+                        vals.update({'type':'savings'})
+                    elif bank_read['type']=='checking':
+                        vals.update({'type':'checking'})
+                    self.pool.get('bank.transfer.line').create(cr, uid, vals)    
+                return {
+                    'domain': "[('id', 'in', ["+str(transfer_id)+"])]",
+                    'name': 'Bank Transfer',
+                    'view_type':'form',
+                    'nodestroy': False,
+                    'target': 'current',
+                    'view_mode':'tree,form',
+                    'res_model':'bank.transfer',
+                    'type':'ir.actions.act_window',
+                    'context':context,}
+            elif not req_search:
+                raise osv.except_osv(_('Error!'), _('No request for the bank and period specified!'))
+        
+bank_transfer_wizard()
+    

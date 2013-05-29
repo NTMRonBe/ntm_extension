@@ -26,6 +26,32 @@ class phone_line(osv.osv):
         'number':fields.char('Phone Number',size=10),
         'monthly_recur':fields.float('Monthly Recurring Charges'),
         'account_number':fields.char('Account Number',size=32),
+        'phone_bill_start':fields.selection([
+                                ('01','01'),('02','02'),('03','03'),
+                                ('04','04'),('05','05'),('06','06'),
+                                ('07','07'),('08','08'),('09','09'),
+                                ('10','10'),('11','11'),('12','12'),
+                                ('13','13'),('14','14'),('15','15'),
+                                ('16','16'),('17','17'),('18','18'),
+                                ('19','19'),('20','20'),('21','21'),
+                                ('22','22'),('23','23'),('24','24'),
+                                ('25','25'),('26','26'),('27','27'),
+                                ('28','28'),('29','29'),('30','30'),
+                                ('31','31'),
+                                    ],'Period Start'),
+        'phone_bill_end':fields.selection([
+                                ('01','01'),('02','02'),('03','03'),
+                                ('04','04'),('05','05'),('06','06'),
+                                ('07','07'),('08','08'),('09','09'),
+                                ('10','10'),('11','11'),('12','12'),
+                                ('13','13'),('14','14'),('15','15'),
+                                ('16','16'),('17','17'),('18','18'),
+                                ('19','19'),('20','20'),('21','21'),
+                                ('22','22'),('23','23'),('24','24'),
+                                ('25','25'),('26','26'),('27','27'),
+                                ('28','28'),('29','29'),('30','30'),
+                                ('31','31'),
+                                    ],'Period End'),
         'lt_bool':fields.boolean('Local Tax included?'),
         'it_bool':fields.boolean('International Tax included?'),
         'lt_value':fields.float('Local Tax Rate'),
@@ -96,9 +122,9 @@ class phone_statement(osv.osv):
     _description = "Phone Line Statement of Accounts"
     _columns = {
         'name':fields.char('SOA no.',size=32),
+        'due_date':fields.date('Due Date'),
         'line_id':fields.many2one('phone.line','Phone Line'),
-        'bill_start':fields.date('Billing Start Date'),
-        'bill_end':fields.date('Billing End Date'),
+        'bill_period':fields.many2one('account.period','Billing Period'),
         'state':fields.selection([
                         ('draft','For Reconciliation'),
                         ('reconciled','For Distribution'),
@@ -384,23 +410,66 @@ class callsdbf_reader(osv.osv_memory):
     _name = "callsdbf.reader"
     _description = "DBF Reader"
     _columns = {
-        'bill_start':fields.date('Billing Start Date'),
-        'bill_end':fields.date('Billing End Date'),
+        'bill_period':fields.many2one('account.period','Billing Period'),
+        'name':fields.char('SOA',size=32),
+        'due_date':fields.date('Due Date'),
         'provider':fields.many2one('phone.provider','Company'),
         'line_id':fields.many2one('phone.line','Phone Line'),
         }
     
     def clean_file(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
-            statement = {
-                'bill_start':form['bill_start'],
-                'bill_end':form['bill_end'],
-                'line_id':form['line_id'],
-                }
-            statement_id = self.pool.get('phone.statement').create(cr, uid, statement)
+            statement_id = False
+            soa=form['name']
+            statement_search = self.pool.get('phone.statement').search(cr, uid, [('bill_period','=',form['bill_period']),
+                                                                                 ('line_id','=',form['line_id']),
+                                                                                 ('name','=',form['name']),
+                                                                                 ])
+            if statement_search:
+                raise osv.except_osv(_('Error!'), _('Statement for SOA %s has already been created!')%soa)
+            elif not statement_search:
+                statement = {
+                    'bill_period':form['bill_period'],
+                    'line_id':form['line_id'],
+                    'name':form['name'],
+                    'due_date':form['due_date'],
+                    }
+                statement_id = self.pool.get('phone.statement').create(cr, uid, statement)
             user_id= uid
             line_id = self.pool.get('phone.line').read(cr, uid, form['line_id'],context=None)
-            line_name = line_id['name']            
+            if line_id['monthly_recur']>0:
+                self.pool.get('phone.statement.additional').create(cr, uid, {
+                    'account_id':line_id['account_id'][0],
+                    'description':'Monthly Recurring Charges',
+                    'amount':line_id['monthly_recur'],
+                    'statement_id':statement_id,
+                    })
+            line_name = line_id['name']
+            start_day = line_id['phone_bill_start']
+            end_day = line_id['phone_bill_end']
+            period_read =self.pool.get('account.period').read(cr, uid, form['bill_period'],context=None)
+            period_name = period_read['name']
+            period = period_name.split('/')
+            print period
+            end = int(end_day)
+            start = int(start_day)
+            start_date = False
+            end_date = False
+            if start > end:
+                end_date = str(period[1])+'-'+str(period[0])+'-'+end_day
+                prev_period = form['bill_period']-1
+                previous = self.pool.get('account.period').read(cr, uid, prev_period, context=None)
+                prev_period_name = previous['name']
+                prev_period_list = prev_period_name.split('/')
+                start_date = str(prev_period_list[1])+'-'+str(prev_period_list[0])+'-'+start_day
+                print end_date
+                print start_date
+                
+            elif end>start:
+                start_date = str(period[1])+'-'+str(period[0])+'-'+start_day
+                end_date = str(period[1])+'-'+str(period[0])+'-'+end_day
+                print end_date
+                print start_date
             user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
             company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['calls_dbf'])
             table = company_read['calls_dbf']
@@ -425,7 +494,7 @@ class callsdbf_reader(osv.osv_memory):
                 stat=stat[0]
                 iduration = str(record.iduration)
                 itime = str(record.itime)
-                if co==line_name and date >=form['bill_start'] and date<=form['bill_end']:
+                if co==line_name and date >=start_date and date<=end_date:
                     vals = {}
                     sprice = str(sprice)
                     sprice = float(sprice)
@@ -445,12 +514,20 @@ class callsdbf_reader(osv.osv_memory):
                             'statement_id':statement_id,
                             'statement_price':sprice,
                             }
-                        print vals
                         if stat=='Globe' or stat=='Sun' or stat=='Smart':
                             vals.update({'location':'local'})
                         self.pool.get('phone.logs').create(cr, uid, vals)
             table.close()
-        return {'type': 'ir.actions.act_window_close'}
+            return {
+                'domain': "[('id', 'in', ["+str(statement_id)+"])]",
+                'name': 'Phone Statement',
+                'view_type':'form',
+                'nodestroy': False,
+                'target': 'current',
+                'view_mode':'tree,form',
+                'res_model':'phone.statement',
+                'type':'ir.actions.act_window',
+                'context':context,}
     
 callsdbf_reader()
 

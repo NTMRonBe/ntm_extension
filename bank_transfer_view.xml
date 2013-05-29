@@ -12,6 +12,65 @@
             attachment="(object.name)"
             header = "False"
             menu="True"/> -->
+        <record id="check_cancellation_wizard_view" model="ir.ui.view">
+            <field name="name">Cancel Check</field>
+            <field name="model">check.cancellation</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Cancel Check">
+                <group colspan="4" col="4">
+                    <field name="name" required="1"/>
+                    <button string="Cancel"
+                                            type="object"
+                                            name="cancel"
+                                            icon="gtk-execute"
+                                            />
+                </group>
+               </form>
+            </field>
+        </record>
+
+        <record id="action_check_cancellation" model="ir.actions.act_window">
+            <field name="name">Cancel Check</field>
+            <field name="res_model">check.cancellation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="check_cancellation_wizard_view"/>
+            <field name="target">new</field>
+        </record>
+        
+        
+        
+        <record id="bank_transer_wizard_view" model="ir.ui.view">
+            <field name="name">Generate Transfer Request</field>
+            <field name="model">bank.transfer.wizard</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Generate Transfer Request">
+                <group colspan="4" col="4">
+                    <field name="name" required="1"/>
+                    <field name="bank_id" required="1" widget="selection"/>
+                    
+                </group>
+                <button string="Generate"
+                                            type="object"
+                                            name="generate"
+                                            icon="gtk-execute"
+                                            />
+               </form>
+            </field>
+        </record>
+
+        <record id="action_bank_transfer_wizard" model="ir.actions.act_window">
+            <field name="name">Generate Transfer Request</field>
+            <field name="res_model">bank.transfer.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="bank_transer_wizard_view"/>
+            <field name="target">new</field>
+        </record>
+        
+        
         
         <record id="check_sequence_wizard_view" model="ir.ui.view">
             <field name="name">Add Check Sequence</field>
@@ -49,6 +108,47 @@
             <field name="value" eval="'ir.actions.act_window,' + str(ref('action_check_sequence_wizard'))"/>
             <field name="key">action</field>
             <field name="model">res.partner.bank</field>
+        </record>
+        
+        <record model="ir.ui.view" id="rpcn_search">
+            <field name="name">rpcn.search</field>
+            <field name="model">res.partner.check.numbers</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Check Monitoring">
+                    <field name="bank_account_id" widget="selection" domain="[('ownership','=','company'),('type','=','checking')]"/>
+                    <field name="name" readonly="1"/>
+                    <newline/>
+                    <group expand="1" string="Other Filters...">
+	                    <filter name="available" icon="terp-document-new" string="Available" domain="[('state','=','available')]"/>
+	                    <filter name="assigned" icon="terp-gtk-media-pause" string="Assigned" domain="[('state','=','assigned')]"/>
+	                    <filter name="released" icon="terp-dolar" string="Released" domain="[('state','=','released')]"/>
+	                    <filter name="cleared" icon="terp-stock_effects-object-colorize" string="Cleared" domain="[('state','=','cleared')]"/>
+	                    <filter name="cancelled" icon="gtk-cancel" string="Cancelled" domain="[('state','=','cancelled')]"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        
+        <record model="ir.ui.view" id="rpcn_tree">
+            <field name="name">rpcn.tree</field>
+            <field name="model">res.partner.check.numbers</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Check Monitoring" editable="top">
+                    <field name="bank_account_id" readonly="1"/>
+                    <field name="name" readonly="1"/>
+                    <field name="state" readonly="1"/>
+                    <field name="cancellation_reason" readonly="1" attrs="{'invisible':[('state','!=','cancelled')]}"/>
+                    <button string="Cancel" type="action" name="%(action_check_cancellation)d" icon="gtk-execute"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_rpcn_form">
+            <field name="name">Check Monitoring</field>
+            <field name="res_model">res.partner.check.numbers</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
         </record>
         
         
@@ -117,6 +217,8 @@
             </field>
         </record>
         
+        
+        
         <record id="view_ntm_res_partner_bank_tree" model="ir.ui.view">
             <field name="name">ntm.res.partner.bank.inherit.tree</field>
             <field name="model">res.partner.bank</field>
@@ -149,7 +251,6 @@
                 <tree string="Bank Transfer">
                     <field name="name"/>
                     <field name="journal_id"/>
-                    <field name="period_id"/>
                     <field name="date"/>
                     <field name="handler"/>
                 </tree>
@@ -164,7 +265,6 @@
                 <search string="Bank Transfer">
                     <field name="name"/>
                     <field name="journal_id"/>
-                    <field name="period_id"/>
                     <field name="date"/>
                     <field name="handler"/>	    
                     </search>
@@ -179,55 +279,39 @@
                 <form string="Bank Transfer">
                     <group colspan="6" col="6">
 	                    <field name="name"/>
-	                    <field name="journal_id" domain="[('type','=','bank')]" widget="selection"/>
-	                    <field name="period_id"/>
+	                    <field name="journal_id" domain="[('ownership','=','company')]" widget="selection"/>
 	                    <field name="date"/>
 	                    <field name="handler"/>
 	                    <field name="ref"/>
 	                    <field name="amount" readonly="True"/>
                     </group>
                     <notebook>
-                        <page string="Savings and Checking Accounts">
-                        <button name="%(action_btl_add)d" states="draft" string="Add Account" type="action" icon="terp-camera_test"/>
-                        <separator string="Savings Accounts" colspan="6"/>
+                        <page string="Savings Accounts">
 		                    <group colspan="6" col="2">
-			                    <field colspan="6" mode="tree,form" name="savings_ids" nolabel="1" domain="[('type','=','savings')]" readonly="True">
-			                       <tree string="Savings Accounts" editable="bottom">
-			                           <field name="partner_id"/>
+			                    <field colspan="6" mode="tree" name="savings_ids" nolabel="1" domain="[('type','=','savings')]" readonly="True">
+			                       <tree string="Savings Accounts">
+			                           <field name="name"/>
 			                           <field name="account_number" domain="[('type','=',type),('partner_id','=',partner_id)]"/>
-			                           <field name="analytic_id" domain="[('partner_id','=',partner_id)]"/>
+			                           <field name="analytic_id" domain="[('partner_id','=',partner_id)]" invisible="True"/>
 			                           <field name="amount"/>
 			                           <field name="type" invisible="True"/>
 			                       </tree>
-			                       <form string="Savings Accounts">
-		                               <field name="partner_id"/>
-		                               <field name="account_number"/>
-		                               <field name="analytic_id"/>
-		                               <field name="amount"/>
-		                               <field name="type"/>
-		                           </form>
 			                    </field>
 		                    </group>
-		                    <separator string="Checking Accounts" colspan="6"/>
-		                    <group colspan="6" col="2">
-                                <field colspan="6" mode="tree,form" name="checking_ids" nolabel="1" readonly="True" domain="[('type','=','checking')]">
-                                   <tree string="Checking Accounts" editable="bottom">
-                                       <field name="partner_id"/>
+	                    </page>
+	                    <page string="Checking Accounts">
+                            <group colspan="6" col="2">
+                                <field colspan="6" mode="tree" name="checking_ids" nolabel="1" readonly="True" domain="[('type','=','checking')]">
+                                   <tree string="Checking Accounts" >
+                                       <field name="name"/>
                                        <field name="account_number"/>
-                                       <field name="analytic_id"/>
+                                       <field name="analytic_id" invisible="True"/>
                                        <field name="amount"/>
                                        <field name="type" invisible="True"/>
                                    </tree>
-                                   <form string="Checking Accounts">
-                                       <field name="partner_id"/>
-                                       <field name="account_number"/>
-                                       <field name="analytic_id"/>
-                                       <field name="amount"/>
-                                       <field name="type" invisible="True"/>
-                                   </form>
                                 </field>
                             </group>
-	                    </page>
+                        </page>
 	                    <page string="Journal Entries">
 	                       <field name="move_id" colspan="6" readonly="1"/>
 	                       <field name="move_ids" colspan="6" readonly="1" nolabel="True"/>
@@ -288,7 +372,7 @@
 	                <field name="company_bank_id"/>
                     <field name="company_bank_name"/>
 	                <field name="account_id"/>
-	                <field name="entity_bank_id" domain="[('partner_id.name','=',account_name)]"/>
+	                <field name="entity_bank_id"/>
                 </tree>
             </field>
         </record>
@@ -326,7 +410,8 @@
                         <separator colspan="4" string="Valid Up to"/>
                         <field name="period_nbr" attrs="{'readonly':[('period_type','=','bimonthly')]}"/>
                         <field name="period_type"/>
-                        <button name="compute" string="Compute" type="object" icon="terp-stock_format-scientific" />
+                        <field name="compute" invisible="1"/>
+                        <button name="compute" string="Compute" type="object" icon="terp-stock_format-scientific" attrs="{'invisible':[('compute','=',True)]}"/>
                     </group>
                     <separator string="Remarks"/>
                     <field name="remarks" colspan="4" nolabel="1"/>
@@ -336,7 +421,7 @@
                                 <field name="name"/>
                                 <field name="date"/>
                                 <field name="state"/>
-                                <button name="cancel" string="Compute" type="object" icon="gtk-remove" attrs="{'invisible':[('state','=','cancel')]}"/>
+                                <button name="cancel" type="object" icon="gtk-remove" states="confirm"/>
                             </tree>
                         </field>
                     </group>
@@ -366,6 +451,7 @@
                      <field name="date"/>
                      <field name="amount"/>
                      <field name="state"/>
+                     <button name="cancel" states="confirm" string="Cancel" icon="gtk-cancel" type="object"/>
                 </tree>
             </field>
         </record>
@@ -399,13 +485,17 @@
                             <field name="amount"/>    
                         </group>
                         <group colspan="2" col="2">
-                            <field name="is_special"/>
-                            <field name="state"/>
+                            <field name="is_special" invisible="1"/>
                         </group>
                     </group>
                     <separator string="Remarks" colspan="2"/>
                     <newline/>
                     <field name="remarks" colspan="4" nolabel="1"/>
+                    <group colspan="4" col="13">
+                        <field name="state" readonly="1"/>
+                        <button name="cancel" attrs="{'invisible':[('state','in',['confirm'])]}" string="Cancel"  type="object"/>
+                        <button name="confirm" attrs="{'invisible':[('state','!=','draft')]}" string="Confirm"  type="object" />
+                    </group>
                 </form>
             </field>
         </record> 
@@ -422,7 +512,7 @@
             <field name="name">All Requests</field>
             <field name="res_model">bank.transfer.request</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="view_mode">tree</field>
             <field name="view_id" ref="view_bank_transfer_request_tree"/>
         </record>
         

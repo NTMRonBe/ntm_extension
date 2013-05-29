@@ -250,7 +250,8 @@ class account_journal(osv.osv):
     _columns = {
         'type': fields.selection([('sale', 'Sale'),('sale_refund','Sale Refund'), 
                                 ('purchase', 'Purchase'), ('purchase_refund','Purchase Refund'),
-                                ('transfer','Fund Transfer'), 
+                                ('transfer','Fund Transfer'),
+                                ('other_expenses','Other Expenses'), 
                                 ('forex','Foreign Exchanges'),
                                 ('pc_transfer','Petty Cash Transfers'),
                                 ('pbd','Phone Bill Distribution'),

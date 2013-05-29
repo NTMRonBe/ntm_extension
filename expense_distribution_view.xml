@@ -1,7 +1,44 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-
+        <record id="view_ntm_expense_rpcn_tree" model="ir.ui.view">
+            <field name="name">ntm.expense.rpcn.tree</field>
+            <field name="model">res.partner.check.numbers</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="rpcn_tree"/>
+            <field name="arch" type="xml">
+                <field name="state" position="after">
+                    <field name="payment_id"/>
+                </field>
+            </field>
+        </record>
+        
+        <record id="view_ntm_payments_phone_statement_form" model="ir.ui.view">
+            <field name="name">ntm.payments.phone_statement.form</field>
+            <field name="model">phone.statement</field>
+            <field name="type">form</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="phone_statement_form"/>
+            <field name="arch" type="xml">
+                <page string="Journal Entries" position="after">
+                    <page string="Payment Details">
+                    <field name="payment_ids" mode="tree" nolabel="1" colspan="4">
+                                    <tree string="Payment Details">
+                                        <field name="date"/>
+                                        <field name="account_id"/>
+                                        <field name="ref"/>
+                                        <field name="debit" sum="Total Debit"/>
+                                        <field name="credit" sum="Total Credit"/>
+                                        <field name="currency_id" string="Encoding Currency"/>
+                                        <field name="amount_currency" string="Encoding Amount"/>
+                                    </tree>
+                                </field>
+                                </page>
+                </page>
+            </field>
+        </record>
+        
         <record id="edg_form" model="ir.ui.view">
             <field name="name">edg.form</field>
             <field name="model">expense.distribution.generic</field>
@@ -34,6 +71,17 @@
                                         <field name="date"/>
                                         <field name="account_id"/>
                                         <field name="analytic_account_id"/>
+                                        <field name="debit" sum="Total Debit"/>
+                                        <field name="credit" sum="Total Credit"/>
+                                        <field name="currency_id" string="Encoding Currency"/>
+                                        <field name="amount_currency" string="Encoding Amount"/>
+                                    </tree>
+                                </field>
+                                <field name="payment_ids" mode="tree" nolabel="1" colspan="4">
+                                    <tree string="Payment Details">
+                                        <field name="date"/>
+                                        <field name="account_id"/>
+                                        <field name="ref"/>
                                         <field name="debit" sum="Total Debit"/>
                                         <field name="credit" sum="Total Credit"/>
                                         <field name="currency_id" string="Encoding Currency"/>
@@ -86,16 +134,21 @@
                 <form string = "Check Payment">
                     <group colspan="4" col="4">
                         <field name="name" invisible="1"/>
-                        <field name="date"/>
-                        <field name="check_date"/>
-                        <field name="bank_account_id" widget="selection"/>
-                        <field name="check_number" domain="[('bank_account_id','=',bank_account_id),('state','=','available')]"/>
-                        <field name="ap_id" widget="selection" on_change="onchange_payables(ap_id,amount2pay)"/>
-                        <field name="amount2pay" on_change="onchange_payables(ap_id,amount2pay)"/>
+                        <field name="date" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        <field name="check_date" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        <field name="bank_account_id" widget="selection" required="1" attrs="{'readonly':[('check_number','!=',False)]}"/>
+                        <group colspan="2" col="4">
+                            <field name="check_number" domain="[('bank_account_id','=',bank_account_id),('state','=','available')]" readonly="1"/>
+                            <button name="fetch_check_num" attrs="{'invisible':[('check_number','!=',False)]}" string="Fetch Check"  type="object"/>
+                        </group>
+                        <group colspan="4" col="4" attrs="{'invisible':[('check_number','=',False)]}">
+	                        <field name="ap_id" widget="selection" on_change="onchange_payables(ap_id,amount2pay)" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                        <field name="amount2pay" on_change="onchange_payables(ap_id,amount2pay)" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        </group>
                     </group>
                     <notebook>
                         <page string="Unpaid Expenses">
-	                        <field mode="tree" name="payment_lines" nolabel="1" colspan="4">
+	                        <field mode="tree" name="payment_lines" nolabel="1" colspan="4" attrs="{'readonly':[('state','!=','draft')]}">
 	                            <tree string="Unpaid Expenses" editable="top">
 	                                <field name="name" readonly="1"/>
 	                                <field name="move_line_id" readonly="1"/>
@@ -123,9 +176,11 @@
                         </page>
                     </notebook>
                     <group colspan="4" col="13">
-                        <field name="state"/>
-                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
-                        <button name="check_lines" attrs="{'invisible':[('state','!=','draft')]}" string="Post Payment"  type="object" />
+                        <field name="state" readonly="1"/>
+                        <button name="cancel" attrs="{'invisible':[('state','in',['cancelled','posted','draft'])]}" string="Cancel"  type="object"/>
+                        <button name="check_lines" attrs="{'invisible':[('state','!=','draft')]}" string="Reserve"  type="object" />
+                        <button name="set2draft" attrs="{'invisible':[('state','!=','reserved')]}" string="Set to Draft" type="object"/>
+                        <button name="post" attrs="{'invisible':[('state','!=','reserved')]}" string="Release"  type="object" />
                     </group>
                 </form>
             </field>
@@ -139,6 +194,7 @@
                     <field name="bank_account_id"/>
                         <field name="check_number"/>
                         <field name="ap_id"/>
+                        <field name="state"/>
                 </tree>
             </field>
         </record>
@@ -147,6 +203,7 @@
             <field name="name">Check Payments</field>
             <field name="res_model">expense.check.payment</field>
             <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
         </record>
         
     </data>
