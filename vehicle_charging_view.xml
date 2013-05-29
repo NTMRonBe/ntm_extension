@@ -118,7 +118,7 @@
                             <separator string="Travel Log"/>
                             <field name="shared_trip" attrs="{'readonly':[('state','!=','draft')]}"/>
                             <field name="start_km" readonly="1"/>
-                            <field name="end_km" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="end_km" attrs="{'readonly':[('state','!=','draft')]}" on_change="onchange_ending(end_km,start_km)"/>
                             <field name="kms" readonly="1"/>
                         </group>
                         <group colspan="2" col="2">

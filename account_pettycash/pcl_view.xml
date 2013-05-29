@@ -112,11 +112,7 @@
             <field name="view_id" ref="pcl_tree"/>
         </record>
         
-        <menuitem id="menu_pcl" 
-            action="action_pcl_form" 
-            parent="main_pettycash"
-            sequence="60" 
-            groups="base.group_user"/>
+       
             
             
             
@@ -187,11 +183,7 @@
             <field name="target">new</field>-->
         </record>
         
-        <menuitem id="menu_be" 
-            action="action_be_form" 
-            parent="main_pettycash"
-            sequence="20" 
-            groups="base.group_user"/> 
+         
 
     </data>
 </openerp>

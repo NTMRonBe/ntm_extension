@@ -112,11 +112,7 @@
 		    <field name="view_type">form</field>
         </record>
         
-        <menuitem id="menu_pcr" 
-            action="action_pcr_form" 
-            parent="main_pettycash"
-            sequence="50" 
-            groups="base.group_user"/>  
+        
 
     </data>
 </openerp>

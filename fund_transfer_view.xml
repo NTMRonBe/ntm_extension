@@ -87,7 +87,7 @@
         </record>     
                 
         <record id="action_fund_transfer_b2b_tree" model="ir.actions.act_window">
-            <field name="name">Bank to Bank</field>
+            <field name="name">Internal Bank Transfer</field>
             <field name="res_model">fund.transfer</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>
@@ -233,7 +233,7 @@
         </record>     
                 
         <record id="action_people2proj_tree" model="ir.actions.act_window">
-            <field name="name">PAT to Project Account</field>
+            <field name="name">PAT to Project</field>
             <field name="res_model">internal.account.transfer</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>
@@ -242,7 +242,7 @@
             <field name="domain">[('transfer_type','=','people2proj')]</field>
         </record>
         <record id="action_proj2people_tree" model="ir.actions.act_window">
-            <field name="name">Project to PAT Account</field>
+            <field name="name">Project to PAT</field>
             <field name="res_model">internal.account.transfer</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>

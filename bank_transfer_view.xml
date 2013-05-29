@@ -252,7 +252,7 @@
         </record>
         
         <record id="action_ntm_res_partner_bank_company_tree" model="ir.actions.act_window">
-            <field name="name">Company Bank Accounts</field>
+            <field name="name">Company Owned</field>
             <field name="res_model">res.partner.bank</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>
@@ -261,12 +261,20 @@
         </record>
         
         <record id="action_ntm_res_partner_bank_entity_tree" model="ir.actions.act_window">
-            <field name="name">Missionary Bank Accounts</field>
+            <field name="name">People and Teams</field>
             <field name="res_model">res.partner.bank</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>
             <field name="context">{'ownership':'entity'}</field>
-            <field name="domain">[('ownership','=','entity')]</field>
+            <field name="domain">[('ownership','=','entity'),('partner_id.supplier','=',True)]</field>
+        </record>
+        <record id="action_ntm_res_partner_bank_project_tree" model="ir.actions.act_window">
+            <field name="name">Projects</field>
+            <field name="res_model">res.partner.bank</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="context">{'ownership':'entity'}</field>
+            <field name="domain">[('ownership','=','entity'),('partner_id.project','=',True)]</field>
         </record>
 
 

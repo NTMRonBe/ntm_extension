@@ -1,10 +1,6 @@
 <?xml version="1.0"?>
 <openerp>
     <data>        
-        <menuitem id="main_pettycash"
-            name="Petty Cash"
-            sequence="30"  web_icon="images/safe.png"
-            web_icon_hover="images/safe_hover.png"/>
         <!--Denominations-->
         <record id="denominations_form" model="ir.ui.view">
             <field name="name">denom.form</field>
@@ -51,11 +47,6 @@
 		    <field name="view_type">form</field>
         </record>
         
-        <menuitem id="menu_denom" 
-            action="action_denom_form" 
-            parent="account.menu_configuration_misc"
-            sequence="50" 
-            groups="base.group_user"/>  
         
         <!--Petty Cash Denominations-->
         <record id="pettycash_denom_form" model="ir.ui.view">
@@ -235,11 +226,7 @@
 		    <field name="view_type">form</field>
         </record>
         
-        <menuitem id="menu_pettycash_transfer" 
-            action="action_pettycash_transfer_form" 
-            parent="main_pettycash"
-            sequence="40" 
-            groups="base.group_user"/>  
+          
         
     <!--Petty Cash Views-->
         <record id="pettycash_form" model="ir.ui.view">
@@ -320,11 +307,7 @@
         </record>
 
         
-        <menuitem id="menu_pettycash" 
-            action="action_pettycash_form" 
-            parent="main_pettycash"
-            sequence="10" 
-            groups="base.group_user"/>  
+          
 
     </data>
 </openerp>

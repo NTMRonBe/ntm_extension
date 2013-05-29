@@ -58,11 +58,7 @@
 		    <field name="view_type">form</field>
         </record>
         
-        <menuitem id="menu_crs" 
-            action="action_crs_form" 
-            parent="main_pettycash"
-            sequence="20" 
-            groups="base.group_user"/>  
+          
             
         
         
@@ -184,11 +180,7 @@
 		    <field name="view_type">form</field>
         </record>
         
-        <menuitem id="menu_pcd" 
-            action="action_pcd_form" 
-            parent="main_pettycash"
-            sequence="30" 
-            groups="base.group_user"/>  
+          
             
     </data>
 </openerp>
