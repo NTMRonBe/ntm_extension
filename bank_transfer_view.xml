@@ -140,7 +140,7 @@
                     <field name="name" readonly="1"/>
                     <field name="state" readonly="1"/>
                     <field name="cancellation_reason" readonly="1" attrs="{'invisible':[('state','!=','cancelled')]}"/>
-                    <button string="Cancel" type="action" name="%(action_check_cancellation)d" icon="gtk-execute"/>
+                    <button string="Cancel" type="action" name="%(action_check_cancellation)d" states='available' icon="gtk-execute"/>
                 </tree>
             </field>
         </record>
@@ -152,34 +152,6 @@
         </record>
         
         
-        <record id="btl_add_view" model="ir.ui.view">
-            <field name="name">Add Account</field>
-            <field name="model">bank.transfer.line.add</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-	            <form string="Add Account">
-	                <separator string="Add Account" colspan="6"/>
-		                <group colspan="6" col="6">
-		                    <field name="partner_id" on_change="onchange_partner(partner_id)"/>
-		                    <field name="account_number" domain="[('type','=',type),('partner_id','=',partner_id)]"/>
-                            <field name="analytic_id" domain="[('partner_id','=',partner_id)]"/>
-		                    <field name="amount"/>
-		                    <field name="type"/>
-		                </group>
-		                <button name="add_account" string="Add Account" type="object" icon="terp-camera_test"/>
-	            </form>
-            </field>
-        </record>
-
-        <record id="action_btl_add" model="ir.actions.act_window">
-            <field name="name">Add Account</field>
-            <field name="res_model">bank.transfer.line.add</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="btl_add_view"/>
-            <field name="target">new</field>
-        </record>
-    
         <record id="view_ntm_res_partner_bank_form" model="ir.ui.view">
             <field name="name">ntm.res.partner.bank.inherit</field>
             <field name="model">res.partner.bank</field>
@@ -290,6 +262,7 @@
 		                    <group colspan="6" col="2">
 			                    <field colspan="6" mode="tree" name="savings_ids" nolabel="1" domain="[('type','=','savings')]" readonly="True">
 			                       <tree string="Savings Accounts">
+			                           <field name="request_id"/> 
 			                           <field name="name"/>
 			                           <field name="account_number" domain="[('type','=',type),('partner_id','=',partner_id)]"/>
 			                           <field name="analytic_id" domain="[('partner_id','=',partner_id)]" invisible="True"/>
@@ -303,6 +276,7 @@
                             <group colspan="6" col="2">
                                 <field colspan="6" mode="tree" name="checking_ids" nolabel="1" readonly="True" domain="[('type','=','checking')]">
                                    <tree string="Checking Accounts" >
+                                       <field name="request_id"/> 
                                        <field name="name"/>
                                        <field name="account_number"/>
                                        <field name="analytic_id" invisible="True"/>
@@ -421,6 +395,8 @@
                                 <field name="name"/>
                                 <field name="date"/>
                                 <field name="state"/>
+                                <field name="transfer_id"/>
+                                <field name="transfer_state"/>
                                 <button name="cancel" type="object" icon="gtk-remove" states="confirm"/>
                             </tree>
                         </field>
@@ -451,6 +427,8 @@
                      <field name="date"/>
                      <field name="amount"/>
                      <field name="state"/>
+                     <field name="transfer_id"/>
+                     <field name="transfer_state"/>
                      <button name="cancel" states="confirm" string="Cancel" icon="gtk-cancel" type="object"/>
                 </tree>
             </field>

@@ -276,6 +276,7 @@
                     <separator string="File Locations" colspan="4"/>
                     <group colspan="4" col="2">
                         <field name="calls_dbf"/>
+                        <field name="voucher_dbf"/>
                     </group>
                 </field>
             </field>

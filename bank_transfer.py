@@ -144,12 +144,12 @@ class bank_transfer_request(osv.osv):
 
 bank_transfer_request()
 
-class btr(osv.osv):
+class bts(osv.osv):
     _inherit = 'bank.transfer.schedule'
     _columns = {
         'lines_id': fields.one2many('bank.transfer.request', 'schedule_id', 'Subscription Lines')
         }
-btr()
+bts()
 
 class bank_transfer(osv.osv):
     
@@ -176,11 +176,23 @@ class bank_transfer(osv.osv):
             }
 bank_transfer()
 
+class btr(osv.osv):
+    _inherit = 'bank.transfer.request'
+    _columns = {
+            'transfer_id':fields.many2one('bank.transfer','Transfer Reference', readonly=True),
+            'transfer_state':fields.selection([
+                            ('draft','Draft'),
+                            ('done','Transferred'),
+                            ],'State'),
+            }
+btr()
+
 class bank_transfer_line(osv.osv):
     _name = 'bank.transfer.line'
     _description = 'Bank Transfer Lines'
     _columns = {
         'transfer_id':fields.many2one('bank.transfer','Transfer ID',ondelete='cascade'),
+        'request_id':fields.many2one('bank.transfer.request','Request ID'),
         'account_number':fields.many2one('res.partner.bank','Bank Account', required=True),
         'name': fields.related('analytic_id','name', type='char',size=64,string='Account Name', readonly=True),
         'analytic_id':fields.many2one('account.analytic.account','Account', required=True),
@@ -191,76 +203,6 @@ class bank_transfer_line(osv.osv):
                             ],'Type', required=True),
         }
 bank_transfer_line()
-
-class btl_add(osv.osv_memory):
-    _name = 'bank.transfer.line.add'
-    _columns = {
-        'partner_id':fields.many2one('res.partner','People/Project', required=True),
-        'account_number':fields.many2one('res.partner.bank','Bank Account', required=True),
-        'analytic_id':fields.many2one('account.analytic.account','Account', required=True),
-        'amount':fields.float('Amount', required=True),
-        'type':fields.selection([
-                            ('savings','Savings'),
-                            ('checking','Checking'),
-                            ],'Type', required=True),
-        }
-    def onchange_partner(self, cr, uid, ids, partner_id=False):
-        result = {}
-        acc_account = False
-        if partner_id:
-            partner_read = self.pool.get('res.partner').read(cr, uid, partner_id,['name'])
-            partner_name = partner_read['name']
-            bank_ids = self.pool.get('res.partner.bank').search(cr, uid, [('partner_id','=',partner_id)])
-            if not bank_ids:
-                raise osv.except_osv(_('Error !'), _('%s has no bank account defined. Please define one.')%partner_name)
-            acc_ids = self.pool.get('account.analytic.account').search(cr, uid, [('partner_id','=',partner_id)])
-            if not acc_ids:
-                raise osv.except_osv(_('Error !'), _('%s has no analytic account defined. Please define one.')%partner_name)
-            elif acc_ids:
-                acc_ctr = 0
-                for acc_id in acc_ids:
-                    acc_ctr += 1
-                    acc_account = acc_id
-                if acc_ctr > 1:
-                    raise osv.except_osv(_('Error !'), _('%s has %s bank accounts defined. Multiple bank accounts are not allowed')%(partner_name, acc_ctr))
-                elif acc_ctr==1:
-                    acc_account = acc_account
-            result = {'value':{
-                    'analytic_id':acc_account,
-                    }
-                }
-        elif not partner_id:
-            result = {'value':{
-                    'analytic_id':False,
-                    }
-                }
-        return result
-    
-    def add_account(self, cr, uid, ids, context=None):
-        for add in self.read(cr, uid, ids, context=context):
-            if add['amount']<1.00:
-                raise osv.except_osv(_('Error !'), _('You can not have 0.00 as the amount for transfer!'))
-            elif add['amount']>0.00:
-                for id in context['active_ids']:
-                    lines = self.pool.get('bank.transfer.line').search(cr, uid, [('partner_id','=',add['partner_id']),
-                                                                                 ('account_number','=',add['account_number']),
-                                                                                 ('transfer_id','=',id)])
-                    if lines:
-                        raise osv.except_osv(_('Error !'), _('The account is already included!'))
-                    elif not lines:
-                        values = {
-                            'partner_id':add['partner_id'],
-                            'account_number':add['account_number'],
-                            'analytic_id':add['analytic_id'],
-                            'amount':add['amount'],
-                            'type':add['type'],
-                            'transfer_id':id,
-                            }
-                        self.pool.get('bank.transfer.line').create(cr, uid,values)
-        return {'type': 'ir.actions.act_window_close'}
-                    
-btl_add()
-    
 
 class bt(osv.osv):
     _inherit = 'bank.transfer'
@@ -505,7 +447,9 @@ class bank_transfer_wizard(osv.osv_memory):
     
     def generate(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
-            req_search = self.pool.get('bank.transfer.request').search(cr, uid, [('state','=','confirm'),('date','<=',form['name']),('company_bank_id','=',form['bank_id'])])
+            req_search = self.pool.get('bank.transfer.request').search(cr, uid, [('state','=','confirm'),
+                                                                                 ('date','<=',form['name']),
+                                                                                 ('company_bank_id','=',form['bank_id'])])
             if req_search:
                 transfer = {
                     'journal_id':form['bank_id'],
@@ -520,12 +464,14 @@ class bank_transfer_wizard(osv.osv_memory):
                         'analytic_id':req_read['account_id'][0],
                         'amount':req_read['amount'],
                         'transfer_id':transfer_id,
+                        'request_id':requests,
                         }
                     if bank_read['type']=='savings':
                         vals.update({'type':'savings'})
                     elif bank_read['type']=='checking':
                         vals.update({'type':'checking'})
                     self.pool.get('bank.transfer.line').create(cr, uid, vals)    
+                    self.pool.get('bank.transfer.request').write(cr, uid, requests,{'transfer_id':transfer_id,'transfer_state':'draft'})
                 return {
                     'domain': "[('id', 'in', ["+str(transfer_id)+"])]",
                     'name': 'Bank Transfer',

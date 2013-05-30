@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_voucher_file_import_form" model="ir.ui.view">
+            <field name="name">File Import</field>
+            <field name="model">voucher.file.import</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Import Voucher">
+                        <group colspan="4">
+                            <separator string="Voucher Import" colspan="4"/>
+                            <group col="4">
+                                <label string="Select voucher to import (.dbf file):" colspan="4"/>
+                                <field name="voucher_file" colspan="4" filename="file_name"/>
+                            </group>
+                        </group>
+                        <group colspan="4" col="4">
+                            <separator string="" colspan="8"/>
+                            <label colspan="6" width="220"/>
+                            <button special="cancel" string="Cancel" icon="gtk-cancel"/>
+                            <button name="importzip" string="Import module" type="object" icon="gtk-apply"/>
+                        </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_view_voucher_file_import" model="ir.actions.act_window">
+            <field name="name">Voucher Import</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">voucher.file.import</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+
+    </data>
+</openerp>
+

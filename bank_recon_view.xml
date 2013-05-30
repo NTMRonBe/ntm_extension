@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="wtc_bank_recon_form" model="ir.ui.view">
+            <field name="name">wtc.bank.recon.form</field>
+            <field name="model">bank.recon</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string ="Wire Transfer Clearing">
+                    <group colspan="4" col="4">
+	                    <field name="name" invisible="1"/>
+	                    <field name="bank_id" domain="[('type','=','savings')]"/>
+	                    <field name="date"/>
+	                    <field name="type" invisible="1"/>
+                    </group>
+                    <field name="state" />
+                </form>
+            </field>
+        </record>
+            
+        <record model="ir.ui.view" id="bank_recon_tree">
+            <field name="name">bank.recon.tree</field>
+            <field name="model">bank.recon</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Bank Reconciliation">
+                    <field name="name"/>
+                    <field name="bank_id"/>
+                    <field name="date"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_wire_transfer_clearing_form">
+            <field name="name">Wire Transfer Clearing</field>
+            <field name="res_model">bank.recon</field>
+            <field name="view_type">form</field>
+            <field name="context">{'type':'wire_transfer_clearing'}</field>
+            <field name="domain">[('type','=','wire_transfer_clearing')]</field>
+            <field name="view_id" ref="bank_recon_tree"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="action_wtc_form">
+            <field name="act_window_id" ref="action_wire_transfer_clearing_form"/>
+            <field name="view_id" ref="wtc_bank_recon_form"/>
+            <field name="view_mode">form</field>
+        </record>
+        
+        
+        
+        
+        <record id="cc_bank_recon_form" model="ir.ui.view">
+            <field name="name">cc.bank.recon.form</field>
+            <field name="model">bank.recon</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string ="Check Clearing">
+                    <group colspan="4" col="4">
+                        <field name="name" invisible="1"/>
+                        <field name="bank_id" domain="[('ownership','=','company'),('type','=','checking')]"/>
+                        <field name="date"/>
+                        <field name="type" invisible="1"/>
+                    </group>
+                    <field name="state" />
+                </form>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_check_clearing_form">
+            <field name="name">Check Clearing</field>
+            <field name="res_model">bank.recon</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'type':'check_clearing'}</field>
+            <field name="domain">[('type','=','check_clearing')]</field>
+        </record>
+        
+        <record model="ir.actions.act_window.view" id="action_cc_tree">
+            <field name="act_window_id" ref="action_check_clearing_form"/>
+            <field name="view_id" ref="bank_recon_tree"/>
+            <field name="view_mode">tree</field>
+            <field name="sequence">10</field>
+        </record>
+        <record model="ir.actions.act_window.view" id="action_cc_form">
+            <field name="act_window_id" ref="action_check_clearing_form"/>
+            <field name="view_id" ref="cc_bank_recon_form"/>
+            <field name="view_mode">form</field>
+            <field name="sequence">20</field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_fund_transfer_clearing_form">
+            <field name="name">Fund Transfer Clearing</field>
+            <field name="res_model">bank.recon</field>
+            <field name="view_type">form</field>
+            <field name="context">{'type':'fund_transfer_clearing'}</field>
+            <field name="domain">[('type','=','fund_transfer_clearing')]</field>
+        </record>
+        
+    </data>
+</openerp>

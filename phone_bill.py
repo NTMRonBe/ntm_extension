@@ -490,8 +490,7 @@ class callsdbf_reader(osv.osv_memory):
                 dialnumber=dialnumber[0]
                 sprice = (record.price)
                 stat = str(record.status)
-                stat = stat.split(' ')
-                stat=stat[0]
+                stat = stat.rstrip()
                 iduration = str(record.iduration)
                 itime = str(record.itime)
                 if co==line_name and date >=start_date and date<=end_date:
@@ -500,7 +499,7 @@ class callsdbf_reader(osv.osv_memory):
                     sprice = float(sprice)
                     amount = "%.2f" % sprice
                     sprice = float(amount) 
-                    if sprice>0.00:
+                    if stat not in ['Local','Incoming']:
                         vals = {
                             'name':date,
                             'line_id':form['line_id'],

@@ -21,6 +21,7 @@ class res_company(osv.osv):
         'transit_php':fields.many2one('account.account','PHP Transit Account', required=True),
         'transit_usd':fields.many2one('account.account','USD Transit Account', required=True),
         'calls_dbf':fields.char('Calls.dbf location',size=64),
+        'voucher_dbf':fields.char('US/CA Voucher location',size=64),
         'phone_bill_ap':fields.many2one('account.account','Phonebill Payable Account', required=True),
         'other_ap':fields.many2one('account.account','Other Payable Accounts', required=True),
         }
