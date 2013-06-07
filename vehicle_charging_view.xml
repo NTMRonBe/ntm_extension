@@ -12,6 +12,10 @@
                         <field name="account_id" colspan="4"/>
                         <field name="percentage" colspan="2"/>
                     </group>
+                    <separator string="Remarks" colspan="4"/>
+                    <group colspan="4">
+                        <field name="remarks" colspan="4" nolabel="1"/>
+                    </group>
                     <button name="data_save" string="Add"  type="object" icon="gtk-jump-to"/>
                </form>
             </field>
@@ -139,8 +143,9 @@
                            <group col="2"  attrs="{'invisible':[('shared_trip','=',False)]}">
 	                           <button name="%(action_add_vehicle)d" attrs="{'invisible':[('state','!=','draft')]}" string="Add Account" type="action" icon="terp-camera_test"/>
 	                           <field colspan="4" mode="tree" name="shared_ids"  readonly="1" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1">
-	                               <tree string="Expense Distribution">
+	                               <tree string="Account Distribution Lists">
 		                               <field name="name"/>
+		                               <field name="remarks"/>
 		                               <field name="account_id" invisible="1"/>
 		                               <field name="percentage" readonly="1" sum="Total Percentage"/>
 		                               <field name="amount" readonly="1" sum="Total Charges"/>

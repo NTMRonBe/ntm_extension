@@ -56,10 +56,21 @@ class voucher_file_import(osv.osv_memory):
         (data,) = self.browse(cr, uid, ids , context=context)
         module_data = data.voucher_file
         val = base64.decodestring(module_data)
-        print val
         fp = open(file,'wb')
         fp.write(val)
         fp.close
+        return True
+    
+    def distribute(self, cr, uid, ids, context):
+        user = uid
+        user_read =self.pool.get('res.users').read(cr, uid, user, ['company_id'])
+        company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['voucher_dbf'])
+        voucher_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'],['name'])
+        voucher_name = voucher_read['name']
+        voucher_name = voucher_name.replace(' ','_')
+        voucher_name = voucher_name.replace('/','_')
+        filename=company_read['voucher_dbf']
+        dbf_file = filename+voucher_name
         table = dbf.Table(dbf_file)
         table.open()
         for rec in table:

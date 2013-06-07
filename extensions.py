@@ -24,6 +24,10 @@ class res_company(osv.osv):
         'voucher_dbf':fields.char('US/CA Voucher location',size=64),
         'phone_bill_ap':fields.many2one('account.account','Phonebill Payable Account', required=True),
         'other_ap':fields.many2one('account.account','Other Payable Accounts', required=True),
+        'contribution':fields.float('Contribution Percentage'),
+        'donations':fields.many2one('account.account','Donations Account', required=True),     
+        'bank_charge':fields.many2one('account.account','Bank Charges Account', required=True),
+        'contributions_acct':fields.many2one('account.account','Contributions Account'),
         }
 res_company()
 

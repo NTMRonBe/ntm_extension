@@ -1,128 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-
+        <record id="account.view_account_period_tree" model="ir.ui.view">
+            <field name="name">account.period.tree</field>
+            <field name="model">account.period</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+              <tree colors="blue:state in ('draft');gray:state in ('done') " string="Period">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="date_start"/>
+                    <field name="date_stop"/>
+                    <field name="special"/>
+                    <field name="state"/>
+                    <button name="revaluate_period" states="draft" string="Close Period" type="object" icon="terp-camera_test"/>
+                </tree>
+            </field>
+        </record>
+        
         <record id="view_account_revaluation" model="ir.ui.view">
             <field name="name">account.revaluation.form</field>
             <field name="model">account.revaluation</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Revaluate Period Entries">
-                <group colspan="8" col="2">
-	                   <group colspan="8" col="4">
+                <group colspan="4" col="2">
+	                   <group colspan="4" col="4">
 	                       <field name="period_id" domain="[('state','!=','done')]" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
-	                       <field name="company_id" readonly="1"/>
-	                       <field name="comp_curr" readonly="1"/>
-	                       <field name="comp_curr_beg_bal" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                       <field name="name"/>
 	                   </group>
+	                   <button string="Fetch Entries"
+                                                type="object"
+                                                name="compute_totals"
+                                                icon="gtk-execute"/>
 	                   <notebook>
-	                   <page string="Currency Lists">
-		                    <field colspan="8" mode="tree,form" name="currency_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" height="300">
-		                        <form string="Currencies">
-		                            <field name="currency_id"/>
-		                            <field name="beg_bal"/>
-		                            <field name="ap_bal"/>
-		                            <field name="start_rate"/>
-		                            <field name="weighted_rate"/>
-									<field name="end_rate" readonly="1"/>
-		                            <field name="post_rate"/>
-		                        </form>
-		                        <tree string="Currencies" editable="bottom">
-		                            <field name="currency_id" readonly="1"/>
-		                            <field name="beg_bal"/>
-	                                <field name="ap_bal"/>
-		                            <field name="start_rate" readonly="1"/>
-		                            <field name="weighted_rate" readonly="1"/>
-									<field name="end_rate" readonly="1"/>
-		                            <field name="post_rate"/>
-		                        </tree>
-							</field>
-						</page>
-						<page string = "Accounts for Partial Revaluation">
-							<field colspan="8" mode="tree,form" name="account_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" height="300">
-	                            <form string = "Accounts for Partial Revaluation">
-	                                <field name="account_id" readonly="1"/>
-	                                <field name="bal_beg" readonly="1"/>
-	                                <field name="bal_ap" readonly="1"/>
-	                                <field name="diff" readonly="1"/>
-	                                <field name="bal_end" readonly="1"/>
-	                            </form>
-	                            <tree string = "Accounts for Partial Revaluation">
-	                                <field name="account_id" readonly="1"/>
-	                                <field name="bal_beg" readonly="1"/>
-	                                <field name="bal_ap" readonly="1"/>
-	                                <field name="diff" readonly="1"/>
-	                                <field name="bal_end" readonly="1"/>
-	                            </tree>
-	                        </field>
-                        </page>
-                        <page string = "Accounting Entries to Revaluate">
-                            <field colspan="8" mode="tree,form" name="line_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" width="700" height="300">
-                                <form string="Journal Items">
-                                    <field name="move_line_id" readonly="1"/>
-                                    <field name="account_id" readonly="1"/>
-                                    <field name="currency_id" readonly="1"/>
-                                    <field name="debit" readonly="1" invisible="1"/>
-                                    <field name="credit" readonly="1" invisible="1"/>
-                                    <field name="post_rate" readonly="1"/>
-                                    <field name="reval_amount" readonly="1"/>
-                                </form>
-                                <tree string="Journal Items" editable="bottom">
-                                    <field name="move_line_id" readonly="1"/>
-                                    <field name="account_id" readonly="1"/>
-                                    <field name="debit" readonly="1" invisible="0"/>
-                                    <field name="credit" readonly="1" invisible="0"/>
-                                    <field name="currency_id" readonly="1"/>
-                                    <field name="amount_currency" readonly="1"/>
-                                    <field name="reval_amount" readonly="1"/>
-                                    <field name="diff" readonly="1"/>
-                                    <field name="bal_ap" readonly="1"/>
-                                    <field name="bal_end" readonly="1"/>
-                                </tree>
-                            </field>
-                        </page>
-                        <page string = "Gain/Loss Accounts">
-                            <field colspan="8" mode="tree,form" name="gain_loss_ids" nolabel="1" attrs="{'readonly':[('base','=',True)]}" width="700" height="300">
-                                <form string="Gain/Loss Accounts">
-                                    <field name="account_id" readonly="1"/>
-                                    <field name="gain_loss" readonly="1"/>
-                                </form>
-                                <tree string="Gain/Loss Accounts" editable="bottom">
-                                    <field name="account_id" readonly="1"/>
-                                    <field name="rel_pr_account" readonly="1"/>
-                                    <field name="gain_loss" readonly="1"/>
-                                </tree>
-                            </field>
-                        </page>
-						</notebook>
-						<group colspan="4" col="10">
-						<field name="state" readonly="1"/>
-						<button string="Get Currencies"
+	                       <page string="Foreign Exchanges">
+	                           <group colspan="4">
+	                               <field name="exchange_ids" mode="tree" nolabel="1" readonly="1">
+	                                   <tree string="Exchanges">
+		                                   <field name="name"/>
+		                                   <field name="period_id"/>
+		                                   <field name="journal_id"/>
+		                                   <field name="src"/>
+		                                   <field name="src_amount"/>
+		                                   <field name="dest"/>
+		                                   <field name="dest_amount"/>
+		                                   <field name="rate"/>
+	                                   </tree>
+	                               </field>
+	                           </group>
+	                           <separator string="Totals based on company currency" colspan="4"/>
+	                           <group colspan="4" col="4">
+	                               <group colspan="2" col="2">
+	                                   <separator string="Source Account Exchanges" colspan="2"/>
+	                                   <group colspan="2" col="2">
+	                                   <field name="src_total1" readonly="1"/>
+	                                   <field name="dest_total1" readonly="1"/>
+	                                   </group>
+	                               </group>
+	                               <group colspan="2" col="2">
+                                       <separator string="Destination Account Exchanges" colspan="2"/>
+                                       <group colspan="2" col="2">
+                                       <field name="src_total2" readonly="1"/>
+                                       <field name="dest_total2" readonly="1"/>
+                                       </group>
+                                   </group>
+	                           </group>
+	                           <separator string="Secondary Currency Details" colspan="4"/>
+	                           <group colspan="4" col="4">
+	                               <field name="second_curr" readonly="1"/>
+	                               <field name="start_rate" readonly="1"/>
+	                               <field name="weighted_rate" readonly="1"/>
+	                               <field name="post_rate"/>
+	                           </group>
+	                       </page>
+	                       <page string="Beginning Balances">
+	                           <field name="account_ids" mode="tree" nolabel="1" readonly="1">
+	                               <tree string="Accounts for Revaluation">
+	                                   <field name="account_id"/>
+	                                   <field name="bal_beg"/>
+	                                   <field name="comp_curr_bal"/>
+	                                   <field name="second_curr_bal"/>
+	                                   <field name="bal_ap"/>
+	                                   <field name="diff"/>
+	                                   <field name="bal_end"/>
+	                               </tree>
+	                           </field>
+                           </page>
+                           <page string="Entries for Revaluation">
+                                <field name="entry_ids" mode="tree" nolabel="1" readonly="1">
+                                    <tree string="Accounting Entries">
+                                        <field name="date"/>
+                                        <field name="name"/>
+                                        <field name="account_id"/>
+                                        <field name="analytic_account_id"/>
+                                        <field name="debit"/>
+                                        <field name="credit"/>
+                                        <field name="currency_id" string="Encoding Currency"/>
+                                        <field name="amount_currency" string="Encoding Amount"/>
+                                    </tree>
+                                </field>
+                           </page>
+                           <page string="Revaluation Result">
+                           </page>
+					   </notebook>
+					   <group colspan="4" col="10">
+					   <field name="state" readonly="1"/>
+					   <button string="Get Currencies"
 	                                            type="object"
 	                                            name="get_details"
 	                                            icon="gtk-execute"
 	                                            attrs="{'invisible': [('state','!=','draft')]}"
 	                                            confirm="Are you sure??"
 	                                            />
-                        <button string="Adjust per Post Rate"
+                       <button string="Adjust per Post Rate"
                                                 type="object"
                                                 name="adjust_post_rate"
                                                 icon="gtk-execute"
                                                 attrs="{'invisible': [('state','!=','test_reval')]}"
                                                 />
-                        <button string="Check Gain Loss"
+                       <button string="Check Gain Loss"
                                                 type="object"
                                                 name="check_gain_loss_accounts"
                                                 icon="gtk-execute"
                                                 attrs="{'invisible': [('state','!=','test_reval')]}"
                                                 />
-                        <button string="Compute Balance AP"
+                       <button string="Compute Balance AP"
                                                 type="object"
                                                 name="compute_balap"
                                                 icon="gtk-execute"
                                                 attrs="{'invisible': [('state','!=','data_fetched')]}"
                                                 />
-                        <button string="Check Revaluation"
+                       <button string="Check Revaluation"
                                                 type="object"
                                                 name="reval_entries"
                                                 icon="gtk-execute"
@@ -142,7 +151,7 @@
             <field name="view_id" ref="view_account_revaluation"/>
             <field name="target">new</field>
         </record>
-        
+        <!-- 
 		<menuitem
             name="Revaluate Entries"
             parent="account.menu_account_end_year_treatments"
@@ -150,6 +159,6 @@
             id="menu_account_revaluation"
             sequence="50"
            />
-
+ -->
     </data>
 </openerp>

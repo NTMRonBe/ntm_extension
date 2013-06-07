@@ -134,9 +134,9 @@ class soa_add_line(osv.osv):
         for soa in self.read(cr, uid, ids, context=None):
             date = datetime.datetime.now()
             date_now = date.strftime("%Y/%m/%d %H:%M")
-            debit = 0.00
-            credit=0.00
             for aal in self.pool.get('account.analytic.line').search(cr, uid, [('account_id','=',soa['account_number'][0]),('move_id.period_id','=',soa['period_id'][0])]):
+                debit = 0.00
+                credit=0.00
                 aal_read = self.pool.get('account.analytic.line').read(cr, uid, aal, ['date','amount'])
                 if aal_read['amount']<0.00:
                     credit = aal_read['amount'] / -1
@@ -153,17 +153,18 @@ class soa_add_line(osv.osv):
                         }
                     self.pool.get('account.soa.line').create(cr, uid, values)
             self.pool.get('account.soa').write(cr, uid, ids,{'date':date_now})
+            self.update_details(cr, uid, ids)
         return True
             
     def get_lines(self,cr, uid, ids, context=None):
         date = datetime.datetime.now()
         period = date.strftime("%m/%Y")
         date_now = date.strftime("%Y/%m/%d %H:%M")
-        debit = 0.00
-        credit=0.00
         for statement in self.pool.get('account.soa').search(cr, uid, [('period_id.name','=',period)]):
             soa_reader = self.pool.get('account.soa').read(cr, uid, statement, context=None)
             for aal in self.pool.get('account.analytic.line').search(cr, uid, [('account_id','=',soa_reader['account_number'][0]),('move_id.period_id','=',soa_reader['period_id'][0])]):
+                debit = 0.00
+                credit=0.00
                 aal_read = self.pool.get('account.analytic.line').read(cr, uid, aal, ['date','amount'])
                 if aal_read['amount']<0.00:
                     credit = aal_read['amount'] / -1

@@ -49,8 +49,8 @@
                         <tree string="Analytic Lines">
 							<field name="date"/>
 							<field name="name"/>
-							<field name="debit"/>
-							<field name="credit"/>
+							<field name="debit" sum="Total"/>
+							<field name="credit" sum="Total"/>
 							<field name="amount" invisible="1"/>
 							<field name="currency_amount"/>
                         </tree>

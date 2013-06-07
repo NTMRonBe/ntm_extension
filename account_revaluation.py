@@ -7,14 +7,14 @@ from tools.translate import _
 import decimal_precision as dp
 
 class account_revaluation(osv.osv):
+      
     _name = "account.revaluation"
     _description = "Account Revaluations"
     _columns = {
         'period_id':fields.many2one('account.period','Period to close'),
-        'company_id':fields.related('period_id','company_id',type='many2one',relation='res.company',store=True,string="Company"),
-        'comp_curr':fields.related('company_id','currency_id',type='many2one',relation='res.currency',store=True,string="Company Currency"),
-        'comp_curr_beg_bal':fields.float('Beginning Balance'),
-        'currency_ids':fields.one2many('account.revaluation.currencies','period_close_id','Currencies', ondelete="cascade"),
+        'name':fields.date('Revaluation Date'),
+        'entry_ids': fields.many2many('account.move.line', 'account_reval_entry_rel', 'reval_id', 'entry_id', 'Journal Items'),
+        'exchange_ids':fields.many2many('forex.transaction','forex_reval_rel','forex_id','reval_id','Exchanges'),
         'state':fields.selection([
                                   ('draft','Draft'),
                                   ('data_fetched','Primary Data Fetched'),
@@ -22,14 +22,127 @@ class account_revaluation(osv.osv):
                                   ('test_reval','Revaluation Checked'),
                                   ('verify','Verify'),
                                   ], 'State'),
-        'line_ids':fields.one2many('account.revaluation.entries','period_close_id','Journal Items', ondelete="cascade"),
-        'gain_loss_ids':fields.one2many('account.revaluation.gain.loss','period_close_id','Gain/Loss Accounts', ondelete="cascade"),
-        'account_ids':fields.one2many('account.revaluation.accounts','period_close_id','PR Accounts', ondelete="cascade"),
+        'src_total1':fields.float('Source Total'),
+        'dest_total1':fields.float('Destination Total'),
+        'src_total2':fields.float('Source Total'),
+        'dest_total2':fields.float('Destination Total'),
+        'second_curr':fields.many2one('res.currency','Secondary Currency'),
+        'start_rate':fields.float('Start Rate',digits=(16,5)),
+        'weighted_rate':fields.float('Weighted Rate',digits=(16,5)),
+        'post_rate':fields.float('Post Rate',digits=(16,5)),
     }
+    
+    def _get_exchanges(self, cr, uid, ids, context=None):
+        return self.pool.get('forex.transaction').search(cr, uid ,[('period_id','=',ids['default_period_id'])])
+    
     _defaults = {
             'state':'draft',
+            'exchange_ids':_get_exchanges,
+            'name':lambda *a: time.strftime('%Y-%m-%d'),
             }
     
+    def compute_totals(self,cr, uid, ids, context=None):
+        for reval in self.read(cr, uid, ids, context=None):
+            src_1 = False
+            dest_1 = False
+            src_2 = False
+            dest_2 = False
+            curr_list = []
+            total_1 = False
+            total_2 = False
+            period_read= self.pool.get('account.period').read(cr, uid, reval['period_id'][0],['date_start','date_stop'])
+            for exchange in reval['exchange_ids']:
+                exchange_read = self.pool.get('forex.transaction').browse(cr, uid, exchange)
+                if exchange_read.src.currency_id.id==exchange_read.src.account_id.company_currency_id.id:
+                    src_1 +=exchange_read.src_amount
+                    dest_1 +=exchange_read.dest_amount
+                    if exchange_read.dest.currency_id.id not in curr_list:
+                        curr_list.append(exchange_read.dest.currency_id.id)
+                elif exchange_read.dest.currency_id.id==exchange_read.dest.account_id.company_currency_id.id:
+                    src_2 +=exchange_read.src_amount
+                    dest_2 +=exchange_read.dest_amount
+                    if exchange_read.src.currency_id.id not in curr_list:
+                        curr_list.append(exchange_read.src.currency_id.id)
+            rate_search = self.pool.get('res.currency.rate').search(cr, uid, [('currency_id','=',curr_list[0]),
+                                                                              ('name','>=',period_read['date_start']),
+                                                                              ('name','<=',period_read['date_stop'])])
+            start_rate = False
+            total_1 = src_1 - dest_2
+            total_2 = src_2 - dest_1
+            if total_1 <0.00:
+                total_1 = total_1 * -1
+            if total_2 < 0.00:
+                total_2 = total_2 * -1
+            weighted = total_2 / total_1
+            amount = "%.5f" % weighted
+            weighted = float(amount)
+            if rate_search:
+                rate_read = self.pool.get('res.currency.rate').read(cr, uid, rate_search[0],['rate'])
+                start_rate=rate_read['rate']
+            vals = {
+                'src_total1':src_1,
+                'dest_total1':dest_1,
+                'src_total2':src_2,
+                'dest_total2':dest_2,
+                'second_curr':curr_list[0],
+                'start_rate':start_rate,
+                'weighted_rate':weighted,
+                'post_rate':weighted,
+                }
+            self.write(cr, uid, ids, vals)
+            self.fetch_accounts(cr, uid, ids)
+        return True
+    def fetch_accounts(self, cr, uid, ids, context=None):
+        for reval in self.read(cr, uid, ids, context=None):
+            period_read= self.pool.get('account.period').read(cr, uid, reval['period_id'][0],['date_start'])
+            acc_search = self.pool.get('account.account').search(cr, uid, [('is_pr','=',True)])
+            for acc in acc_search:
+                check_acc = self.pool.get('account.revaluation.account').search(cr, uid, [('account_id','=',acc),('period_close_id','=',reval['id'])])
+                if not check_acc:
+                    move_search = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',acc),('date','<=',period_read['date_start'])])
+                    bal_beg = False
+                    for move in move_search:
+                        move_read = self.pool.get('account.move.line').read(cr, uid, move, ['debit','credit'])
+                        bal_beg +=move_read['debit']-move_read['credit']
+                    move_search2 = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',acc),('date','>=',period_read['date_start'])])
+                    if move_search2:
+                        vals = {
+                            'account_id':acc,
+                            'bal_beg':bal_beg,
+                            'period_close_id':reval['id'],
+                            }
+                        self.pool.get('account.revaluation.account').create(cr, uid, vals)
+                        move_lines=self.pool.get('account.move.line').search(cr, uid, [('account_id','=',acc),
+                                                                                       ('currency_id','=',reval['second_curr'][0]),
+                                                                                       ('period_id','=',reval['period_id'][0])])
+                        for move_line in move_lines:
+                            vals = {
+                                'reval_id':reval['id'],
+                                'entry_id':move_line,
+                                }
+                            cr.execute('''insert into account_reval_entry_rel(reval_id,entry_id) values (%s,%s)'''%(reval['id'],move_line))
+            self.compute_apbal(cr, uid, ids)
+        return True
+    def compute_apbal(self,cr, uid, ids, context=None):
+        for reval in self.read(cr, uid, ids, context=None):
+            for acc in reval['account_ids']:
+                acc_read =self.pool.get('account.revaluation.account').read(cr, uid, acc,context=None)
+                move_lines=self.pool.get('account.move.line').search(cr, uid, [('account_id','=',acc_read['account_id'][0]),
+                                                                                   ('currency_id','=',reval['second_curr'][0]),
+                                                                                   ('period_id','=',reval['period_id'][0])])
+                balance_ap = acc_read['bal_beg']
+                for move_line in move_lines:
+                    move_read = self.pool.get('account.move.line').read(cr, uid, move_line,['amount_currency','name','debit','credit'])
+                    print move_read
+                    print reval['weighted_rate']
+                    if move_read['debit']==0.00:
+                        add_balap = ((-1 * move_read['amount_currency'])/reval['weighted_rate'])
+                    elif move_read['credit']==0.00:
+                        add_balap = (move_read['amount_currency']/reval['weighted_rate'])
+                    balance_ap += add_balap
+                self.pool.get('account.revaluation.account').write(cr, uid, acc, {'bal_ap':balance_ap})
+        return True
+                
     def reval_entries(self, cr, uid, ids, context=None):
     	for reval in self.read(cr, uid, ids, ['id']):
     		period_close_id = reval['id']
@@ -98,8 +211,15 @@ class account_revaluation(osv.osv):
                     'bal_beg':balance,
                     }
                 ara_pool.create(cr, uid, values)
-        return True               
+        return True
+    
     def get_details(self, cr, uid, ids, context=None):
+        for reval in self.read(cr, uid, ids, context=None):
+            exchanges = self.pool.get('forex.transaction').search(cr, uid, [('period_id','=',context['default_period_id']),('state','=','post')])
+            self.write(cr, uid, ids, {'exchange_ids':exchanges})
+        return True
+    
+    def get_details2(self, cr, uid, ids, context=None):
         self.get_currencies(cr, uid, ids, context=context)
         self.check_currencies(cr, uid, ids, context=context)
         self.get_account(cr, uid, ids, context=context)
@@ -283,60 +403,41 @@ class account_revaluation(osv.osv):
     
 account_revaluation()
 
-class account_revaluation_currencies(osv.osv):
-    _name = 'account.revaluation.currencies'
-    _columns = {
-        'currency_id':fields.many2one('res.currency', "Currency"),
-        'weighted_rate':fields.float("Weighted Rate",digits_compute=dp.get_precision('Rates')),
-        'start_rate':fields.float("Start Rate",digits_compute=dp.get_precision('Rates')),
-        'post_rate':fields.float("Post Rate",digits_compute=dp.get_precision('Rates')),
-        'end_rate':fields.float("End Rate",digits_compute=dp.get_precision('Rates')),
-        'period_close_id':fields.many2one('account.revaluation'),
-        'beg_bal':fields.float("Beginning Balance",digits_compute=dp.get_precision('Account')),
-        'ap_bal':fields.float("After Posting Balance",digits_compute=dp.get_precision('Account')),
-    }  
-account_revaluation_currencies()
-
 class account_revaluation_accounts(osv.osv):
-    _name = 'account.revaluation.accounts'
+    _name = 'account.revaluation.account'
     _columns = {
         'account_id':fields.many2one('account.account','Account'),
         'bal_beg':fields.float('Beginning Balance',digits_compute=dp.get_precision('Account')),
         'bal_ap':fields.float('Balance AP',digits_compute=dp.get_precision('Account')),
+        'comp_curr_bal':fields.float('Balance in Company Currency',digits_compute=dp.get_precision('Account')),
+        'second_curr_bal':fields.float('Balance in Secondary Currency',digits_compute=dp.get_precision('Account')),
         'diff':fields.float('Diff'),
-        'period_close_id':fields.many2one('account.revaluation'),
+        'period_close_id':fields.many2one('account.revaluation',ondelete='cascade'),
         'bal_end':fields.float('Ending Balance', digits_compute=dp.get_precision('Account')),
         }
 account_revaluation_accounts()
 
-class account_revaluation_entries(osv.osv):
-    _name = 'account.revaluation.entries'
+class ar2(osv.osv):
+    _inherit='account.revaluation'
     _columns = {
-        'move_line_id':fields.many2one('account.move.line','Journal Item'),
-        'currency_id':fields.related('move_line_id','currency_id',type='many2one',relation='res.currency',store=True, string='Posting Currency'),
-        'account_id':fields.related('move_line_id','account_id',type='many2one',relation='account.account',store=True,string="Account"),
-        'debit': fields.related('move_line_id', 'debit', type="float", string="Debit", store=True,digits_compute=dp.get_precision('Account')),
-        'credit': fields.related('move_line_id', 'credit', type="float", string="Credit", store=True,digits_compute=dp.get_precision('Account')),
-        'amount_currency': fields.related('move_line_id', 'amount_currency', type="float", string="Posting Amount", store=True,digits_compute=dp.get_precision('Account')),
-        'post_rate': fields.related('move_line_id', 'post_rate', type="float", string="Post Rate", store=True,digits_compute=dp.get_precision('Account')),
-        'br_debit': fields.float("Revaluated Debit"),
-        'br_credit': fields.float("Revaluated Credit"),
-        'reval_amount':fields.float("Revaluated Amount"),
-        'period_close_id':fields.many2one('account.revaluation'),
-        'diff':fields.float('Diff'),
-        'bal_ap':fields.float('Balance AP'),
-        'bal_end':fields.float('Balance END'),
+        'account_ids':fields.one2many('account.revaluation.account','period_close_id','Accounts for Revaluation'),
         }
-account_revaluation_entries()
+ar2()
 
-class account_revaluation_gain_loss(osv.osv):
-    _name = 'account.revaluation.gain.loss'
-    _columns = {
-        'account_id':fields.many2one('account.account','Gain/Loss Account'),
-        'rel_pr_account':fields.many2one('account.account','Related PR Account'),
-        'period_close_id':fields.many2one('account.revaluation'),
-        'gain_loss':fields.float('Gain/Loss Amount')
-        }
-account_revaluation_gain_loss()
-
+class account_period(osv.osv):
+    _inherit = 'account.period'
+    
+    def revaluate_period(self, cr, uid, ids, context=None):
+        for period in self.read(cr, uid, ids, context=None):
+            period_id = period['id']
+        return {
+            'name': 'Revaluate',
+            'view_type':'form',
+            'nodestroy': True,
+            'target': 'new',
+            'view_mode':'form',
+            'res_model':'account.revaluation',
+            'type':'ir.actions.act_window',
+            'context':{'default_period_id':period_id},}
+account_period()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

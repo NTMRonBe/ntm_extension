@@ -263,21 +263,51 @@
             <field name="inherit_id" ref="account.view_company_inherit_1_form"/>
             <field name="arch" type="xml">
                 <field name="property_reserve_and_surplus_account" position="after">
-                    <separator string="Transit Accounts" colspan="4"/>
+                    <separator string="Account Configurations" colspan="4"/>
                     <group colspan="4" col="4">
-	                    <field name="transit_php"/>
-	                    <field name="transit_usd"/>
-                    </group>
-                    <separator string="Payable Accounts" colspan="4"/>
-                    <group colspan="4" col="4">
-                        <field name="phone_bill_ap"/>
-                        <field name="other_ap"/>
+                        <group colspan="2" col="2">
+		                    <separator string="Transit Accounts" colspan="2"/>
+		                    <group colspan="2" col="2">
+			                    <field name="transit_php"/>
+			                    <field name="transit_usd"/>
+		                    </group>
+	                    </group>
+	                    <group colspan="2" col="2">
+		                    <separator string="Payable Accounts" colspan="2"/>
+		                    <group colspan="2" col="2">
+		                        <field name="phone_bill_ap"/>
+		                        <field name="other_ap"/>
+		                    </group>
+	                    </group>
+	                    <group colspan="2" col="2">
+                            <separator string="Donations Account" colspan="2"/>
+                            <group colspan="2" col="2">
+                                <field name="donations"/>
+                            </group>
+                        </group>
+                        <group colspan="2" col="2">
+                            <separator string="Bank Charges Account" colspan="2"/>
+                            <group colspan="2" col="2">
+                                <field name="bank_charge"/>
+                            </group>
+                        </group>
+                        <group colspan="2" col="2">
+                            <separator string="Contributions Account" colspan="2"/>
+                            <group colspan="2" col="2">
+                                <field name="contributions_acct"/>
+                            </group>
+                        </group>
                     </group>
                     <separator string="File Locations" colspan="4"/>
                     <group colspan="4" col="2">
                         <field name="calls_dbf"/>
                         <field name="voucher_dbf"/>
                     </group>
+                    <separator string="Contributions" colspan="4"/>
+                    <group colspan="4" col="4">
+                        <field name="contribution"/>
+                    </group>
+                    
                 </field>
             </field>
         </record>

@@ -65,30 +65,35 @@ class bank_transfer_schedule(osv.osv):
         self.write(cr, uid, ids, {'state':'draft'})
         return False
     
-
-
+    
     def compute(self, cr, uid, ids, context=None):
         for sub in self.browse(cr, uid, ids, context=context):
-            ds = sub.date_start
-            for i in range(sub.period_total):
-                request_id = self.pool.get('bank.transfer.request').create(cr, uid, {
-                    'date': ds,
-                    'schedule_id': sub.id,
-                    'company_bank_id':sub.company_bank_id.id,
-                    'entity_bank_id':sub.entity_bank_id.id,
-                    'account_id':sub.account_id.id,
-                    'remarks':sub.remarks,
-                    'amount':sub.amount,
-                    'state':'confirm',
-                })
-                if sub.period_type=='day':
-                    ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(days=sub.period_nbr)).strftime('%Y-%m-%d')
-                if sub.period_type=='month':
-                    ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(months=sub.period_nbr)).strftime('%Y-%m-%d')
-                if sub.period_type=='bimonthly':
-                    ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(weeks=+2)).strftime('%Y-%m-%d')
-                if sub.period_type=='year':
-                    ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(years=sub.period_nbr)).strftime('%Y-%m-%d')
+            com_bank = self.pool.get('res.partner.bank').read(cr, uid, sub.company_bank_id.id,['currency_id'])
+            print com_bank
+            ent_bank = self.pool.get('res.partner.bank').read(cr, uid, sub.entity_bank_id.id,['currency_id'])
+            if com_bank['currency_id'][0]==ent_bank['currency_id'][0]:
+                ds = sub.date_start
+                for i in range(sub.period_total):
+                    request_id = self.pool.get('bank.transfer.request').create(cr, uid, {
+                        'date': ds,
+                        'schedule_id': sub.id,
+                        'company_bank_id':sub.company_bank_id.id,
+                        'entity_bank_id':sub.entity_bank_id.id,
+                        'account_id':sub.account_id.id,
+                        'remarks':sub.remarks,
+                        'amount':sub.amount,
+                        'state':'confirm',
+                    })
+                    if sub.period_type=='day':
+                        ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(days=sub.period_nbr)).strftime('%Y-%m-%d')
+                    if sub.period_type=='month':
+                        ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(months=sub.period_nbr)).strftime('%Y-%m-%d')
+                    if sub.period_type=='bimonthly':
+                        ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(weeks=+2)).strftime('%Y-%m-%d')
+                    if sub.period_type=='year':
+                        ds = (datetime.strptime(ds, '%Y-%m-%d') + relativedelta(years=sub.period_nbr)).strftime('%Y-%m-%d')
+            elif com_bank['currency_id'][0]!=ent_bank['currency_id'][0]:
+                raise osv.except_osv(_('Error!'), _('Can not create transfer request for banks with different currencies!'))
         self.write(cr, uid, ids, {'state':'running','compute':True})
         return True
 bank_transfer_schedule()
@@ -139,6 +144,10 @@ class bank_transfer_request(osv.osv):
     
     def cancel(self, cr, uid, ids, context=None):
         for btr in self.read(cr, uid, ids, context=None):
+            if btr['transfer_id']:
+                btl_search = self.pool.get('bank.transfer.line').search(cr, uid, [('transfer_id','=',btr['transfer_id'][0]),
+                                                                                  ('request_id','=',btr['id'])])
+                self.pool.get('bank.transfer.line').unlink(cr, uid, btl_search)
             self.write(cr, uid, ids, {'state':'cancel'})
         return True
 
@@ -163,7 +172,8 @@ class bank_transfer(osv.osv):
         'ref':fields.char('Reference',size=64),
         'state':fields.selection([
                             ('draft','Draft'),
-                            ('done','Transferred'),
+                            ('done','Requested'),
+                            ('transferred','Transferred'),
                             ],'State'),
         'move_id':fields.many2one('account.move','Move Name'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
@@ -202,6 +212,12 @@ class bank_transfer_line(osv.osv):
                             ('checking','Checking'),
                             ],'Type', required=True),
         }
+    
+    def unlink(self, cr, uid, ids, context=None):
+        for btl in self.read(cr, uid, ids, context=None):
+            self.pool.get('bank.transfer.request').write(cr, uid, btl['request_id'][0],{'transfer_id':False,'transfer_state':False})
+        return super(bank_transfer_line, self).unlink(cr, uid, ids, context=context)
+    
 bank_transfer_line()
 
 class bt(osv.osv):
@@ -222,79 +238,18 @@ class bt(osv.osv):
                 return True
         return True
     
-    def complete(self, cr, uid, ids, context=None):
-        move_pool = self.pool.get('account.move')
-        journal_pool = self.pool.get('account.journal')
-        move_line_pool = self.pool.get('account.move.line')
-        line_pool = self.pool.get('bank.transfer.line')
-        analytic_pool = self.pool.get('account.analytic.account')
-        for bt in self.read(cr, uid, ids, context=None):
-            move = {
-                        'journal_id':bt['journal_id'][0],
-                        'period_id':bt['period_id'][0],
-                        'date':bt['date'],
-                        'ref':bt['ref'],
-                        }
-            amount = 0.00
-            move_id = move_pool.create(cr, uid, move)
-            for lines in bt['savings_ids']:
-                read_line = line_pool.read(cr, uid, lines, context=None)
-                analytic_read = analytic_pool.read(cr, uid, read_line['analytic_id'][0],context=None)
-                if analytic_read['normal_account']:
-                    credit = {
-                        'name':read_line['account_number'][1],
-                        'journal_id':bt['journal_id'][0],
-                        'period_id':bt['period_id'][0],
-                        'date':bt['date'],
-                        'account_id':analytic_read['normal_account'][0],
-                        'debit':read_line['amount'],
-                        'analytic_account_id':read_line['analytic_id'][0],
-                        'move_id':move_id,
-                    }
-                    move_line_pool.create(cr, uid, credit)
-                    amount +=read_line['amount']
-            for lines in bt['checking_ids']:
-                read_line = line_pool.read(cr, uid, lines, context=None)
-                analytic_read = analytic_pool.read(cr, uid, read_line['analytic_id'][0],context=None)
-                if analytic_read['normal_account']:
-                    credit = {
-                        'name':read_line['account_number'][1],
-                        'journal_id':bt['journal_id'][0],
-                        'period_id':bt['period_id'][0],
-                        'date':bt['date'],
-                        'account_id':analytic_read['normal_account'][0],
-                        'debit':read_line['amount'],
-                        'analytic_account_id':read_line['analytic_id'][0],
-                        'move_id':move_id,
-                    }
-                    move_line_pool.create(cr, uid, credit)
-                    amount +=read_line['amount']
-            journal_read = journal_pool.read(cr, uid, bt['journal_id'][0],['default_debit_account_id','bank_id'])
-            debit = {
-                        'name':bt['ref'],
-                        'journal_id':bt['journal_id'][0],
-                        'period_id':bt['period_id'][0],
-                        'date':bt['date'],
-                        'account_id':journal_read['default_debit_account_id'][0],
-                        'credit':amount,
-                        'move_id':move_id,
-                        }
-            move_line_pool.create(cr, uid, debit)
-            values = {
-                'state':'done',
-                'move_id':move_id,
-                'amount':amount,
-                }
-            self.def_name(cr, uid, [bt['id']])
-            self.write(cr, uid, [bt['id']],values)
-        return True       
-    
+    def create(self, cr, uid, vals, context=None):
+        vals.update({
+            'name': self.pool.get('ir.sequence').get(cr, uid, 'bank.transfer'),
+        })
+        return super(bank_transfer, self).create(cr, uid, vals, context)
+        
     def cancel(self, cr, uid, ids, context=None):
         for bt in self.read(cr, uid, ids, context=None):
             move_id = bt['move_id'][0]
             self.pool.get('account.move').unlink(cr, uid, [move_id])
         return self.write(cr, uid, ids, {'state':'draft'})
-    
+        
     def data_get(self, cr, uid, ids, context=None):
         datas = {}
         statements = []
@@ -315,9 +270,110 @@ class bt(osv.osv):
             'report_name': 'bank.transfer',
             'nodestroy':True,
             'datas': datas,
+            #'name':data['name'],
+            'header':False,
             }
-                
-            
+    
+    def check_total(self, cr, uid, ids, context=None):
+        for bt in self.read(cr, uid, ids, context=None):
+            total = False
+            for savings in bt['savings_ids']:
+                savings_read = self.pool.get('bank.transfer.line').read(cr, uid, savings,context=None)
+                total+=savings_read['amount']
+            for checking in bt['checking_ids']:
+                checking_read = self.pool.get('bank.transfer.line').read(cr, uid, checking,context=None)
+                total+=checking_read['amount']
+            if total!=bt['amount']:
+                raise osv.except_osv(_('Error !'), _('Total amount of transfer lines is not equal to bank transfer amount!'))
+            elif total==bt['amount']:
+                self.transfer(cr, uid, ids)
+        return True
+    def transfer(self, cr, uid, ids, context=None):
+        for bt in self.read(cr, uid, ids, context=None):
+            bank_read = self.pool.get('res.partner.bank').read(cr, uid, bt['journal_id'][0],['journal_id','transit_id','account_id'])
+            b1_curr = self.pool.get('account.account').read(cr, uid, bank_read['account_id'][0],['company_currency_id','currency_id'])
+            period_search = self.pool.get('account.period').search(cr, uid, [('date_start','<=',bt['date']),('date_stop','>=',bt['date'])],limit=1)
+            journal_id = bank_read['journal_id'][0]
+            rate = False
+            currency = False
+            if not b1_curr['currency_id']:
+                currency = b1_curr['company_currency_id'][0]
+                rate = 1.00
+            if b1_curr['currency_id']:
+                curr_read = self.pool.get('res.currency').read(cr, uid, b1_curr['currency_id'][0],['rate'])
+                currency = b1_curr['currency_id'][0]
+                rate = curr_read['rate']
+            period_id = period_search[0]
+            move = {
+                'period_id':period_search[0],
+                'date':bt['date'],
+                'ref':bt['name'],
+                'journal_id':bank_read['journal_id'][0],
+                }
+            move_id = self.pool.get('account.move').create(cr, uid, move)
+            total_for_withdraw = False
+            total_for_withdraw_ac = False
+            for savings in bt['savings_ids']:
+                savings_read = self.pool.get('bank.transfer.line').read(cr, uid, savings,context=None)
+                acc_read = self.pool.get('account.analytic.account').read(cr, uid, savings_read['analytic_id'][0],['normal_account'])
+                credit = savings_read['amount']/rate
+                total_for_withdraw += credit
+                total_for_withdraw_ac +=savings_read['amount']
+                name = 'For deposit to ' + savings_read['name']
+                self.pool.get('bank.transfer.request').write(cr, uid,savings_read['request_id'][0],{'transfer_state':'done','state':'transferred'})
+                move_line = {
+                    'name':name,
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':acc_read['normal_account'][0],
+                    'debit':credit,
+                    'date':bt['date'],
+                    'ref':bt['name'],
+                    'analytic_account_id':savings_read['analytic_id'][0],
+                    'move_id':move_id,
+                    'amount_currency':savings_read['amount'],
+                    'currency_id':currency,
+                    }
+                self.pool.get('account.move.line').create(cr, uid, move_line)
+            for savings in bt['checking_ids']:
+                savings_read = self.pool.get('bank.transfer.line').read(cr, uid, savings,context=None)
+                acc_read = self.pool.get('account.analytic.account').read(cr, uid, savings_read['analytic_id'][0],['normal_account'])
+                credit = savings_read['amount']/rate
+                total_for_withdraw += credit
+                total_for_withdraw_ac +=savings_read['amount']
+                self.pool.get('bank.transfer.request').write(cr, uid,savings_read['request_id'][0],{'transfer_state':'done','state':'transferred'})
+                name = 'For deposit to ' + savings_read['name']
+                move_line = {
+                    'name':name,
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':acc_read['normal_account'][0],
+                    'analytic_account_id':savings_read['analytic_id'][0],
+                    'debit':credit,
+                    'date':bt['date'],
+                    'ref':bt['name'],
+                    'move_id':move_id,
+                    'amount_currency':savings_read['amount'],
+                    'currency_id':currency,
+                    }
+                self.pool.get('account.move.line').create(cr, uid, move_line)
+            name = 'Withdraw from ' + bank_read['journal_id'][1]
+            move_line = {
+                'name':name,
+                'journal_id':journal_id,
+                'period_id':period_id,
+                'account_id':bank_read['transit_id'][0],
+                'credit':total_for_withdraw,
+                'date':bt['date'],
+                'ref':bt['name'],
+                'move_id':move_id,
+                'amount_currency':total_for_withdraw_ac,
+                'currency_id':currency,
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            self.pool.get('account.move').post(cr, uid, [move_id])
+            self.write(cr, uid, ids, {'move_id':move_id,'state':'done'})
+        return True 
             
 bt()
 
@@ -403,7 +459,7 @@ class check_sequence_wizard(osv.osv_memory):
     _name = 'check.sequence.wizard'
     _columns = {
         'start_sequence':fields.integer('Start Sequence'),
-        'end_sequence':fields.integer('Start Sequence'),
+        'end_sequence':fields.integer('Ending Sequence'),
         }
     def add_sequence(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
@@ -449,6 +505,7 @@ class bank_transfer_wizard(osv.osv_memory):
         for form in self.read(cr, uid, ids, context=None):
             req_search = self.pool.get('bank.transfer.request').search(cr, uid, [('state','=','confirm'),
                                                                                  ('date','<=',form['name']),
+                                                                                 ('transfer_id','=',False),
                                                                                  ('company_bank_id','=',form['bank_id'])])
             if req_search:
                 transfer = {

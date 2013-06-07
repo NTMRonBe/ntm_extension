@@ -237,6 +237,31 @@
             <field name="user_id" ref="base.user_root"/>
             <field name="analytic_journal_id" ref="analytic_journal_pbd"/>
         </record>
+        
+        
+        <record id="seq_type_br_sequence" model="ir.sequence.type">
+            <field name="name">Bank Reconciliation</field>
+            <field name="code">bank.recon</field>
+        </record>
 
+        <record id="seq_br_sequence" model="ir.sequence">
+            <field name="name">Bank Reconciliation</field>
+            <field name="code">bank.recon</field>
+            <field name="prefix">BR/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        
+        <record id="seq_type_idg_sequence" model="ir.sequence.type">
+            <field name="name">Income Distribution</field>
+            <field name="code">income.distribution.generic</field>
+        </record>
+
+        <record id="seq_idg_sequence" model="ir.sequence">
+            <field name="name">Income Distribution</field>
+            <field name="code">income.distribution.generic</field>
+            <field name="prefix">IDG/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        
     </data>
 </openerp>

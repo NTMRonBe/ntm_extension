@@ -26,7 +26,7 @@
         
         <menuitem id="menu_income_distribution_main" name="Income Distribution" parent="account.menu_finance_payables" sequence="20"/>
         <menuitem id="menu_idg" action="action_idg_form" parent="menu_income_distribution_main" sequence="10"/>
-        <menuitem id="menu_voucher_distribution" action="action_voucher_distribution_form" parent="menu_income_distribution_main" sequence="20"/>
+        <menuitem id="menu_voucher_distribution" action="action_voucher_distribution_form" parent="menu_income_distribution_main" sequence="30"/>
         
         <menuitem id="menu_expense_distribution_main" name="Expense Distribution" parent="account.menu_finance_payables" sequence="30"/>
         <menuitem id="menu_vehicle_log" action="action_vehicle_log_form"  parent="menu_expense_distribution_main" sequence="10" groups="base.group_user"/>
@@ -62,7 +62,6 @@
         <menuitem id="menu_action_ntm_res_partner_bank_project_form" parent="ntm_bankaccounts_main" sequence="20" action="action_ntm_res_partner_bank_project_tree"/>
         
         <menuitem id="main_bank_recon" name="Bank Reconciliation" sequence="20" parent="ntm_bankandcash_root"/>
-        <menuitem id="recon_wire_transfer_menu" sequence="10" action="action_wire_transfer_clearing_form" parent="main_bank_recon"/>
         <menuitem id="recon_check_clearance_menu" sequence="20" action="action_check_clearing_form" parent="main_bank_recon"/>
         <menuitem id="recon_fund_transfer_menu" sequence="30" action="action_fund_transfer_clearing_form" parent="main_bank_recon"/>
         

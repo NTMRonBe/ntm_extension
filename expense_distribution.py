@@ -65,6 +65,7 @@ class idg(osv.osv):
                             ('draft','Draft'),
                             ('confirm','Confirmed'),
                             ('distributed','Distributed'),
+                            ('paid','Paid'),
                             ],'State')
         }
     
@@ -229,7 +230,7 @@ class ecp(osv.osv):
                         'amount_unpaid':unpaid,
                         }
                     if amount_to_pay > 0.00:
-                        if amount_to_pay>unpaid:
+                        if amount_to_pay>=unpaid:
                             vals.update({'amount2pay':unpaid})
                         elif amount_to_pay<unpaid:
                             vals.update({'amount2pay':amount_to_pay})
@@ -252,7 +253,7 @@ class ecp(osv.osv):
     
     def def_name(self, cr, uid, ids, context=None):
         for bt in self.read(cr, uid, ids, context=None):
-            if bt['name']=='NEW':
+            if bt['name']=='/':
                 bank_read = self.pool.get('res.partner.bank').read(cr, uid, bt['bank_account_id'][0],['journal_id'])
                 journal_read = self.pool.get('account.journal').read(cr, uid, bank_read['journal_id'][0],['sequence_id'])
                 sequence_read = self.pool.get('ir.sequence').read(cr, uid, journal_read['sequence_id'][0],['code'])
@@ -272,7 +273,7 @@ class ecp(osv.osv):
                 ecp_read = self.pool.get('expense.check.payment.lines').read(cr, uid, lines,context=None)
                 line_amount+=ecp_read['amount2pay']
             if amount>line_amount:
-                raise osv.except_osv(_('Error!'), _('Amount to pay is not equal to payment lines!'))
+                raise osv.except_osv(_('Error!'), _('Amount is over the payable amount!'))
             elif amount<=line_amount:
                 self.write(cr, uid, ids, {'state':'reserved'})
                 self.def_name(cr, uid, ids)
@@ -333,6 +334,7 @@ class ecp(osv.osv):
                 rec_ids = [payment,ecp_read['move_line_id'][0]]
                 rec_list_ids.append(rec_ids)
             self.pool.get('account.move').post(cr, uid, [move_id])
+            read_name = self.pool.get('account.move').read(cr, uid, [move_id])
             self.write(cr, uid, ids, {
                 'move_id': move_id,
                 'state': 'posted',

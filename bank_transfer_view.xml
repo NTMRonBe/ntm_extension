@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-    <!-- 
     
                <report id="report_bank_transfer_print"
             string="Bank Transfer"
@@ -11,7 +10,9 @@
             auto="False"
             attachment="(object.name)"
             header = "False"
-            menu="True"/> -->
+            menu="True"
+            groups="base.group_no_one"
+            />
         <record id="check_cancellation_wizard_view" model="ir.ui.view">
             <field name="name">Cancel Check</field>
             <field name="model">check.cancellation</field>
@@ -166,13 +167,15 @@
                     <field name="ownership" required="1" invisible="1"/>
                     <field name="type" required="True"/>
                 </field>
+                <field name="bank" position="after">
+                    <field name="currency_id" widget="selection"  attrs="{'invisible':[('ownership','=','company')]}"/>
+                </field>
                 <field name="state_id" position="after">
                     <group colspan="4" col="4" attrs="{'invisible':[('ownership','!=','company')]}">
                         <separator string="Account Details" colspan="6"/>
                         <field name="journal_id" on_change="onchange_journal(journal_id)" attrs="{'required':[('ownership','=','company')]}"/>
                         <field name="account_id"/>
                         <field name="transit_id" domain="[('type','!=','view')]"/>
-                        <field name="currency_id" invisible="True"/>
                     </group>
                     <group colspan="4" col="2" attrs="{'invisible':[('ownership','!=','company')]}">
                         <group colspan="4" col="4" attrs="{'invisible':[('type','!=','checking')]}">
@@ -251,22 +254,22 @@
                 <form string="Bank Transfer">
                     <group colspan="6" col="6">
 	                    <field name="name"/>
-	                    <field name="journal_id" domain="[('ownership','=','company')]" widget="selection"/>
-	                    <field name="date"/>
-	                    <field name="handler"/>
-	                    <field name="ref"/>
-	                    <field name="amount" readonly="True"/>
+	                    <field name="journal_id" domain="[('ownership','=','company')]" widget="selection" attrs="{'readonly':[('state','=','done')]}"/>
+	                    <field name="date" attrs="{'readonly':[('state','=','done')]}"/>
+	                    <field name="handler" attrs="{'readonly':[('state','=','done')]}"/>
+	                    <field name="ref" attrs="{'readonly':[('state','=','done')]}"/>
+	                    <field name="amount" attrs="{'readonly':[('state','=','done')]}"/>
                     </group>
                     <notebook>
                         <page string="Savings Accounts">
 		                    <group colspan="6" col="2">
-			                    <field colspan="6" mode="tree" name="savings_ids" nolabel="1" domain="[('type','=','savings')]" readonly="True">
-			                       <tree string="Savings Accounts">
-			                           <field name="request_id"/> 
-			                           <field name="name"/>
-			                           <field name="account_number" domain="[('type','=',type),('partner_id','=',partner_id)]"/>
+			                    <field colspan="6" mode="tree" name="savings_ids" nolabel="1" domain="[('type','=','savings')]" attrs="{'readonly':[('state','=','done')]}">
+			                       <tree string="Savings Accounts" editable="top">
+			                           <field name="request_id" readonly="1"/> 
+			                           <field name="name" readonly="1"/>
+			                           <field name="account_number" domain="[('type','=',type),('partner_id','=',partner_id)]" readonly="1"/>
 			                           <field name="analytic_id" domain="[('partner_id','=',partner_id)]" invisible="True"/>
-			                           <field name="amount"/>
+			                           <field name="amount" readonly="1" sum="Total"/>
 			                           <field name="type" invisible="True"/>
 			                       </tree>
 			                    </field>
@@ -274,26 +277,39 @@
 	                    </page>
 	                    <page string="Checking Accounts">
                             <group colspan="6" col="2">
-                                <field colspan="6" mode="tree" name="checking_ids" nolabel="1" readonly="True" domain="[('type','=','checking')]">
-                                   <tree string="Checking Accounts" >
-                                       <field name="request_id"/> 
-                                       <field name="name"/>
-                                       <field name="account_number"/>
+                                <field colspan="6" mode="tree" name="checking_ids" nolabel="1" domain="[('type','=','checking')]" attrs="{'readonly':[('state','=','done')]}">
+                                   <tree string="Checking Accounts" editable="top">
+                                       <field name="request_id" readonly="1"/> 
+                                       <field name="name" readonly="1"/>
+                                       <field name="account_number" readonly="1"/>
                                        <field name="analytic_id" invisible="True"/>
-                                       <field name="amount"/>
+                                       <field name="amount" readonly="1" sum="Total"/>
                                        <field name="type" invisible="True"/>
                                    </tree>
                                 </field>
                             </group>
                         </page>
-	                    <page string="Journal Entries">
-	                       <field name="move_id" colspan="6" readonly="1"/>
-	                       <field name="move_ids" colspan="6" readonly="1" nolabel="True"/>
-	                    </page>
+	                    <page string="Journal Items">
+	                    <field name="move_id" invisible="1"/>
+                            <group colspan="4" col="2">
+                                <field name="move_ids" mode="tree" nolabel="1">
+                                    <tree string="Accounting Entries">
+                                        <field name="date"/>
+                                        <field name="name"/>
+                                        <field name="account_id"/>
+                                        <field name="analytic_account_id"/>
+                                        <field name="debit"/>
+                                        <field name="credit"/>
+                                        <field name="currency_id" string="Encoding Currency"/>
+                                        <field name="amount_currency" string="Encoding Amount"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
                     </notebook>
                     <group colspan="4" col="13">
-                                <field name="state"/>
-                                <button name="complete" attrs="{'invisible':[('state','!=','draft')]}" string="Transfer"  type="object" icon="gtk-jump-to"/>
+                                <field name="state" attrs="{'readonly':[('state','=','done')]}"/>
+                                <button name="check_total" states="draft" string="Generate Request"  type="object" icon="gtk-jump-to"/>
                                 <button name="cancel" attrs="{'invisible':[('state','!=','done')]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
                                 <button string="Print Request" type="object" name="data_get" icon="gtk-execute" attrs="{'invisible':[('state','!=','done')]}" />
                             </group>
@@ -406,7 +422,7 @@
         </record> 
           
         <record id="action_bank_transfer_schedule_tree" model="ir.actions.act_window">
-            <field name="name">Schedule</field>
+            <field name="name">Scheduled</field>
             <field name="res_model">bank.transfer.schedule</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>
@@ -471,7 +487,7 @@
                     <field name="remarks" colspan="4" nolabel="1"/>
                     <group colspan="4" col="13">
                         <field name="state" readonly="1"/>
-                        <button name="cancel" attrs="{'invisible':[('state','in',['confirm'])]}" string="Cancel"  type="object"/>
+                        <button name="cancel" attrs="{'invisible':[('state','not in',['confirm'])]}" string="Cancel"  type="object"/>
                         <button name="confirm" attrs="{'invisible':[('state','!=','draft')]}" string="Confirm"  type="object" />
                     </group>
                 </form>
@@ -479,7 +495,7 @@
         </record> 
         
         <record id="action_bank_transfer_request_tree" model="ir.actions.act_window">
-            <field name="name">Special</field>
+            <field name="name">Unscheduled</field>
             <field name="res_model">bank.transfer.request</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>

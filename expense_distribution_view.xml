@@ -77,19 +77,21 @@
                                         <field name="amount_currency" string="Encoding Amount"/>
                                     </tree>
                                 </field>
-                                <field name="payment_ids" mode="tree" nolabel="1" colspan="4">
-                                    <tree string="Payment Details">
-                                        <field name="date"/>
-                                        <field name="account_id"/>
-                                        <field name="ref"/>
-                                        <field name="debit" sum="Total Debit"/>
-                                        <field name="credit" sum="Total Credit"/>
-                                        <field name="currency_id" string="Encoding Currency"/>
-                                        <field name="amount_currency" string="Encoding Amount"/>
-                                    </tree>
-                                </field>
                             </group>
                         </page>
+                        <page string="Payment Details">
+	                    <field name="payment_ids" mode="tree" nolabel="1" colspan="4">
+	                                    <tree string="Payment Details">
+	                                        <field name="date"/>
+	                                        <field name="account_id"/>
+	                                        <field name="ref"/>
+	                                        <field name="debit" sum="Total Debit"/>
+	                                        <field name="credit" sum="Total Credit"/>
+	                                        <field name="currency_id" string="Encoding Currency"/>
+	                                        <field name="amount_currency" string="Encoding Amount"/>
+	                                    </tree>
+	                                </field>
+                                </page>
                     </notebook>
                     <group colspan="4" col="13">
                         <field name="state"/>

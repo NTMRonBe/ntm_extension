@@ -296,6 +296,7 @@ class vehicle_log_shared(osv.osv):
         'account_id':fields.many2one('account.analytic.account','Charged Account'),
         'amount':fields.float('Charge Amount'),
         'percentage':fields.float('Percentage'),
+        'remarks':fields.text('Remarks'),
         }
     _order = 'start_km asc'
 vehicle_log_shared()
@@ -313,6 +314,7 @@ class add_vehicle(osv.osv_memory):
     _columns = {
         'account_id':fields.many2one('account.analytic.account','Charged Account', required=True),
         'percentage':fields.float('Percentage'),
+        'remarks':fields.text('Remarks'),
         }
     def data_save(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=context):
@@ -322,6 +324,7 @@ class add_vehicle(osv.osv_memory):
                     'account_id':form['account_id'],
                     'percentage':form['percentage'],
                     'log_id':context['active_id'],
+                    'remarks':form['remarks'],
                     }
                 self.pool.get('vehicle.log.shared').create(cr, uid, vals)
             elif shares:
@@ -341,6 +344,7 @@ class add_vehicle(osv.osv_memory):
                         'account_id':form['account_id'],
                         'percentage':form['percentage'],
                         'log_id':context['active_id'],
+                        'remarks':form['remarks'],
                         }
                         self.pool.get('vehicle.log.shared').create(cr, uid, vals)
         return {'type': 'ir.actions.act_window_close'}
