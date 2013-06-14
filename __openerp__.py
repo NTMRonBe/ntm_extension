@@ -28,7 +28,7 @@
     """,
     'website': '',
     'init_xml': [],
-    "depends" : ["account","base","analytic","fetchmail","email_template"],
+    "depends" : ["account","account_voucher","base","analytic","fetchmail","email_template"],
     'update_xml': ["data.xml","ntm_extensions_view.xml"
                    ,"users_view.xml",
                    #"account_move_view.xml",

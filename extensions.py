@@ -28,6 +28,7 @@ class res_company(osv.osv):
         'donations':fields.many2one('account.account','Donations Account', required=True),     
         'bank_charge':fields.many2one('account.account','Bank Charges Account', required=True),
         'contributions_acct':fields.many2one('account.account','Contributions Account'),
+        'def_gain_loss':fields.many2one('account.account','Default Exchange Gain/Loss'),
         }
 res_company()
 
@@ -212,6 +213,7 @@ class account_account(osv.osv):
     _columns = {
         'is_pr':fields.boolean('Partially Revaluated'),
         'to_be_moved':fields.boolean('To be moved at EOY'),
+        'include_pool':fields.boolean('Included in Money Pool'),
         'equity_account':fields.many2one('account.account','Equity Account'),
         'gain_loss':fields.many2one('account.account','Gain Loss Account',domain=[('gain_loss_acc','=',True),('type','in',['other','liquidity'])]),
         'gain_loss_acc':fields.boolean('Is this a Gain/Loss Account?'),
@@ -219,7 +221,23 @@ class account_account(osv.osv):
         'code_accpac':fields.char('Code Accpac',size=16),
         'closing_account':fields.many2one('account.account','Closing Account'),
         'post_amount': fields.function(_compute_amount, digits_compute=dp.get_precision('Account'), method=True, type='float', string='Total Amount', store=False),
+        'equity_reval_value_acc':fields.many2one('account.analytic.account','Reval Value'),
+        'equity_gain_loss_acc':fields.many2one('account.analytic.account','Reval Value'),
+        'equity_check':fields.boolean('Is this an Equity Account?'),
         }
+    
+    def onchange_equity_bool(self, cr, uid, ids, include_pool):
+        res={}
+        if include_pool:
+            res = {'value':
+                   {
+                    'gain_loss_acc':False,
+                    'gain_loss':False,
+                    'equity_check':False,
+                    'equity_reval_value_acc':False,
+                    'equity_gain_loss_acc':False,
+                }}
+        return res
 account_account()
 
 

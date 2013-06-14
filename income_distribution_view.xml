@@ -148,6 +148,7 @@
                         </group>
                         <group colspan="2" col="2" attrs="{'invisible':[('generated','=',True)]}">
                             <button name="%(action_view_voucher_file_import)d" string="Generate Voucher" type="action" icon="gtk-apply"/>
+                            <button name="match_accounts" string="Match" type="object" icon="gtk-apply"/>
                         </group>
                     </group>
                     <notebook>
@@ -165,6 +166,7 @@
                                     <field name="account_name"/>
                                     <field name="type" invisible="1"/>
                                     <field name="amount"/>
+                                    <button name="match_account" string="Match" type="object" icon="gtk-apply"/>
                                 </tree>
                             </field>
                         </page>
@@ -219,6 +221,18 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Account Charging">
+                            <field name="charging_lines" mode="tree" nolabel="1">
+                                <tree string="Charged Accounts">
+                                    <field name="name"/>
+                                    <field name="contingency"/>
+                                    <field name="postage"/>
+                                    <field name="natw"/>
+                                    <field name="extra"/>
+                                    <field name="total"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                 </form>
             </field>
@@ -238,6 +252,42 @@
         <record model="ir.actions.act_window" id="action_voucher_distribution_form">
             <field name="name">Voucher Distribution</field>
             <field name="res_model">voucher.distribution</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        
+        
+        
+        
+        <!-- VOucher DIstribution Canada and US -->
+        
+        
+         <record id="voucher_distribution_rule_form" model="ir.ui.view">
+            <field name="name">voucher.distribution.rule.form</field>
+            <field name="model">voucher.distribution.rule</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Voucher Distribution Rule">
+                    <field name="name"/>
+                    <field name="account_id"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="voucher_distribution_rule_tree">
+            <field name="name">voucher.distribution.rule.tree</field>
+            <field name="model">voucher.distribution.rule</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Voucher Distribution Rules">
+                    <field name="name"/>
+                    <field name="account_id"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_voucher_distribution_rule_form">
+            <field name="name">Voucher Distribution Rules</field>
+            <field name="res_model">voucher.distribution.rule</field>
             <field name="view_type">form</field>
         </record>
         

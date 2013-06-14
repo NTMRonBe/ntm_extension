@@ -102,6 +102,7 @@
 				</field>
             </field>
         </record>
+        <!-- 
         <record id="view_ntm_account_account_form" model="ir.ui.view">
             <field name="name">ntm.account.account.form.inherit</field>
             <field name="model">account.account</field>
@@ -114,21 +115,113 @@
                         <field name="code_short" attrs="{'invisible': [('type','=','view')]}"/>
                         <field name="code_accpac" attrs="{'invisible': [('type','=','view')]}"/>
                 </field>
+                <page string="General Information" position="replace">
+                    <page string="General Information">
+                            <field name="active" groups="base.group_extended" />
+                            <newline/>
+                            <group col="4" colspan="4">
+                                <separator string="Currency" colspan="4"/>
+                                <field name="currency_id"/>
+                                <field name="currency_mode" attrs="{'readonly': [('currency_id','=',False)]}"/>
+                            </group>
+                            <group col="4" colspan="4" attrs="{'invisible': [('type','=','view')]}">
+                                <separator string="Configuration" colspan="4"/>
+	                            <field name="reconcile"/>
+	                            <field name="is_pr"/>
+                            </group>
+                            <separator string="Default Taxes" colspan="4"/>
+                            <field colspan="4" name="tax_ids" nolabel="1" domain="[('parent_id','=',False)]"/>
+                            <separator string="Consolidated Children" colspan="4"/>
+                            <field name="child_consol_ids" colspan="4" nolabel="1" attrs="{'readonly':[('type','!=','consolidation')]}"/>
+                        </page>
+                </page>
+                
                 <separator string = "Reconcile" position="replace">
                     <separator string = "Configurations" colspan="2"/>
                 </separator>
                 <field name="reconcile" position="replace">
-                    <group colspan="4" col="4">
-                        <field name="is_pr" attrs="{'invisible': [('type','=','view')]}"/>
-                        <field name="reconcile"/>
-                        <field name="gain_loss_acc" attrs="{'invisible': [('type','=','view')]}"/>
-                        <field name="gain_loss" attrs="{'invisible': [('gain_loss_acc','=',True)]}"/>
-                        <field name="to_be_moved" attrs="{'invisible': [('type','=','view')]}"/>
-                        <field name="closing_account" attrs="{'invisible': [('to_be_moved','!=',True)],'required':[('to_be_moved','=',True)]}"/>
+                    <group colspan="2" col="4">
+                        <group colspan="4" col="4">
+                            <field name="reconcile"/>
+                            <field name="is_pr" />
+                        </group>
+                        <group colspan="4" col="4" attrs="{'invisible': [('type','=','view')]}">
+                            <field name="equity_check"/>
+                            
+                        </group>
+                        <group colspan="4" col="4" attrs="{'invisible': [('type','=','view')]}">
+                            <field name="gain_loss_acc" attrs="{'invisible': [('equity_check','=',True)]}"/>
+                        </group>
                     </group>
                 </field>
+                 
+            </field>
+        </record>-->
+        
+        <record id="account.view_account_form" model="ir.ui.view">
+            <field name="name">account.account.form</field>
+            <field name="model">account.account</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Account">
+                    <group col="4" colspan="4">
+	                    <field name="name" select="1"/>
+	                    <field name="parent_id"/>
+	                    <field name="type" select="1"/>
+	                    <field name="user_type" select="1"/>
+                    </group>
+                    <separator string="Codes" colspan="4"/>
+                    <group colspan="4" col="6">
+                        <field name="code"/>
+                        <field name="code_short" attrs="{'invisible':[('type','=','view')]}"/>
+                        <field name="code_accpac" attrs="{'invisible':[('type','=','view')]}"/>
+                    </group>
+                    <notebook>
+                        <page string="General Information">
+                            <field name="active" groups="base.group_extended" />
+                            <newline/>
+                            <group col="4" colspan="4">
+                                <separator string="Currency" colspan="4"/>
+                                <field name="currency_id"/>
+                                <field name="currency_mode" attrs="{'readonly': [('currency_id','=',False)]}"/>
+                            </group>
+                            <group col="4" colspan="4">
+                                <separator string="Configuration" colspan="4"/>
+                                <field name="reconcile"/>
+                                <field name="include_pool" on_change="onchange_equity_bool(include_pool)"/>
+                                <field name="equity_check" attrs="{'invisible':[('include_pool','=',True)]}"/>
+                                <field name="gain_loss_acc" attrs="{'invisible':[('include_pool','=',True)]}"/>
+                                <field name="to_be_moved" attrs="{'invisible': [('include_pool','=',True)]}"/>
+                            </group>
+                            <group colspan="4" col="6" attrs="{'invisible':[('include_pool','=',True)]}">
+	                            <group col="2" colspan="2" attrs="{'invisible':[('equity_check','=',False)]}">
+	                                <separator string="Equity Revaluation Accounts" colspan="2"/>   
+	                                <field name="equity_reval_value_acc"/>
+	                                <field name="equity_gain_loss_acc"/>
+	                            </group>
+	                            <group col="2" colspan="2" attrs="{'invisible':[('gain_loss_acc','=',True)]}">
+                                    <separator string="Gain Loss Account" colspan="2"/>   
+                                    <field name="gain_loss"/>
+                                </group>
+                                <group col="2" colspan="2" attrs="{'invisible':[('to_be_moved','=',False)]}">
+                                    <separator string="End of Year Account" colspan="4"/>   
+                                    <field name="closing_account" attrs="{'required':[('to_be_moved','=',True)]}"/>
+                                </group>
+                            </group>
+                            <group colspan="4" col="2" attrs="{'invisible':[('type','!=','consolidation')]}">
+                            <separator string="Consolidated Children" colspan="4"/>
+                            <field name="child_consol_ids" colspan="4" nolabel="1" attrs="{'readonly':[('type','!=','consolidation')]}"/>
+                            </group>
+                        </page>
+                        <page string="Notes">
+                            <field colspan="4" name="note" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </form>
             </field>
         </record>
+        
+        
         <record id="view_ntm_account_account_tree" model="ir.ui.view">
             <field name="name">ntm.account.account.tree.inherit</field>
             <field name="model">account.account</field>
@@ -295,6 +388,12 @@
                             <separator string="Contributions Account" colspan="2"/>
                             <group colspan="2" col="2">
                                 <field name="contributions_acct"/>
+                            </group>
+                        </group>
+                        <group colspan="2" col="2">
+                            <separator string="Default Gain Loss Account" colspan="2"/>
+                            <group colspan="2" col="2">
+                                <field name="def_gain_loss"/>
                             </group>
                         </group>
                     </group>

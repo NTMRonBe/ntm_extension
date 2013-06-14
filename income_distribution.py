@@ -326,15 +326,68 @@ class voucher_distribution_line(osv.osv):
                         ('other','Other'),
                         ],'Type'),
         }
+    
+    def match_account(self, cr, uid, ids, context=None):
+        for vdl in self.read(cr, uid, ids, context=None):
+            comment = vdl['name']
+            comment = comment.replace(" ","")
+            comm_len = len(comment)
+            name = ''
+            for i in range(comm_len):
+                name = name + comment[i]
+                name = name.lower()
+                check_rules = self.pool.get('voucher.distribution.rule').search(cr, uid, [])
+                for rule in check_rules:
+                    rule_read = self.pool.get('voucher.distribution.rule').read(cr, uid, rule, ['name','account_id'])
+                    phrase = rule_read['name']
+                    phrase = phrase.split(" ")
+                    if name in phrase:
+                        print name
+                        print rule_read['account_id']
+                        print phrase
+        return True
 voucher_distribution_line()
+
+class voucher_distribution_account_charging(osv.osv):
+    _name = 'voucher.distribution.account.charging'
+    _description = "Voucher Distribution Account Charging"
+    _columns = {
+        'name':fields.many2one('account.analytic.account','Account Charged'),
+        'contingency':fields.float('Contingency Charges'),
+        'postage':fields.float('Postage/Env Recovery'),
+        'natw':fields.float('N@W Charges'),
+        'extra':fields.float('Extra Charges'),
+        'total':fields.float('Total'),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
+        }
+voucher_distribution_account_charging()
 
 class vd(osv.osv):
     _inherit = 'voucher.distribution'
     _columns = {
+        'charging_lines':fields.one2many('voucher.distribution.account.charging','voucher_id','Charging Lines'),
         'missionary_lines':fields.one2many('voucher.distribution.line','voucher_id','Missionary Lines',domain=[('type','=','mission')]),
         'personal_lines':fields.one2many('voucher.distribution.line','voucher_id','Personal Lines',domain=[('type','=','personal')]),
         'voucher_lines':fields.one2many('voucher.distribution.line','voucher_id','Voucher Lines',domain=[('type','=','voucher')]),
         'other_lines':fields.one2many('voucher.distribution.line','voucher_id','Other Lines',domain=[('type','=','other')]),
         }
+    
+    def match_accounts(self, cr, uid, ids, context=None):
+        for vd in self.read(cr, uid, ids, context=None):
+            for vdml in vd['missionary_lines']:
+                vdml_read = self.pool.get('voucher.distribution.line').read(cr, uid, vdml,context=None)
+                comment = vdml_read['name']
+                comment = comment.split(' ')
+                for i in range(len(comment)):
+                    print comment[i]
+        return True
 vd()
+class voucher_distribution_rule(osv.osv):
+    _name = 'voucher.distribution.rule'
+    _description = "Distribution Rules"
+    _columns = {
+        'name':fields.char('Phrase',size=100),
+        'account_id':fields.many2one('account.analytic.account','Account Name'),
+        } 
+voucher_distribution_rule()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:,

@@ -29,80 +29,123 @@
 	                       <field name="period_id" domain="[('state','!=','done')]" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
 	                       <field name="name"/>
 	                   </group>
+	                   <separator string="Currency" colspan="4"/>
+	                   <group colspan="4" col="4">
+	                       <field name="comp_curr" readonly="1"/>
+	                       <field name="second_curr" readonly="1"/>
+	                   </group>
+	                   <separator string="Exchange Rate" colspan="4"/>
+	                   <group colspan="4" col="4">
+                           <field name="start_rate" readonly="1"/>
+                           <field name="weighted_rate" readonly="1"/>
+                           <field name="end_rate" required="1"/>
+                           <field name="post_rate"/>
+                       </group>
 	                   <button string="Fetch Entries"
                                                 type="object"
-                                                name="compute_totals"
+                                                name="fetch_accounts"
                                                 icon="gtk-execute"/>
 	                   <notebook>
 	                       <page string="Foreign Exchanges">
 	                           <group colspan="4">
-	                               <field name="exchange_ids" mode="tree" nolabel="1" readonly="1">
-	                                   <tree string="Exchanges">
+	                               <field name="src_exchange_ids" mode="tree" nolabel="1" readonly="1" colspan="4">
+	                                   <tree string="From Company Currency Exchanges" limit="100">
 		                                   <field name="name"/>
 		                                   <field name="period_id"/>
 		                                   <field name="journal_id"/>
 		                                   <field name="src"/>
-		                                   <field name="src_amount"/>
+		                                   <field name="src_amount" sum="Total"/>
 		                                   <field name="dest"/>
-		                                   <field name="dest_amount"/>
+		                                   <field name="dest_amount" sum="Total"/>
 		                                   <field name="rate"/>
 	                                   </tree>
 	                               </field>
-	                           </group>
-	                           <separator string="Totals based on company currency" colspan="4"/>
-	                           <group colspan="4" col="4">
-	                               <group colspan="2" col="2">
-	                                   <separator string="Source Account Exchanges" colspan="2"/>
-	                                   <group colspan="2" col="2">
-	                                   <field name="src_total1" readonly="1"/>
-	                                   <field name="dest_total1" readonly="1"/>
-	                                   </group>
-	                               </group>
-	                               <group colspan="2" col="2">
-                                       <separator string="Destination Account Exchanges" colspan="2"/>
-                                       <group colspan="2" col="2">
-                                       <field name="src_total2" readonly="1"/>
-                                       <field name="dest_total2" readonly="1"/>
-                                       </group>
-                                   </group>
-	                           </group>
-	                           <separator string="Secondary Currency Details" colspan="4"/>
-	                           <group colspan="4" col="4">
-	                               <field name="second_curr" readonly="1"/>
-	                               <field name="start_rate" readonly="1"/>
-	                               <field name="weighted_rate" readonly="1"/>
-	                               <field name="post_rate"/>
+	                               <field name="dest_exchange_ids" mode="tree" nolabel="1" readonly="1" colspan="4">
+                                       <tree string="To Company Currency Exchanges">
+                                           <field name="name"/>
+                                           <field name="period_id"/>
+                                           <field name="journal_id"/>
+                                           <field name="src"/>
+                                           <field name="src_amount" sum="Total"/>
+                                           <field name="dest"/>
+                                           <field name="dest_amount" sum="Total"/>
+                                           <field name="rate"/>
+                                       </tree>
+                                   </field>
 	                           </group>
 	                       </page>
-	                       <page string="Beginning Balances">
+	                       <page string="Revaluated Accounts">
 	                           <field name="account_ids" mode="tree" nolabel="1" readonly="1">
 	                               <tree string="Accounts for Revaluation">
-	                                   <field name="account_id"/>
-	                                   <field name="bal_beg"/>
-	                                   <field name="comp_curr_bal"/>
-	                                   <field name="second_curr_bal"/>
-	                                   <field name="bal_ap"/>
-	                                   <field name="diff"/>
-	                                   <field name="bal_end"/>
+	                                   <field name="account_id" readonly="1"/>
+	                                   <field name="analytic_id" readonly="1"/>
+	                                   <field name="gainloss_account_id" readonly="1"/>
+	                                   <field name="comp_bal_beg" readonly="1"/>
+	                                   <field name="bal_ap" readonly="1"/>
+	                                   <field name="adjustment" readonly="1"/>
+	                                   <field name="diff" readonly="1" sum="Total"/>
+	                                   <field name="bal_end" readonly="1"/>
 	                               </tree>
 	                           </field>
                            </page>
-                           <page string="Entries for Revaluation">
-                                <field name="entry_ids" mode="tree" nolabel="1" readonly="1">
-                                    <tree string="Accounting Entries">
-                                        <field name="date"/>
-                                        <field name="name"/>
+                           <page string="Pool Accounts">
+                                <field name="pool_account_ids" mode="tree" nolabel="1" readonly="1">
+                                    <tree string="Accounts included in Pool Equivalent">
+                                        <field name="account_id" readonly="1"/>
+                                        <field name="currency_id" readonly="1"/>
+                                        <field name="comp_bal_beg" readonly="1" sum="Total"/>
+                                        <field name="bal_ap" readonly="1" sum="Total"/>
+                                        <field name="diff" readonly="1" sum="Total"/>
+                                        <field name="bal_end" readonly="1" sum="Total"/>
+                                    </tree>
+                                </field>
+                           </page>
+                           <page string="Revaluation Computation">
+	                           <group colspan="4" col="4">
+		                           <separator string="Company Currency" colspan="2"/>
+		                           <separator string="Secondary Currency" colspan="2"/>
+	                           </group>
+	                           <group colspan="4" col="4">
+	                               <separator string="Beginning" colspan="2"/>
+	                               <separator string="Beginning" colspan="2"/>
+	                               <field name="pool_equivalent_beg_comp" colspan="2" readonly="1"/>
+	                               <field name="pool_equivalent_beg_second" colspan="2" readonly="1"/>
+	                               <field name="pool_total_beg" colspan="4" readonly="1"/>
+	                               <field name="portion_factor_beg_comp" readonly="1"/>
+	                               <field name="portion_factor_beg_second" readonly="1"/>
+	                               <field name="rate_change_beg_comp" readonly="1"/>
+	                               <field name="rate_change_beg_second" readonly="1"/>
+	                               <field name="reval_beg" readonly="1"/>
+	                           </group>
+	                           <group colspan="4" col="4">
+	                               <separator string="After Posting" colspan="2"/>
+	                               <separator string="After Posting" colspan="2"/>
+	                               <field name="pool_equivalent_ap_comp" colspan="2" readonly="1"/>
+	                               <field name="pool_equivalent_ap_second" colspan="2" readonly="1"/>
+	                               <field name="pool_total_ap" colspan="4" readonly="1"/>
+	                               <field name="portion_factor_ap_comp" readonly="1"/>
+	                               <field name="portion_factor_ap_second" readonly="1"/>
+	                               <field name="rate_change_ap_comp" readonly="1"/>
+	                               <field name="rate_change_ap_second" readonly="1"/>
+	                               <field name="reval_ap" readonly="1"/>
+	                           </group>
+                           </page>
+                           <page string="Journal Entries">
+                            <group colspan="4" col="2">
+                                <field name="move_id" invisible="1"/>
+                                <field name="move_ids" mode="tree" nolabel="1">
+                                    <tree string="Revaluation Entries">
+                                        <field name="date" string="Revaluation Date"/>
                                         <field name="account_id"/>
                                         <field name="analytic_account_id"/>
-                                        <field name="debit"/>
-                                        <field name="credit"/>
+                                        <field name="debit" sum="Total Debit"/>
+                                        <field name="credit" sum="Total Credit"/>
                                         <field name="currency_id" string="Encoding Currency"/>
                                         <field name="amount_currency" string="Encoding Amount"/>
                                     </tree>
                                 </field>
-                           </page>
-                           <page string="Revaluation Result">
-                           </page>
+                            </group>
+                        </page>
 					   </notebook>
 					   <group colspan="4" col="10">
 					   <field name="state" readonly="1"/>
