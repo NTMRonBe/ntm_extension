@@ -269,7 +269,9 @@
             <field name="arch" type="xml">
                 <form string = "Voucher Distribution Rule">
                     <field name="name"/>
+                    <field name="name2"/>
                     <field name="account_id"/>
+                    <field name="condition"/>
                 </form>
             </field>
         </record>        
@@ -280,7 +282,9 @@
             <field name="arch" type="xml">
                 <tree string="Voucher Distribution Rules">
                     <field name="name"/>
+                    <field name="name2"/>
                     <field name="account_id"/>
+                    <field name="condition"/>
                 </tree>
             </field>
         </record>

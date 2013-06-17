@@ -330,21 +330,20 @@ class voucher_distribution_line(osv.osv):
     def match_account(self, cr, uid, ids, context=None):
         for vdl in self.read(cr, uid, ids, context=None):
             comment = vdl['name']
-            comment = comment.replace(" ","")
-            comm_len = len(comment)
-            name = ''
-            for i in range(comm_len):
-                name = name + comment[i]
-                name = name.lower()
-                check_rules = self.pool.get('voucher.distribution.rule').search(cr, uid, [])
-                for rule in check_rules:
-                    rule_read = self.pool.get('voucher.distribution.rule').read(cr, uid, rule, ['name','account_id'])
-                    phrase = rule_read['name']
-                    phrase = phrase.split(" ")
-                    if name in phrase:
-                        print name
-                        print rule_read['account_id']
-                        print phrase
+            print comment
+            check_exact_match = self.pool.get('voucher.distribution.rule').search(cr, uid, [('name','=',comment),('condition','=','exact')])
+            if check_exact_match:
+                match_read = self.pool.get('voucher.distribution.rule').read(cr, uid, check_exact_match[0], context=None)
+                print match_read
+                read_analytic = self.pool.get('account.analytic.account').read(cr, uid, match_read['account_id'][0],['name'])
+                self.write(cr, uid, ids, {'analytic_account_id':match_read['account_id'][0],'account_name':read_analytic['name']})
+            elif not check_exact_match:
+                any= self.pool.get('voucher.distribution.rule').search(cr, uid,[('condition','=','any')])
+                account_id = False
+                for rule in any:
+                    rule_read = self.pool.get('voucher.distribution.rule').read(cr, uid, rule, context=None)
+                    if comment.find(rule_read['name'])==0:
+                        self.write(cr, uid, ids, {'analytic_account_id':rule_read['account_id'][0],'account_name':rule_read['account_id'][1]})
         return True
 voucher_distribution_line()
 
@@ -374,20 +373,22 @@ class vd(osv.osv):
     
     def match_accounts(self, cr, uid, ids, context=None):
         for vd in self.read(cr, uid, ids, context=None):
-            for vdml in vd['missionary_lines']:
-                vdml_read = self.pool.get('voucher.distribution.line').read(cr, uid, vdml,context=None)
-                comment = vdml_read['name']
-                comment = comment.split(' ')
-                for i in range(len(comment)):
-                    print comment[i]
+            for vdl in vd['missionary_lines']:
+                self.pool.get('voucher.distribution.line').match_account(cr, uid, [vdl])
         return True
 vd()
 class voucher_distribution_rule(osv.osv):
     _name = 'voucher.distribution.rule'
     _description = "Distribution Rules"
     _columns = {
-        'name':fields.char('Phrase',size=100),
+        'name':fields.char('Phrase 1',size=100),
+        'name2':fields.char('Phrase 2',size=100),
         'account_id':fields.many2one('account.analytic.account','Account Name'),
+        'condition':fields.selection([
+                            ('exact','Exact Match'),
+                            ('both','Both words in phrase'),
+                            ('any','Any word in phrase')
+                            ],'Condition'),
         } 
 voucher_distribution_rule()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:,
