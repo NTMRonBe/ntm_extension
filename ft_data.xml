@@ -213,9 +213,7 @@
             <field name="active" eval="1"/>
             <field name="type">general</field>
         </record>
-
-
-
+        
          <record id="seq_type_pbd_sequence" model="ir.sequence.type">
             <field name="name">Phone Bill Distribution</field>
             <field name="code">pbd</field>
@@ -262,6 +260,44 @@
             <field name="prefix">IDG/%(y)s/</field>
             <field name="padding">3</field>
         </record>
+        
+        
+        
+        <!-- Phone Bill Distribution -->
+        
+        
+        <record id="analytic_journal_reval" model="account.analytic.journal">
+            <field name="name">Account Revaluation</field>
+            <field name="code">REVAL</field>
+            <field name="active" eval="1"/>
+            <field name="type">general</field>
+        </record>
+        
+         <record id="seq_type_reval_sequence" model="ir.sequence.type">
+            <field name="name">Account Revaluation</field>
+            <field name="code">reval</field>
+        </record>
+
+        <record id="seq_reval_sequence" model="ir.sequence">
+            <field name="name">Account Revaluation</field>
+            <field name="code">reval</field>
+            <field name="prefix">ARJ/%(y)s/</field>
+            <field name="padding">3</field>
+        </record>
+        
+        <record forcecreate="1" id="reval_journal" model="account.journal">
+            <field name="name">Account Revaluation Journal</field>
+            <field name="code">ARJ</field>
+            <field name="type">arj</field>
+            <field name="view_id" ref="account.account_journal_view"/>
+            <field name="sequence_id" ref="seq_reval_sequence"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="analytic_journal_id" ref="analytic_journal_reval"/>
+        </record>
+        
+        
+        
+        
         
     </data>
 </openerp>

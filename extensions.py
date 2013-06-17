@@ -221,8 +221,8 @@ class account_account(osv.osv):
         'code_accpac':fields.char('Code Accpac',size=16),
         'closing_account':fields.many2one('account.account','Closing Account'),
         'post_amount': fields.function(_compute_amount, digits_compute=dp.get_precision('Account'), method=True, type='float', string='Total Amount', store=False),
-        'equity_reval_value_acc':fields.many2one('account.analytic.account','Reval Value'),
-        'equity_gain_loss_acc':fields.many2one('account.analytic.account','Reval Value'),
+        'equity_reval_value_acc':fields.many2one('account.analytic.account','Equity Revaluated Value'),
+        'equity_gain_loss_acc':fields.many2one('account.analytic.account','Equity Gain Loss Value'),
         'equity_check':fields.boolean('Is this an Equity Account?'),
         }
     
@@ -278,6 +278,7 @@ class account_journal(osv.osv):
                                 ('forex','Foreign Exchanges'),
                                 ('pc_transfer','Petty Cash Transfers'),
                                 ('pbd','Phone Bill Distribution'),
+                                ('arj','Accounts Revaluation'),
                                 ('ved','Vehicle Expense Distribution'),
                                 ('iat','Internal Account Transfers'),
                                 ('regional_report','Regional Report'),

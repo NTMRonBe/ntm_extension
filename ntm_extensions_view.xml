@@ -189,7 +189,10 @@
                                 <separator string="Configuration" colspan="4"/>
                                 <field name="reconcile"/>
                                 <field name="include_pool" on_change="onchange_equity_bool(include_pool)"/>
+                                <field name="is_pr" attrs="{'invisible':[('include_pool','=',True)]}"/>
                                 <field name="equity_check" attrs="{'invisible':[('include_pool','=',True)]}"/>
+                            </group>
+                            <group colspan="4" col="4" attrs="{'invisible':[('equity_check','=',True)]}">
                                 <field name="gain_loss_acc" attrs="{'invisible':[('include_pool','=',True)]}"/>
                                 <field name="to_be_moved" attrs="{'invisible': [('include_pool','=',True)]}"/>
                             </group>
@@ -199,9 +202,11 @@
 	                                <field name="equity_reval_value_acc"/>
 	                                <field name="equity_gain_loss_acc"/>
 	                            </group>
-	                            <group col="2" colspan="2" attrs="{'invisible':[('gain_loss_acc','=',True)]}">
-                                    <separator string="Gain Loss Account" colspan="2"/>   
-                                    <field name="gain_loss"/>
+	                            <group col="2" colspan="2" attrs="{'invisible':[('equity_check','=',True)]}">
+		                            <group col="2" colspan="2" attrs="{'invisible':[('gain_loss_acc','=',True)]}">
+	                                    <separator string="Gain Loss Account" colspan="2"/>   
+	                                    <field name="gain_loss"/>
+	                                </group>
                                 </group>
                                 <group col="2" colspan="2" attrs="{'invisible':[('to_be_moved','=',False)]}">
                                     <separator string="End of Year Account" colspan="4"/>   

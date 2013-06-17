@@ -6,7 +6,14 @@ from tools.translate import _
 import decimal_precision as dp
 
 class account_revaluation(osv.osv):
-      
+    
+    def _get_journal(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        journal_obj = self.pool.get('account.journal')
+        res = journal_obj.search(cr, uid, [('type', '=', 'arj')],limit=1)
+        return res and res[0] or False
+
     _name = "account.revaluation"
     _description = "Account Revaluations"
     _columns = {
@@ -16,10 +23,8 @@ class account_revaluation(osv.osv):
         'dest_exchange_ids':fields.many2many('forex.transaction','forex_reval_dest_rel','forex_id','reval_id','Exchanges'),
         'state':fields.selection([
                                   ('draft','Draft'),
-                                  ('data_fetched','Primary Data Fetched'),
-                                  ('balap_computed','Balance Computed'),
-                                  ('test_reval','Revaluation Checked'),
-                                  ('verify','Verify'),
+                                  ('revaluated','Revaluated'),
+                                  ('verified', 'Verified'),
                                   ], 'State'),
         'comp_curr':fields.many2one('res.currency','Currency'),
         'comp_balbeg':fields.float('Beginning Balance'),
@@ -42,6 +47,7 @@ class account_revaluation(osv.osv):
         'portion_factor_ap_comp':fields.float('Portion Factor', digits=(16,5)),
         'portion_factor_ap_second':fields.float('Portion Factor', digits=(16,5)),
         'rate_change_beg_comp':fields.float('Rate Change Factor', digits=(16,8)),
+        'journal_id':fields.many2one('account.journal','Journal',),
         'rate_change_beg_second':fields.float('Rate Change Factor', digits=(16,8)),
         'rate_change_ap_comp':fields.float('Rate Change Factor', digits=(16,8)),
         'rate_change_ap_second':fields.float('Rate Change Factor', digits=(16,8)),
@@ -177,6 +183,7 @@ class account_revaluation(osv.osv):
     
     _defaults = {
             'state':'draft',
+            'journal_id':_get_journal,
             'src_exchange_ids':_get_exchanges_src,
             'dest_exchange_ids':_get_exchanges_dest,
             'comp_curr':_get_company_curr,
@@ -302,7 +309,7 @@ class account_revaluation(osv.osv):
                 'pool_equivalent_ap_comp':balapcomp,'pool_equivalent_ap_second':balapsec,'pool_total_beg':pt_beg,
                 'pool_total_ap':pt_ap,'portion_factor_beg_comp':pf_beg_comp,'portion_factor_beg_second':pf_beg_sec,
                 'portion_factor_ap_comp':pf_ap_comp,'portion_factor_ap_second':pf_ap_sec,'rate_change_beg_second':rcf_beg,
-                'rate_change_ap_second':rcf_ap,'reval_beg':rf_beg, 'reval_ap':rf_ap,
+                'rate_change_ap_second':rcf_ap,'reval_beg':rf_beg, 'reval_ap':rf_ap,'state':'revaluated'
                 }
             self.write(cr, uid, ids, vals)
             self.pool_account(cr, uid, ids)
@@ -399,27 +406,123 @@ class account_revaluation(osv.osv):
         return True
     def post_entries(self, cr, uid, ids, context=None):
         for reval in self.read(cr, uid, ids, context=None):
+            journal_id = reval['journal_id'][0]
             move = {
                 'period_id':reval['period_id'][0],
                 'date':reval['name'],
-                'journal_id':bank_read['journal_id'][0],
-                'name':recon['name'],
+                'journal_id':journal_id,
                 }
             move_id = self.pool.get('account.move').create(cr, uid, move)
             for reval_acc in reval['account_ids']:
                 acc_read = self.pool.get('account.revaluation.account').read(cr, uid, reval_acc,context=None)
-                move_line = {
-                        'name':line_read['name'],
-                        'journal_id':journal_id,
-                        'period_id':period_id,
-                        'account_id':bank_read['account_id'][0],
-                        'credit':credit,
-                        'date':line_read['recon_date'],
-                        'ref':line_read['name'],
-                        'move_id':move_id,
-                        'amount_currency':line_read['amount'],
-                        'currency_id':currency,
-                    }
+                aa_read = self.pool.get('account.account').read(cr, uid, acc_read['account_id'][0],context=None)
+                analytic_read = self.pool.get('account.analytic.account').read(cr, uid, acc_read['analytic_id'][0],['name'])
+                if aa_read['equity_check']==True:
+                    credit = 0.00
+                    debit = 0.00
+                    if acc_read['diff']>0.00:
+                        credit = 0.00
+                        debit = acc_read['diff']
+                        name = 'Gain of ' + acc_read['account_id'][1]
+                    elif acc_read['diff']<0.00:
+                        debit = 0.00
+                        credit = acc_read['diff']
+                        name = 'Loss of ' + acc_read['account_id'][1]
+                    move_line = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':reval['period_id'][0],
+                            'account_id':acc_read['account_id'][0],
+                            'debit':debit,
+                            'credit':credit,
+                            'date':reval['name'],
+                            'move_id':move_id,
+                            'analytic_account_id':aa_read['equity_reval_value_acc'][0],
+                            'amount_currency':acc_read['diff'],
+                            'currency_id':reval['comp_curr'][0],
+                        }
+                    self.pool.get('account.move.line').create(cr, uid, move_line)
+                    if acc_read['diff']>0.00:
+                        debit = 0.00
+                        credit = acc_read['diff']
+                        name = 'Gain of ' + acc_read['account_id'][1]
+                    elif acc_read['diff']<0.00:
+                        credit = 0.00
+                        debit = acc_read['diff']
+                        name = 'Loss of ' + acc_read['account_id'][1]
+                    move_line = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':reval['period_id'][0],
+                            'account_id':acc_read['account_id'][0],
+                            'debit':debit,
+                            'credit':credit,
+                            'date':reval['name'],
+                            'move_id':move_id,
+                            'analytic_account_id':aa_read['equity_gain_loss_acc'][0],
+                            'amount_currency':acc_read['diff'],
+                            'currency_id':reval['comp_curr'][0],
+                        }
+                    self.pool.get('account.move.line').create(cr, uid, move_line)
+                elif aa_read['equity_check']==False:
+                    name = False
+                    credit = 0.00
+                    debit = 0.00
+                    diff = acc_read['diff']
+                    if acc_read['diff']>0.00:
+                        credit = 0.00
+                        debit = diff
+                        name = 'Loss of '+ analytic_read['name']
+                    elif acc_read['diff']<0.00:
+                        debit = 0.00
+                        credit = diff * -1
+                        name = 'Gain of '+ analytic_read['name']
+                    print name 
+                    print '\n'
+                    print acc_read
+                    print '\n'
+                    print credit
+                    print '\n' 
+                    print debit
+                    print '\n'
+                    move_line = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':reval['period_id'][0],
+                            'account_id':acc_read['account_id'][0],
+                            'debit':debit,
+                            'credit':credit,
+                            'date':reval['name'],
+                            'move_id':move_id,
+                            'analytic_account_id':acc_read['analytic_id'][0],
+                            'amount_currency':diff,
+                            'currency_id':reval['comp_curr'][0],
+                        }
+                    self.pool.get('account.move.line').create(cr, uid, move_line)
+                    if acc_read['diff']>0.00:
+                        debit = 0.00
+                        credit = diff
+                        name = 'Loss of '+ analytic_read['name']
+                    elif acc_read['diff']<0.00:
+                        credit = 0.00
+                        debit = diff * -1
+                        name = 'Gain of '+ analytic_read['name']
+                    move_line = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':reval['period_id'][0],
+                            'account_id':acc_read['gainloss_account_id'][0],
+                            'debit':debit,
+                            'credit':credit,
+                            'date':reval['name'],
+                            'move_id':move_id,
+                            'amount_currency':acc_read['diff'],
+                            'currency_id':reval['comp_curr'][0],
+                        }
+                    self.pool.get('account.move.line').create(cr, uid, move_line)
+            self.write(cr, uid, ids, {'move_id':move_id,'state':'verified'})
+            self.pool.get('account.move').post(cr, uid, [move_id])
+        return True
                 
 account_revaluation()
 
@@ -467,9 +570,6 @@ class account_period(osv.osv):
     _inherit = 'account.period'
     
     def revaluate_period(self, cr, uid, ids, context=None):
-        del_revals = self.pool.get('account.revaluation').search(cr, uid, [('name','!=',False)])
-        for revals in del_revals:
-            self.pool.get('account.revaluation').unlink(cr, uid, revals)
         for period in self.read(cr, uid, ids, context=None):
             period_id = period['id']
         return {

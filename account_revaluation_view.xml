@@ -18,6 +18,19 @@
             </field>
         </record>
         
+        <record id="view_account_revaluation_tree" model="ir.ui.view">
+            <field name="name">account.revaluation.tree</field>
+            <field name="model">account.revaluation</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+              <tree colors="blue:state in ('draft');gray:state in ('done') " string="Monthly Revaluations">
+                    <field name="period_id"/>
+                    <field name="name"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        
         <record id="view_account_revaluation" model="ir.ui.view">
             <field name="name">account.revaluation.form</field>
             <field name="model">account.revaluation</field>
@@ -28,6 +41,7 @@
 	                   <group colspan="4" col="4">
 	                       <field name="period_id" domain="[('state','!=','done')]" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
 	                       <field name="name"/>
+	                       <field name="journal_id"/>
 	                   </group>
 	                   <separator string="Currency" colspan="4"/>
 	                   <group colspan="4" col="4">
@@ -41,10 +55,6 @@
                            <field name="end_rate" required="1"/>
                            <field name="post_rate"/>
                        </group>
-	                   <button string="Fetch Entries"
-                                                type="object"
-                                                name="fetch_accounts"
-                                                icon="gtk-execute"/>
 	                   <notebook>
 	                       <page string="Foreign Exchanges">
 	                           <group colspan="4">
@@ -149,37 +159,9 @@
 					   </notebook>
 					   <group colspan="4" col="10">
 					   <field name="state" readonly="1"/>
-					   <button string="Get Currencies"
-	                                            type="object"
-	                                            name="get_details"
-	                                            icon="gtk-execute"
-	                                            attrs="{'invisible': [('state','!=','draft')]}"
-	                                            confirm="Are you sure??"
-	                                            />
-                       <button string="Adjust per Post Rate"
-                                                type="object"
-                                                name="adjust_post_rate"
-                                                icon="gtk-execute"
-                                                attrs="{'invisible': [('state','!=','test_reval')]}"
-                                                />
-                       <button string="Check Gain Loss"
-                                                type="object"
-                                                name="check_gain_loss_accounts"
-                                                icon="gtk-execute"
-                                                attrs="{'invisible': [('state','!=','test_reval')]}"
-                                                />
-                       <button string="Compute Balance AP"
-                                                type="object"
-                                                name="compute_balap"
-                                                icon="gtk-execute"
-                                                attrs="{'invisible': [('state','!=','data_fetched')]}"
-                                                />
-                       <button string="Check Revaluation"
-                                                type="object"
-                                                name="reval_entries"
-                                                icon="gtk-execute"
-                                                attrs="{'invisible': [('state','!=','balap_computed')]}"
-                                                />
+					   <button string="Fetch Entries" type="object" name="fetch_accounts" states="draft" icon="gtk-execute"/>
+					   <button string="Change Revaluation" type="object" name="fetch_accounts" states="revaluated" icon="gtk-execute"/>
+					   <button string="Verify" type="object" name="post_entries" states="revaluated" icon="gtk-execute"/>
 	                    </group>
 	           </group>   
                </form>
@@ -190,18 +172,13 @@
             <field name="name">Revaluate Entries</field>
             <field name="res_model">account.revaluation</field>
             <field name="view_type">form</field>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="view_account_revaluation"/>
-            <field name="target">new</field>
         </record>
-        <!-- 
 		<menuitem
-            name="Revaluate Entries"
+            name="Monthly Revaluations"
             parent="account.menu_account_end_year_treatments"
             action="action_account_revaluation"
             id="menu_account_revaluation"
             sequence="50"
            />
- -->
     </data>
 </openerp>
