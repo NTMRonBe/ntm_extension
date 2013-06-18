@@ -720,13 +720,10 @@ class iat(osv.osv):
     def onchange_pcid(self, cr, uid, ids, pettycash_id=False, context=None):
         result = {}
         if pettycash_id:
-            print ids
             iat_ids = ids
             iat_id = iat_ids[0]
             pc_read = self.pool.get('account.pettycash').read(cr,uid, pettycash_id, ['currency_id'])
-            print pc_read
             denom_search = self.pool.get('denominations').search(cr, uid, [('currency_id','=',pc_read['currency_id'][0])])
-            print denom_search
             currency = pc_read['currency_id'][1]
             if not denom_search:
                 raise osv.except_osv(_('Error!'), _('%s has no available denominations.Please add them!')%currency)

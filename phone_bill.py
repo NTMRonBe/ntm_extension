@@ -162,7 +162,6 @@ class phone_statement_payment(osv.osv_memory):
     
     def paybill(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
-            print context
             bank_read = self.pool.get('res.partner.bank').read(cr, uid, form['bank_id'],['journal_id','account_id'])
             statement_read = self.pool.get('phone.statement').read(cr, uid, context['active_id'],context=None)            
             date = datetime.datetime.now()
@@ -358,7 +357,6 @@ class phone_statement_logs(osv.osv):
                     'currency_id':company_read['currency_id'][0],
                     }
             self.pool.get('account.move.line').create(cr, uid, move_line)
-            print move_line
             for distribution in statement['distribution_ids']:
                 dist_read = self.pool.get('phone.statement.distribution').read(cr, uid, distribution, context=None)
                 analytic_read = self.pool.get('account.analytic.account').read(cr, uid, dist_read['account_id'][0],['normal_account'])
@@ -378,7 +376,6 @@ class phone_statement_logs(osv.osv):
                     'currency_id':company_read['currency_id'][0],
                     }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
-                print move_line
             for additional_charges in statement['additional_ids']:
                 dist_read = self.pool.get('phone.statement.additional').read(cr, uid, additional_charges, context=None)
                 analytic_read = self.pool.get('account.analytic.account').read(cr, uid, dist_read['account_id'][0],['normal_account'])
@@ -398,7 +395,6 @@ class phone_statement_logs(osv.osv):
                     'currency_id':company_read['currency_id'][0],
                     }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
-                print move_line
             self.pool.get('account.move').post(cr, uid, [move_id])
             self.write(cr, uid, ids,{'distribution_move_id':move_id})
         return True
@@ -450,7 +446,6 @@ class callsdbf_reader(osv.osv_memory):
             period_read =self.pool.get('account.period').read(cr, uid, form['bill_period'],context=None)
             period_name = period_read['name']
             period = period_name.split('/')
-            print period
             end = int(end_day)
             start = int(start_day)
             start_date = False
@@ -462,14 +457,9 @@ class callsdbf_reader(osv.osv_memory):
                 prev_period_name = previous['name']
                 prev_period_list = prev_period_name.split('/')
                 start_date = str(prev_period_list[1])+'-'+str(prev_period_list[0])+'-'+start_day
-                print end_date
-                print start_date
-                
             elif end>start:
                 start_date = str(period[1])+'-'+str(period[0])+'-'+start_day
                 end_date = str(period[1])+'-'+str(period[0])+'-'+end_day
-                print end_date
-                print start_date
             user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
             company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['calls_dbf'])
             table = company_read['calls_dbf']

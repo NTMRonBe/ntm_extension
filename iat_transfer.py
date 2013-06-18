@@ -11,7 +11,6 @@ class iat(osv.osv):
     _inherit = 'internal.account.transfer'
     
     def transfer(self, cr, uid, ids, context=None):
-        print context
         if 'transfer_type' in context:
             if context['transfer_type']=='people2proj':
                 for iat in self.read(cr, uid, ids, context=None):
@@ -105,8 +104,6 @@ class iat(osv.osv):
                 iatd_read = self.pool.get('pettycash.denom').read(cr, uid, iatd, ['quantity','name'])
                 denom_check = self.pool.get('denominations').read(cr, uid, iatd_read['name'][0],['multiplier'])
                 total_denom_amount +=iatd_read['quantity']*denom_check['multiplier']
-            print total_denom_amount
-            print iat
             if total_denom_amount!=iat['amount']:
                 raise osv.except_osv(_('Error!'), _('Sum of all denominations is not equal to the amount to be transferred!'))
             elif total_denom_amount==iat['amount']:

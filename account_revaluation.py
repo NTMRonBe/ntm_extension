@@ -477,14 +477,6 @@ class account_revaluation(osv.osv):
                         debit = 0.00
                         credit = diff * -1
                         name = 'Gain of '+ analytic_read['name']
-                    print name 
-                    print '\n'
-                    print acc_read
-                    print '\n'
-                    print credit
-                    print '\n' 
-                    print debit
-                    print '\n'
                     move_line = {
                             'name':name,
                             'journal_id':journal_id,

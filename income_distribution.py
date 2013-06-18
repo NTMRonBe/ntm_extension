@@ -330,11 +330,9 @@ class voucher_distribution_line(osv.osv):
     def match_account(self, cr, uid, ids, context=None):
         for vdl in self.read(cr, uid, ids, context=None):
             comment = vdl['name']
-            print comment
             check_exact_match = self.pool.get('voucher.distribution.rule').search(cr, uid, [('name','=',comment),('condition','=','exact')])
             if check_exact_match:
                 match_read = self.pool.get('voucher.distribution.rule').read(cr, uid, check_exact_match[0], context=None)
-                print match_read
                 read_analytic = self.pool.get('account.analytic.account').read(cr, uid, match_read['account_id'][0],['name'])
                 self.write(cr, uid, ids, {'analytic_account_id':match_read['account_id'][0],'account_name':read_analytic['name']})
             elif not check_exact_match:
@@ -342,8 +340,9 @@ class voucher_distribution_line(osv.osv):
                 account_id = False
                 for rule in any:
                     rule_read = self.pool.get('voucher.distribution.rule').read(cr, uid, rule, context=None)
+                    read_analytic = self.pool.get('account.analytic.account').read(cr, uid, rule_read['account_id'][0],['name'])
                     if comment.find(rule_read['name'])==0:
-                        self.write(cr, uid, ids, {'analytic_account_id':rule_read['account_id'][0],'account_name':rule_read['account_id'][1]})
+                        self.write(cr, uid, ids, {'analytic_account_id':rule_read['account_id'][0],'account_name':read_analytic['name']})
         return True
 voucher_distribution_line()
 

@@ -83,7 +83,6 @@ class vehicle_log(osv.osv):
     _order = 'date asc'
     
     def create(self, cr, uid, vals, context=None):
-        print vals
         if 'vehicle_id' in vals:
             vread = self.pool.get('vehicle').read(cr, uid, vals['vehicle_id'],['km'])
             vals.update({
@@ -111,7 +110,6 @@ class vehicle_log(osv.osv):
         if end_km:
             for log in self.read(cr, uid, ids, context=None):
                 kms = end_km - start_km
-                print start_km
                 vehicle_read = self.pool.get('vehicle').read(cr, uid, log['vehicle_id'][0],['perkmcharge','perkmcharge150'])
                 charge=0.00
                 if kms > 150.00:

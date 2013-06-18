@@ -74,7 +74,6 @@ class bank_recon2(osv.osv):
                     if recon['type']=='check_clearing':
                         self.pool.get('bank.recon.line').unlink(cr, uid, recon['line_ids'])
                         check_search = self.pool.get('expense.check.payment').search(cr, uid, [('bank_account_id','=',bank_id),('check_date','<=',date),('state','=','posted')])
-                        print check_search
                         for checks in check_search:
                             check_read = self.pool.get('expense.check.payment').read(cr, uid, checks,['check_number','amount2pay','check_date'])
                             check_state = self.pool.get('res.partner.check.numbers').read(cr, uid, check_read['check_number'][0],['state'])
@@ -88,9 +87,7 @@ class bank_recon2(osv.osv):
                                     'check_id':check_read['check_number'][0],
                                     }
                                 check_num = check_read['check_number'][1]
-                                print check_num
                                 entry_search = self.pool.get('account.move.line').search(cr, uid, [('name','=',check_num)])
-                                print entry_search
                                 if entry_search:
                                     entry_read = self.pool.get('account.move.line').read(cr, uid, entry_search[0],['account_id'])
                                     line.update({'account_id':entry_read['account_id'][0],'move_line_id':entry_search[0]})
@@ -100,8 +97,6 @@ class bank_recon2(osv.osv):
                         self.pool.get('bank.recon.line').unlink(cr, uid, recon['line_ids'])
                         bt_search = self.pool.get('bank.transfer').search(cr, uid, [('journal_id','=',bank_id),
                                                                                     ('date','<=',date),('state','=','done')])
-                        print bt_search
-                        print recon['type']
                         for bt in bt_search:
                             bt_read = self.pool.get('bank.transfer').read(cr, uid, bt, context=None)
                             line = {
@@ -141,8 +136,6 @@ class bank_recon2(osv.osv):
                 'name':recon['name'],
                 }
             move_id = self.pool.get('account.move').create(cr, uid, move)
-            #move_id=False
-            print context
             if recon['type']=='check_clearing':
                 rec_list_ids = []
                 for line in recon['line_ids']:
@@ -218,10 +211,8 @@ class bank_recon2(osv.osv):
                                                                                      ('move_id.state','=','posted'),
                                                                                      ('analytic_account_id','!=',False)
                                                                                      ])
-                    print move_lines
                     for move_line in move_lines:
                         move_line_read = self.pool.get('account.move.line').read(cr, uid, move_line,context=None)
-                        print move_line_read
                         analytic_id = move_line_read['analytic_account_id'][0]
                         credit = move_line_read['amount_currency']/rate
                         name = "Clearing of transfer request # " + move_line_read['ref']

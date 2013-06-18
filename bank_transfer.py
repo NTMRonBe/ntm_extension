@@ -69,7 +69,6 @@ class bank_transfer_schedule(osv.osv):
     def compute(self, cr, uid, ids, context=None):
         for sub in self.browse(cr, uid, ids, context=context):
             com_bank = self.pool.get('res.partner.bank').read(cr, uid, sub.company_bank_id.id,['currency_id'])
-            print com_bank
             ent_bank = self.pool.get('res.partner.bank').read(cr, uid, sub.entity_bank_id.id,['currency_id'])
             if com_bank['currency_id'][0]==ent_bank['currency_id'][0]:
                 ds = sub.date_start
@@ -463,7 +462,6 @@ class check_sequence_wizard(osv.osv_memory):
         }
     def add_sequence(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
-            print context
             if form['start_sequence']<form['end_sequence']:
                 seq_search = self.pool.get('res.partner.check.numbers').search(cr, uid, [('name','=',form['start_sequence'])])
                 if not seq_search:
@@ -475,7 +473,6 @@ class check_sequence_wizard(osv.osv_memory):
                         end = end+1
                         ctr=0.00
                         for x in xrange(start,end):
-                            print x
                             if x<=form['end_sequence']:
                                 vals = {
                                     'bank_account_id':context['active_id'],
