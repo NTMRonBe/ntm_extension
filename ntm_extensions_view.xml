@@ -81,9 +81,17 @@
 				<field name="user_id" position="after">
 				    <newline/>
 					<field name="code_short"/>
-					<field name="code_accpac"/>
 					<field name="report"/>
 					<field name="normal_account"  attrs="{'invisible': [('type','=','view')]}"/>
+					<separator string="Accpac Codes" colspan="4"/>
+					<group colspan="4" col="2">
+					   <field name="accpac_ids" mode="tree" colspan="4" nolabel="1">
+					       <tree string="Codes" editable="top">
+					           <field name="name"/>
+					           <field name="description"/>
+					       </tree>
+					   </field>
+					</group>
 				</field>
 				<field name="partner_id" position="replace">
 				    <field name="partner_id" string="Linked Entity"/>
@@ -102,61 +110,6 @@
 				</field>
             </field>
         </record>
-        <!-- 
-        <record id="view_ntm_account_account_form" model="ir.ui.view">
-            <field name="name">ntm.account.account.form.inherit</field>
-            <field name="model">account.account</field>
-            <field name="type">form</field>
-            <field name="priority">2</field>
-            <field name="inherit_id" ref="account.view_account_form"/>
-            <field name="arch" type="xml">
-                <field name="code" position = "replace">
-                        <field name="code"/>
-                        <field name="code_short" attrs="{'invisible': [('type','=','view')]}"/>
-                        <field name="code_accpac" attrs="{'invisible': [('type','=','view')]}"/>
-                </field>
-                <page string="General Information" position="replace">
-                    <page string="General Information">
-                            <field name="active" groups="base.group_extended" />
-                            <newline/>
-                            <group col="4" colspan="4">
-                                <separator string="Currency" colspan="4"/>
-                                <field name="currency_id"/>
-                                <field name="currency_mode" attrs="{'readonly': [('currency_id','=',False)]}"/>
-                            </group>
-                            <group col="4" colspan="4" attrs="{'invisible': [('type','=','view')]}">
-                                <separator string="Configuration" colspan="4"/>
-	                            <field name="reconcile"/>
-	                            <field name="is_pr"/>
-                            </group>
-                            <separator string="Default Taxes" colspan="4"/>
-                            <field colspan="4" name="tax_ids" nolabel="1" domain="[('parent_id','=',False)]"/>
-                            <separator string="Consolidated Children" colspan="4"/>
-                            <field name="child_consol_ids" colspan="4" nolabel="1" attrs="{'readonly':[('type','!=','consolidation')]}"/>
-                        </page>
-                </page>
-                
-                <separator string = "Reconcile" position="replace">
-                    <separator string = "Configurations" colspan="2"/>
-                </separator>
-                <field name="reconcile" position="replace">
-                    <group colspan="2" col="4">
-                        <group colspan="4" col="4">
-                            <field name="reconcile"/>
-                            <field name="is_pr" />
-                        </group>
-                        <group colspan="4" col="4" attrs="{'invisible': [('type','=','view')]}">
-                            <field name="equity_check"/>
-                            
-                        </group>
-                        <group colspan="4" col="4" attrs="{'invisible': [('type','=','view')]}">
-                            <field name="gain_loss_acc" attrs="{'invisible': [('equity_check','=',True)]}"/>
-                        </group>
-                    </group>
-                </field>
-                 
-            </field>
-        </record>-->
         
         <record id="account.view_account_form" model="ir.ui.view">
             <field name="name">account.account.form</field>
@@ -174,7 +127,6 @@
                     <group colspan="4" col="6">
                         <field name="code"/>
                         <field name="code_short" attrs="{'invisible':[('type','=','view')]}"/>
-                        <field name="code_accpac" attrs="{'invisible':[('type','=','view')]}"/>
                     </group>
                     <notebook>
                         <page string="General Information">
@@ -217,6 +169,16 @@
                             <separator string="Consolidated Children" colspan="4"/>
                             <field name="child_consol_ids" colspan="4" nolabel="1" attrs="{'readonly':[('type','!=','consolidation')]}"/>
                             </group>
+                        </page>
+                        <page string="Accpac Codes">
+		                    <group colspan="4" col="2">
+		                       <field name="accpac_ids" mode="tree" colspan="4" nolabel="1">
+		                           <tree string="Codes" editable="top">
+		                               <field name="name"/>
+		                               <field name="description"/>
+		                           </tree>
+		                       </field>
+		                    </group>
                         </page>
                         <page string="Notes">
                             <field colspan="4" name="note" nolabel="1"/>
@@ -427,6 +389,68 @@
             <field name="filter" eval="True"/>
             <field name="help">You can access all information regarding your projects  from the projects form: accounting data, history of emails, meetings, purchases, etc. You can uncheck the 'Projects' filter button in order to search in all your partners, including donors and prospects.</field>
         </record>
+        
+        
+        <record id="account_accpac_form" model="ir.ui.view">
+            <field name="name">account.accpac.form</field>
+            <field name="model">account.accpac</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Accpac Account Matcher">
+                    <field name="name" attrs="{'readonly':[('state','in',['matched','nomatched'])]}"/>
+                    <field name="code" attrs="{'readonly':[('state','in',['matched','nomatched'])]}"/>
+                    <field name="description" attrs="{'readonly':[('state','in',['matched','nomatched'])]}"/>
+                    <field name="analytic_id" readonly="1"/>
+                    <field name="account_id" readonly="1"/>
+                    <field name="state" readonly="1"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="account_accpac_tree">
+            <field name="name">account.accpac.tree</field>
+            <field name="model">account.accpac</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Accpac Account Matcher">
+                    <field name="name" attrs="{'readonly':[('state','in',['matched','nomatched])]}"/>
+                    <field name="code" attrs="{'readonly':[('state','in',['matched','nomatched])]}"/>
+                    <field name="description" attrs="{'readonly':[('state','in',['matched','nomatched])]}"/>
+                    <field name="analytic_id" readonly="1"/>
+                    <field name="account_id" readonly="1"/>
+                    <field name="state" readonly="1"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_account_accpac_form">
+            <field name="name">Accpac Account Matcher</field>
+            <field name="res_model">account.accpac</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        
+        <record id="account_accpac_wiz_view" model="ir.ui.view">
+            <field name="name">Accpac Matcher Wizard</field>
+            <field name="model">account.accpac.wiz</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Match Accounts">
+                <group colspan="4" col="2">
+                    <button string="Match" type="object" name="match_accounts" icon="gtk-execute"/>
+                </group>
+               </form>
+            </field>
+        </record>
+
+        <record id="action_account_accpac_wiz" model="ir.actions.act_window">
+            <field name="name">Accpac Matcher Wizard</field>
+            <field name="res_model">account.accpac.wiz</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="account_accpac_wiz_view"/>
+            <field name="target">new</field>
+        </record>
+        
         
        </data>
 </openerp>

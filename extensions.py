@@ -60,13 +60,47 @@ class res_partner(osv.osv):
         }
 res_partner()
 
+class aaa_accpac(osv.osv):
+    _name = 'account.accpac'
+    _description = 'Accpac Accounts Matcher'
+    _columns = {
+        'name':fields.char('Account Number',size=64),
+        'code':fields.char('Code to Match',size=64),
+        'description':fields.char('Account Description',size=64),
+        'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
+        'account_id':fields.many2one('account.account','Normal Account'),
+        'state':fields.selection([
+                        ('matched','Matched'),('nomatched','No Match'),
+                        ],'Matching State', readonly=True),
+        }
+aaa_accpac()
+
+class aaa_accpac_wiz(osv.osv_memory):
+    _name = 'account.accpac.wiz'
+    _description = "Accpac Matcher Wizard"
+    
+    def match_accounts(self, cr, uid, ids, context=None):
+        accpac_ids = self.pool.get('account.accpac').search(cr, uid, [('state','=',False)])
+        for accpac in accpac_ids:
+            accpac_read = self.pool.get('account.accpac').read(cr, uid, accpac,context=None)
+            normal_search = self.pool.get('account.account').search(cr, uid,[('code','=',accpac_read['code'])])
+            if normal_search:
+                self.pool.get('account.accpac').write(cr, uid, accpac,{'state':'matched','account_id':normal_search[0]})
+            elif not normal_search:
+                analytic_search = self.pool.get('account.analytic.account').search(cr, uid, [('code','=',accpac_read['code'])])
+                if analytic_search:
+                    self.pool.get('account.accpac').write(cr, uid, accpac,{'state':'matched','analytic_id':analytic_search[0]})
+                elif not analytic_search:
+                    self.pool.get('account.accpac').write(cr, uid, accpac,{'state':'nomatched'})
+        return {'type': 'ir.actions.act_window_close'}
+aaa_accpac_wiz()
 class account_analytic_account(osv.osv):
         
     _inherit = 'account.analytic.account'
     _columns = {
             'phone_pin':fields.char('Phone Pin',size=12),
             'code_short':fields.char('Short Code',size=64),
-            'code_accpac':fields.char('Accpac Code',size=64),
+            'accpac_ids':fields.one2many('account.accpac','analytic_id','Accpac Codes'),
             'code':fields.char('Code',size=64),
             'supplier':fields.related('partner_id','supplier',type='boolean',store=True, string='People and Team',readonly=True),
             'project':fields.related('partner_id','project',type='boolean',store=True, string='Project',readonly=True),
@@ -198,7 +232,6 @@ class account_account(osv.osv):
             amount2 = 0.00
             amount = 0.00
             for accounts in self.pool.get('account.move.line').search(cr, uid,[('account_id','=',r.id)]):
-                print accounts
                 account = self.pool.get('account.move.line').read(cr, uid, accounts,['debit','credit','amount_currency'])
                 if account['debit']>0.00:
                     amount1 += account['amount_currency']
@@ -206,7 +239,6 @@ class account_account(osv.osv):
                     amount2 += account['amount_currency']
             amount = amount1 - amount2
             result[r.id] = amount
-            print amount
         return result
     
     _inherit = 'account.account'
@@ -218,7 +250,7 @@ class account_account(osv.osv):
         'gain_loss':fields.many2one('account.account','Gain Loss Account',domain=[('gain_loss_acc','=',True),('type','in',['other','liquidity'])]),
         'gain_loss_acc':fields.boolean('Is this a Gain/Loss Account?'),
         'code_short':fields.char('Code Short',size=16),
-        'code_accpac':fields.char('Code Accpac',size=16),
+        'accpac_ids':fields.one2many('account.accpac','account_id','Accpac Codes'),
         'closing_account':fields.many2one('account.account','Closing Account'),
         'post_amount': fields.function(_compute_amount, digits_compute=dp.get_precision('Account'), method=True, type='float', string='Total Amount', store=False),
         'equity_reval_value_acc':fields.many2one('account.analytic.account','Equity Revaluated Value'),
