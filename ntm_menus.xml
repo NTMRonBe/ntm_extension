@@ -54,6 +54,7 @@
         <menuitem id="menu_communications_line" parent="pat_config_main" sequence="30" action="action_phone_line_form"/>
         <menuitem id="menu_communications_company" parent="pat_config_main" sequence="40" action="action_phone_provider_form"/>
         <menuitem id="menu_vdr" parent="pat_config_main" sequence="60" action="action_voucher_distribution_rule_form"/>
+        <menuitem id="menu_eca" parent="pat_config_main" sequence="60" action="action_email_charging_account_form"/>
         
        
         

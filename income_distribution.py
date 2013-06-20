@@ -287,6 +287,8 @@ class voucher_distribution(osv.osv):
         'country':fields.many2one('res.country','Country',domain=[('code','in',['US','CA'])],required=True),
         'period_id':fields.many2one('account.period','Period',required=True),
         'generated':fields.boolean('Generated'),
+        'postage_recovery':fields.float('Postage Recovery Expense',digits_compute=dp.get_precision('Account')),
+        'envelope_recovery':fields.float('Envelope Recovery Expense',digits_compute=dp.get_precision('Account')),
         }
     _defaults = {
             'date': lambda *a: time.strftime('%Y-%m-%d'),
@@ -309,7 +311,6 @@ class voucher_distribution_line(osv.osv):
         'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
         'name':fields.char('Description',size=100),
         'comments':fields.char('Comments',size=100),
-        'comments2':fields.char('Comments2',size=100),
         'co1':fields.char('CO1',size=10),
         'batch_date':fields.date('Batch Date'),
         'co2':fields.char('CO2',size=10),
@@ -346,6 +347,55 @@ class voucher_distribution_line(osv.osv):
         return True
 voucher_distribution_line()
 
+class voucher_distribution_personal_section(osv.osv):
+    _name = 'voucher.distribution.personal.section'
+    _description = "Personal Account Section"
+    _columns = {
+        'name':fields.char('Personal Account',size=64),
+        'amount':fields.float('Amount'),
+        'account_name':fields.char('Account Name',size=64),
+        'account_id':fields.many2one('account.account','Normal Account'),
+        'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
+        'transaction_code':fields.selection([
+                                    ('dp','Deposits to Personal'),
+                                    ('pd','Personal Disbursements'),
+                                    ('v','Voucher'),
+                                    ]),
+        }
+voucher_distribution_personal_section()
+
+class voucher_distribution_email_charging(osv.osv):
+    _name = 'voucher.distribution.email.charging'
+    _description = "Email Charging"
+    _columns = {
+        'name':fields.char('Email Account Description',size=64, required=True),
+        'other_email':fields.char('Other Email Account',size=64),
+        'amount':fields.float('Amount'),
+        'account_id':fields.many2one('account.analytic.account','Analytic Account', required=True),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
+        }
+voucher_distribution_email_charging()
+
+class email_charging_account(osv.osv):
+    _name = 'email.charging.account'
+    _description = "Email Charging Account Configuration"
+    _columns = {
+        'name':fields.char('Email Account Description',size=64),
+        'account_id':fields.many2one('account.analytic.account','Analytic Account')
+        }
+email_charging_account()
+
+class voucher_distribution_natw_charge(osv.osv):
+    _name = 'voucher.distribution.natw.charge'
+    _description = "N@W Charges"
+    _columns = {
+        'name':fields.char('Charged For',size=64),
+        'amount':fields.float('Amount'),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
+        }
+voucher_distribution_natw_charge()
+
 class voucher_distribution_account_charging(osv.osv):
     _name = 'voucher.distribution.account.charging'
     _description = "Voucher Distribution Account Charging"
@@ -363,13 +413,12 @@ voucher_distribution_account_charging()
 class vd(osv.osv):
     _inherit = 'voucher.distribution'
     _columns = {
+        'natw_charges':fields.one2many('voucher.distribution.natw.charge','voucher_id','NTM at Work Charges'),
         'charging_lines':fields.one2many('voucher.distribution.account.charging','voucher_id','Charging Lines'),
-        'missionary_lines':fields.one2many('voucher.distribution.line','voucher_id','Missionary Lines',domain=[('type','=','mission')]),
-        'personal_lines':fields.one2many('voucher.distribution.line','voucher_id','Personal Lines',domain=[('type','=','personal')]),
-        'voucher_lines':fields.one2many('voucher.distribution.line','voucher_id','Voucher Lines',domain=[('type','=','voucher')]),
-        'other_lines':fields.one2many('voucher.distribution.line','voucher_id','Other Lines',domain=[('type','=','other')]),
+        'voucher_lines':fields.one2many('voucher.distribution.line','voucher_id','Voucher Lines'),
+        'email_charges':fields.one2many('voucher.distribution.email.charging','voucher_id','Email Charges'),
+        'personal_section':fields.one2many('voucher.distribution.personal.section','voucher_id','Deposits to Personal'),
         }
-    
     def match_accounts(self, cr, uid, ids, context=None):
         for vd in self.read(cr, uid, ids, context=None):
             for vdl in vd['missionary_lines']:

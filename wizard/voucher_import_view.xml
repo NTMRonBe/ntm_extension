@@ -8,20 +8,37 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Import Voucher">
+                        <group col="8">
+                        <group colspan="3" col="1">
+                            <newline/>
+                            <label width="220"/>
+                            <label width="220" string="Please be patient, this operation may take a few minutes (depending on the size of the DBF file)..."/>
+                            <field name="state" invisible="1"/>
+                        </group>
+                        <separator orientation="vertical" rowspan="5"/>
                         <group colspan="4">
                             <separator string="Voucher Import" colspan="4"/>
-                            <group col="4">
-                                <label string="Select voucher to import (.dbf file):" colspan="4"/>
-                                <field name="voucher_file" colspan="4" filename="file_name"/>
+                            <group states="init" col="4">
+                                <label string="Select DBF file to import (.dbf/DBF file):" colspan="4"/>
+                                <field name="voucher_file" colspan="4"/>
+                            </group>
+                            <group states="done" col="4">
+                                <label string="DBF file successfully imported!" colspan="4"/>
                             </group>
                         </group>
-                        <group colspan="4" col="4">
+                        <group colspan="8" col="8" states="init">
                             <separator string="" colspan="8"/>
                             <label colspan="6" width="220"/>
                             <button special="cancel" string="Cancel" icon="gtk-cancel"/>
-                            <button name="importzip" string="Copy" type="object" icon="gtk-apply"/>
+                            <button name="importzip" string="Import DBF File" type="object" icon="gtk-apply"/>
                         </group>
-                        <button name="distribute" string="Distribute" type="object" icon="gtk-apply" colspan="4"/>
+                        <group colspan="8" col="8" states="done">
+                            <separator string="" colspan="8"/>
+                            <label colspan="6" width="220"/>
+                            <button special="cancel" string="Close" icon="gtk-ok"/>
+                            <button name="distribute" string="Distribute Lines" type="object" icon="gtk-go-forward"/>
+                        </group>
+                    </group>
                 </form>
             </field>
         </record>

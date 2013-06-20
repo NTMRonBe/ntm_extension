@@ -37,9 +37,11 @@ class voucher_file_import(osv.osv_memory):
     _columns = {
           'voucher_file': fields.binary('File .DBF file', required=True),
           'file_name': fields.char('File Name', size=128),
+          'state':fields.selection([('init','init'),('done','done')], 'state', readonly=True),
     }
 
     _defaults = {  
+        'state': 'init',
     }
 
     def importzip(self, cr, uid, ids, context):
@@ -59,6 +61,7 @@ class voucher_file_import(osv.osv_memory):
         fp = open(file,'wb')
         fp.write(val)
         fp.close
+        self.write(cr, uid, ids, {'state':'done'}, context)
         return True
     
     def distribute(self, cr, uid, ids, context):
@@ -73,6 +76,8 @@ class voucher_file_import(osv.osv_memory):
         dbf_file = filename+voucher_name
         table = dbf.Table(dbf_file)
         table.open()
+        postage_recovery = 0.00
+        envelope_recovery = 0.00
         for rec in table:
             rec_name=str(rec.comm1)
             rec_comments = str(rec.comm2)
@@ -81,6 +86,7 @@ class voucher_file_import(osv.osv_memory):
             rec_co2 = str(rec.batltr)
             rec_docnum = str(rec.docno)
             rec_code = str(rec.trancd)
+            rec_code = rec_code.replace(' ','')
             sprice = (rec.amount)
             rec_amount = str(sprice)
             rec_amount = float(rec_amount)
@@ -97,14 +103,39 @@ class voucher_file_import(osv.osv_memory):
                 'code':rec_code,
                 'amount':rec_amount,
                 }
-            print vals
-            if rec_code in ['AD','CK','CL','DG','DO','LI','MD','ME','MI','MM','MP','MS','MU','MX','NT','PI','SU','TI','TS']:
+            if rec_code in ['AD','CK','CL','DG','DO','LI','MD','MI','MM','MP','MS','MU','MX','NT','PI','SU','TI','TS']:
                 vals.update({'type':'mission'})
-            elif rec_code in ['BD', 'CH', 'DP', 'GP', 'LP', 'PD', 'PG', 'PY', 'RF', 'ST', 'TR', 'V', 'WD']:
-                vals.update({'type':'personal'})
             elif rec_code in ['DV','VD']:
                 vals.update({'type':'voucher'})
-            self.pool.get('voucher.distribution.line').create(cr, uid, vals)
+            if rec_code not in ['BD', 'CH', 'DP', 'GP', 'LP', 'PD', 'PG', 'PY', 'RF', 'ST', 'TR', 'V', 'WD', 'ME']:
+                self.pool.get('voucher.distribution.line').create(cr, uid, vals)
+            if rec_code=='ME':
+                if rec_name.find('N@W')==0:
+                    naw_vals = {
+                        'voucher_id':context['active_id'],
+                        'name':rec_comments,
+                        'amount':rec_amount,
+                        }
+                    self.pool.get('voucher.distribution.natw.charge').create(cr, uid, naw_vals)
+                if rec_name.find('N@W')==-1:
+                    checker = rec_name.replace(' ','')
+                    checker = checker.replace('&','')
+                    checker = checker.lower()
+                    if checker=='rcptformenvrecovery':
+                        envelope_recovery = rec_amount
+                    elif checker=='rcptpostagerecovery':
+                        postage_recovery = rec_amount
+            if rec_code in ['BD', 'CH', 'DP', 'GP', 'LP', 'PD', 'PG', 'PY', 'RF', 'ST', 'TR', 'V', 'WD']:
+                name = rec_name
+                if 'EMAIL CHARGE' in rec_name:
+                    name = rec_comments
+                vals = {
+                    'voucher_id':context['active_id'],
+                    'name':name,
+                    'amount':rec_amount,
+                    }
+                self.pool.get('voucher.distribution.personal.section').create(cr, uid, vals)
+        self.pool.get('voucher.distribution').write(cr, uid, context['active_id'],{'generated':True,'postage_recovery':postage_recovery,'envelope_recovery':envelope_recovery})
         return {'type': 'ir.actions.act_window_close'}
 
 voucher_file_import()

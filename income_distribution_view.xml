@@ -146,78 +146,50 @@
                             <field name="country" widget="selection"/>
                             <field name="generated" invisible="1"/>
                         </group>
-                        <group colspan="2" col="2" attrs="{'invisible':[('generated','=',True)]}">
-                            <button name="%(action_view_voucher_file_import)d" string="Generate Voucher" type="action" icon="gtk-apply"/>
+                        <group colspan="2" col="2">
+                            <button name="%(action_view_voucher_file_import)d" string="Generate Voucher" type="action" icon="gtk-apply" attrs="{'invisible':[('generated','=',True)]}"/>
                             <button name="match_accounts" string="Match" type="object" icon="gtk-apply"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Missionary Regular Sub-Accts">
-                            <field name="missionary_lines" mode="tree" nolabel="1">
-                                <tree string="Voucher Lines">
-                                    <field name="name"/>
-                                    <field name="comments"/>
-                                    <field name="comments2"/>
-                                    <field name="co1"/>
-                                    <field name="batch_date"/>
-                                    <field name="co2"/>
-                                    <field name="doc_num"/>
-                                    <field name="code"/>
-                                    <field name="account_name"/>
-                                    <field name="type" invisible="1"/>
-                                    <field name="amount"/>
-                                    <button name="match_account" string="Match" type="object" icon="gtk-apply"/>
-                                </tree>
-                            </field>
-                        </page>
-                        <page string="Personal Regular Sub-Accts">
-                            <field name="personal_lines" mode="tree" nolabel="1">
-                                <tree string="Voucher Lines">
-                                    <field name="name"/>
-                                    <field name="comments"/>
-                                    <field name="comments2"/>
-                                    <field name="co1"/>
-                                    <field name="batch_date"/>
-                                    <field name="co2"/>
-                                    <field name="doc_num"/>
-                                    <field name="code"/>
-                                    <field name="account_name"/>
-                                    <field name="type" invisible="1"/>
-                                    <field name="amount"/>
-                                </tree>
-                            </field>
-                        </page>
-                        <page string="Voucher Accounts">
+                        <page string="Voucher Lines">
                             <field name="voucher_lines" mode="tree" nolabel="1">
                                 <tree string="Voucher Lines">
                                     <field name="name"/>
                                     <field name="comments"/>
-                                    <field name="comments2"/>
                                     <field name="co1"/>
                                     <field name="batch_date"/>
-                                    <field name="co2"/>
                                     <field name="doc_num"/>
                                     <field name="code"/>
                                     <field name="account_name"/>
-                                    <field name="type" invisible="1"/>
+                                    <field name="type"/>
                                     <field name="amount"/>
                                 </tree>
                             </field>
                         </page>
-                        <page string="Other Accounts">
-                            <field name="other_lines" mode="tree" nolabel="1">
-                                <tree string="Voucher Lines">
+                        <page string="N@W Charges">
+                            <field name="natw_charges" mode="tree" nolabel="1" readonly="1">
+                                <tree string="N@W Charges">
+                                    <field name="name" readonly="1"/>
+                                    <field name="amount" readonly="1" sum="Total"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Personal Section">
+                            <field name="personal_section" mode="tree" nolabel="1">
+                                <tree string="Deposits to Personal">
                                     <field name="name"/>
-                                    <field name="comments"/>
-                                    <field name="comments2"/>
-                                    <field name="co1"/>
-                                    <field name="batch_date"/>
-                                    <field name="co2"/>
-                                    <field name="doc_num"/>
-                                    <field name="code"/>
                                     <field name="account_name"/>
-                                    <field name="type" invisible="1"/>
-                                    <field name="amount"/>
+                                    <field name="account_id"/>
+                                    <field name="analytic_id"/>
+                                    <field name="amount" sum="Total"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Email Charges">
+                            <field name="email_charges" mode="tree" nolabel="1" readonly="1">
+                                <tree string="Email Charging">
+                                    <field name="name" readonly="1"/>
                                 </tree>
                             </field>
                         </page>
@@ -232,6 +204,12 @@
                                     <field name="total"/>
                                 </tree>
                             </field>
+                        </page>
+                        <page string="Recovery Charges">
+                            <group colspan="4" col="4">
+                                <field name="postage_recovery"/>
+                                <field name="envelope_recovery"/>
+                            </group>
                         </page>
                     </notebook>
                 </form>
@@ -294,6 +272,38 @@
             <field name="res_model">voucher.distribution.rule</field>
             <field name="view_type">form</field>
         </record>
+        
+        
+        
+        <record id="email_charging_account_form" model="ir.ui.view">
+            <field name="name">email.charging.account.form</field>
+            <field name="model">email.charging.account</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Email Charging Account">
+                    <field name="name"/>
+                    <field name="account_id"/>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="email_charging_account_tree">
+            <field name="name">email.charging.account.tree</field>
+            <field name="model">email.charging.account</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Email Charging Accounts">
+                    <field name="name"/>
+                    <field name="account_id"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_email_charging_account_form">
+            <field name="name">Email Charging Accounts</field>
+            <field name="res_model">email.charging.account</field>
+            <field name="view_type">form</field>
+        </record>
+        
         
     </data>
 </openerp>
