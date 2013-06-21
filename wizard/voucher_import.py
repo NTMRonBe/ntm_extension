@@ -76,21 +76,6 @@ class voucher_file_import(osv.osv_memory):
         dbf_file = filename+voucher_name
         table = dbf.Table(dbf_file)
         table.open()
-        postage_recovery = 0.00
-        envelope_recovery = 0.00
-        missionary_subtotal = 0.00
-        recovery_charges = 0.00
-        natw_total_charges = 0.00
-        phna_pool = []
-        phna_accs = self.pool.get('voucher.distribution.missionaries').search(cr, uid, [])
-        for phna in phna_accs:
-            phna_read = self.pool.get('voucher.distribution.missionaries').read(cr, uid, phna,context=None)
-            phna_name = phna_read['name']
-            phna_name = phna_name.replace(' ','')
-            phna_name = phna_name.replace('&','')
-            phna_name = phna_name.lower()
-            phna_pool.append(phna_name)
-        print phna_pool
         for rec in table:
             rec_name=str(rec.comm1)
             rec_comments = str(rec.comm2)
@@ -105,6 +90,7 @@ class voucher_file_import(osv.osv_memory):
             rec_amount = float(rec_amount)
             rec_amount = "%.2f" % rec_amount
             rec_amount = float(rec_amount) 
+            rec_amount = rec_amount*-1
             vals = {
                 'name':rec_name,
                 'voucher_id':context['active_id'],
@@ -116,95 +102,14 @@ class voucher_file_import(osv.osv_memory):
                 'code':rec_code,
                 'amount':rec_amount,
                 }
-            if rec_code in ['AD','CK','CL','DG','DO','LI','MI','MM','MP','MS','MU','MX','NT','PI','SU','TI','TS']:
+            if rec_code in ['AD','CK','CL','DG','DO','LI','MI','ME','MM','MP','MS','MU','MX','NT','PI','SU','TI','TS']:
                 vals.update({'type':'mission'})
             elif rec_code in ['DV','VD']:
-                phnational = rec_name.lower()
-                phnational = phnational.replace(' ','')
-                phnational = phnational.replace('&','')
-                if phnational in phna_pool:
-                    for phna in phna_accs:
-                        phna_read = self.pool.get('voucher.distribution.missionaries').read(cr, uid, phna,context=None)
-                        acc_read = self.pool.get('account.analytic.account').read(cr, uid, phna_read['account_id'][0],['name'])
-                        phna_name = phna_read['name']
-                        phna_name = phna_name.replace(' ','')
-                        phna_name = phna_name.replace('&','')
-                        phna_name = phna_name.lower()
-                        if phnational == phna_name:
-                            amount = rec_amount * -1
-                            val_name = False
-                            if phna_read['national']==True:
-                                val_name = 'Philippine National'
-                            elif phna_read['national']==False:
-                                vouch_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'],['name'])
-                                val_name = vouch_read['name']
-                            phna_vals = {
-                                    'name':val_name,
-                                    'comment':rec_name,
-                                    'amount':amount,
-                                    'voucher_id':context['active_id'],
-                                    'analytic_account_id':phna_read['account_id'][0],
-                                    'account_name':acc_read['name'],
-                                    }
-                            self.pool.get('voucher.distribution.voucher.transfer').create(cr, uid, phna_vals)
-                elif phnational not in phna_pool:
-                    amount = rec_amount * -1
-                    val_name = 'For Account Assignment'
-                    phna_vals = {
-                            'name':val_name,
-                            'comment':rec_name,
-                            'amount':amount,
-                            'voucher_id':context['active_id'],
-                            }
-                    self.pool.get('voucher.distribution.voucher.transfer').create(cr, uid, phna_vals)
-            if rec_code not in ['BD', 'CH', 'DP', 'GP', 'LP', 'PD', 'PG', 'PY', 'RF', 'ST', 'TR', 'V', 'WD', 'ME','DV','VD']:
-                self.pool.get('voucher.distribution.line').create(cr, uid, vals)
-            if rec_code=='ME':
-                if rec_name.find('N@W')==0:
-                    rec_amount = rec_amount * -1
-                    naw_vals = {
-                        'voucher_id':context['active_id'],
-                        'name':rec_comments,
-                        'amount':rec_amount,
-                        }
-                    self.pool.get('voucher.distribution.natw.charge').create(cr, uid, naw_vals)
-                    natw_total_charges += rec_amount
-                if rec_name.find('N@W')==-1:
-                    checker = rec_name.replace(' ','')
-                    checker = checker.replace('&','')
-                    checker = checker.lower()
-                    if checker=='rcptformenvrecovery':
-                        envelope_recovery = rec_amount
-                    elif checker=='rcptpostagerecovery':
-                        postage_recovery = rec_amount
-            if rec_code in ['BD', 'CH', 'DP', 'GP', 'LP', 'PD', 'PG', 'PY', 'RF', 'ST', 'TR', 'V', 'WD']:
-                name = rec_name
-                if 'EMAIL CHARGE' in rec_name:
-                    name = rec_comments
-                rec_amount = rec_amount * -1
-                if 'NTMA' in rec_name:
-                    name = rec_name + rec_comments
-                if 'BOOKSTORE' in rec_name:
-                    name = rec_name.replace('BOOKSTORE','')
-                    name = name.replace('INVOICE','')
-                    name = name.replace(' ','')
-                    comments = rec_comments.replace(' ','')
-                    name = name + ' ' + comments
-                vals = {
-                    'voucher_id':context['active_id'],
-                    'name':name,
-                    'amount':rec_amount,
-                    }
-                self.pool.get('voucher.distribution.personal.section').create(cr, uid, vals)
-            if rec_code in ['DG','MI','DP'] and rec_amount>0.00:
-                missionary_subtotal -=rec_amount
-        recovery_charges = postage_recovery + envelope_recovery
-        self.pool.get('voucher.distribution').write(cr, uid, context['active_id'],{'generated':True,
-                                                                                   'postage_recovery':postage_recovery,
-                                                                                   'missionary_subtotal':missionary_subtotal,
-                                                                                   'natw_total_charges':natw_total_charges,
-                                                                                   'recovery_charges':recovery_charges,
-                                                                                   'envelope_recovery':envelope_recovery})
+                vals.update({'type':'voucher'})
+            elif rec_code in ['BD', 'CH', 'DP', 'GP', 'LP', 'PD', 'PG', 'PY', 'RF', 'ST', 'TR', 'V', 'WD']:
+                vals.update({'type':'personal'})
+            self.pool.get('voucher.distribution.line').create(cr, uid, vals)
+        self.pool.get('voucher.distribution').write(cr, uid, context['active_id'],{'generated':True})
         return {'type': 'ir.actions.act_window_close'}
 
 voucher_file_import()

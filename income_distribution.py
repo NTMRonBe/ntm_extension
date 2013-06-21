@@ -330,7 +330,7 @@ class voucher_distribution_line(osv.osv):
                         ('other','Other'),
                         ],'Type'),
         }
-    
+    _order = 'type asc, id asc'
     def match_account(self, cr, uid, ids, context=None):
         for vdl in self.read(cr, uid, ids, context=None):
             comment = vdl['name']
@@ -344,6 +344,7 @@ class voucher_distribution_line(osv.osv):
                 account_id = False
                 for rule in any:
                     rule_read = self.pool.get('voucher.distribution.rule').read(cr, uid, rule, context=None)
+                    print rule_read['name']
                     read_analytic = self.pool.get('account.analytic.account').read(cr, uid, rule_read['account_id'][0],['name'])
                     if comment.find(rule_read['name'])==0:
                         self.write(cr, uid, ids, {'analytic_account_id':rule_read['account_id'][0],'account_name':read_analytic['name']})
@@ -375,9 +376,8 @@ class voucher_distribution_email_charging(osv.osv):
     _description = "Email Charging"
     _columns = {
         'name':fields.char('Email Account Description',size=64, required=True),
-        'other_email':fields.char('Other Email Account',size=64),
         'amount':fields.float('Amount'),
-        'account_id':fields.many2one('account.analytic.account','Analytic Account', required=True),
+        'account_id':fields.many2one('account.analytic.account','Analytic Account'),
         'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade'),
         }
 voucher_distribution_email_charging()
@@ -387,7 +387,8 @@ class email_charging_account(osv.osv):
     _name = 'email.charging.account'
     _description = "Email Charging Account Configuration"
     _columns = {
-        'name':fields.char('Email Account Description',size=64),
+        'name':fields.char('Email Account (Voucher)',size=64),
+        'description':fields.char('Description',size=64),
         'account_id':fields.many2one('account.analytic.account','Analytic Account')
         }
 email_charging_account()
@@ -426,6 +427,16 @@ class voucher_distribution_9phna(osv.osv):
         }
 voucher_distribution_9phna()
 
+class voucher_distribution_uncharged(osv.osv):
+    _name = 'voucher.distribution.uncharged'
+    _description = "Uncharged Amounts"
+    _columns = {
+        'name':fields.char('Description',size=64),
+        'amount':fields.float('Amount',size=64),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade')
+        }
+voucher_distribution_uncharged()
+
 class voucher_distribution_voucher_transfer(osv.osv):
     _name = 'voucher.distribution.voucher.transfer'
     _description = "Voucher Transfer"
@@ -463,12 +474,95 @@ class vd(osv.osv):
         'email_charges':fields.one2many('voucher.distribution.email.charging','voucher_id','Email Charges'),
         'personal_section':fields.one2many('voucher.distribution.personal.section','voucher_id','Deposits to Personal'),
         'voucher_transfer_lines':fields.one2many('voucher.distribution.voucher.transfer','voucher_id','Voucher Transfers'),
+        'uncharged_ids':fields.one2many('voucher.distribution.uncharged','voucher_id','Uncharged Amounts'),
         }
     def match_accounts(self, cr, uid, ids, context=None):
         for vd in self.read(cr, uid, ids, context=None):
-            for vdl in vd['missionary_lines']:
+            for vdl in vd['voucher_lines']:
                 self.pool.get('voucher.distribution.line').match_account(cr, uid, [vdl])
         return True
+    
+    def check_accounts(self, cr, uid, ids, context=None):
+        phna_pool = []
+        phna_idpool = []
+        phna_accs = self.pool.get('voucher.distribution.missionaries').search(cr, uid, [])
+        for phna in phna_accs:
+            phna_read = self.pool.get('voucher.distribution.missionaries').read(cr, uid, phna,context=None)
+            phna_name = phna_read['name']
+            phna_name = phna_name.replace(' ','')
+            phna_name = phna_name.replace('&','')
+            phna_name = phna_name.lower()
+            phna_pool.append(phna_name)
+            phna_idpool.append(phna_read['id'])
+        for vd in self.read(cr, uid, ids, context=None):
+            for vdl in vd['voucher_lines']:
+                vdlread= self.pool.get('voucher.distribution.line').read(cr, uid, vdl, context=None)
+                vdlread_description = vdlread['name']
+                vdlread_comments = vdlread['comments']
+                if 'N@W' in vdlread_description:
+                    vals = {
+                        'name':vdlread['comments'],
+                        'voucher_id':vd['id'],
+                        'amount':vdlread['amount'],
+                        }
+                    self.pool.get('voucher.distribution.natw.charge').create(cr, uid, vals)
+                    self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
+                elif 'EMAIL' in vdlread_description:
+                    vdlread_comments = vdlread_comments.replace('USER: ','')
+                    vdlread_comments = vdlread_comments.replace(' ','')
+                    email_search = self.pool.get('email.charging.account').search(cr, uid, [('name','=',vdlread_comments)], limit=1)
+                    if email_search:
+                        email_read = self.pool.get('email.charging.account').read(cr, uid, email_search[0], context=None)
+                        vals = {
+                            'name':email_read['description'],
+                            'voucher_id':vd['id'],
+                            'amount':vdlread['amount'],
+                            }
+                        if email_read['account_id']:
+                            vals.update({'account_id':email_read['account_id'][0]})
+                        self.pool.get('voucher.distribution.email.charging').create(cr, uid, vals)
+                    self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
+                else:
+                    vdlread_description = vdlread_description.lower()
+                    if vdlread['type']=='voucher':
+                        vdlread_description = vdlread_description.replace(' ','')
+                        vdlread_description = vdlread_description.replace('&','')
+                        ctr = 0
+                        if vdlread_description in phna_pool:
+                            for phna_pool_name in phna_pool:
+                                if phna_pool_name!=vdlread_description:
+                                    ctr+=1
+                                    continue
+                                elif phna_pool_name==vdlread_description:
+                                    phna_read = self.pool.get('voucher.distribution.missionaries').read(cr, uid, phna_idpool[ctr],context=None)
+                                    acc_read = self.pool.get('account.analytic.account').read(cr, uid, phna_read['account_id'][0],['name'])
+                                    val_name = False
+                                    if phna_read['national']==True:
+                                        val_name = 'Philippine National'
+                                    elif phna_read['national']==False:
+                                        val_name = vd['name']
+                                    phna_vals = {
+                                            'name':val_name,
+                                            'comment':vdlread['name'],
+                                            'amount':vdlread['amount'],
+                                            'voucher_id':vd['id'],
+                                            'analytic_account_id':phna_read['account_id'][0],
+                                            'account_name':acc_read['name'],
+                                            }
+                                    self.pool.get('voucher.distribution.voucher.transfer').create(cr, uid, phna_vals)
+                        elif vdlread_description not in phna_pool:
+                            val_name = 'For Account Assignment'
+                            phna_vals = {
+                                    'name':val_name,
+                                    'comment':vdlread['name'],
+                                    'amount':vdlread['amount'],
+                                    'voucher_id':vd['id'],
+                                    }
+                            self.pool.get('voucher.distribution.voucher.transfer').create(cr, uid, phna_vals)
+                                    
+                    #print vdlread_description
+        return True
+                
 vd()
 class voucher_distribution_rule(osv.osv):
     _name = 'voucher.distribution.rule'
@@ -484,4 +578,26 @@ class voucher_distribution_rule(osv.osv):
                             ],'Condition'),
         } 
 voucher_distribution_rule()
+
+
+class voucher_distribution_account_assignment(osv.osv):
+    _name = 'voucher.distribution.account.assignment'
+    _description = "Voucher Line Account Assignment"
+    _columns = {
+        'name':fields.char('Phrase',size=100),
+        'field2match':fields.selection([
+                                ('description','Description'),
+                                ('comment','Comments'),
+                                ('both','Both'),
+                                ],'Fields to Match'),
+        'match_rule':fields.selection([('exact','Exact Match'),('wildcard','Wildcard Match'),('prefix','Prefix Match')],'Matching Rule'),
+        'account_type':fields.selection([('normal','Normal'),('analytic','Analytic')],'Account Type'),
+        'account_id':fields.many2one('account.account','Normal Account'),
+        'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
+        }
+    
+    _defaults = {
+        'account_type':'normal',
+        }
+voucher_distribution_account_assignment()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:,
