@@ -287,6 +287,9 @@ class voucher_distribution(osv.osv):
         'country':fields.many2one('res.country','Country',domain=[('code','in',['US','CA'])],required=True),
         'period_id':fields.many2one('account.period','Period',required=True),
         'generated':fields.boolean('Generated'),
+        'missionary_subtotal':fields.float('Missionary Account Subtotal',digits_compute=dp.get_precision('Account')),
+        'recovery_charges':fields.float('Recovery Charges',digits_compute=dp.get_precision('Account')),
+        'natw_total_charges':fields.float('N@W Charges',digits_compute=dp.get_precision('Account')),
         'postage_recovery':fields.float('Postage Recovery Expense',digits_compute=dp.get_precision('Account')),
         'envelope_recovery':fields.float('Envelope Recovery Expense',digits_compute=dp.get_precision('Account')),
         }
@@ -308,7 +311,7 @@ class voucher_distribution_line(osv.osv):
     _name = 'voucher.distribution.line'
     _description = "Voucher Distribution Lines"
     _columns = {
-        'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade'),
         'name':fields.char('Description',size=100),
         'comments':fields.char('Comments',size=100),
         'co1':fields.char('CO1',size=10),
@@ -356,13 +359,15 @@ class voucher_distribution_personal_section(osv.osv):
         'account_name':fields.char('Account Name',size=64),
         'account_id':fields.many2one('account.account','Normal Account'),
         'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
-        'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade'),
         'transaction_code':fields.selection([
                                     ('dp','Deposits to Personal'),
                                     ('pd','Personal Disbursements'),
                                     ('v','Voucher'),
                                     ]),
         }
+    
+    _order = 'amount asc'
 voucher_distribution_personal_section()
 
 class voucher_distribution_email_charging(osv.osv):
@@ -373,9 +378,10 @@ class voucher_distribution_email_charging(osv.osv):
         'other_email':fields.char('Other Email Account',size=64),
         'amount':fields.float('Amount'),
         'account_id':fields.many2one('account.analytic.account','Analytic Account', required=True),
-        'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade'),
         }
 voucher_distribution_email_charging()
+
 
 class email_charging_account(osv.osv):
     _name = 'email.charging.account'
@@ -392,7 +398,7 @@ class voucher_distribution_natw_charge(osv.osv):
     _columns = {
         'name':fields.char('Charged For',size=64),
         'amount':fields.float('Amount'),
-        'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade'),
         }
 voucher_distribution_natw_charge()
 
@@ -406,10 +412,48 @@ class voucher_distribution_account_charging(osv.osv):
         'natw':fields.float('N@W Charges'),
         'extra':fields.float('Extra Charges'),
         'total':fields.float('Total'),
-        'voucher_id':fields.many2one('voucher.distribution','Voucher ID'),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade'),
         }
 voucher_distribution_account_charging()
 
+class voucher_distribution_9phna(osv.osv):
+    _name = 'voucher.distribution.missionaries'
+    _description = "Missionary Charging"
+    _columns = {
+        'name':fields.char('Name',size=64),
+        'account_id':fields.many2one('account.analytic.account','Account Name'),
+        'national':fields.boolean('Philippine National'),
+        }
+voucher_distribution_9phna()
+
+class voucher_distribution_voucher_transfer(osv.osv):
+    _name = 'voucher.distribution.voucher.transfer'
+    _description = "Voucher Transfer"
+    _columns = {
+        'name':fields.char('Description',size=64),
+        'comment':fields.char('Comments',size=64),
+        'amount':fields.float('Amount',digits_compute=dp.get_precision('Account')),
+        'account_name':fields.char('Account Name',size=100),
+        'analytic_account_id':fields.many2one('account.analytic.account','Analytic Account'),
+        'account_id':fields.many2one('account.account','Normal Account'),
+        'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade'),
+        }
+    _order = 'name asc, comment asc'
+    
+    def onchange_account(self, cr, uid, ids,  account_id):
+        res = {}
+        if account_id:
+            acc_read = self.pool.get('account.account').read(cr, uid, account_id, ['name'])
+            res = {'value':{'account_name':acc_read['name']}}
+        return res
+    
+    def onchange_analytic(self, cr, uid, ids,analytic_account_id):
+        res = {}
+        if analytic_account_id:
+            acc_read = self.pool.get('account.analytic.account').read(cr, uid, analytic_account_id, ['name'])
+            res = {'value':{'account_name':acc_read['name']}}
+        return res
+voucher_distribution_voucher_transfer()
 class vd(osv.osv):
     _inherit = 'voucher.distribution'
     _columns = {
@@ -418,6 +462,7 @@ class vd(osv.osv):
         'voucher_lines':fields.one2many('voucher.distribution.line','voucher_id','Voucher Lines'),
         'email_charges':fields.one2many('voucher.distribution.email.charging','voucher_id','Email Charges'),
         'personal_section':fields.one2many('voucher.distribution.personal.section','voucher_id','Deposits to Personal'),
+        'voucher_transfer_lines':fields.one2many('voucher.distribution.voucher.transfer','voucher_id','Voucher Transfers'),
         }
     def match_accounts(self, cr, uid, ids, context=None):
         for vd in self.read(cr, uid, ids, context=None):

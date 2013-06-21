@@ -105,10 +105,13 @@ class account_analytic_account(osv.osv):
             'supplier':fields.related('partner_id','supplier',type='boolean',store=True, string='People and Team',readonly=True),
             'project':fields.related('partner_id','project',type='boolean',store=True, string='Project',readonly=True),
             'normal_account':fields.many2one('account.account','Related Normal Account'),
+            'voucher_expense':fields.boolean('Include on voucher expense distribution?'),
+            'project_account':fields.boolean('Project Account?'),
             'report':fields.selection([
                                 ('pal','Profit and Loss'),
                                 ('soa','Statement of Account')
                                 ], 'Report Type'),
+            
             }
     '''
     def compute_total_balance(self, cr, uid, ids, context=None):

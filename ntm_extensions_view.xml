@@ -83,6 +83,10 @@
 					<field name="code_short"/>
 					<field name="report"/>
 					<field name="normal_account"  attrs="{'invisible': [('type','=','view')]}"/>
+					<group colspan="2" col="4" attrs="{'invisible': [('type','=','view')]}">
+					<field name="project_account"/>
+					<field name="voucher_expense" attrs="{'invisible': [('project_account','=',False)]}"/>
+					</group>
 					<separator string="Accpac Codes" colspan="4"/>
 					<group colspan="4" col="2">
 					   <field name="accpac_ids" mode="tree" colspan="4" nolabel="1">
@@ -412,7 +416,7 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Accpac Account Matcher">
-                    <field name="name" attrs="{'readonly':[('state','in',['matched','nomatched])]}"/>
+                    <field name="name" attrs="{'readonly':[('state','in',['matched','nomatched])]}" select="1"/>
                     <field name="code" attrs="{'readonly':[('state','in',['matched','nomatched])]}"/>
                     <field name="description" attrs="{'readonly':[('state','in',['matched','nomatched])]}"/>
                     <field name="analytic_id" readonly="1"/>
