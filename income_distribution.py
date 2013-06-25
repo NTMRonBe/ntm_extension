@@ -344,7 +344,6 @@ class voucher_distribution_line(osv.osv):
                 account_id = False
                 for rule in any:
                     rule_read = self.pool.get('voucher.distribution.rule').read(cr, uid, rule, context=None)
-                    print rule_read['name']
                     read_analytic = self.pool.get('account.analytic.account').read(cr, uid, rule_read['account_id'][0],['name'])
                     if comment.find(rule_read['name'])==0:
                         self.write(cr, uid, ids, {'analytic_account_id':rule_read['account_id'][0],'account_name':read_analytic['name']})
@@ -369,6 +368,20 @@ class voucher_distribution_personal_section(osv.osv):
         }
     
     _order = 'amount asc'
+    
+    def onchange_accountid(self, cr, uid, ids, account_id):
+        res = {}
+        if account_id:
+            accountRead = self.pool.get('account.account').read(cr, uid, account_id, ['name'])
+            res = {'value':{'account_id':account_id,'account_name':accountRead['name'], 'analytic_id':False}}
+        return res
+    
+    def onchange_analyticid(self, cr, uid, ids, analytic_id):
+        res = {}
+        if analytic_id:
+            accountRead = self.pool.get('account.analytic.account').read(cr, uid, analytic_id, ['name'])
+            res = {'value':{'account_id':analytic_id,'account_name':accountRead['name'], 'account_id':False}}
+        return res
 voucher_distribution_personal_section()
 
 class voucher_distribution_email_charging(osv.osv):
@@ -472,7 +485,8 @@ class vd(osv.osv):
         'charging_lines':fields.one2many('voucher.distribution.account.charging','voucher_id','Charging Lines'),
         'voucher_lines':fields.one2many('voucher.distribution.line','voucher_id','Voucher Lines'),
         'email_charges':fields.one2many('voucher.distribution.email.charging','voucher_id','Email Charges'),
-        'personal_section':fields.one2many('voucher.distribution.personal.section','voucher_id','Deposits to Personal'),
+        'dp_section':fields.one2many('voucher.distribution.personal.section','voucher_id','Deposits to Personal',domain=[('transaction_code','=','dp')]),
+        'pdv_section':fields.one2many('voucher.distribution.personal.section','voucher_id','Personal Disbursements and Vouchers',domain=[('transaction_code','!=','dp')]),
         'voucher_transfer_lines':fields.one2many('voucher.distribution.voucher.transfer','voucher_id','Voucher Transfers'),
         'uncharged_ids':fields.one2many('voucher.distribution.uncharged','voucher_id','Uncharged Amounts'),
         }
@@ -499,6 +513,9 @@ class vd(osv.osv):
                 vdlread= self.pool.get('voucher.distribution.line').read(cr, uid, vdl, context=None)
                 vdlread_description = vdlread['name']
                 vdlread_comments = vdlread['comments']
+                vdlread_code=vdlread['code']
+                vdlread_code = vdlread_code.replace(' ','')
+                vdlread_code = vdlread_code.lower()
                 if 'N@W' in vdlread_description:
                     vals = {
                         'name':vdlread['comments'],
@@ -507,23 +524,65 @@ class vd(osv.osv):
                         }
                     self.pool.get('voucher.distribution.natw.charge').create(cr, uid, vals)
                     self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
+                    vdread = self.read(cr, uid, vd['id'],['natw_total_charges'])
+                    recover =vdread['natw_total_charges']+vdlread['amount']
+                    self.write(cr, uid, vd['id'], {'natw_total_charges':recover})
+                elif 'POSTAGE' in vdlread_description:
+                    self.write(cr, uid, vd['id'], {'postage_recovery':vdlread['amount']})
+                    vdread = self.read(cr, uid, vd['id'],['recovery_charges'])
+                    recover =vdread['recovery_charges']+vdlread['amount']
+                    self.write(cr, uid, vd['id'], {'recovery_charges':recover})
+                    self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
+                elif 'ENV' in vdlread_description:
+                    self.write(cr, uid, vd['id'], {'envelope_recovery':vdlread['amount']})
+                    vdread = self.read(cr, uid, vd['id'],['recovery_charges'])
+                    recover =vdread['recovery_charges']+vdlread['amount']
+                    self.write(cr, uid, vd['id'], {'recovery_charges':recover})
+                    self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
                 elif 'EMAIL' in vdlread_description:
                     vdlread_comments = vdlread_comments.replace('USER: ','')
                     vdlread_comments = vdlread_comments.replace(' ','')
+                    print vdlread_comments
                     email_search = self.pool.get('email.charging.account').search(cr, uid, [('name','=',vdlread_comments)], limit=1)
                     if email_search:
                         email_read = self.pool.get('email.charging.account').read(cr, uid, email_search[0], context=None)
-                        vals = {
-                            'name':email_read['description'],
-                            'voucher_id':vd['id'],
-                            'amount':vdlread['amount'],
-                            }
-                        if email_read['account_id']:
-                            vals.update({'account_id':email_read['account_id'][0]})
-                        self.pool.get('voucher.distribution.email.charging').create(cr, uid, vals)
+                        print email_read
+                        check_emailcharging = self.pool.get('voucher.distribution.email.charging').search(cr, uid, [('name','=',email_read['description'])])
+                        if check_emailcharging:
+                            charging_read = self.pool.get('voucher.distribution.email.charging').read(cr, uid, check_emailcharging[0],['amount'])
+                            charging_amount = charging_read['amount']+ vdlread['amount']
+                            self.pool.get('voucher.distribution.email.charging').write(cr, uid, check_emailcharging[0],{'amount':charging_amount})
+                        elif not check_emailcharging:
+                            vals = {
+                                'name':email_read['description'],
+                                'voucher_id':vd['id'],
+                                'amount':vdlread['amount'],
+                                }
+                            if email_read['account_id']:
+                                vals.update({'account_id':email_read['account_id'][0]})
+                            self.pool.get('voucher.distribution.email.charging').create(cr, uid, vals)
                     self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
                 else:
                     vdlread_description = vdlread_description.lower()
+                    if vdlread['type']=='personal':
+                        vdlread_code = vdlread['code'].lower()
+                        name = vdlread['name']+'\n\n'+vdlread['comments']
+                        personal_vals = {
+                                    'name':name,
+                                    'voucher_id':vd['id'],
+                                    'amount':vdlread['amount'],
+                                    'transaction_code':vdlread_code,
+                                    }
+                        self.pool.get('voucher.distribution.personal.section').create(cr, uid, personal_vals)
+                        self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
+                    if vdlread_code=='md':
+                        uncharged_vals = {
+                                'name':vdlread['name'],
+                                'amount':vdlread['amount'],
+                                'voucher_id':vd['id'],
+                                }
+                        self.pool.get('voucher.distribution.uncharged').create(cr, uid, uncharged_vals)
+                        self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
                     if vdlread['type']=='voucher':
                         vdlread_description = vdlread_description.replace(' ','')
                         vdlread_description = vdlread_description.replace('&','')
@@ -559,9 +618,60 @@ class vd(osv.osv):
                                     'voucher_id':vd['id'],
                                     }
                             self.pool.get('voucher.distribution.voucher.transfer').create(cr, uid, phna_vals)
-                                    
-                    #print vdlread_description
+                        self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
+        return self.check_rulings(cr, uid, ids)
+    
+    def check_rulings(self, cr, uid, ids, context=None):
+        wildcard_pool = []
+        wildcard_ids = []
+        ctr=0
+        wildcard_rules = self.pool.get('voucher.distribution.account.assignment').search(cr, uid, [('match_rule','=','wildcard')])
+        for rule in wildcard_rules:
+            ctr +=1
+            wildcard_read = self.pool.get('voucher.distribution.account.assignment').read(cr, uid, rule, context=None)
+            wildcard_pool.append(wildcard_read['name'])
+            wildcard_ids.append(wildcard_read['id'])
+        for vd in self.read(cr, uid, ids, context=None):
+            for vdl in vd['voucher_lines']:
+                vdlread= self.pool.get('voucher.distribution.line').read(cr, uid, vdl, context=None)
+                vdlread_description = vdlread['name']
+                vdlread_comments = vdlread['comments']
+                lowered_description = vdlread_description.lower()
+                lowered_comments = vdlread['comments'].lower()
+                for rule in range(ctr):
+                    wildcard_id_read = self.pool.get('voucher.distribution.account.assignment').read(cr, uid, wildcard_ids[rule],context=None)
+                    if wildcard_id_read['field2match']=='description':
+                        wildcard_pool_rule = wildcard_pool[rule]
+                        wildcard_pool_rule = wildcard_pool_rule.lower()
+                        wildcard_pool_rule=wildcard_pool_rule.replace(' ','')
+                        lowered_description = lowered_description.replace(' ','')
+                        if wildcard_pool_rule in lowered_description:
+                            if wildcard_id_read['account_type']=='analytic':
+                                analytic_read = self.pool.get('account.analytic.account').read(cr, uid, wildcard_id_read['analytic_id'][0],context=None)
+                                self.pool.get('voucher.distribution.line').write(cr, uid, vdl, {'analytic_account_id':analytic_read['id'],'account_name':analytic_read['name']})
+                            elif wildcard_id_read['account_type']=='normal':
+                                normal_read = self.pool.get('account.account').read(cr, uid, wildcard_id_read['account_id'][0],context=None)
+                                self.pool.get('voucher.distribution.line').write(cr, uid, vdl, {'account_id':normal_read['id'],'account_name':normal_read['name']})
+                        elif wildcard_pool_rule not in lowered_description:
+                            continue
+                    elif wildcard_id_read['field2match']=='both':
+                        rule_combine = lowered_description +' '+lowered_comments
+                        rule_combine = rule_combine.replace(' ','')
+                        wildcard_pool_rule = wildcard_pool[rule]
+                        wildcard_pool_rule = wildcard_pool_rule.lower()
+                        wildcard_pool_rule=wildcard_pool_rule.replace(' ','')                       
+                        if wildcard_pool_rule in rule_combine:
+                            if wildcard_id_read['account_type']=='analytic':
+                                analytic_read = self.pool.get('account.analytic.account').read(cr, uid, wildcard_id_read['analytic_id'][0],context=None)
+                                self.pool.get('voucher.distribution.line').write(cr, uid, vdl, {'analytic_account_id':analytic_read['id'],'account_name':analytic_read['name']})
+                            elif wildcard_id_read['account_type']=='normal':
+                                normal_read = self.pool.get('account.account').read(cr, uid, wildcard_id_read['account_id'][0],context=None)
+                                self.pool.get('voucher.distribution.line').write(cr, uid, vdl, {'account_id':normal_read['id'],'account_name':normal_read['name']})
+                        elif wildcard_pool_rule not in rule_combine:
+                            continue
         return True
+                    
+            
                 
 vd()
 class voucher_distribution_rule(osv.osv):

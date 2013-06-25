@@ -154,7 +154,7 @@
                     </group>
                     <notebook>
                         <page string="Voucher Lines">
-                            <field name="voucher_lines" mode="tree" nolabel="1">
+                            <field name="voucher_lines" mode="tree" nolabel="1" height="40">
                                 <tree string="Voucher Lines">
                                     <field name="name"/>
                                     <field name="comments"/>
@@ -169,12 +169,21 @@
                             </field>
                         </page>
                         <page string="Personal Section">
-                            <field name="personal_section" mode="tree" nolabel="1">
-                                <tree string="Deposits to Personal">
+                            <field name="dp_section" mode="tree" nolabel="1">
+                                <tree string="Deposits to Personal" editable="top">
                                     <field name="name"/>
                                     <field name="account_name"/>
-                                    <field name="account_id"/>
-                                    <field name="analytic_id"/>
+                                    <field name="account_id" on_change="onchange_accountid(account_id)"/>
+                                    <field name="analytic_id" on_change="onchange_analyticid(analytic_id)"/>
+                                    <field name="amount" sum="Total"/>
+                                </tree>
+                            </field>
+                            <field name="pdv_section" mode="tree" nolabel="1">
+                                <tree string="Personal Disbursements and Vouchers" editable="top">
+                                    <field name="name"/>
+                                    <field name="account_name"/>
+                                    <field name="account_id" on_change="onchange_accountid(account_id)"/>
+                                    <field name="analytic_id" on_change="onchange_analyticid(analytic_id)"/>
                                     <field name="amount" sum="Total"/>
                                 </tree>
                             </field>
@@ -190,11 +199,11 @@
                             <separator colspan="4"/>
                             <notebook colspan="4">
                                 <page string="Email Charges">
-		                            <field name="email_charges" mode="tree" nolabel="1" readonly="1">
-		                                <tree string="Email Charging">
+		                            <field name="email_charges" mode="tree" nolabel="1">
+		                                <tree string="Email Charging" editable="top">
 		                                    <field name="name" readonly="1"/>
-		                                    <field name="account_id" readonly="1"/>
-		                                    <field name="amount" readonly="1"/>
+		                                    <field name="account_id"/>
+		                                    <field name="amount" readonly="1" sum="Total"/>
 		                                </tree>
 		                            </field>
 		                        </page>
