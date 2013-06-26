@@ -146,16 +146,17 @@
                             <field name="country" widget="selection"/>
                             <field name="generated" invisible="1"/>
                         </group>
-                        <group colspan="2" col="2">
+                        <group colspan="2" col="16">
                             <button name="%(action_view_voucher_file_import)d" string="Generate Voucher" type="action" icon="gtk-apply" attrs="{'invisible':[('generated','=',True)]}"/>
                             <button name="match_accounts" string="Match" type="object" icon="gtk-apply"/>
                             <button name="check_accounts" string="Check" type="object" icon="gtk-apply"/>
+                            <button name="count_transactions" string="Count" type="object" icon="gtk-apply"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Voucher Lines">
-                            <field name="voucher_lines" mode="tree" nolabel="1" height="40">
-                                <tree string="Voucher Lines">
+                            <field name="voucher_lines" mode="tree,form" nolabel="1" height="40">
+                                <tree string="Voucher Lines" colors="blue:account_name==False;red:included_in_charged==False;black:included_in_charged==True">
                                     <field name="name"/>
                                     <field name="comments"/>
                                     <field name="co1"/>
@@ -164,8 +165,18 @@
                                     <field name="code"/>
                                     <field name="account_name"/>
                                     <field name="type"/>
+                                    <field name="included_in_charged" invisible="True"/>
                                     <field name="amount" sum="Total"/>
                                 </tree>
+                                <form string="Voucher Line">
+                                    <field name="name"/>
+                                    <field name="comments"/>
+                                    <field name="batch_date"/>
+                                    <field name="code"/>
+                                    <field name="account_name" invisible="1"/>
+                                    <field name="analytic_account_id" on_change="onchange_analyticid(analytic_account_id)"/>
+                                    <field name="account_id" on_change="onchange_accountid(account_id)"/>
+                                </form>
                             </field>
                         </page>
                         <page string="Personal Section">
@@ -189,13 +200,6 @@
                             </field>
                         </page>
                         <page string="Expense Charging">
-                            <group colspan="4" col="4">
-                                <field name="postage_recovery"/>
-                                <field name="envelope_recovery"/>
-                                <field name="missionary_subtotal"/>
-                                <field name="recovery_charges"/>
-                                <field name="natw_total_charges"/>
-                            </group>
                             <separator colspan="4"/>
                             <notebook colspan="4">
                                 <page string="Email Charges">
@@ -217,8 +221,12 @@
 		                        </page>
 		                        <page string="Account Charging">
 		                            <field name="charging_lines" mode="tree" nolabel="1">
-		                                <tree string="Charged Accounts">
+		                                <tree string="Charged Accounts" colors="green:charged==True">
 		                                    <field name="name"/>
+		                                    <field name="code"/>
+		                                    <field name="charged" invisible="True"/>
+		                                    <field name="total_entries"/>
+		                                    <field name="entries_amount" sum="Total"/>
 		                                    <field name="contingency"/>
 		                                    <field name="postage"/>
 		                                    <field name="natw"/>
@@ -234,6 +242,23 @@
 		                                    <field name="amount"/>
 		                                </tree>
 		                            </field>
+		                        </page>
+		                        <page string="Charging Computation">
+			                        <group colspan="4" col="4">
+	                                   <group colspan="2" col="2">
+                                           <separator string="Balance Mission Account" colspan="2"/>
+                                           <field name="total_gifts"/>
+                                           <field name="autocontribution"/>
+                                           <field name="missionary_subtotal" readonly="True"/>
+                                           <field name="recovery_charges" readonly="True"/>
+                                           <field name="natw_total_charges" readonly="True"/>
+                                           <field name="postage_recovery" readonly="True"/>
+                                           <field name="envelope_recovery" readonly="True"/>
+                                       </group>
+                                       <group colspan="2" col="2">
+                                           <separator string="Charging Percentage" colspan="2"/>
+                                       </group>
+	                                </group>
 		                        </page>
                             </notebook>
                         </page>

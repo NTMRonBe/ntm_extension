@@ -316,6 +316,7 @@ class voucher_distribution_line(osv.osv):
         'comments':fields.char('Comments',size=100),
         'co1':fields.char('CO1',size=10),
         'batch_date':fields.date('Batch Date'),
+        'included_in_charged':fields.boolean('Included in Charging', readonly=True),
         'co2':fields.char('CO2',size=10),
         'doc_num':fields.char('DOC No',size=10),
         'code':fields.char('CODE',size=10),
@@ -330,7 +331,7 @@ class voucher_distribution_line(osv.osv):
                         ('other','Other'),
                         ],'Type'),
         }
-    _order = 'type asc, id asc'
+    _order = 'account_name desc'
     def match_account(self, cr, uid, ids, context=None):
         for vdl in self.read(cr, uid, ids, context=None):
             comment = vdl['name']
@@ -348,6 +349,27 @@ class voucher_distribution_line(osv.osv):
                     if comment.find(rule_read['name'])==0:
                         self.write(cr, uid, ids, {'analytic_account_id':rule_read['account_id'][0],'account_name':read_analytic['name']})
         return True
+    
+    def onchange_accountid(self, cr, uid, ids, account_id):
+        res = {}
+        if account_id:
+            accountRead = self.pool.get('account.account').read(cr, uid, account_id, ['name'])
+            res = {'value':{'account_id':account_id,'account_name':accountRead['name'], 'analytic_account_id':False}}
+        elif not account_id:
+            res = {'value':{'account_id':False,'account_name':False, 'analytic_account_id':False}}
+        return res
+    
+    def onchange_analyticid(self, cr, uid, ids, analytic_account_id):
+        res = {}
+        if analytic_account_id:
+            accountRead = self.pool.get('account.analytic.account').read(cr, uid, analytic_account_id, ['name'])
+            res = {'value':{'analytic_account_id':analytic_account_id,'account_name':accountRead['name'], 'account_id':False}}
+        elif not analytic_account_id:
+            res = {'value':{'account_id':False,'account_name':False, 'analytic_account_id':False}}
+        return res
+    
+    def includeUncharge(self, cr, uid, ids, context=None):
+        for vdl in self.read(cr, uid, ids, context=None):
 voucher_distribution_line()
 
 class voucher_distribution_personal_section(osv.osv):
@@ -380,7 +402,7 @@ class voucher_distribution_personal_section(osv.osv):
         res = {}
         if analytic_id:
             accountRead = self.pool.get('account.analytic.account').read(cr, uid, analytic_id, ['name'])
-            res = {'value':{'account_id':analytic_id,'account_name':accountRead['name'], 'account_id':False}}
+            res = {'value':{'analytic_id':analytic_id,'account_name':accountRead['name'], 'account_id':False}}
         return res
 voucher_distribution_personal_section()
 
@@ -420,12 +442,17 @@ class voucher_distribution_account_charging(osv.osv):
     _name = 'voucher.distribution.account.charging'
     _description = "Voucher Distribution Account Charging"
     _columns = {
-        'name':fields.many2one('account.analytic.account','Account Charged'),
+        'name':fields.char('Account Name',size=64),
+        'code':fields.char('Account ID',size=64),
+        'account_id':fields.many2one('account.analytic.account','Account Charged'),
         'contingency':fields.float('Contingency Charges'),
         'postage':fields.float('Postage/Env Recovery'),
         'natw':fields.float('N@W Charges'),
         'extra':fields.float('Extra Charges'),
         'total':fields.float('Total'),
+        'entries_amount':fields.float('Entries Amount'),
+        'total_entries':fields.integer('No of Entries'),
+        'charged':fields.boolean('Charged',readonly=True),
         'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade'),
         }
 voucher_distribution_account_charging()
@@ -478,6 +505,7 @@ class voucher_distribution_voucher_transfer(osv.osv):
             res = {'value':{'account_name':acc_read['name']}}
         return res
 voucher_distribution_voucher_transfer()
+
 class vd(osv.osv):
     _inherit = 'voucher.distribution'
     _columns = {
@@ -489,6 +517,8 @@ class vd(osv.osv):
         'pdv_section':fields.one2many('voucher.distribution.personal.section','voucher_id','Personal Disbursements and Vouchers',domain=[('transaction_code','!=','dp')]),
         'voucher_transfer_lines':fields.one2many('voucher.distribution.voucher.transfer','voucher_id','Voucher Transfers'),
         'uncharged_ids':fields.one2many('voucher.distribution.uncharged','voucher_id','Uncharged Amounts'),
+        'total_gifts':fields.float('Total Gifts', readonly=True),
+        'autocontribution':fields.float('Automatic Contribution', readonly=True),
         }
     def match_accounts(self, cr, uid, ids, context=None):
         for vd in self.read(cr, uid, ids, context=None):
@@ -542,11 +572,9 @@ class vd(osv.osv):
                 elif 'EMAIL' in vdlread_description:
                     vdlread_comments = vdlread_comments.replace('USER: ','')
                     vdlread_comments = vdlread_comments.replace(' ','')
-                    print vdlread_comments
                     email_search = self.pool.get('email.charging.account').search(cr, uid, [('name','=',vdlread_comments)], limit=1)
                     if email_search:
                         email_read = self.pool.get('email.charging.account').read(cr, uid, email_search[0], context=None)
-                        print email_read
                         check_emailcharging = self.pool.get('voucher.distribution.email.charging').search(cr, uid, [('name','=',email_read['description'])])
                         if check_emailcharging:
                             charging_read = self.pool.get('voucher.distribution.email.charging').read(cr, uid, check_emailcharging[0],['amount'])
@@ -669,10 +697,70 @@ class vd(osv.osv):
                                 self.pool.get('voucher.distribution.line').write(cr, uid, vdl, {'account_id':normal_read['id'],'account_name':normal_read['name']})
                         elif wildcard_pool_rule not in rule_combine:
                             continue
+        return self.get_project_accounts(cr, uid, ids)
+    
+    def get_project_accounts(self, cr, uid, ids, context=None):
+        proj_in_list = []
+        for vd in self.read(cr, uid, ids, context=None):
+            proj_list_check = self.pool.get('voucher.distribution.account.charging').search(cr, uid, [('voucher_id','=',vd['id'])])
+            for proj_inList_item in proj_list_check:
+                proj_in_list_read = self.pool.get('voucher.distribution.account.charging').read(cr, uid, proj_inList_item, ['account_id'])
+                proj_in_list.append(proj_in_list_read['account_id'][0])
+            proj_search = self.pool.get('account.analytic.account').search(cr, uid, [('project_account','=',True),
+                                                                                     ('voucher_expense','=',False)], order='code asc')
+            for proj in proj_search:
+                if proj in proj_in_list:
+                    continue
+                elif proj not in proj_in_list:
+                    projRead = self.pool.get('account.analytic.account').read(cr, uid, proj, ['name','code'])
+                    vals = {
+                        'name':projRead['name'],
+                        'code':projRead['code'],
+                        'account_id':proj,
+                        'voucher_id':vd['id'],
+                        }
+                    self.pool.get('voucher.distribution.account.charging').create(cr, uid, vals)
+            proj_search2 = self.pool.get('account.analytic.account').search(cr, uid, [('project_account','=',True),
+                                                                                     ('voucher_expense','=',True)], order='code asc')
+            for proj in proj_search2:
+                if proj in proj_in_list:
+                    continue
+                elif proj not in proj_in_list:
+                    projRead = self.pool.get('account.analytic.account').read(cr, uid, proj, ['name','code'])
+                    vals = {
+                        'name':projRead['name'],
+                        'code':projRead['code'],
+                        'account_id':proj,
+                        'voucher_id':vd['id'],
+                        'charged':True,
+                        }
+                    self.pool.get('voucher.distribution.account.charging').create(cr, uid, vals)
         return True
-                    
-            
-                
+    
+    def count_transactions(self, cr, uid, ids, context=None):
+        for vd in self.read(cr, uid, ids, context=None):
+            checkLines = self.pool.get('voucher.distribution.line').search(cr, uid, [('voucher_id','=',vd['id']),
+                                                                                     ('account_name','=',False)
+                                                                                     ])
+            if checkLines:
+                raise osv.except_osv(_('Error!'), _('Please check all voucher lines if an account has been assigned!'))
+            elif not checkLines:
+                chargedAccounts = self.pool.get('voucher.distribution.account.charging').search(cr, uid, [('voucher_id','=',vd['id'])])
+                for charged in chargedAccounts:
+                    chargedAccountsRead = self.pool.get('voucher.distribution.account.charging').read(cr, uid, charged,['account_id'])
+                    lineSearch = self.pool.get('voucher.distribution.line').search(cr, uid, [('voucher_id','=',vd['id']),
+                                                                                             ('amount','<','0.00'),
+                                                                                             ('analytic_account_id','=',chargedAccountsRead['account_id'][0])
+                                                                                             ])
+                    amount = 0.00
+                    for line in lineSearch:
+                        self.pool.get('voucher.distribution.line').write(cr, uid, line, {'included_in_charged':True})
+                        lineRead = self.pool.get('voucher.distribution.line').read(cr, uid, line, ['amount'])
+                        amount+=lineRead['amount']
+                    countLine = len(lineSearch)
+                    self.pool.get('voucher.distribution.account.charging').write(cr, uid, charged,{'total_entries':countLine, 'entries_amount':amount})
+        return True
+    
 vd()
 class voucher_distribution_rule(osv.osv):
     _name = 'voucher.distribution.rule'
