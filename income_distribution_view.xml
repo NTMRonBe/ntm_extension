@@ -225,13 +225,13 @@
 		                                    <field name="name"/>
 		                                    <field name="code"/>
 		                                    <field name="charged" invisible="True"/>
-		                                    <field name="total_entries"/>
+		                                    <field name="total_entries" sum="Total"/>
 		                                    <field name="entries_amount" sum="Total"/>
-		                                    <field name="contingency"/>
-		                                    <field name="postage"/>
-		                                    <field name="natw"/>
-		                                    <field name="extra"/>
-		                                    <field name="total"/>
+		                                    <field name="contingency" sum="Total"/>
+		                                    <field name="postage" sum="Total"/>
+		                                    <field name="natw" sum="Total"/>
+		                                    <field name="extra" sum="Total"/>
+		                                    <field name="total" sum="Total"/>
 		                                </tree>
 		                            </field>
 		                        </page>
@@ -257,6 +257,10 @@
                                        </group>
                                        <group colspan="2" col="2">
                                            <separator string="Charging Percentage" colspan="2"/>
+                                           <field name="contingency_ratio"/>
+                                           <field name="postage_ratio"/>
+                                           <field name="natw_ratio"/>
+                                           <field name="extra_ratio"/>
                                        </group>
 	                                </group>
 		                        </page>

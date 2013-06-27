@@ -368,8 +368,8 @@ class voucher_distribution_line(osv.osv):
             res = {'value':{'account_id':False,'account_name':False, 'analytic_account_id':False}}
         return res
     
-    def includeUncharge(self, cr, uid, ids, context=None):
-        for vdl in self.read(cr, uid, ids, context=None):
+    #def includeUncharge(self, cr, uid, ids, context=None):
+    #    for vdl in self.read(cr, uid, ids, context=None):
 voucher_distribution_line()
 
 class voucher_distribution_personal_section(osv.osv):
@@ -519,6 +519,10 @@ class vd(osv.osv):
         'uncharged_ids':fields.one2many('voucher.distribution.uncharged','voucher_id','Uncharged Amounts'),
         'total_gifts':fields.float('Total Gifts', readonly=True),
         'autocontribution':fields.float('Automatic Contribution', readonly=True),
+        'postage_ratio':fields.float('Postage Ratio',readonly=True,digits=(16,8)),
+        'contingency_ratio':fields.float('Contingency Ratio', readonly=True,digits=(16,8)),
+        'natw_ratio':fields.float('N@W Ratio',readonly=True,digits=(16,8)),
+        'extra_ratio':fields.float('Extra Charges', readonly=True,digits=(16,8))
         }
     def match_accounts(self, cr, uid, ids, context=None):
         for vd in self.read(cr, uid, ids, context=None):
@@ -745,6 +749,7 @@ class vd(osv.osv):
             if checkLines:
                 raise osv.except_osv(_('Error!'), _('Please check all voucher lines if an account has been assigned!'))
             elif not checkLines:
+                countChargedAccounts = 0
                 chargedAccounts = self.pool.get('voucher.distribution.account.charging').search(cr, uid, [('voucher_id','=',vd['id'])])
                 for charged in chargedAccounts:
                     chargedAccountsRead = self.pool.get('voucher.distribution.account.charging').read(cr, uid, charged,['account_id'])
@@ -758,7 +763,42 @@ class vd(osv.osv):
                         lineRead = self.pool.get('voucher.distribution.line').read(cr, uid, line, ['amount'])
                         amount+=lineRead['amount']
                     countLine = len(lineSearch)
+                    countChargedAccounts+=countLine
                     self.pool.get('voucher.distribution.account.charging').write(cr, uid, charged,{'total_entries':countLine, 'entries_amount':amount})
+                    
+                postage_ratio = vd['recovery_charges']/countChargedAccounts
+                print countChargedAccounts
+                chargedAccounts = self.pool.get('voucher.distribution.account.charging').search(cr, uid, [('voucher_id','=',vd['id']),
+                                                                                                          ('charged','=',True)
+                                                                                                          ])
+                allChargedAmount = 0.00
+                for charging in chargedAccounts:
+                    charging_read = self.pool.get('voucher.distribution.account.charging').read(cr, uid, charging,['entries_amount'])
+                    allChargedAmount+=charging_read['entries_amount']
+                natw_ratio = vd['natw_total_charges']/allChargedAmount
+                self.write(cr, uid, ids,{'postage_ratio':postage_ratio,'natw_ratio':natw_ratio})
+        return self.distribute(cr, uid, ids)
+    
+    def distribute(self, cr, uid, ids, context=None):
+        for vd in self.read(cr, uid, ids, context=None):
+            chargedAccounts = self.pool.get('voucher.distribution.account.charging').search(cr, uid, [('voucher_id','=',vd['id']),('charged','=',True)])
+            for charging in chargedAccounts:
+                charging_read = self.pool.get('voucher.distribution.account.charging').read(cr, uid, charging,['total_entries','entries_amount'])
+                total_entry = charging_read['total_entries']
+                accountAmount = charging_read['entries_amount']
+                contingency = vd['contingency_ratio'] * accountAmount
+                postage = vd['postage_ratio'] * total_entry
+                natw=vd['natw_ratio']*accountAmount
+                extra = vd['extra_ratio']*accountAmount
+                total_charges = contingency + postage + natw + extra
+                vals = {
+                    'contingency':contingency,
+                    'postage':postage,
+                    'natw':natw,
+                    'extra':extra,
+                    'total':total_charges,
+                    }
+                self.pool.get('voucher.distribution.account.charging').write(cr, uid, charging, vals)
         return True
     
 vd()
