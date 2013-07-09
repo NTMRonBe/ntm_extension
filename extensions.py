@@ -311,6 +311,7 @@ class account_journal(osv.osv):
                                 ('transfer','Fund Transfer'),
                                 ('other_expenses','Other Expenses'), 
                                 ('forex','Foreign Exchanges'),
+                                ('vd','Voucher Distribution'),
                                 ('pc_transfer','Petty Cash Transfers'),
                                 ('pbd','Phone Bill Distribution'),
                                 ('arj','Accounts Revaluation'),

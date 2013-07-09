@@ -137,21 +137,25 @@
             <field name="arch" type="xml">
                 <form string = "Voucher Distribution">
                     <group colspan="4" col="4">
-                        <field name="name" invisible="1"/>
-                        <field name="date"/>
-                        <field name="period_id"/>
-                    </group>
-                    <group colspan="4" col="4">
                         <group colspan="2" col="2">
-                            <field name="country" widget="selection"/>
-                            <field name="generated" invisible="1"/>
+	                        <field name="name" invisible="1"/>
+	                        <field name="date"/>
+	                        <field name="period_id"/>
+	                        <field name="journal_id" invisible="1"/>
+	                        <field name="country" widget="selection"/>
+	                        <field name="generated" invisible="1"/>
+	                        <field name="currency_id" widget="selection"/>
                         </group>
-                        <group colspan="2" col="16">
-                            <button name="%(action_view_voucher_file_import)d" string="Generate Voucher" type="action" icon="gtk-apply" attrs="{'invisible':[('generated','=',True)]}"/>
-                            <button name="match_accounts" string="Match" type="object" icon="gtk-apply"/>
-                            <button name="check_accounts" string="Check" type="object" icon="gtk-apply"/>
-                            <button name="count_transactions" string="Count" type="object" icon="gtk-apply"/>
+                        <group colspan="2" col="2">
+                            <field name="state" colspan="2"/>
+                            <button name="%(action_view_voucher_file_import)d" string="Generate Voucher" type="action" icon="gtk-apply" states='draft' colspan="2"/>
+                            <!-- <button name="match_accounts" string="Match" type="object" icon="gtk-apply"/>
+                            createMISSentry 
+                            <button name="check_accounts" string="Check" type="object" icon="gtk-apply" colspan="2" states='generated'/>-->
+                            <button name="count_transactions" string="Distribute Voucher Lines" type="object" icon="gtk-apply" colspan="2" states='generated'/>
+                            <button name="createMISSentry" string="Create Entries" type="object" icon="gtk-apply" states='distributed' colspan="2"/>
                         </group>
+                        
                     </group>
                     <notebook>
                         <page string="Voucher Lines">
@@ -235,14 +239,6 @@
 		                                </tree>
 		                            </field>
 		                        </page>
-		                        <page string="Uncharged Amounts">
-		                            <field name="uncharged_ids" mode="tree" nolabel="1">
-		                                <tree string="Uncharged Amounts">
-		                                    <field name="name"/>
-		                                    <field name="amount"/>
-		                                </tree>
-		                            </field>
-		                        </page>
 		                        <page string="Charging Computation">
 			                        <group colspan="4" col="4">
 	                                   <group colspan="2" col="2">
@@ -283,6 +279,23 @@
                                     <field name="amount" readonly="1"/>
                                 </form>
                             </field>
+                        </page>
+                        <page string="Journal Entries">
+                            <group colspan="4" col="2">
+                                <field name="m_move_id" invisible="1"/>
+                                <field name="m_move_ids" mode="tree" nolabel="1" colspan="4">
+                                    <tree string="Missionary and Personal Entries">
+                                        <field name="date"/>
+                                        <field name="name"/>
+                                        <field name="account_id"/>
+                                        <field name="analytic_account_id"/>
+                                        <field name="debit" sum="Total Debit"/>
+                                        <field name="credit" sum="Total Credit"/>
+                                        <field name="currency_id" string="Encoding Currency"/>
+                                        <field name="amount_currency" string="Encoding Amount"/>
+                                    </tree>
+                                </field>
+                            </group>
                         </page>
                     </notebook>
                 </form>
@@ -387,7 +400,7 @@
             <field name="model">voucher.distribution.missionaries</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string = "Missionary Distribution Reference">
+                <form string = "Missionary Account Distribution Reference">
                     <field name="name" select="1"/>
                     <field name="account_id"/>
                     <field name="national"/>
@@ -399,7 +412,7 @@
             <field name="model">voucher.distribution.missionaries</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Missionary Distribution Reference">
+                <tree string="Missionary Account Distribution Reference">
                     <field name="name"/>
                     <field name="account_id"/>
                     <field name="national"/>
@@ -408,7 +421,7 @@
         </record>
         
         <record model="ir.actions.act_window" id="action_voucher_distribution_philnational_form">
-            <field name="name">Missionary Distribution Reference</field>
+            <field name="name">Missionary Account Distribution Reference</field>
             <field name="res_model">voucher.distribution.missionaries</field>
             <field name="view_type">form</field>
         </record>
@@ -437,7 +450,7 @@
             <field name="model">voucher.distribution.account.assignment</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string = "Voucher Distribution Account Assignment">
+                <form string = "Project Distribution Account Reference">
                     <group colspan="4" col="4">
                         <group colspan="2" col="2">
                             <separator string="Rule Values" colspan="2"/>
@@ -460,7 +473,7 @@
             <field name="model">voucher.distribution.account.assignment</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Voucher Distribution Account Assignment">
+                <tree string="Project Distribution Account Reference">
                     <field name="name"/>
                     <field name="field2match"/>
                     <field name="match_rule"/>
@@ -470,7 +483,7 @@
         </record>
         
         <record model="ir.actions.act_window" id="action_voucher_distribution_account_assignment_form">
-            <field name="name">Voucher Distribution Account Assignment</field>
+            <field name="name">Project Distribution Account Reference</field>
             <field name="res_model">voucher.distribution.account.assignment</field>
             <field name="view_type">form</field>
         </record>

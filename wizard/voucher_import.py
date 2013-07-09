@@ -109,7 +109,8 @@ class voucher_file_import(osv.osv_memory):
             elif rec_code in ['BD', 'CH', 'DP', 'GP', 'LP', 'PD', 'PG', 'PY', 'RF', 'ST', 'TR', 'V', 'WD']:
                 vals.update({'type':'personal'})
             self.pool.get('voucher.distribution.line').create(cr, uid, vals)
-        self.pool.get('voucher.distribution').write(cr, uid, context['active_id'],{'generated':True})
+        self.pool.get('voucher.distribution').write(cr, uid, context['active_id'],{'generated':True,'state':'generated'})
+        self.pool.get('voucher.distribution').check_accounts(cr, uid, [context['active_id']])
         return {'type': 'ir.actions.act_window_close'}
 
 voucher_file_import()

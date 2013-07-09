@@ -8,6 +8,7 @@ from tools.translate import _
 import decimal_precision as dp
 import csv
 import dbf
+from pickle import FALSE
 
 class income_distribution_generic(osv.osv):
     _name = 'income.distribution.generic'
@@ -203,10 +204,10 @@ class idg(osv.osv):
                 account_read = self.pool.get('account.analytic.account').read(cr, uid, idgl_read['account_id'][0],['normal_account'])
                 distribution_amt = idgl_read['amount'] / rate
                 contribution = idgl_read['charges'] / rate
-                amount = "%.2f" % distribution_amt
+                amount = "%.3f" % distribution_amt
                 distribution_amt = float(amount)
                 curr_distribution +=distribution_amt
-                amount = "%.2f" % contribution
+                amount = "%.3f" % contribution
                 contribution = float(amount)
                 curr_contribution +=contribution                
                 total_distribution += idgl_read['amount']
@@ -242,7 +243,7 @@ class idg(osv.osv):
                         }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
             if total_distribution != idg['amount']:
-                raise osv.except_osv(_('Error !'), _('Total received amount is not equal to total distributed amount!'))
+                raise osv.except_osv(_('Error!'), _('ERR-001: Total received amount is not equal to the total amount to be distributed!'))
             elif total_distribution== idg['amount']:
                 name = "Total Distributed Amount with ref#" + idg['ref']
                 move_line = {
@@ -272,13 +273,21 @@ class idg(osv.osv):
                         'currency_id':currency,
                         }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
-                self.pool.get('account.move').post(cr, uid, [move_id])
+                #self.pool.get('account.move').post(cr, uid, [move_id])
                 self.write(cr, uid, ids, {'state':'distributed','dmove_id':move_id})
         return True
 idg()
 
 
 class voucher_distribution(osv.osv):
+    
+    def _get_journal(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        journal_obj = self.pool.get('account.journal')
+        res = journal_obj.search(cr, uid, [('type', '=', 'vd')],limit=1)
+        return res and res[0] or False
+    
     _name = 'voucher.distribution'
     _description = "US and Canada Voucher Distribution"
     _columns ={
@@ -287,14 +296,21 @@ class voucher_distribution(osv.osv):
         'country':fields.many2one('res.country','Country',domain=[('code','in',['US','CA'])],required=True),
         'period_id':fields.many2one('account.period','Period',required=True),
         'generated':fields.boolean('Generated'),
+        'journal_id':fields.many2one('account.journal','Journal ID'),
         'missionary_subtotal':fields.float('Missionary Account Subtotal',digits_compute=dp.get_precision('Account')),
         'recovery_charges':fields.float('Recovery Charges',digits_compute=dp.get_precision('Account')),
         'natw_total_charges':fields.float('N@W Charges',digits_compute=dp.get_precision('Account')),
         'postage_recovery':fields.float('Postage Recovery Expense',digits_compute=dp.get_precision('Account')),
         'envelope_recovery':fields.float('Envelope Recovery Expense',digits_compute=dp.get_precision('Account')),
+        'currency_id':fields.many2one('res.currency','Currency', required=True),
+        'state':fields.selection([('draft','Draft'),('generated','Generated'),('entry_created','Entry Created'),('distributed','Voucher Distributed')],'State'),
+        'm_move_id':fields.many2one('account.move','Missionary Entries'),
+        'm_move_ids': fields.related('m_move_id','line_id', type='one2many', relation='account.move.line', string='Missionary Entries', readonly=True),
         }
     _defaults = {
             'date': lambda *a: time.strftime('%Y-%m-%d'),
+            'state':'draft',
+            'journal_id':_get_journal,
             }
     
     def create(self, cr, uid, vals, context):
@@ -368,8 +384,6 @@ class voucher_distribution_line(osv.osv):
             res = {'value':{'account_id':False,'account_name':False, 'analytic_account_id':False}}
         return res
     
-    #def includeUncharge(self, cr, uid, ids, context=None):
-    #    for vdl in self.read(cr, uid, ids, context=None):
 voucher_distribution_line()
 
 class voucher_distribution_personal_section(osv.osv):
@@ -396,6 +410,8 @@ class voucher_distribution_personal_section(osv.osv):
         if account_id:
             accountRead = self.pool.get('account.account').read(cr, uid, account_id, ['name'])
             res = {'value':{'account_id':account_id,'account_name':accountRead['name'], 'analytic_id':False}}
+        elif not account_id:
+            res = {'value':{'account_id':False,'account_name':False, 'analytic_id':False}}
         return res
     
     def onchange_analyticid(self, cr, uid, ids, analytic_id):
@@ -403,6 +419,8 @@ class voucher_distribution_personal_section(osv.osv):
         if analytic_id:
             accountRead = self.pool.get('account.analytic.account').read(cr, uid, analytic_id, ['name'])
             res = {'value':{'analytic_id':analytic_id,'account_name':accountRead['name'], 'account_id':False}}
+        elif not analytic_id:
+            res = {'value':{'analytic_id':False,'account_name':False, 'account_id':False}}
         return res
 voucher_distribution_personal_section()
 
@@ -467,16 +485,6 @@ class voucher_distribution_9phna(osv.osv):
         }
 voucher_distribution_9phna()
 
-class voucher_distribution_uncharged(osv.osv):
-    _name = 'voucher.distribution.uncharged'
-    _description = "Uncharged Amounts"
-    _columns = {
-        'name':fields.char('Description',size=64),
-        'amount':fields.float('Amount',size=64),
-        'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade')
-        }
-voucher_distribution_uncharged()
-
 class voucher_distribution_voucher_transfer(osv.osv):
     _name = 'voucher.distribution.voucher.transfer'
     _description = "Voucher Transfer"
@@ -496,6 +504,8 @@ class voucher_distribution_voucher_transfer(osv.osv):
         if account_id:
             acc_read = self.pool.get('account.account').read(cr, uid, account_id, ['name'])
             res = {'value':{'account_name':acc_read['name']}}
+        elif account_id==False:
+            res = {'value':{'account_name':False}}
         return res
     
     def onchange_analytic(self, cr, uid, ids,analytic_account_id):
@@ -503,6 +513,8 @@ class voucher_distribution_voucher_transfer(osv.osv):
         if analytic_account_id:
             acc_read = self.pool.get('account.analytic.account').read(cr, uid, analytic_account_id, ['name'])
             res = {'value':{'account_name':acc_read['name']}}
+        elif analytic_account_id==False:
+            res = {'value':{'account_name':False}}
         return res
 voucher_distribution_voucher_transfer()
 
@@ -516,7 +528,6 @@ class vd(osv.osv):
         'dp_section':fields.one2many('voucher.distribution.personal.section','voucher_id','Deposits to Personal',domain=[('transaction_code','=','dp')]),
         'pdv_section':fields.one2many('voucher.distribution.personal.section','voucher_id','Personal Disbursements and Vouchers',domain=[('transaction_code','!=','dp')]),
         'voucher_transfer_lines':fields.one2many('voucher.distribution.voucher.transfer','voucher_id','Voucher Transfers'),
-        'uncharged_ids':fields.one2many('voucher.distribution.uncharged','voucher_id','Uncharged Amounts'),
         'total_gifts':fields.float('Total Gifts', readonly=True),
         'autocontribution':fields.float('Automatic Contribution', readonly=True),
         'postage_ratio':fields.float('Postage Ratio',readonly=True,digits=(16,8)),
@@ -607,14 +618,14 @@ class vd(osv.osv):
                                     }
                         self.pool.get('voucher.distribution.personal.section').create(cr, uid, personal_vals)
                         self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
-                    if vdlread_code=='md':
-                        uncharged_vals = {
-                                'name':vdlread['name'],
-                                'amount':vdlread['amount'],
-                                'voucher_id':vd['id'],
-                                }
-                        self.pool.get('voucher.distribution.uncharged').create(cr, uid, uncharged_vals)
-                        self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
+                    #if vdlread_code=='md':
+                    ##    uncharged_vals = {
+                    #            'name':vdlread['name'],
+                    #            'amount':vdlread['amount'],
+                    #            'voucher_id':vd['id'],
+                    #            }
+                    #    self.pool.get('voucher.distribution.uncharged').create(cr, uid, uncharged_vals)
+                    #    self.pool.get('voucher.distribution.line').unlink(cr, uid, vdl)
                     if vdlread['type']=='voucher':
                         vdlread_description = vdlread_description.replace(' ','')
                         vdlread_description = vdlread_description.replace('&','')
@@ -740,7 +751,8 @@ class vd(osv.osv):
                         }
                     self.pool.get('voucher.distribution.account.charging').create(cr, uid, vals)
         return True
-    
+    def assignPersonalAccounts(self, cr, uid, ids, context=None):
+        return True
     def count_transactions(self, cr, uid, ids, context=None):
         for vd in self.read(cr, uid, ids, context=None):
             checkLines = self.pool.get('voucher.distribution.line').search(cr, uid, [('voucher_id','=',vd['id']),
@@ -750,6 +762,7 @@ class vd(osv.osv):
                 raise osv.except_osv(_('Error!'), _('Please check all voucher lines if an account has been assigned!'))
             elif not checkLines:
                 countChargedAccounts = 0
+                totalGifts = 0
                 chargedAccounts = self.pool.get('voucher.distribution.account.charging').search(cr, uid, [('voucher_id','=',vd['id'])])
                 for charged in chargedAccounts:
                     chargedAccountsRead = self.pool.get('voucher.distribution.account.charging').read(cr, uid, charged,['account_id'])
@@ -763,11 +776,11 @@ class vd(osv.osv):
                         lineRead = self.pool.get('voucher.distribution.line').read(cr, uid, line, ['amount'])
                         amount+=lineRead['amount']
                     countLine = len(lineSearch)
+                    totalGifts+=amount
                     countChargedAccounts+=countLine
                     self.pool.get('voucher.distribution.account.charging').write(cr, uid, charged,{'total_entries':countLine, 'entries_amount':amount})
                     
                 postage_ratio = vd['recovery_charges']/countChargedAccounts
-                print countChargedAccounts
                 chargedAccounts = self.pool.get('voucher.distribution.account.charging').search(cr, uid, [('voucher_id','=',vd['id']),
                                                                                                           ('charged','=',True)
                                                                                                           ])
@@ -776,7 +789,7 @@ class vd(osv.osv):
                     charging_read = self.pool.get('voucher.distribution.account.charging').read(cr, uid, charging,['entries_amount'])
                     allChargedAmount+=charging_read['entries_amount']
                 natw_ratio = vd['natw_total_charges']/allChargedAmount
-                self.write(cr, uid, ids,{'postage_ratio':postage_ratio,'natw_ratio':natw_ratio})
+                self.write(cr, uid, ids,{'postage_ratio':postage_ratio,'natw_ratio':natw_ratio,'total_gifts':totalGifts})
         return self.distribute(cr, uid, ids)
     
     def distribute(self, cr, uid, ids, context=None):
@@ -799,6 +812,232 @@ class vd(osv.osv):
                     'total':total_charges,
                     }
                 self.pool.get('voucher.distribution.account.charging').write(cr, uid, charging, vals)
+        return self.write(cr, uid, ids, {'state':'distributed'})
+    
+    def createMISSentry(self, cr, uid, ids, context=None):
+        for vd in self.read(cr, uid, ids, context=None):
+            chargedAccounts = self.pool.get('voucher.distribution.account.charging').search(cr, uid, [('voucher_id','=',vd['id'])])
+            voucher_not_included = self.pool.get('voucher.distribution.line').search(cr, uid, [('voucher_id','=',vd['id']),('included_in_charged','=',False)])
+            journal_id = vd['journal_id'][0]
+            period_id = vd['period_id'][0]
+            rate = False
+            currency = False
+            getCompany = self.pool.get('res.users').read(cr, uid, uid, context=None)
+            getCurr = self.pool.get('res.company').read(cr, uid, getCompany['company_id'][0], ['currency_id'])
+            if vd['currency_id'][0]==getCurr['currency_id'][0]:
+                currency = vd['currency_id'][0]
+                rate = 1.00
+            elif vd['currency_id'][0]!=getCurr['currency_id'][0]:
+                curr_read = self.pool.get('res.currency').read(cr, uid, vd['currency_id'][0],['rate'])
+                currency = vd['currency_id'][0]
+                rate = curr_read['rate']
+            ffEntry = {
+                'journal_id':journal_id,
+                'period_id':period_id,
+                'date':vd['date'],
+                'ref':vd['name'],
+                }
+            move_id = self.pool.get('account.move').create(cr, uid, ffEntry)
+            for voucherLines in voucher_not_included:
+                analytic_id = False
+                account_id = False
+                anaytic_name = False
+                entry_amount = False
+                debit = 0.00
+                credit = 0.00
+                lineRead = self.pool.get('voucher.distribution.line').read(cr, uid, voucherLines, context=None)
+                if not lineRead['analytic_account_id']:
+                    account_id = lineRead['account_id'][0]
+                elif lineRead['analytic_account_id']:
+                    analytic_read = self.pool.get('account.analytic.account').read(cr, uid, lineRead['analytic_account_id'][0],context=None)
+                    analytic_id = lineRead['analytic_account_id'][0]
+                    account_id = analytic_read['normal_account'][0]
+                if lineRead['amount']<0:
+                    entry_amount = lineRead['amount'] * -1
+                    debit = 0.00
+                    credit = entry_amount / rate
+                elif lineRead['amount']>0:
+                    entry_amount = lineRead['amount']
+                    debit = entry_amount / rate
+                    credit = 0.00
+                debitEntry = debit
+                creditEntry = credit
+                chargedAccountEntry = {
+                    'name':lineRead['name'],
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':account_id,
+                    'debit':debit,
+                    'credit':credit,
+                    'date':vd['date'],
+                    'ref':vd['name'],
+                    'analytic_account_id':analytic_id, 
+                    'move_id':move_id,
+                    'amount_currency':lineRead['amount'],
+                    'currency_id':currency,
+                    }
+                self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
+            for chargedAccount in chargedAccounts:
+                chargedAccount_read = self.pool.get('voucher.distribution.account.charging').read(cr, uid, chargedAccount, context=None)
+                if chargedAccount_read['entries_amount'] != 0.00:
+                    analytic_read = self.pool.get('account.analytic.account').read(cr, uid, chargedAccount_read['account_id'][0],context=None)
+                    entry_amount = chargedAccount_read['entries_amount'] * -1
+                    convertedAmount = entry_amount / rate
+                    name = 'Fund for '+ analytic_read['name']
+                    chargedAccountEntry = {
+                        'name':name,
+                        'journal_id':journal_id,
+                        'period_id':period_id,
+                        'account_id':analytic_read['normal_account'][0],
+                        'debit':0.00,
+                        'credit':convertedAmount,
+                        'date':vd['date'],
+                        'ref':vd['name'],
+                        'analytic_account_id':analytic_read['id'],
+                        'move_id':move_id,
+                        'amount_currency':entry_amount,
+                        'currency_id':currency,
+                        }
+                    self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
+                    if chargedAccount_read['contingency']!=0.00:
+                        entry_amount = chargedAccount_read['contingency']
+                        convertedAmount = entry_amount / rate
+                        name = 'Contingency Charge for '+ analytic_read['name']
+                        chargedAccountEntry = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':period_id,
+                            'account_id':analytic_read['normal_account'][0],
+                            'debit':convertedAmount,
+                            'credit':0.00,
+                            'date':vd['date'],
+                            'ref':vd['name'],
+                            'analytic_account_id':analytic_read['id'],
+                            'move_id':move_id,
+                            'amount_currency':entry_amount,
+                            'currency_id':currency,
+                            }
+                        self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
+                    if chargedAccount_read['postage']!=0.00:
+                        entry_amount = chargedAccount_read['postage']
+                        convertedAmount = entry_amount / rate
+                        name = 'Recovery Charge for '+ analytic_read['name']
+                        chargedAccountEntry = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':period_id,
+                            'account_id':analytic_read['normal_account'][0],
+                            'debit':convertedAmount,
+                            'credit':0.00,
+                            'date':vd['date'],
+                            'ref':vd['name'],
+                            'analytic_account_id':analytic_read['id'],
+                            'move_id':move_id,
+                            'amount_currency':entry_amount,
+                            'currency_id':currency,
+                            }
+                        self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
+                    if chargedAccount_read['natw']!=0.00:
+                        entry_amount = chargedAccount_read['natw']
+                        convertedAmount = entry_amount / rate
+                        name = 'N@W Charge for '+ analytic_read['name']
+                        chargedAccountEntry = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':period_id,
+                            'account_id':analytic_read['normal_account'][0],
+                            'debit':convertedAmount,
+                            'credit':0.00,
+                            'date':vd['date'],
+                            'ref':vd['name'],
+                            'analytic_account_id':analytic_read['id'],
+                            'move_id':move_id,
+                            'amount_currency':entry_amount,
+                            'currency_id':currency,
+                            }
+                        self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
+                    if chargedAccount_read['extra']!=0.00:
+                        entry_amount = chargedAccount_read['extra']
+                        convertedAmount = entry_amount / rate
+                        name = 'Extra Charge for '+ analytic_read['name']
+                        chargedAccountEntry = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':period_id,
+                            'account_id':analytic_read['normal_account'][0],
+                            'debit':convertedAmount,
+                            'credit':0.00,
+                            'date':vd['date'],
+                            'ref':vd['name'],
+                            'analytic_account_id':analytic_read['id'],
+                            'move_id':move_id,
+                            'amount_currency':entry_amount,
+                            'currency_id':currency,
+                            }
+                        self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
+            #self.pool.get('account.move').post(cr, uid, [move_id])
+            emailCharges = self.pool.get('voucher.distribution.email.charging').search(cr, uid, [('voucher_id','=',vd['id'])])
+            for email in emailCharges:
+                emailChargeRead = self.pool.get('voucher.distribution.email.charging').read(cr, uid, email, context=None)
+                analytic_read = self.pool.get('account.analytic.account').read(cr, uid, emailChargeRead['account_id'][0],context=None)
+                entry_amount = emailChargeRead['amount']
+                convertedAmount = entry_amount / rate
+                name = emailChargeRead['name']
+                emailChargeEntry = {
+                    'name':name,
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':analytic_read['normal_account'][0],
+                    'debit':convertedAmount,
+                    'credit':0.00,
+                    'date':vd['date'],
+                    'ref':vd['name'],
+                    'analytic_account_id':analytic_read['id'],
+                    'move_id':move_id,
+                    'amount_currency':entry_amount,
+                    'currency_id':currency,
+                }
+                self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
+            personals= self.pool.get('voucher.distribution.personal.section').search(cr, uid, [('voucher_id','=',vd['id'])])
+            for personal in personals:
+                personalRead = self.pool.get('voucher.distribution.personal.section').read(cr, uid, personal, context=None)
+                personal_acc_id = False
+                personal_analytic_id = False
+                name = personalRead['name']
+                if personalRead['account_id']:
+                    personal_acc_id = personalRead['account_id'][0]
+                elif personalRead['analytic_id']:
+                    personal_analytic_id=personalRead['analytic_id'][0]
+                    analytic_read = self.pool.get('account.analytic.account').read(cr, uid, personal_analytic_id,context=None)
+                    personal_acc_id = analytic_read['normal_account'][0]
+                elif not personalRead['account_id'] and not personalRead['analytic_id']:
+                    raise osv.except_osv(_('Error!'), _('ERR-002: Please assign account to entry %s!')%(name))
+                entry_amount = personalRead['amount']
+                if entry_amount <0.00:
+                    entry_amount = entry_amount * -1
+                convertedAmount = entry_amount / rate
+                if personalRead['amount'] < 0.00:
+                    debit = 0.00
+                    credit = convertedAmount
+                elif personalRead['amount']>0.00:
+                    credit = 0.00
+                    debit = convertedAmount
+                emailChargeEntry = {
+                    'name':name,
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':personal_acc_id,
+                    'debit':debit,
+                    'credit':credit,
+                    'date':vd['date'],
+                    'ref':vd['name'],
+                    'analytic_account_id':personal_analytic_id,
+                    'move_id':move_id,
+                    'amount_currency':entry_amount,
+                    'currency_id':currency,
+                }
+                self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
+            self.write(cr, uid, ids, {'m_move_id':move_id,'state':'entry_created'})
         return True
     
 vd()
@@ -838,4 +1077,5 @@ class voucher_distribution_account_assignment(osv.osv):
         'account_type':'normal',
         }
 voucher_distribution_account_assignment()
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:,
