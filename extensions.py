@@ -20,8 +20,6 @@ class res_company(osv.osv):
     _columns = {
         'transit_php':fields.many2one('account.account','PHP Transit Account', required=True),
         'transit_usd':fields.many2one('account.account','USD Transit Account', required=True),
-        'calls_dbf':fields.char('Calls.dbf location',size=64),
-        'voucher_dbf':fields.char('US/CA Voucher location',size=64),
         'phone_bill_ap':fields.many2one('account.account','Phonebill Payable Account', required=True),
         'other_ap':fields.many2one('account.account','Other Payable Accounts', required=True),
         'contribution':fields.float('Contribution Percentage'),
@@ -94,11 +92,22 @@ class aaa_accpac_wiz(osv.osv_memory):
                     self.pool.get('account.accpac').write(cr, uid, accpac,{'state':'nomatched'})
         return {'type': 'ir.actions.act_window_close'}
 aaa_accpac_wiz()
+
+class phone_pins(osv.osv):
+    _name = 'phone.pin'
+    _description = "Phone Pin Assignment"
+    _columns = {
+        'name':fields.char('Phone Pin',size=6),
+        'account_id':fields.many2one('account.analytic.account','Account Name', ondelete='cascade'),
+        'description':fields.char('Description',size=64),
+        }
+phone_pins()
+
 class account_analytic_account(osv.osv):
         
     _inherit = 'account.analytic.account'
     _columns = {
-            'phone_pin':fields.char('Phone Pin',size=12),
+            'phone_pin':fields.one2many('phone.pin','account_id','Phone Pins'),
             'code_short':fields.char('Short Code',size=64),
             'accpac_ids':fields.one2many('account.accpac','analytic_id','Accpac Codes'),
             'code':fields.char('Code',size=64),

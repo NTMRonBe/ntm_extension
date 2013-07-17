@@ -8,6 +8,11 @@ from tools.translate import _
 import decimal_precision as dp
 import csv
 import dbf
+import os
+import tools
+
+from StringIO import StringIO
+import base64
 
 class phone_provider(osv.osv):
     _name = 'phone.provider'
@@ -98,12 +103,11 @@ class phone_logs(osv.osv):
                     self.write(cr, uid,ids, {'reconcile':True, 'taxed_price':taxed})
             elif tax_included==False:
                 if log['location']=='local':
-                    tax = (log['statement_price'] * log['lt_value'])/100.00
+                    tax = (log['statement_price'] * log['lt_value'])
                     taxed = log['statement_price'] + tax
                     self.write(cr, uid,ids, {'reconcile':True, 'taxed_price':taxed})
                 elif log['location']=='international':
-                    tax = (log['statement_price'] * log['it_value'])/100.00
-                    taxed = log['statement_price'] + tax
+                    taxed = log['statement_price']
                     self.write(cr, uid,ids, {'reconcile':True, 'taxed_price':taxed})
                 elif log['location']==False:
                     raise osv.except_osv(_('Error!'), _('Please change the location of the receiving end!'))
@@ -265,7 +269,7 @@ class phone_statement_additional(osv.osv):
         'account_id':fields.many2one('account.analytic.account','Account ID'),
         'name': fields.related('account_id','name', type='char',size=64,string='Account Name', readonly=True),
         'description':fields.char('Description',size=64),
-        'phone_pin':fields.related('account_id','phone_pin', type="char",string='Phone Pin',size=12, readonly=True),
+        'phone_pin':fields.many2one('phone.pin','Phone Pin'),
         'amount':fields.float('Charged Amount'),
         'statement_id':fields.many2one('phone.statement','Statement ID', ondelete='cascade'),
         }
@@ -304,12 +308,15 @@ class phone_statement_logs(osv.osv):
         for statement in self.read(cr, uid, ids, context=None):
             for log_id in statement['log_ids']:
                 log_read = self.pool.get('phone.logs').read(cr, uid, log_id,['phone_pin','statement_id','taxed_price'])
-                acc_search = self.pool.get('account.analytic.account').search(cr, uid, [('phone_pin','=',log_read['phone_pin'])])
+                pin = log_read['phone_pin']
+                acc_search = self.pool.get('phone.pin').search(cr, uid, [('name','=',log_read['phone_pin'])])
                 if not acc_search:
-                    pin = log_read['phone_pin']
                     raise osv.except_osv(_('Error!'), _('No account connected to phone pin %s!')%pin)
                 elif acc_search:
-                    acc_id = acc_search[0]
+                    accRead = self.pool.get('phone.pin').read(cr, uid, acc_search[0], ['account_id'])
+                    if not accRead['account_id']:
+                        raise osv.except_osv(_('Error!'), _('No account connected to phone pin %s!')%pin)
+                    acc_id = accRead['account_id'][0]
                     dist_search = self.pool.get('phone.statement.distribution').search(cr, uid, [('statement_id','=',log_read['statement_id'][0]),
                                                                                                  ('account_id','=',acc_id)])
                     if not dist_search:
@@ -329,15 +336,14 @@ class phone_statement_logs(osv.osv):
         return True
     def distribute_entries(self, cr, uid, ids, context=None):
         for statement in self.read(cr, uid, ids, context=None):
-            period_search = self.pool.get('account.period').search(cr, uid, [('date_start','<=',statement['bill_start']),('date_stop','>=',statement['bill_end'])],limit=1)
             date = datetime.datetime.now()
             journal_id = statement['journal_id'][0]
-            period_id = period_search[0]
+            period_id = statement['bill_period'][0]
             date_now = date.strftime("%Y/%m/%d")
             amount = statement['amount']
             move = {
                 'journal_id':statement['journal_id'][0],
-                'period_id':period_search[0],
+                'period_id':period_id,
                 'date':date_now
                 }
             move_id = self.pool.get('account.move').create(cr, uid,move)
@@ -407,39 +413,65 @@ class callsdbf_reader(osv.osv_memory):
     _description = "DBF Reader"
     _columns = {
         'bill_period':fields.many2one('account.period','Billing Period'),
-        'name':fields.char('SOA',size=32),
+        'soa':fields.char('SOA',size=32),
         'due_date':fields.date('Due Date'),
         'provider':fields.many2one('phone.provider','Company'),
         'line_id':fields.many2one('phone.line','Phone Line'),
+        'calls_file': fields.binary('Calls.dbf file', required=True),
+        'state':fields.selection([('init','init'),('done','done')], 'state', readonly=True),
         }
+    
+    _defaults = {  
+        'state': 'init',
+    }
+    
+    def importzip(self, cr, uid, ids, context):
+        user = uid
+        ad = tools.config['root_path'].split(",")[-1]
+        file= os.path.join(ad, 'calls.dbf')
+        (data,) = self.browse(cr, uid, ids , context=context)
+        module_data = data.calls_file
+        val = base64.decodestring(module_data)
+        fp = open(file,'wb')
+        fp.write(val)
+        fp.close
+        self.write(cr, uid, ids, {'state':'done'}, context)
+        return True
     
     def clean_file(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
             statement_id = False
-            soa=form['name']
+            soa=form['soa']
             statement_search = self.pool.get('phone.statement').search(cr, uid, [('bill_period','=',form['bill_period']),
                                                                                  ('line_id','=',form['line_id']),
-                                                                                 ('name','=',form['name']),
+                                                                                 ('name','=',form['soa']),
                                                                                  ])
             if statement_search:
-                raise osv.except_osv(_('Error!'), _('Statement for SOA %s has already been created!')%soa)
+                raise osv.except_osv(_('Error!'), _('ERR-007: Statement for SOA %s has already been created!')%soa)
             elif not statement_search:
                 statement = {
                     'bill_period':form['bill_period'],
                     'line_id':form['line_id'],
-                    'name':form['name'],
+                    'name':form['soa'],
                     'due_date':form['due_date'],
                     }
                 statement_id = self.pool.get('phone.statement').create(cr, uid, statement)
             user_id= uid
             line_id = self.pool.get('phone.line').read(cr, uid, form['line_id'],context=None)
             if line_id['monthly_recur']>0:
-                self.pool.get('phone.statement.additional').create(cr, uid, {
+                newMRF = False
+                if line_id['lt_bool']==False:
+                    newMRF= line_id['lt_value'] * line_id['monthly_recur']
+                elif line_id['lt_bool']==True:
+                    newMRF = line_id['monthly_recur']
+                print newMRF
+                mRFValue = self.pool.get('phone.statement.additional').create(cr, uid, {
                     'account_id':line_id['account_id'][0],
                     'description':'Monthly Recurring Charges',
-                    'amount':line_id['monthly_recur'],
+                    'amount':newMRF,
                     'statement_id':statement_id,
                     })
+                print mRFValue
             line_name = line_id['name']
             start_day = line_id['phone_bill_start']
             end_day = line_id['phone_bill_end']
@@ -462,8 +494,10 @@ class callsdbf_reader(osv.osv_memory):
                 end_date = str(period[1])+'-'+str(period[0])+'-'+end_day
             user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
             company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['calls_dbf'])
+            ad = tools.config['root_path'].split(",")[-1]
+            file= os.path.join(ad, 'calls')
             table = company_read['calls_dbf']
-            table = dbf.Table(table)
+            table = dbf.Table(file)
             table.open()
             for record in table:
                 date = str(record.date)
@@ -485,6 +519,8 @@ class callsdbf_reader(osv.osv_memory):
                 itime = str(record.itime)
                 if co==line_name and date >=start_date and date<=end_date:
                     vals = {}
+                    if not sprice:
+                        sprice = 0.00
                     sprice = str(sprice)
                     sprice = float(sprice)
                     amount = "%.2f" % sprice
