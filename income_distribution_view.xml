@@ -11,13 +11,13 @@
                     <group colspan="4" col="4">
                         <field name="name" invisible="1"/>
                         <group colspan="2" col="2">
-                            <field name="bank_id" widget="selection" required="1" domain="[('ownership','=','company')]"/>
-                            <field name="ref" required="1"/>
+                            <field name="bank_id" widget="selection" required="1" domain="[('ownership','=','company')]" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="ref" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
                         </group>
                         <group colspan="2" col="2">
-	                        <field name="amount" required="1"/>
-	                        <field name="charges_included"/>
-	                        <field name="bank_charges" attrs="{'invisible':[('charges_included','=',False)]}"/>
+	                        <field name="amount" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                        <field name="charges_included" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                        <field name="bank_charges" attrs="{'invisible':[('charges_included','=',False)],'readonly':[('state','!=','draft')]}"/>
                         </group>
                     </group>
                     <separator string="Dates" colspan="4"/>
@@ -27,7 +27,7 @@
                     </group>
                     <notebook>
                        <page string="Distribution Details">
-                            <field mode="tree,form" name="distribution_ids" nolabel="1">
+                            <field mode="tree,form" name="distribution_ids" nolabel="1" attrs="{'readonly':[('state','!=','received')]}">
                                 <tree string="Account Distribution List">
                                     <field name="account_id"/>
                                     <field name="remarks"/>
@@ -37,8 +37,8 @@
                                 <form string="Account Distribution">
                                     <group colspan="4" col="6">
                                         <group colspan="4" col="2">
-		                                    <field name="account_id"/>
-		                                    <field name="remarks"/>
+		                                    <field name="account_id" required="True"/>
+		                                    <field name="remarks" required="True"/>
 	                                    </group>
 	                                    <group colspan="2" col="2">
 		                                    <field name="amount" on_change="onchange_contribute(contribute, amount)"/>
@@ -50,7 +50,7 @@
                             </field>
                        </page>
                        <page string="Remarks">
-                        <field name="remarks" colspan="4" nolabel="1"/>
+                        <field name="remarks" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}"/>
                        </page>
                        <page string="Journal Entries">
                             <field name="rmove_ids" mode="tree" nolabel="1">
@@ -81,7 +81,7 @@
                        </page>
                     </notebook>
                     <group colspan="4" col="13">
-                        <field name="state"/>
+                        <field name="state" readonly="1"/>
                         <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
                         <button name="receive" attrs="{'invisible':[('state','!=','draft')]}" string="Money Received"  type="object" />
                         <button name="distribute" attrs="{'invisible':[('state','!=','received')]}" string="Distribute Donation"  type="object" />

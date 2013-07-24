@@ -8,8 +8,9 @@
             name="pettycash.disbursement"
             rml="ntm_extension/report/pettycash_print_disbursement.rml"
             auto="False"
+            attachment="((object.name))"
             header = "False"
-            menu="True"/>
+            menu="False"/>
                     
         <record id="crs_form" model="ir.ui.view">
             <field name="name">crs.form</field>

@@ -120,7 +120,6 @@ class bill_exchange(osv.osv):
     def exchange2(self, cr, uid, ids, context=None):
         for be in self.read(cr, uid, ids, context=None):
             denom_read = self.pool.get('denominations').read(cr, uid, be['denom_id'][0],['multiplier'])
-            #netsvc.Logger().notifyChannel("denom_read", netsvc.LOG_INFO, ' '+str(denom_read))
             if be['quantity']<=0.00:
                 raise osv.except_osv(_('Error !'), _('Please indicate the quantity to be exchanged!'))
             if be['quantity']>be['curr_quantity']:
@@ -209,13 +208,13 @@ class pc_liquidation_lines(osv.osv):
     _name = 'pc.liquidation.lines'
     _description = "Liquidation Lines"
     _columns = {
-        'name':fields.char('Description',size=64,required=True),
+        'name':fields.char('Description',size=64),
         'amount':fields.float('Amount'),
         'reference':fields.char('Reference',size=64),
         'pcl_id':fields.many2one('account.pettycash.liquidation','Liquidation',ondelete="cascade"),
         'analytic_id':fields.many2one('account.analytic.account','Account'),
         'account_id':fields.many2one('account.account','Account'),
-        'acc_name':fields.char('Account Name',size=64, required=True),
+        'acc_name':fields.char('Account Name',size=64),
         'type':fields.selection([
                             ('analytic','Analytic Account'),
                             ('normal','Normal Account')
@@ -225,6 +224,30 @@ class pc_liquidation_lines(osv.osv):
     _defaults = {
         'type':'normal',
         }
+    
+    def data_get(self, cr, uid, ids, context=None):
+        datas = {}
+        statements = []
+        if context is None:
+            context = {}
+        for data in self.read(cr, uid, ids, ['id']):
+            rec = data['id']
+            attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','pc.liquidation.lines'),('res_id','=',rec)])
+            self.pool.get('ir.attachment').unlink(cr, uid, attachments)
+            statements.append(rec)
+        datas = {
+            'ids':statements,
+            'model':'pc.liquidation.lines',
+            'form':data
+            }
+        return {
+            'type': 'ir.actions.report.xml',
+            'report_name': 'pc.liquidation.lines',
+            'nodestroy':True,
+            'datas': datas,
+            #'name':data['name'],
+            'header':False,
+            }
     
     def onchange_type(self, cr, uid, ids, type=False):
         result = {}
@@ -238,16 +261,12 @@ class pc_liquidation_lines(osv.osv):
     def onchange_account(self, cr, uid, ids, account_id=False, analytic_id=False):
         result = {}
         if account_id and not analytic_id:
-            netsvc.Logger().notifyChannel("account_id", netsvc.LOG_INFO, ' '+str(account_id))
             account_read = self.pool.get('account.account').read(cr, uid, account_id,['name'])
-            netsvc.Logger().notifyChannel("account_read", netsvc.LOG_INFO, ' '+str(account_read))
             acc_name = account_read['name']
             self.write(cr, uid, ids, {'analytic_id':False})
             result = {'value':{'acc_name':acc_name,}}
         if analytic_id and not account_id:
-            netsvc.Logger().notifyChannel("analytic_id", netsvc.LOG_INFO, ' '+str(analytic_id))
             analytic_read = self.pool.get('account.analytic.account').read(cr, uid, analytic_id,['name'])
-            netsvc.Logger().notifyChannel("analytic_read", netsvc.LOG_INFO, ' '+str(analytic_read))
             acc_name = analytic_read['name']
             self.write(cr, uid, ids, {'account_id':False})
             result = {'value':{'acc_name':acc_name,}}
@@ -317,34 +336,29 @@ class pcl(osv.osv):
                 pc_read = self.pool.get('account.pettycash').read(cr, uid, pcl['pc_id'][0],['amount'])
                 pc_amount = pc_read['amount']
                 check_amount = pc_read['amount'] - denom_sum
+                
                 if lines_sum == check_amount:
                     values = {
                         'state':'confirmed',
                         'name':self.pool.get('ir.sequence').get(cr, uid, 'account.pettycash.liquidation'),
                         }
                     self.write(cr, uid, pcl['id'], values)
-                elif lines_sum > check_amount or lines_sum < check_amount:
+                elif lines_sum != check_amount:
                     raise osv.except_osv(_('Error !'), _('Sum of all liquidation lines (%s) must be equal to the \npetty cash amount (%s) less the summation of remaining denomination (%s)!')%(lines_sum,pc_amount,denom_sum))
         return True
     
     def update_pc(self, cr, uid, ids, context=None):
         for pcl in self.read(cr, uid, ids, context=None):
             denoms = self.pool.get('pettycash.denom').search(cr, uid, [('pcl_id','=',pcl['id'])])
-            netsvc.Logger().notifyChannel("denoms", netsvc.LOG_INFO, ' '+str(denoms))
             denom_ids = []
             for denom in denoms:
                 denom_read = self.pool.get('pettycash.denom').read(cr, uid, denom, context=None)
                 denom_ids.append(denom_read['name'][0])
-                netsvc.Logger().notifyChannel("denom_read", netsvc.LOG_INFO, ' '+str(denom_read))
                 pc_denoms = self.pool.get('pettycash.denom').search(cr, uid, [('name','=',denom_read['name'][0]),('pettycash_id','=',pcl['pc_id'][0])])
-                netsvc.Logger().notifyChannel("pc_denoms", netsvc.LOG_INFO, ' '+str(pc_denoms))
                 for pc_denom in pc_denoms:
-                    netsvc.Logger().notifyChannel("pc_denoms", netsvc.LOG_INFO, ' '+str(denom_read['quantity']))
                     self.pool.get('pettycash.denom').write(cr, uid,pc_denom,{'quantity':denom_read['quantity']})
             pc_denom_uninclude = self.pool.get('pettycash.denom').search(cr, uid, [('name','not in',denom_ids),('pettycash_id','=',pcl['pc_id'][0])])
-            netsvc.Logger().notifyChannel("pc_denom_uninclude", netsvc.LOG_INFO, ' '+str(pc_denom_uninclude))
             for uninclude in pc_denom_uninclude:
-                netsvc.Logger().notifyChannel("uninclude", netsvc.LOG_INFO, ' '+str(uninclude))
                 self.pool.get('pettycash.denom').write(cr, uid,uninclude,{'quantity':0.00})
         return True
         
@@ -381,7 +395,6 @@ class pcl(osv.osv):
                     analytic_id = False
                 amount += line_read['amount']
                 comp_curr_amount = line_read['amount'] / rate  
-                ##netsvc.Logger().notifyChannel("amount", netsvc.LOG_INFO, ' '+str(amount))
                 if line_read['analytic_id']:
                     analytic_read = self.pool.get('account.analytic.account').read(cr, uid, line_read['analytic_id'][0],context=None)
                     analytic_name = analytic_read['name']

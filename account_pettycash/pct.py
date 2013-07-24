@@ -125,6 +125,24 @@ class apt(osv.osv):
                         self.write(cr, uid, pct['id'],{'filled':True})
         return True
     
+    def postIT(self, cr, uid, ids, context=None):
+        for pct in self.read(cr, uid, ids, context=None):
+            if pct['state']=='confirmed':
+                readSRC =self.pool.get('account.pettycash').read(cr, uid, pct['src_pc_id'][0],['manager_id'])
+                if readSRC['manager_id'][0]!=uid:
+                    managerName = readSRC['manager_id'][1]
+                    raise osv.except_osv(_('Error !'), _('You are not %s! Only %s can release cash on this drawer!')%(managerName,managerName))
+                elif readSRC['manager_id'][0]==uid:
+                    self.post_pct(cr, uid, ids, context)
+            if pct['state']=='released':
+                readSRC =self.pool.get('account.pettycash').read(cr, uid, pct['dest_pc_id'][0],['manager_id'])
+                if readSRC['manager_id'][0]!=uid:
+                    managerName = readSRC['manager_id'][1]
+                    raise osv.except_osv(_('Error !'), _('You are not %s! Only %s can receive cash for this drawer!')%(managerName,managerName))
+                elif readSRC['manager_id'][0]==uid:
+                    self.post_pct(cr, uid, ids, context)
+        return True
+    
     def post_pct(self, cr, uid, ids, context=None):
         for pct in self.read(cr, uid, ids, context=None):
             src_pc = pct['src_pc_id'][0]
@@ -152,7 +170,6 @@ class apt(osv.osv):
                     dest_amount += dest_denoms_read['quantity'] * denom_multiple_read['multiplier']
                 if src_amount!=dest_amount:
                     raise osv.except_osv(_('Error !'), _('Total amounts are not equal!'))
-            netsvc.Logger().notifyChannel("pct_denom_check", netsvc.LOG_INFO, ' '+str(pct_denom_check))
             for pct_denoms in pct_denom_check:
                 denom_read = self.pool.get('pettycash.denom').read(cr, uid, pct_denoms,['quantity','name'])
                 if pct['state']=='confirmed':
@@ -174,11 +191,8 @@ class apt(osv.osv):
             pc_id = False
             if pct['state']=='confirmed':
                 pc_id = pct['src_pc_id'][0]
-                netsvc.Logger().notifyChannel("pc_src_id", netsvc.LOG_INFO, ' '+str(pc_id))
             if pct['state']=='released':
                 pc_id = pct['dest_pc_id'][0]
-                netsvc.Logger().notifyChannel("pc_dest_id", netsvc.LOG_INFO, ' '+str(pc_id))
-            netsvc.Logger().notifyChannel("pc_id", netsvc.LOG_INFO, ' '+str(pc_id))    
             pc_read = self.pool.get('account.pettycash').read(cr, uid, pc_id,['account_code'])
             acc_read = self.pool.get('account.account').read(cr, uid, pc_read['account_code'][0],['currency_id','company_currency_id','company_id'])
             company_read = self.pool.get('res.company').read(cr, uid, acc_read['company_id'][0],['transit_php','transit_usd'])

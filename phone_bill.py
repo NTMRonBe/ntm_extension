@@ -81,8 +81,8 @@ class phone_logs(osv.osv):
         'statement_price':fields.float('Statement Price'),
         'taxed_price':fields.float('Taxed Price'),
         'location':fields.selection([
-                            ('local','Local'),
-                            ('international','International'),
+                            ('local','NDD'),
+                            ('international','IDD'),
                             ],'Location'),
         'reconcile':fields.boolean('Reconcile?', readonly=True),
         }
@@ -103,8 +103,8 @@ class phone_logs(osv.osv):
                     self.write(cr, uid,ids, {'reconcile':True, 'taxed_price':taxed})
             elif tax_included==False:
                 if log['location']=='local':
-                    tax = (log['statement_price'] * log['lt_value'])
-                    taxed = log['statement_price'] + tax
+                    tax = log['statement_price'] * statement_read['lt_value']
+                    taxed = log['statement_price'] * statement_read['lt_value']
                     self.write(cr, uid,ids, {'reconcile':True, 'taxed_price':taxed})
                 elif log['location']=='international':
                     taxed = log['statement_price']
@@ -236,7 +236,7 @@ class phone_statement_distribution(osv.osv):
     _columns = {
         'account_id':fields.many2one('account.analytic.account','Account ID'),
         'name': fields.related('account_id','name', type='char',size=64,string='Account Name', readonly=True),
-        'phone_pin':fields.related('account_id','phone_pin', type="char",string='Phone Pin',size=12, readonly=True),
+        'phone_pin':fields.many2one('phone.pin','Phone Pin'),
         'amount':fields.float('Charged Amount'),
         'statement_id':fields.many2one('phone.statement','Statement ID', ondelete='cascade'),
         }
@@ -284,7 +284,7 @@ class phone_statement_logs(osv.osv):
         }
     
     def reconcile(self, cr, uid, ids, context=None):
-        for statement in self.read(cr, uid,ids, context=None):
+        for statement in self.read(cr, uid, ids, context=None):
             log_amount = 0.00
             additional_amount = 0.00
             total_amount = 0.00
@@ -292,17 +292,25 @@ class phone_statement_logs(osv.osv):
             unreconciled_logs = self.pool.get('phone.logs').search(cr, uid, [('statement_id','=',statement['id']),('reconcile','=',False)])
             if unreconciled_logs:
                 raise osv.except_osv(_('Error!'), _('All Call logs must be reconciled first before reconciling the statement!'))
-            for log_id in reconciled_logs:
-                log_read = self.pool.get('phone.logs').read(cr, uid, log_id,['phone_pin','statement_id','taxed_price'])
-                log_amount+=log_read['taxed_price']
-            for additional_id in statement['additional_ids']:
-                additional_read = self.pool.get('phone.statement.additional').read(cr, uid, additional_id, ['amount'])
-                additional_amount +=additional_read['amount']
-            total_amount = log_amount + additional_amount
-            if statement['amount']!=total_amount:
-                raise osv.except_osv(_('Error!'), _('Please check the reconciliation! Total amount of call logs and additional charges is not equal to billed amount!'))
-            elif statement['amount']==total_amount:
-                self.write(cr, uid, ids, {'state':'reconciled'})
+            elif not unreconciled_logs:
+                for log_id in statement['log_ids']:
+                    log_read = self.pool.get('phone.logs').read(cr, uid, log_id,['phone_pin','statement_id','taxed_price'])
+                    log_amount+=log_read['taxed_price']
+                for additional_id in statement['additional_ids']:
+                    additional_read = self.pool.get('phone.statement.additional').read(cr, uid, additional_id, ['amount'])
+                    additional_amount +=additional_read['amount']
+                total_amount = log_amount + additional_amount
+                statement_amount = statement['amount']
+                rec_amount = "%.2f" % total_amount
+                total_amount = float(rec_amount)
+                rec_amount = "%.2f" % statement_amount
+                statement_amount = float(rec_amount)
+                if statement_amount==total_amount:
+                    self.write(cr, uid, ids, {'state':'reconciled'})
+                elif statement_amount!=total_amount:
+                    total_amount = str(total_amount)
+                    statement_amount = str(statement_amount)
+                    raise osv.except_osv(_('Error!'), _('Please check the reconciliation! Total amount of call logs and additional charges is not equal to billed amount!'))
         return True
     def distribute(self, cr, uid, ids, context=None):
         for statement in self.read(cr, uid, ids, context=None):
@@ -321,6 +329,7 @@ class phone_statement_logs(osv.osv):
                                                                                                  ('account_id','=',acc_id)])
                     if not dist_search:
                         vals = {
+                            'phone_pin':acc_search[0],
                             'account_id':acc_id,
                             'amount':log_read['taxed_price'],
                             'statement_id':statement['id'],
@@ -334,6 +343,7 @@ class phone_statement_logs(osv.osv):
             self.distribute_entries(cr, uid, ids)
             self.write(cr, uid, ids, {'state':'distributed'})
         return True
+                
     def distribute_entries(self, cr, uid, ids, context=None):
         for statement in self.read(cr, uid, ids, context=None):
             date = datetime.datetime.now()
@@ -407,6 +417,21 @@ class phone_statement_logs(osv.osv):
         
 phone_statement_logs()    
 
+class phone_statement_local(osv.osv_memory):
+    _name = 'phone.statement.local'
+    _description = "Set to Local"
+    
+    def add(self, cr, uid, ids, context=None):
+        for form in self.read(cr, uid, ids, context=context):
+            statement = context['active_id']
+            for logs in self.pool.get('phone.logs').search(cr, uid, [('statement_id','=',statement)]):
+                logRead = self.pool.get('phone.logs').read(cr, uid, logs, context=None)
+                if logRead['location']=='international':
+                    continue
+                if logRead['location']==False:
+                    self.pool.get('phone.logs').write(cr, uid, logs, {'location':'local'})
+        return {'type': 'ir.actions.act_window_close'}
+phone_statement_local()
 
 class callsdbf_reader(osv.osv_memory):
     _name = "callsdbf.reader"
@@ -435,8 +460,115 @@ class callsdbf_reader(osv.osv_memory):
         fp = open(file,'wb')
         fp.write(val)
         fp.close
-        self.write(cr, uid, ids, {'state':'done'}, context)
-        return True
+        for form in self.read(cr, uid, ids, context=None):
+            statement_id = False
+            soa=form['soa']
+            statement_search = self.pool.get('phone.statement').search(cr, uid, [('bill_period','=',form['bill_period']),
+                                                                                 ('line_id','=',form['line_id']),
+                                                                                 ('name','=',form['soa']),
+                                                                                 ])
+            if statement_search:
+                raise osv.except_osv(_('Error!'), _('ERR-007: Statement for SOA %s has already been created!')%soa)
+            elif not statement_search:
+                statement = {
+                    'bill_period':form['bill_period'],
+                    'line_id':form['line_id'],
+                    'name':form['soa'],
+                    'due_date':form['due_date'],
+                    }
+                statement_id = self.pool.get('phone.statement').create(cr, uid, statement)
+            user_id= uid
+            line_id = self.pool.get('phone.line').read(cr, uid, form['line_id'],context=None)
+            if line_id['monthly_recur']>0:
+                newMRF = False
+                if line_id['lt_bool']==False:
+                    newMRF= line_id['lt_value'] * line_id['monthly_recur']
+                elif line_id['lt_bool']==True:
+                    newMRF = line_id['monthly_recur']
+                mRFValue = self.pool.get('phone.statement.additional').create(cr, uid, {
+                    'account_id':line_id['account_id'][0],
+                    'description':'Monthly Recurring Charges',
+                    'amount':newMRF,
+                    'statement_id':statement_id,
+                    })
+            line_name = line_id['name']
+            start_day = line_id['phone_bill_start']
+            end_day = line_id['phone_bill_end']
+            period_read =self.pool.get('account.period').read(cr, uid, form['bill_period'],context=None)
+            period_name = period_read['name']
+            period = period_name.split('/')
+            end = int(end_day)
+            start = int(start_day)
+            start_date = False
+            end_date = False
+            if start > end:
+                end_date = str(period[1])+'-'+str(period[0])+'-'+end_day
+                prev_period = form['bill_period']-1
+                previous = self.pool.get('account.period').read(cr, uid, prev_period, context=None)
+                prev_period_name = previous['name']
+                prev_period_list = prev_period_name.split('/')
+                start_date = str(prev_period_list[1])+'-'+str(prev_period_list[0])+'-'+start_day
+            elif end>start:
+                start_date = str(period[1])+'-'+str(period[0])+'-'+start_day
+                end_date = str(period[1])+'-'+str(period[0])+'-'+end_day
+            ad = tools.config['root_path'].split(",")[-1]
+            file= os.path.join(ad, 'calls')
+            table = dbf.Table(file)
+            table.open()
+            for record in table:
+                date = str(record.date)
+                co = str(record.co)
+                co = co.strip()
+                ext = str(record.extension)
+                ext = ext.split(' ')
+                ext=ext[0]
+                act = str(record.account)
+                act = act.split(' ')
+                act = act[0]
+                dialnumber = str(record.number)
+                dialnumber = dialnumber.split(' ')
+                dialnumber=dialnumber[0]
+                sprice = (record.price)
+                stat = str(record.status)
+                stat = stat.rstrip()
+                iduration = str(record.iduration)
+                itime = str(record.itime)
+                if co==line_name and date >=start_date and date<=end_date:
+                    vals = {}
+                    if not sprice:
+                        sprice = 0.00
+                    sprice = str(sprice)
+                    sprice = float(sprice)
+                    amount = "%.2f" % sprice
+                    sprice = float(amount) 
+                    if stat not in ['Local','Incoming']:
+                        vals = {
+                            'name':date,
+                            'line_id':form['line_id'],
+                            'extension':ext,
+                            'phone_pin':act,
+                            'number':dialnumber,
+                            'duration':iduration,
+                            'time':itime,
+                            'status':stat,
+                            'price':sprice,
+                            'statement_id':statement_id,
+                            'statement_price':sprice,
+                            }
+                        if stat=='Globe' or stat=='Sun' or stat=='Smart':
+                            vals.update({'location':'local'})
+                        self.pool.get('phone.logs').create(cr, uid, vals)
+            table.close()
+            return {
+                'domain': "[('id', 'in', ["+str(statement_id)+"])]",
+                'name': 'Phone Statement',
+                'view_type':'form',
+                'nodestroy': False,
+                'target': 'current',
+                'view_mode':'tree,form',
+                'res_model':'phone.statement',
+                'type':'ir.actions.act_window',
+                'context':context,}
     
     def clean_file(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
@@ -464,14 +596,12 @@ class callsdbf_reader(osv.osv_memory):
                     newMRF= line_id['lt_value'] * line_id['monthly_recur']
                 elif line_id['lt_bool']==True:
                     newMRF = line_id['monthly_recur']
-                print newMRF
                 mRFValue = self.pool.get('phone.statement.additional').create(cr, uid, {
                     'account_id':line_id['account_id'][0],
                     'description':'Monthly Recurring Charges',
                     'amount':newMRF,
                     'statement_id':statement_id,
                     })
-                print mRFValue
             line_name = line_id['name']
             start_day = line_id['phone_bill_start']
             end_day = line_id['phone_bill_end']
@@ -492,11 +622,8 @@ class callsdbf_reader(osv.osv_memory):
             elif end>start:
                 start_date = str(period[1])+'-'+str(period[0])+'-'+start_day
                 end_date = str(period[1])+'-'+str(period[0])+'-'+end_day
-            user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
-            company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['calls_dbf'])
             ad = tools.config['root_path'].split(",")[-1]
             file= os.path.join(ad, 'calls')
-            table = company_read['calls_dbf']
             table = dbf.Table(file)
             table.open()
             for record in table:

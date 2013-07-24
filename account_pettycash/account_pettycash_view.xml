@@ -1,6 +1,16 @@
 <?xml version="1.0"?>
 <openerp>
     <data>        
+    
+    <report id="report_account_pettyycash_transfer_print"
+            string="P/C to P/C Transfer"
+            model="account.pettycash.transfer"
+            name="account.pettycash.transfer"
+            rml="ntm_extension/report/apt.rml"
+            auto="False"
+            header = "False"
+            menu="True"/>
+            
         <!--Denominations-->
         <record id="denominations_form" model="ir.ui.view">
             <field name="name">denom.form</field>
@@ -177,13 +187,13 @@
                                             />
                                     <button string="Release"
                                             type="object"
-                                            name="post_pct"
+                                            name="postIT"
                                             icon="gtk-execute"
                                             attrs="{'invisible': [('state','!=','confirmed')]}"
                                             />
                                     <button string="Received"
                                             type="object"
-                                            name="post_pct"
+                                            name="postIT"
                                             icon="gtk-execute"
                                             attrs="{'invisible': [('state','!=','released')]}"
                                             />        

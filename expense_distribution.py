@@ -128,16 +128,18 @@ class idg(osv.osv):
     def confirm(self, cr, uid, ids, context=None):
         for edg in self.read(cr, uid, ids, context=None):
             if edg['amount']==0.00:
-                raise osv.except_osv(_('Error!'), _('Zero expense amounts are not allowed!'))
+                raise osv.except_osv(_('Error!'), _('ERR-008: Zero expense amounts are not allowed!'))
             elif edg['amount']!=0.00:
                 total_amount = 0.00
                 for edgl in edg['distribution_ids']:
                     edgl_read = self.pool.get('expense.distribution.generic.lines').read(cr, uid, edgl,['amount'])
+                    if edgl_read['amount']==0.00:
+                        raise osv.except_osv(_('Error!'), _('ERR-009: Zero charged amount is not allowed!'))
                     total_amount +=edgl_read['amount']
                 if total_amount==edg['amount']:
                     self.write(cr, uid, ids, {'state':'confirm'})
                 elif total_amount!=edg['amount']:
-                    raise osv.except_osv(_('Error!'), _('Expense amount is not equal to distribution lines amount total!'))
+                    raise osv.except_osv(_('Error!'), _('ERR-010: Expense amount is not equal to distribution lines amount total!'))
         return True
 idg()
 
@@ -192,6 +194,7 @@ class ecp(osv.osv):
         'payment_lines':fields.one2many('expense.check.payment.lines','payment_id','Payables'),
         'move_id':fields.many2one('account.move','Journal Entry'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
+        'remarks':fields.text('Remarks'),
         }
     
     def fetch_check_num(self,cr, uid, ids, context=None):

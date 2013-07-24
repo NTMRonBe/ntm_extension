@@ -1,6 +1,19 @@
 <?xml version="1.0"?>
 <openerp>
     <data>        
+    
+    <report id="report_liquidation_line_print"
+            string="Liquidation Lines"
+            model="pc.liquidation.lines"
+            name="pc.liquidation.lines"
+            rml="ntm_extension/report/pc_liquidation.rml"
+            auto="False"
+            attachment="(object.name)"
+            header = "False"
+            menu="True"
+            />
+    
+    
     <!--Petty Cash Liquidation-->
         <record id="pcl_form" model="ir.ui.view">
             <field name="name">pcl.form</field>
@@ -39,6 +52,7 @@
 	                                <field name="acc_name"/>
 	                                <field name="reference"/>
 	                                <field name="amount" sum="Total Liquidations"/>
+	                                <button name="data_get" string="Print"  type="object" icon="gtk-jump-to"/>
                                 </tree>
                                 <form string="Liquidation Lines">
                                     <field name="name"/>

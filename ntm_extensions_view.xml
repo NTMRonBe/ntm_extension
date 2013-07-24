@@ -86,6 +86,7 @@
 					<group colspan="2" col="4" attrs="{'invisible': [('type','=','view')]}">
 					<field name="project_account"/>
 					<field name="voucher_expense" attrs="{'invisible': [('project_account','=',False)]}"/>
+					<field name="ntm_type"/>
 					</group>
 					<group colspan="4" col="4">
 					   <separator colspan="4"/>
@@ -272,6 +273,9 @@
                 <field name="supplier" position="replace">
                     <field name="supplier" string="People and Teams"/>
                     <field name="project"/>
+                </field>
+                <field name="property_account_position" position="replace">
+                    <field name="project_id"/>
                 </field>
             </field>
         </record>

@@ -8,7 +8,6 @@ from tools.translate import _
 import decimal_precision as dp
 import csv
 import dbf
-from pickle import FALSE
 
 class income_distribution_generic(osv.osv):
     _name = 'income.distribution.generic'
@@ -390,7 +389,7 @@ class voucher_distribution_personal_section(osv.osv):
     _name = 'voucher.distribution.personal.section'
     _description = "Personal Account Section"
     _columns = {
-        'name':fields.char('Personal Account',size=64),
+        'name':fields.char('Description',size=64),
         'amount':fields.float('Amount'),
         'account_name':fields.char('Account Name',size=64),
         'account_id':fields.many2one('account.account','Normal Account'),
@@ -759,7 +758,7 @@ class vd(osv.osv):
                                                                                      ('account_name','=',False)
                                                                                      ])
             if checkLines:
-                raise osv.except_osv(_('Error!'), _('Please check all voucher lines if an account has been assigned!'))
+                raise osv.except_osv(_('Error!'), _('ERR-002: Please check all voucher lines if an account has been assigned!'))
             elif not checkLines:
                 countChargedAccounts = 0
                 totalGifts = 0
@@ -822,6 +821,8 @@ class vd(osv.osv):
             period_id = vd['period_id'][0]
             rate = False
             currency = False
+            allDebitAmounts = False
+            allCreditAmounts = False
             getCompany = self.pool.get('res.users').read(cr, uid, uid, context=None)
             getCurr = self.pool.get('res.company').read(cr, uid, getCompany['company_id'][0], ['currency_id'])
             if vd['currency_id'][0]==getCurr['currency_id'][0]:
@@ -856,10 +857,12 @@ class vd(osv.osv):
                     entry_amount = lineRead['amount'] * -1
                     debit = 0.00
                     credit = entry_amount / rate
+                    allCreditAmounts += credit
                 elif lineRead['amount']>0:
                     entry_amount = lineRead['amount']
                     debit = entry_amount / rate
                     credit = 0.00
+                    allDebitAmounts +=debit
                 debitEntry = debit
                 creditEntry = credit
                 chargedAccountEntry = {
@@ -898,6 +901,7 @@ class vd(osv.osv):
                         'amount_currency':entry_amount,
                         'currency_id':currency,
                         }
+                    allCreditAmounts+=convertedAmount
                     self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
                     if chargedAccount_read['contingency']!=0.00:
                         entry_amount = chargedAccount_read['contingency']
@@ -918,6 +922,7 @@ class vd(osv.osv):
                             'currency_id':currency,
                             }
                         self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
+                        allDebitAmounts+=convertedAmount
                     if chargedAccount_read['postage']!=0.00:
                         entry_amount = chargedAccount_read['postage']
                         convertedAmount = entry_amount / rate
@@ -937,6 +942,7 @@ class vd(osv.osv):
                             'currency_id':currency,
                             }
                         self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
+                        allDebitAmounts+=convertedAmount
                     if chargedAccount_read['natw']!=0.00:
                         entry_amount = chargedAccount_read['natw']
                         convertedAmount = entry_amount / rate
@@ -956,6 +962,7 @@ class vd(osv.osv):
                             'currency_id':currency,
                             }
                         self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
+                        allDebitAmounts+=convertedAmount
                     if chargedAccount_read['extra']!=0.00:
                         entry_amount = chargedAccount_read['extra']
                         convertedAmount = entry_amount / rate
@@ -975,14 +982,16 @@ class vd(osv.osv):
                             'currency_id':currency,
                             }
                         self.pool.get('account.move.line').create(cr, uid, chargedAccountEntry)
-            #self.pool.get('account.move').post(cr, uid, [move_id])
+                        allDebitAmounts+=convertedAmount
             emailCharges = self.pool.get('voucher.distribution.email.charging').search(cr, uid, [('voucher_id','=',vd['id'])])
             for email in emailCharges:
                 emailChargeRead = self.pool.get('voucher.distribution.email.charging').read(cr, uid, email, context=None)
+                name = emailChargeRead['name']
+                if not emailChargeRead['account_id']:
+                    raise osv.except_osv(_('Error!'), _('ERR-003: Please assign account to entry %s!')%(name))
                 analytic_read = self.pool.get('account.analytic.account').read(cr, uid, emailChargeRead['account_id'][0],context=None)
                 entry_amount = emailChargeRead['amount']
                 convertedAmount = entry_amount / rate
-                name = emailChargeRead['name']
                 emailChargeEntry = {
                     'name':name,
                     'journal_id':journal_id,
@@ -998,6 +1007,7 @@ class vd(osv.osv):
                     'currency_id':currency,
                 }
                 self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
+                allDebitAmounts+=convertedAmount
             personals= self.pool.get('voucher.distribution.personal.section').search(cr, uid, [('voucher_id','=',vd['id'])])
             for personal in personals:
                 personalRead = self.pool.get('voucher.distribution.personal.section').read(cr, uid, personal, context=None)
@@ -1011,7 +1021,7 @@ class vd(osv.osv):
                     analytic_read = self.pool.get('account.analytic.account').read(cr, uid, personal_analytic_id,context=None)
                     personal_acc_id = analytic_read['normal_account'][0]
                 elif not personalRead['account_id'] and not personalRead['analytic_id']:
-                    raise osv.except_osv(_('Error!'), _('ERR-002: Please assign account to entry %s!')%(name))
+                    raise osv.except_osv(_('Error!'), _('ERR-003: Please assign account to entry %s!')%(name))
                 entry_amount = personalRead['amount']
                 if entry_amount <0.00:
                     entry_amount = entry_amount * -1
@@ -1019,9 +1029,52 @@ class vd(osv.osv):
                 if personalRead['amount'] < 0.00:
                     debit = 0.00
                     credit = convertedAmount
+                    allCreditAmounts+=credit
                 elif personalRead['amount']>0.00:
                     credit = 0.00
                     debit = convertedAmount
+                    allDebitAmounts+=debit
+                emailChargeEntry = {
+                    'name':name,
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':personal_acc_id,
+                    'debit':debit,
+                    'credit':credit,
+                    'date':vd['date'],
+                    'ref':vd['name'],
+                    'analytic_account_id':personal_analytic_id,
+                    'move_id':move_id,
+                    'amount_currency':entry_amount,
+                    'currency_id':currency,
+                }
+                self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
+            personals= self.pool.get('voucher.distribution.voucher.transfer').search(cr, uid, [('voucher_id','=',vd['id'])])
+            for personal in personals:
+                personalRead = self.pool.get('voucher.distribution.voucher.transfer').read(cr, uid, personal, context=None)
+                personal_acc_id = False
+                personal_analytic_id = False
+                name = personalRead['comment']
+                if personalRead['account_id']:
+                    personal_acc_id = personalRead['account_id'][0]
+                elif personalRead['analytic_account_id']:
+                    personal_analytic_id=personalRead['analytic_account_id'][0]
+                    analytic_read = self.pool.get('account.analytic.account').read(cr, uid, personal_analytic_id,context=None)
+                    personal_acc_id = analytic_read['normal_account'][0]
+                elif not personalRead['account_id'] and not personalRead['analytic_account_id']:
+                    raise osv.except_osv(_('Error!'), _('ERR-003: Please assign account to entry %s!')%(name))
+                entry_amount = personalRead['amount']
+                if entry_amount <0.00:
+                    entry_amount = entry_amount * -1
+                convertedAmount = entry_amount / rate
+                if personalRead['amount'] < 0.00:
+                    debit = 0.00
+                    credit = convertedAmount
+                    allCreditAmounts+=convertedAmount
+                elif personalRead['amount']>0.00:
+                    credit = 0.00
+                    debit = convertedAmount
+                    allDebitAmounts+=convertedAmount
                 emailChargeEntry = {
                     'name':name,
                     'journal_id':journal_id,
@@ -1038,6 +1091,92 @@ class vd(osv.osv):
                 }
                 self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
             self.write(cr, uid, ids, {'m_move_id':move_id,'state':'entry_created'})
+            print allCreditAmounts
+            print allDebitAmounts
+        return True
+    def sendEmail(self, cr, uid, ids, context=None):
+        for voucher in self.read(cr, uid, ids, context=None):
+            smtp_login = self.pool.get('email_template.account').search(cr, uid, [('smtpuname','ilike','openerp'),('company','=','yes')])
+            use_smtp= False
+            for smtp in smtp_login:
+                use_smtp = smtp
+            for donors in self.pool.get('voucher.distribution.natw.charge').search(cr, uid, [('voucher_id','=',voucher['id'])]):
+                donorRead = self.pool.get('voucher.distribution.natw.charge').read(cr, uid, donors, context=None)
+                subj = 'Thank You '+ donorRead['name']
+                searchEmail = self.pool.get('res.partner.address').search(cr, uid, [('name','=',donorRead['name'])], limit=1)
+                donorEmail = False
+                if searchEmail:
+                    emailRead = self.pool.get('res.partner.address').read(cr, uid, searchEmail[0],['email'])
+                    donorEmail=emailRead['email']
+                    smtp_acct = self.pool.get('email_template.account').read(cr, uid, use_smtp,['email_id'])
+                    account_id = use_smtp
+                    subject = 'Re:' + subj
+                    email_to = donorEmail['email']
+                    values = {
+                        'account_id':account_id,
+                        'email_to':email_to,
+                        'folder':'outbox',
+                        'body_text':'This is a test',
+                        'subject':subject,
+                        'state':'na',
+                        'server_ref':0
+                        }
+                    email_lists = []
+                    email_created = self.pool.get('email_template.mailbox').create(cr, uid, values)
+                    email_lists.append(email_created)
+                    self.pool.get('email_template.mailbox').send_this_mail(cr, uid, email_lists)
+        return True
+                
+                
+    def create_reply(self, cr, uid, ids, context=None):
+        for requests in self.pool.get('soa.request').search(cr, uid, [('generated','=',False)]):
+            request_read = self.pool.get('soa.request').read(cr, uid, requests, context=None)
+            subj = request_read['name']
+            subj_split = subj.split(':')
+            subj_split_period_code = subj_split[1].split(',')
+            code = subj_split_period_code[1]
+            period = subj_split_period_code[0]
+            netsvc.Logger().notifyChannel("subj_split", netsvc.LOG_INFO, ' '+str(subj_split_period_code))
+            acc_search = self.pool.get('account.analytic.account').search(cr, uid, [('code','ilike',code)])
+            period_search = self.pool.get('account.period').search(cr, uid, [('name','ilike',period)])
+            netsvc.Logger().notifyChannel("period_search", netsvc.LOG_INFO, ' '+str(period_search))
+            smtp_login = self.pool.get('email_template.account').search(cr, uid, [('smtpuname','ilike','openerp'),('company','=','yes')])
+            use_smtp= False
+            for smtp in smtp_login:
+                use_smtp = smtp
+            if not acc_search:
+                raise osv.except_osv(_('Error !'), _('There is no existing account with account code %s')%code)
+            elif acc_search:
+                if not period_search:
+                    raise osv.except_osv(_('Error !'), _('Period %s is not existing!')%period)
+                elif period_search:
+                    for acc in acc_search:
+                        for period_id in period_search:
+                            check_soa = self.pool.get('account.soa').search(cr, uid, [('account_number','=',acc),('period_id','=',period_id)])
+                            if check_soa:
+                                for soa_id in check_soa:
+                                    smtp_acct = self.pool.get('email_template.account').read(cr, uid, use_smtp,['email_id'])
+                                    account_id = use_smtp
+                                    subject = 'Re:' + subj
+                                    email_to = request_read['email_adds']
+                                    values = {
+                                            'account_id':account_id,
+                                            'email_to':email_to,
+                                            'folder':'outbox',
+                                            'body_text':'This is a test',
+                                            'subject':subject,
+                                            'state':'na',
+                                            'server_ref':0
+                                            }
+                                    email_lists = []
+                                    email_created = self.pool.get('email_template.mailbox').create(cr, uid, values)
+                                    email_lists.append(email_created)
+                                    soa_attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','account.soa'),('res_id','=',soa_id)])
+                                    netsvc.Logger().notifyChannel("soa_attachments", netsvc.LOG_INFO, ' '+str(soa_attachments))
+                                    for soa_attachment in soa_attachments:
+                                        query=("""insert into mail_attachments_rel(mail_id,att_id)values(%s,%s)"""%(email_created,soa_attachment))
+                                        cr.execute(query)
+                                    self.pool.get('email_template.mailbox').send_this_mail(cr, uid, email_lists)
         return True
     
 vd()

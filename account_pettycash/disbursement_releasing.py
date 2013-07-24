@@ -6,6 +6,8 @@ import psycopg2
 from tools.translate import _
 import decimal_precision as dp
 import re
+import tools
+import os
 
 class cash_request_slip(osv.osv):
     _name='cash.request.slip'
@@ -302,6 +304,75 @@ class pcd(osv.osv):
             self.pool.get('account.move').post(cr, uid, [move_id])
             self.write(cr, uid, pcd['id'],{'state':'released','move_id':move_id})
             self.check_disbursements(cr, uid, [pcd['id']])
+            self.sendEmail(cr, uid, ids, context)
+        return True
+    
+    def attachmentCreate(self, cr, uid, ids, context=None):
+        root = tools.config['root_path']
+        file = ''
+        try:
+            os.makedirs(root+'/pdfs/')
+        except OSError:
+            pass
+        for pcd in self.read(cr, uid, ids, context=None):
+            rec = pcd['id']
+            attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','pettycash.disbursement'),('res_id','=',rec)])
+            self.pool.get('ir.attachment').unlink(cr, uid, attachments)
+            file_name = pcd['name']
+            splitName = file_name.split('/')
+            file_name = splitName[0]+'_'+splitName[1]+'_'+splitName[2]
+            file = root+'/pdfs/'+file_name+'.pdf'
+            service = netsvc.LocalService("report.pettycash.disbursement")
+            (result,format) = service.create(cr, uid, [rec],{'model':'pettycash.disbursement'})
+            fp = open(file,'w+');
+            try:
+                fp.write(result);
+            finally:
+                fp.close();
+        return (True, file)
+       
+    def sendEmail(self, cr, uid, ids, context=None):
+        smtp_login = self.pool.get('email_template.account').search(cr, uid, [('smtpuname','ilike','openerp'),('company','=','yes')])
+        use_smtp= False
+        for smtp in smtp_login:
+            use_smtp = smtp
+        smtp_acct = self.pool.get('email_template.account').read(cr, uid, use_smtp,['email_id'])
+        print smtp_acct
+        for pcd in self.read(cr, uid, ids, context=None):
+            analyticRead = self.pool.get('account.analytic.account').read(cr, uid, pcd['analytic_id'][0], context=None)
+            partnerID = analyticRead['partner_id'][0]
+            searchPartners = self.pool.get('res.partner.address').search(cr, uid, [('partner_id','=',partnerID)])
+            emails = []
+            if searchPartners:
+                for address in searchPartners:
+                    addRead = self.pool.get('res.partner.address').read(cr, uid, address,['email'])
+                    emails.append(addRead['email'])
+            emailsLen = len(emails)
+            sendTO=False
+            for i in range(emailsLen):
+                if sendTO==False:
+                    sendTO=emails[0]
+                elif sendTO!=False:
+                    sendTO = sendTO+','
+            values = {
+                'account_id':use_smtp,
+                'email_to':sendTO,
+                'folder':'outbox',
+                'body_text':'Please print a copy of this file and sign.',
+                'subject':pcd['name'],
+                'state':'na',
+                'server_ref':0
+                }
+            print values
+            email_lists = []
+            email_created = self.pool.get('email_template.mailbox').create(cr, uid, values)
+            email_lists.append(email_created)
+            self.attachmentCreate(cr, uid, ids, context)
+            soa_attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','pettycash.disbursement'),('res_id','=',pcd['id'])])
+            for soa_attachment in soa_attachments:
+                query=("""insert into mail_attachments_rel(mail_id,att_id)values(%s,%s)"""%(email_created,soa_attachment))
+                cr.execute(query)
+            self.pool.get('email_template.mailbox').send_this_mail(cr, uid, email_lists)
         return True
     
     def receive_intransit(self, cr, uid, ids, context=None):

@@ -52,9 +52,8 @@ class voucher_file_import(osv.osv_memory):
         voucher_name = voucher_read['name']
         voucher_name = voucher_name.replace(' ','_')
         voucher_name = voucher_name.replace('/','_')
-        filename=company_read['voucher_dbf']
-        dbf_file = filename+voucher_name
-        file = dbf_file+'.dbf'
+        ad = tools.config['root_path'].split(",")[-1]
+        file= os.path.join(ad, voucher_name+'.dbf')
         (data,) = self.browse(cr, uid, ids , context=context)
         module_data = data.voucher_file
         val = base64.decodestring(module_data)
@@ -72,9 +71,10 @@ class voucher_file_import(osv.osv_memory):
         voucher_name = voucher_read['name']
         voucher_name = voucher_name.replace(' ','_')
         voucher_name = voucher_name.replace('/','_')
-        filename=company_read['voucher_dbf']
-        dbf_file = filename+voucher_name
-        table = dbf.Table(dbf_file)
+        ad = tools.config['root_path'].split(",")[-1]
+        file= os.path.join(ad, voucher_name+'.dbf')
+        #dbf_file = filename+voucher_name
+        table = dbf.Table(file)
         table.open()
         for rec in table:
             rec_name=str(rec.comm1)

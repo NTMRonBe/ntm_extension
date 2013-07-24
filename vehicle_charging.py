@@ -19,7 +19,7 @@ class vehicle(osv.osv):
     _name = 'vehicle'
     _description = 'Vehicles'
     _columns = {
-        'name':fields.char('Plate Number',size=6),
+        'name':fields.char('Plate Number',size=10),
         'km':fields.float('Number of KM',readonly=True),
         'perkmcharge':fields.float('Per KM charge (less than 150KM)'),
         'perkmcharge150':fields.float('Per KM charge (over 150KM)'),
@@ -117,7 +117,7 @@ class vehicle_log(osv.osv):
                 elif kms<151 and kms>0:
                     charge=vehicle_read['perkmcharge']
                 elif kms<1:
-                    raise osv.except_osv(_('Error!'), _(''))
+                    raise osv.except_osv(_('Error!'), _('ERR-004: Negative Ending KM is not allowed!'))
                 result = {'value':{
                             'kms':kms,
                             'perkmcharge':charge,
@@ -136,7 +136,7 @@ class vehicle_log(osv.osv):
                 elif kms<151 and kms>0:
                     charge=vehicle_read['perkmcharge']
                 elif kms<1:
-                    raise osv.except_osv(_('Error!'), _(''))
+                    raise osv.except_osv(_('Error!'), _('ERR-004: Negative Ending KM is not allowed!'))
                 vals['kms']=kms
                 vals['perkmcharge']=charge
         return super(vehicle_log,self).write(cr, uid,ids, vals,context=None)
@@ -331,12 +331,12 @@ class add_vehicle(osv.osv_memory):
                     share_read = self.pool.get('vehicle.log.shared').read(cr, uid, share,['percentage'])
                     total_percent +=share_read['percentage']
                 if total_percent==100.00:
-                    raise osv.except_osv(_('Error!'), _('Percentage of all shared trips is already 100%!'))
+                    raise osv.except_osv(_('Error!'), _('ERR-005: Percentage of all shared trips is already 100%!'))
                 elif total_percent <100.00:
                     total_percent+=form['percentage']
                     if total_percent>100.00:
                         over = total_percent - 100.00
-                        raise osv.except_osv(_('Error!'), _('Shared trips is over by %s! Adjust your percentage!')%over)
+                        raise osv.except_osv(_('Error!'), _('ERR-006: Shared trip percentage is over by %s! Adjust your percentage!')%over)
                     elif total_percent<=100:
                         vals = {
                         'account_id':form['account_id'],

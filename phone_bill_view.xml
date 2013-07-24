@@ -30,6 +30,30 @@
             <field name="view_id" ref="additional_charge_view"/>
             <field name="target">new</field>
         </record>
+        
+        <record id="local_change_view" model="ir.ui.view">
+            <field name="name">Change all Logs to Local</field>
+            <field name="model">phone.statement.local</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Change logs to local">
+               <button string="Change"
+                                            type="object"
+                                            name="add"
+                                            icon="gtk-execute"
+                                            />
+               </form>
+            </field>
+        </record>
+
+        <record id="action_local_change" model="ir.actions.act_window">
+            <field name="name">Change all Logs to Local</field>
+            <field name="res_model">phone.statement.local</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="local_change_view"/>
+            <field name="target">new</field>
+        </record>
     
         <record id="phone_provider_form" model="ir.ui.view">
             <field name="name">phone.provider.form</field>
@@ -132,6 +156,7 @@
                     <notebook>
                         <page string="Call logs and Additional Charges">
                             <separator string="Call Logs" colspan="4"/>
+                            <button name="%(action_local_change)d" colspan="4" attrs="{'invisible':[('state','!=','draft')]}" string="Change location to Local" icon="gtk-execute" type="action"/>
                             <field mode="tree" name="log_ids" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
                                 <tree string="Call Logs" editable="top" colors="red:price!=statement_price">
                                     <field name="name" readonly="1"/>
@@ -162,7 +187,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Payment and Distribution Details" attrs="{'invisible':[('state','=','draft')]}">
+                        <page string="Payment and Distribution Details">
                             <field mode="tree" name="distribution_ids" nolabel="1" readonly="1">
                                 <tree string="Distribution Lists">
                                     <field name="name" readonly="1"/>
@@ -252,24 +277,25 @@
                         <separator orientation="vertical" rowspan="5"/>
                         <group colspan="4">
                             <separator string="Phone Logs Import / Statement Generator" colspan="4"/>
-                            <group states="init" col="4">
+                            <group col="4">
                                 <label string="Select DBF file to import (.dbf/DBF file):" colspan="4"/>
+                                <group states="done">
+                                    <label string="DBF file successfully imported!" colspan="4"/>
+                                </group>        
                                 <field name="calls_file" colspan="4"/>
-                            </group>
-                            <group states="done" col="4">
-                                <label string="DBF file successfully imported!" colspan="4"/>
-                                <field name="provider" widget="selection" colspan="4" attrs="{'required':[('state','=','done')]}"/>
-			                    <field name="line_id" domain="[('company_id','=',provider)]" colspan="4" attrs="{'required':[('state','=','done')]}"/>
-			                    <field name="bill_period" widget="selection" domain="[('state','=','draft')]" colspan="4" attrs="{'required':[('state','=','done')]}"/>
-			                    <field name="due_date" colspan="4" attrs="{'required':[('state','=','done')]}"/>
-			                    <field name="soa" colspan="4" attrs="{'required':[('state','=','done')]}"/>
+                                <field name="provider" widget="selection" colspan="4" attrs="{'required':[('state','=','init')]}"/>
+                                <field name="line_id" domain="[('company_id','=',provider)]" colspan="4" attrs="{'required':[('state','=','init')]}"/>
+                                <field name="bill_period" widget="selection" domain="[('state','=','draft')]" colspan="4" attrs="{'required':[('state','=','init')]}"/>
+                                <field name="due_date" colspan="4" attrs="{'required':[('state','=','init')]}"/>
+                                <field name="soa" colspan="4" attrs="{'required':[('state','=','init')]}"/>
                             </group>
                         </group>
-                        <group colspan="8" col="8" states="init">
-                            <separator string="" colspan="8"/>
+                        <group colspan="8" col="13" states="init">
+                            <separator string="" colspan="13"/>
                             <label colspan="6" width="220"/>
                             <button special="cancel" string="Cancel" icon="gtk-cancel"/>
                             <button name="importzip" string="Import DBF File" type="object" icon="gtk-apply"/>
+                            <button name="clean_file" string="Generate Statement" type="object" icon="gtk-go-forward"/>
                         </group>
                         <group colspan="8" col="8" states="done">
                             <separator string="" colspan="8"/>

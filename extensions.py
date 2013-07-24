@@ -55,6 +55,7 @@ class res_partner(osv.osv):
             view_load=True,
             domain="[('type', '=', 'receivable')]",
             help="This account will be used instead of the default one as the receivable account for the current partner"),
+        'project_id':fields.many2one('account.analytic.account','Project Account'),
         }
 res_partner()
 
@@ -111,6 +112,7 @@ class account_analytic_account(osv.osv):
             'code_short':fields.char('Short Code',size=64),
             'accpac_ids':fields.one2many('account.accpac','analytic_id','Accpac Codes'),
             'code':fields.char('Code',size=64),
+            'ntm_type':fields.selection([('income','Income'),('expense','Expense')],'Account Type'),
             'supplier':fields.related('partner_id','supplier',type='boolean',store=True, string='People and Team',readonly=True),
             'project':fields.related('partner_id','project',type='boolean',store=True, string='Project',readonly=True),
             'normal_account':fields.many2one('account.account','Related Normal Account'),

@@ -32,6 +32,7 @@
     'update_xml': ["data.xml","ntm_extensions_view.xml"
                    ,"users_view.xml",
                    #"account_move_view.xml",
+                   "security/ntm_security.xml",
                    "account_revaluation_view.xml",
                    "wizard/user_set_location_view.xml",
                    "soa_view.xml",

@@ -160,6 +160,9 @@
 	                            </tree>
 	                        </field>
                         </page>
+                        <page string="Remarks">
+                        <field name="remarks" nolabel="1" colspan="4"/>
+                        </page>
                         <page string="Journal Entries">
                             <group colspan="4" col="2">
                                 <field name="move_id" invisible="1"/>
