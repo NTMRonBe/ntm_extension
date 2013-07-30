@@ -222,7 +222,7 @@ class pc_liquidation_lines(osv.osv):
         }
     
     _defaults = {
-        'type':'normal',
+        'type':'analytic',
         }
     
     def data_get(self, cr, uid, ids, context=None):
@@ -272,6 +272,32 @@ class pc_liquidation_lines(osv.osv):
             result = {'value':{'acc_name':acc_name,}}
         return result
 pc_liquidation_lines()
+
+class pcll_lines(osv.osv):
+    _name = 'pc.liquidation.line.lines'
+    _columns = {
+        'name':fields.char('Description',size=64),
+        'amount':fields.float('Amount'),
+        'pcll_id':fields.many2one('pc.liquidation.lines','PC Liquidation Line',ondelete='cascade')
+        }
+pcll_lines()
+
+class pcll(osv.osv):
+    _inherit = 'pc.liquidation.lines'
+    _columns = {
+        'multiple':fields.boolean('Multiple'),
+        'pclll_ids':fields.one2many('pc.liquidation.line.lines','pcll_id','Distribution'),
+        }
+    
+    def compute(self, cr, uid, ids, context=None):
+        for pcll in self.read(cr, uid, ids, context=None):
+            total = False
+            for line in pcll['pclll_ids']:
+                reader = self.pool.get('pc.liquidation.line.lines').read(cr, uid, line, ['amount'])
+                total +=reader['amount']
+            self.write(cr, uid, pcll['id'], {'amount':total})
+        return True
+pcll()
 
 class pcl(osv.osv):
     _inherit = "account.pettycash.liquidation"
@@ -336,15 +362,18 @@ class pcl(osv.osv):
                 pc_read = self.pool.get('account.pettycash').read(cr, uid, pcl['pc_id'][0],['amount'])
                 pc_amount = pc_read['amount']
                 check_amount = pc_read['amount'] - denom_sum
-                
                 if lines_sum == check_amount:
                     values = {
                         'state':'confirmed',
                         'name':self.pool.get('ir.sequence').get(cr, uid, 'account.pettycash.liquidation'),
                         }
                     self.write(cr, uid, pcl['id'], values)
-                elif lines_sum != check_amount:
-                    raise osv.except_osv(_('Error !'), _('Sum of all liquidation lines (%s) must be equal to the \npetty cash amount (%s) less the summation of remaining denomination (%s)!')%(lines_sum,pc_amount,denom_sum))
+                elif lines_sum > check_amount:
+                    checker = lines_sum - check_amount
+                    raise osv.except_osv(_('Error !'), _('Liquidation lines is greater than the deducted amount on petty cash amount by (%s)!')%(checker))
+                elif lines_sum < check_amount:
+                    checker = check_amount - lines_sum
+                    raise osv.except_osv(_('Error !'), _('Liquidation lines is less than the deducted amount on petty cash by (%s)!')%(checker))
         return True
     
     def update_pc(self, cr, uid, ids, context=None):
@@ -393,8 +422,6 @@ class pcl(osv.osv):
                 if line_read['account_id']:
                     account_id = line_read['account_id'][0]
                     analytic_id = False
-                amount += line_read['amount']
-                comp_curr_amount = line_read['amount'] / rate  
                 if line_read['analytic_id']:
                     analytic_read = self.pool.get('account.analytic.account').read(cr, uid, line_read['analytic_id'][0],context=None)
                     analytic_name = analytic_read['name']
@@ -403,20 +430,44 @@ class pcl(osv.osv):
                         raise osv.except_osv(_('Error !'), _('Please add a related account to %s')%analytic_name)
                     if analytic_read['normal_account']:
                         account_id = analytic_read['normal_account'][0]
-                move_line_vals = {
-                        'name':line_read['name'],
-                        'journal_id':journal_id,
-                        'period_id':period_id,
-                        'account_id':account_id,
-                        'debit':comp_curr_amount,
-                        'analytic_account_id':analytic_id,
-                        'date':pcl['date'],
-                        'ref':pcl['name'],
-                        'move_id':move_id,
-                        'amount_currency':line_read['amount'],
-                        'currency_id':currency,
-                        }
-                self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+                if line_read['multiple']==True:
+                    for line2 in line_read['pclll_ids']:
+                        line2_read = self.pool.get('pc.liquidation.line.lines').read(cr, uid, line2, context=None)
+                        amount += line2_read['amount']
+                        comp_curr_amount = line2_read['amount'] / rate
+                        name = line_read['name']+' for ' +line2_read['name']
+                        move_line_vals = {
+                                'name':name,
+                                'journal_id':journal_id,
+                                'period_id':period_id,
+                                'account_id':account_id,
+                                'debit':comp_curr_amount,
+                                'analytic_account_id':analytic_id,
+                                'date':pcl['date'],
+                                'ref':pcl['name'],
+                                'move_id':move_id,
+                                'amount_currency':line2_read['amount'],
+                                'currency_id':currency,
+                                }
+                        self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+                elif line_read['multiple']==False:
+                    amount += line_read['amount']
+                    comp_curr_amount = line_read['amount'] / rate
+                    name = line_read['name']
+                    move_line_vals = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':period_id,
+                            'account_id':account_id,
+                            'debit':comp_curr_amount,
+                            'analytic_account_id':analytic_id,
+                            'date':pcl['date'],
+                            'ref':pcl['name'],
+                            'move_id':move_id,
+                            'amount_currency':line_read['amount'],
+                            'currency_id':currency,
+                            }
+                    self.pool.get('account.move.line').create(cr, uid, move_line_vals)
             pca = self.pool.get('account.pettycash').read(cr, uid, pcl['pc_id'][0],context=None)
             amount = amount / rate
             move_line_vals = {

@@ -1093,6 +1093,52 @@ class vd(osv.osv):
             self.write(cr, uid, ids, {'m_move_id':move_id,'state':'entry_created'})
             print allCreditAmounts
             print allDebitAmounts
+            gainLoss = allDebitAmounts - allCreditAmounts
+            print gainLoss
+            entry_amount = gainLoss * rate
+            uid_read = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
+            company_read = self.pool.get('res.company').read(cr, uid, uid_read['company_id'][0],['def_gain_loss'])
+            gainLossAccount = False
+            if not company_read['def_gain_loss']:
+                raise osv.except_osv(_('Error!'), _('Please assign exchange gain/loss account on your company!'))
+            elif company_read['def_gain_loss']:
+                gainLossAccount = company_read['def_gain_loss'][0]
+            if allCreditAmounts>allDebitAmounts:
+                debit = gainLoss * -1
+                credit = 0.00
+                emailChargeEntry = {
+                    'name':'Exchange Gain/Loss',
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':gainLossAccount,
+                    'debit':debit,
+                    'credit':credit,
+                    'date':vd['date'],
+                    'ref':vd['name'],
+                    'move_id':move_id,
+                    'amount_currency':entry_amount,
+                    'currency_id':currency,
+                }
+                print 'debit'
+                self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
+            elif allCreditAmounts<allDebitAmounts:
+                debit = 0.00
+                credit = gainLoss
+                emailChargeEntry = {
+                    'name':'Exchange Gain/Loss',
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'account_id':gainLossAccount,
+                    'debit':debit,
+                    'credit':credit,
+                    'date':vd['date'],
+                    'ref':vd['name'],
+                    'move_id':move_id,
+                    'amount_currency':entry_amount,
+                    'currency_id':currency,
+                }
+                print 'credit'
+                self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
         return True
     def sendEmail(self, cr, uid, ids, context=None):
         for voucher in self.read(cr, uid, ids, context=None):

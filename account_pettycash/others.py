@@ -11,7 +11,7 @@ class denominations(osv.osv):
     _description="Denominations"
     _columns = {
         'name':fields.char('Denomination Name',size=64),
-        'multiplier':fields.integer('Multiplier'),
+        'multiplier':fields.float('Multiplier'),
         'currency_id':fields.many2one('res.currency','Currency'),
         'sequence':fields.integer('Sequence'),
         }

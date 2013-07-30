@@ -61,7 +61,6 @@ class fund_transfer(osv.osv):
     def request(self, cr, uid, ids, context=None):
         for b2b in self.read(cr, uid, ids, context=None):
             name = self.pool.get('ir.sequence').get(cr, uid, 'internal.bank.transfer')
-            print name
             self.write(cr, uid, ids, {'state':'requested','name':name})
             self.data_get(cr, uid, ids, context)
         return True
@@ -401,22 +400,30 @@ class internal_account_transfer(osv.osv):
     _description = 'Internal Account Transfers'
     _columns = {
         'name':fields.char('Transfer ID',size=32),
+        'remarks':fields.text('Remarks'),
         'date':fields.date('Date'),
         'period_id':fields.many2one('account.period','Period'),
         'journal_id':fields.many2one('account.journal','Journal',domain=[('type','=','iat')]),
         'src_pat_analytic_id':fields.many2one('account.analytic.account','PAT Account',domain=[('supplier','=',True)]),
         'src_income_analytic_id':fields.many2one('account.analytic.account','Income Account',domain=[('ntm_type','=','income')]),
+        'src_expense_analytic_id':fields.many2one('account.analytic.account','Expense Account',domain=[('ntm_type','=','expense')]),
         'src_proj_analytic_id':fields.many2one('account.analytic.account','Project Account', domain=[('project','=',True)]),
         'dest_pat_analytic_id':fields.many2one('account.analytic.account','PAT Account', domain=[('supplier','=',True)]),
         'dest_proj_analytic_id':fields.many2one('account.analytic.account','Project Account', domain=[('project','=',True)]),
+        'dest_income_analytic_id':fields.many2one('account.analytic.account','Income Account', domain=[('ntm_type','=','income')]),
         'transfer_type':fields.selection([
                                 ('people2proj','PAT to Project Account'),
                                 ('proj2proj','Project to Project Account'),
                                 ('people2people','PAT to PAT Account'),
                                 ('proj2people','Project to PAT Account'),
                                 ('people2pc','PAT to Petty Cash Account'),
+                                ('people2income','PAT to Income'),
+                                ('proj2income','Project to Income'),
+                                ('expense2income','Expense to Income'),
                                 ('proj2pc','Project to Petty Cash Account'),
                                 ('income2pc','Income to Petty Cash Account'),
+                                ('expense2people','Expense to PAT Account'),
+                                ('expense2proj','Expense to Project Account'),
                                 ],'Transfer Type'),
         'bank_account':fields.many2one('res.partner.bank','Bank Account'),
         'amount':fields.float('Amount'),
@@ -465,10 +472,12 @@ class internal_account_transfer(osv.osv):
         pat_id = False
         proj_id = False
         pat_bool = False
+        income_bool = False
+        income_id = False
         if amount>0.00:
             for iat in self.read(cr, uid, ids, context=None):
                 if distribute_type in ['fixed','percentage']:
-                    if iat['transfer_type'] in ['people2proj', 'proj2proj']:
+                    if iat['transfer_type'] in ['people2proj', 'proj2proj','expense2proj']:
                         iatd_ids = iat['proj_iatd_ids']
                         pat_id = False
                         pat_bool = False
@@ -477,7 +486,7 @@ class internal_account_transfer(osv.osv):
                             iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['proj_analytic_id'])
                             acc_ids.append(iatd_read['proj_analytic_id'][0])
                             self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
-                    if iat['transfer_type'] in ['people2people', 'proj2people']:
+                    if iat['transfer_type'] in ['people2people', 'proj2people','expense2people']:
                         iatd_ids = iat['pat_iatd_ids']
                         pat_id = iat['id']
                         proj_id = False
@@ -486,30 +495,51 @@ class internal_account_transfer(osv.osv):
                             iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['pat_analytic_id'])
                             acc_ids.append(iatd_read['pat_analytic_id'][0])
                             self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
+                    if iat['transfer_type'] in ['people2income', 'proj2income','expense2income']:
+                        iatd_ids = iat['income_iatd_ids']
+                        pat_id = False
+                        proj_id = False
+                        pat_bool = False
+                        income_bool = True
+                        income_id = iat['id']
+                        for iatd_id in iatd_ids:
+                            iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['income_analytic_id'])
+                            acc_ids.append(iatd_read['income_analytic_id'][0])
+                            self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
                     for acc_id in acc_ids:
                         proj_analytic = False
                         pat_analytic = False
-                        if pat_bool==False:
+                        income_analytic = False
+                        if pat_bool==False and income_bool==False:
                             pat_analytic = False
                             proj_analytic = acc_id
+                        if pat_bool==False and income_bool==True:
+                            pat_analytic = False
+                            proj_analytic = False
+                            income_analytic = acc_id
                         elif pat_bool==True:
                             pat_analytic = acc_id
                             proj_analytic = False
+                            income_analytic = False
                         new_iatd_ids = {
                             'proj_analytic_id':proj_analytic,
                             'pat_analytic_id':pat_analytic,
+                            'income_analytic_id':income_analytic,
                             'amount':'0.00',
                             'pat_iat_id':pat_id,
-                            'proj_iat_id':proj_id
+                            'proj_iat_id':proj_id,
+                            'income_iat_id':income_id,
                             }
                         new_iatd_id = self.pool.get('internal.account.transfer.destination').create(cr, uid, new_iatd_ids)
                         new_iatd.append(new_iatd_id)
-                    if pat_bool==False:
+                    if pat_bool==False and income_bool==False:
                         result = {'value':{'proj_iatd_ids':new_iatd}}
+                    if pat_bool==False and income_bool==True:
+                        result = {'value':{'income_iatd_ids':new_iatd}}
                     if pat_bool==True:
                         result = {'value':{'pat_iatd_ids':new_iatd}}
                 if distribute_type=='equal':
-                    if iat['transfer_type'] in ['people2proj', 'proj2proj']:
+                    if iat['transfer_type'] in ['people2proj', 'proj2proj','expense2proj']:
                         iatd_ids = iat['proj_iatd_ids']
                         pat_id = False
                         pat_bool = False
@@ -518,7 +548,7 @@ class internal_account_transfer(osv.osv):
                             iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['proj_analytic_id', ])
                             acc_ids.append(iatd_read['proj_analytic_id'][0])
                             self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
-                    if iat['transfer_type'] in ['people2people', 'proj2people']:
+                    if iat['transfer_type'] in ['people2people', 'proj2people','expense2people']:
                         iatd_ids = iat['pat_iatd_ids']
                         pat_id = iat['id']
                         proj_id = False
@@ -526,6 +556,17 @@ class internal_account_transfer(osv.osv):
                         for iatd_id in iatd_ids:
                             iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['pat_analytic_id', ])
                             acc_ids.append(iatd_read['pat_analytic_id'][0])
+                            self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
+                    if iat['transfer_type'] in ['people2income', 'proj2income','expense2income']:
+                        iatd_ids = iat['income_iatd_ids']
+                        pat_id = False
+                        proj_id = False
+                        pat_bool = False
+                        income_bool = True
+                        income_id = iat['id']
+                        for iatd_id in iatd_ids:
+                            iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['income_analytic_id'])
+                            acc_ids.append(iatd_read['income_analytic_id'][0])
                             self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
                     dest_len = len(iatd_ids)
                     amt = amount/dest_len
@@ -539,20 +580,28 @@ class internal_account_transfer(osv.osv):
                     for acc_id in acc_ids:
                         proj_analytic = False
                         pat_analytic = False
-                        if pat_bool==False:
+                        income_analytic = False
+                        if pat_bool==False and income_bool==False:
                             pat_analytic = False
                             proj_analytic = acc_id
+                        if pat_bool==False and income_bool==True:
+                            pat_analytic = False
+                            proj_analytic = False
+                            income_analytic = acc_id
                         elif pat_bool==True:
                             pat_analytic = acc_id
                             proj_analytic = False
+                            income_analytic = False
                         if ctr==0:
                             amt = amt + check_amt
                             new_iatd_ids = {
                                 'proj_analytic_id':proj_analytic,
                                 'pat_analytic_id':pat_analytic,
+                                'income_analytic_id':income_analytic,
                                 'amount':amt,
                                 'pat_iat_id':pat_id,
-                                'proj_iat_id':proj_id
+                                'proj_iat_id':proj_id,
+                                'income_iat_id':income_id,
                                 }
                             ctr=1
                             new_iatd_id = self.pool.get('internal.account.transfer.destination').create(cr, uid, new_iatd_ids)
@@ -563,15 +612,19 @@ class internal_account_transfer(osv.osv):
                             new_iatd_ids = {
                                 'proj_analytic_id':proj_analytic,
                                 'pat_analytic_id':pat_analytic,
+                                'income_analytic_id':income_analytic,
                                 'amount':amt,
                                 'pat_iat_id':pat_id,
-                                'proj_iat_id':proj_id
+                                'proj_iat_id':proj_id,
+                                'income_iat_id':income_id,
                                 }
                             new_iatd_id = self.pool.get('internal.account.transfer.destination').create(cr, uid, new_iatd_ids)
                             new_iatd.append(new_iatd_id)
-                    if pat_bool==False:
+                    if pat_bool==False and income_bool==False:
                         result = {'value':{'proj_iatd_ids':new_iatd}}
-                    elif pat_bool==True:
+                    if pat_bool==False and income_bool==True:
+                        result = {'value':{'income_iatd_ids':new_iatd}}
+                    if pat_bool==True:
                         result = {'value':{'pat_iatd_ids':new_iatd}}
         return result
     
@@ -582,56 +635,83 @@ class internal_account_transfer(osv.osv):
         acc_ids = []
         pat_id = False
         proj_id = False
+        income_id = False
+        income_bool = False
         pat_bool = False
         if distribute_type in ['fixed','percentage']:
             for iat in self.read(cr, uid, ids, context=None):
                 if amount<=0.00:
                     raise osv.except_osv(_('Error !'), _('Please indicate amount!'))
-                if iat['transfer_type'] in ['people2proj', 'proj2proj']:
+                if iat['transfer_type'] in ['people2proj', 'proj2proj','expense2proj']:
                     iatd_ids = iat['proj_iatd_ids']
                     pat_id = False
                     pat_bool = False
                     proj_id = iat['id']
+                    income_bool = False
+                    income_id = False
                     for iatd_id in iatd_ids:
                         iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['proj_analytic_id'])
                         acc_ids.append(iatd_read['proj_analytic_id'][0])
                         self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
-                if iat['transfer_type'] in ['people2people', 'proj2people']:
+                if iat['transfer_type'] in ['people2people', 'proj2people','expense2people']:
                     iatd_ids = iat['pat_iatd_ids']
                     pat_id = iat['id']
                     proj_id = False
                     pat_bool = True
+                    income_bool = False
+                    income_id = False
                     for iatd_id in iatd_ids:
                         iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['pat_analytic_id'])
                         acc_ids.append(iatd_read['pat_analytic_id'][0])
                         self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
+                if iat['transfer_type'] in ['people2income', 'proj2income','expense2income']:
+                    iatd_ids = iat['income_iatd_ids']
+                    pat_id = False
+                    proj_id = False
+                    pat_bool = False
+                    income_bool = True
+                    income_id = iat['id']
+                    for iatd_id in iatd_ids:
+                        iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['income_analytic_id'])
+                        acc_ids.append(iatd_read['income_analytic_id'][0])
+                        self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
                 for acc_id in acc_ids:
                     proj_analytic = False
                     pat_analytic = False
-                    if pat_bool==False:
+                    income_analytic = False
+                    if pat_bool==False and income_bool==False:
                         pat_analytic = False
                         proj_analytic = acc_id
+                    if pat_bool==False and income_bool==True:
+                        pat_analytic = False
+                        proj_analytic = False
+                        income_analytic = acc_id
                     elif pat_bool==True:
                         pat_analytic = acc_id
                         proj_analytic = False
+                        income_analytic = False
                     new_iatd_ids = {
                         'proj_analytic_id':proj_analytic,
                         'pat_analytic_id':pat_analytic,
+                        'income_analytic_id':income_analytic,
                         'amount':'0.00',
                         'pat_iat_id':pat_id,
-                        'proj_iat_id':proj_id
+                        'proj_iat_id':proj_id,
+                        'income_iat_id':income_id,
                         }
                     new_iatd_id = self.pool.get('internal.account.transfer.destination').create(cr, uid, new_iatd_ids)
                     new_iatd.append(new_iatd_id)
-                    if pat_bool==False:
+                    if pat_bool==False and income_bool==False:
                         result = {'value':{'proj_iatd_ids':new_iatd}}
+                    if pat_bool==False and income_bool==True:
+                        result = {'value':{'income_iatd_ids':new_iatd}}
                     if pat_bool==True:
                         result = {'value':{'pat_iatd_ids':new_iatd}}
         if distribute_type=='equal':
             for iat in self.read(cr, uid, ids, context=None):
                 if amount<=0.00:
                     raise osv.except_osv(_('Error !'), _('Please indicate amount!'))
-                if iat['transfer_type'] in ['people2proj', 'proj2proj']:
+                if iat['transfer_type'] in ['people2proj', 'proj2proj','expense2proj']:
                     iatd_ids = iat['proj_iatd_ids']
                     pat_id = False
                     pat_bool = False
@@ -640,7 +720,7 @@ class internal_account_transfer(osv.osv):
                         iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['proj_analytic_id', ])
                         acc_ids.append(iatd_read['proj_analytic_id'][0])
                         self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
-                if iat['transfer_type'] in ['people2people', 'proj2people']:
+                if iat['transfer_type'] in ['people2people', 'proj2people','expense2people']:
                     iatd_ids = iat['pat_iatd_ids']
                     pat_id = iat['id']
                     proj_id = False
@@ -648,6 +728,17 @@ class internal_account_transfer(osv.osv):
                     for iatd_id in iatd_ids:
                         iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['pat_analytic_id', ])
                         acc_ids.append(iatd_read['pat_analytic_id'][0])
+                        self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
+                if iat['transfer_type'] in ['people2income', 'proj2income','expense2income']:
+                    iatd_ids = iat['income_iatd_ids']
+                    pat_id = False
+                    proj_id = False
+                    pat_bool = False
+                    income_bool = True
+                    income_id = iat['id']
+                    for iatd_id in iatd_ids:
+                        iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid, iatd_id, ['income_analytic_id'])
+                        acc_ids.append(iatd_read['income_analytic_id'][0])
                         self.pool.get('internal.account.transfer.destination').unlink(cr, uid, iatd_id)
                 dest_len = len(iatd_ids)
                 amt = amount/dest_len
@@ -661,20 +752,28 @@ class internal_account_transfer(osv.osv):
                 for acc_id in acc_ids:
                     proj_analytic = False
                     pat_analytic = False
-                    if pat_bool==False:
+                    income_analytic = False
+                    if pat_bool==False and income_bool==False:
                         pat_analytic = False
                         proj_analytic = acc_id
+                    if pat_bool==False and income_bool==True:
+                        pat_analytic = False
+                        proj_analytic = False
+                        income_analytic = acc_id
                     elif pat_bool==True:
                         pat_analytic = acc_id
                         proj_analytic = False
+                        income_analytic = False
                     if ctr==0:
                         amt = amt + check_amt
                         new_iatd_ids = {
                             'proj_analytic_id':proj_analytic,
                             'pat_analytic_id':pat_analytic,
+                            'income_analytic_id':income_analytic,
                             'amount':amt,
                             'pat_iat_id':pat_id,
-                            'proj_iat_id':proj_id
+                            'proj_iat_id':proj_id,
+                            'income_iat_id':income_id,
                             }
                         ctr=1
                         new_iatd_id = self.pool.get('internal.account.transfer.destination').create(cr, uid, new_iatd_ids)
@@ -685,14 +784,18 @@ class internal_account_transfer(osv.osv):
                         new_iatd_ids = {
                             'proj_analytic_id':proj_analytic,
                             'pat_analytic_id':pat_analytic,
+                            'income_analytic_id':income_analytic,
                             'amount':amt,
                             'pat_iat_id':pat_id,
-                            'proj_iat_id':proj_id
+                            'proj_iat_id':proj_id,
+                            'income_iat_id':income_id,
                             }
                         new_iatd_id = self.pool.get('internal.account.transfer.destination').create(cr, uid, new_iatd_ids)
                         new_iatd.append(new_iatd_id)
-                if pat_bool==False:
+                if pat_bool==False and income_bool==False:
                     result = {'value':{'proj_iatd_ids':new_iatd}}
+                if pat_bool==False and income_bool==True:
+                    result = {'value':{'income_iatd_ids':new_iatd}}
                 if pat_bool==True:
                     result = {'value':{'pat_iatd_ids':new_iatd}}
         return result
@@ -727,6 +830,26 @@ class internal_account_transfer(osv.osv):
                 vals.update({
                 'name': self.pool.get('ir.sequence').get(cr, uid, 'iat.proj2proj'),
                 })
+            if context['transfer_type']=='people2income':
+                vals.update({
+                'name': self.pool.get('ir.sequence').get(cr, uid, 'iat.people2income'),
+                })
+            if context['transfer_type']=='proj2income':
+                vals.update({
+                'name': self.pool.get('ir.sequence').get(cr, uid, 'iat.proj2income'),
+                })
+            if context['transfer_type']=='expense2income':
+                vals.update({
+                'name': self.pool.get('ir.sequence').get(cr, uid, 'iat.expense2income'),
+                })
+            if context['transfer_type']=='expense2people':
+                vals.update({
+                'name': self.pool.get('ir.sequence').get(cr, uid, 'iat.expense2people'),
+                })
+            if context['transfer_type']=='expense2proj':
+                vals.update({
+                'name': self.pool.get('ir.sequence').get(cr, uid, 'iat.expense2proj'),
+                })
                 
         return super(internal_account_transfer, self).create(cr, uid, vals, context)
 
@@ -742,6 +865,9 @@ class internal_account_transfer_destination(osv.osv):
         'amount':fields.float('Amount/Percentage', digits_compute=dp.get_precision('Account')),
         'proj_iat_id':fields.many2one('internal.account.transfer','Transfer ID',ondelete='cascade'),
         'pat_iat_id':fields.many2one('internal.account.transfer','Transfer ID',ondelete='cascade'),
+        'income_iat_id':fields.many2one('internal.account.transfer','Transfer ID', ondelete='cascade'),
+        'expense_iat_id':fields.many2one('internal.account.transfer','Transfer ID', ondelete='cascade'),
+        'income_analytic_id':fields.many2one('account.analytic.account','Analytic Account',domain=[('ntm_type','=','income')]),
         'remarks':fields.text('Remarks'),
         'percentage':fields.float('Percentage(%)'),
         'percentage_bool':fields.boolean('Percentage?'),
@@ -795,6 +921,7 @@ class iat(osv.osv):
     _columns = {
         'pat_iatd_ids':fields.one2many('internal.account.transfer.destination','pat_iat_id','Destinations'),
         'proj_iatd_ids':fields.one2many('internal.account.transfer.destination','proj_iat_id','Destinations'),
+        'income_iatd_ids':fields.one2many('internal.account.transfer.destination','income_iat_id','Destinations'),
         'denom_ids':fields.one2many('pettycash.denom','iat_id','Denominations'),
         'move_id':fields.many2one('account.move','Journal Entry'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Releasing Journal Items', readonly=True),

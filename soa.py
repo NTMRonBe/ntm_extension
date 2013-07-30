@@ -33,6 +33,7 @@ class soa_request(osv.osv):
             'email_adds': body,
         }
         res = self.create(cr, uid, vals, context)
+        self.pool.get('soa.request').create_reply(cr, uid, res)
         return res
     
     def create_reply(self, cr, uid, ids, context=None):
@@ -117,7 +118,7 @@ class account_soa_line(osv.osv):
         'currency_amount':fields.related('link_to','amount_currency',type='float',store=True, string='Encoding Amount'),
         'link_to':fields.many2one('account.analytic.line','Analytic Line', ondelete='cascade'),
         'move_id':fields.related('link_to','move_id',type='many2one',relation='account.move.line',store=True,string='Move ID'),
-        'soa_id':fields.many2one('account.soa','SOA'),
+        'soa_id':fields.many2one('account.soa','SOA',ondelete='cascade'),
         }
     _order = 'date asc'
      

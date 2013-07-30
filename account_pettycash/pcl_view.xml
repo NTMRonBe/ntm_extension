@@ -12,8 +12,7 @@
             header = "False"
             menu="True"
             />
-    
-    
+            
     <!--Petty Cash Liquidation-->
         <record id="pcl_form" model="ir.ui.view">
             <field name="name">pcl.form</field>
@@ -61,7 +60,17 @@
                                     <field name="analytic_id" attrs="{'invisible':[('type','=','normal')]}" colspan="4" domain="[('type','=','normal')]" on_change="onchange_account(account_id, analytic_id)"/>
                                     <field name="acc_name" invisible="1"/>
                                     <field name="reference"/>
-                                    <field name="amount" required="1"/>
+                                    <field name="amount" required="1" attrs="{'readonly':[('multiple','=',True)]}" />
+                                    <field name="multiple"/>
+                                    <group colspan="4" attrs="{'invisible':[('multiple','=',False)]}">
+                                        <field name="pclll_ids" mode="tree" nolabel="1" colspan="4">
+                                            <tree string="Distribution Line" editable="top">
+	                                            <field name="name"/>
+	                                            <field name="amount" sum="Total"/>
+                                            </tree>
+                                        </field>
+                                        <button string="Compute Total" type="object" name="compute" icon="gtk-execute"/>
+                                    </group>
                                 </form>
                            </field>
                         </page>
@@ -70,6 +79,7 @@
                                 <field name="move_ids" mode="tree" nolabel="1">
                                     <tree string="Accounting Entries">
                                         <field name="date"/>
+                                        <field name="name"/>
                                         <field name="account_id"/>
 					                    <field name="analytic_account_id"/>
                                         <field name="debit"/>
@@ -85,7 +95,7 @@
                         <field name="state"/>
                         <button string="Cancel" type="object" name="cancel" icon="gtk-cancel" attrs="{'invisible': [('state','=','cancel')}"/>
                         <button string="Set to draft" type="object" name="set_to_draft" icon="terp-stock_effects-object-colorize" attrs="{'invisible': [('state','!=','cancel')]}"/>
-                        <button string="Confirm" type="object" name="confirm_pcl" icon="gtk-execute" attrs="{'invisible': [('state','!=','draft')]}"/>
+                        <button string="Confirm" type="object" confirm="Have you double checked all the entries?" name="confirm_pcl" icon="gtk-execute" attrs="{'invisible': [('state','!=','draft')]}"/>
                         <button string="Complete" type="object" name="post_pcl" icon="gtk-execute" attrs="{'invisible': [('state','!=','confirmed')]}"/>
                     </group>
                 </form>

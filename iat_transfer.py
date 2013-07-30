@@ -5,43 +5,27 @@ import pooler
 import psycopg2
 from tools.translate import _
 import decimal_precision as dp
-from stringprep import b1_set
 
 class iat(osv.osv):
     _inherit = 'internal.account.transfer'
     
     def transfer(self, cr, uid, ids, context=None):
         if 'transfer_type' in context:
-            if context['transfer_type']=='people2proj':
-                for iat in self.read(cr, uid, ids, context=None):
-                    if not iat['multiple']:
-                        self.notmultiple(cr, uid, ids)
-                    if iat['multiple']:
-                        self.ifmultiple(cr, uid, ids)
-            if context['transfer_type']=='proj2people':
-                for iat in self.read(cr, uid, ids, context=None):
-                    if not iat['multiple']:
-                        self.notmultiple(cr, uid, ids)
-                    if iat['multiple']:
-                        self.ifmultiple(cr, uid, ids)
             if context['transfer_type']=='people2pc':
                 self.check_denoms(cr, uid, ids)
             if context['transfer_type']=='proj2pc':
                 self.check_denoms(cr, uid, ids)
             if context['transfer_type']=='income2pc':
                 self.check_denoms(cr, uid, ids)
-            if context['transfer_type']=='people2people':
+            if context['transfer_type'] in ['people2income','proj2income','expense2income',
+                                            'expense2people','expense2proj',
+                                            'proj2proj','people2people','proj2people','people2proj']:
                 for iat in self.read(cr, uid, ids, context=None):
                     if not iat['multiple']:
                         self.notmultiple(cr, uid, ids)
                     if iat['multiple']:
                         self.ifmultiple(cr, uid, ids)
-            if context['transfer_type']=='proj2proj':
-                for iat in self.read(cr, uid, ids, context=None):
-                    if not iat['multiple']:
-                        self.notmultiple(cr, uid, ids)
-                    if iat['multiple']:
-                        self.ifmultiple(cr, uid, ids)
+            
     
     def people2pc(self, cr, uid, ids, context=None):
         for iat in self.read(cr, uid, ids, context=None):
@@ -272,8 +256,23 @@ class iat(osv.osv):
             if iat['transfer_type']=='proj2proj':
                 src_account = iat['src_proj_analytic_id'][0]
                 dest_account = iat['dest_proj_analytic_id'][0]
+            if iat['transfer_type']=='people2income':
+                src_account=iat['src_pat_analytic_id'][0]
+                dest_account = iat['dest_income_analytic_id'][0]
+            if iat['transfer_type']=='proj2income':
+                src_account=iat['src_proj_analytic_id'][0]
+                dest_account = iat['dest_income_analytic_id'][0]
+            if iat['transfer_type']=='expense2income':
+                src_account=iat['src_expense_analytic_id'][0]
+                dest_account = iat['dest_income_analytic_id'][0]
+            if iat['transfer_type']=='expense2people':
+                src_account = iat['src_expense_analytic_id'][0]
+                dest_account = iat['dest_pat_analytic_id'][0]
+            if iat['transfer_type']=='expense2proj':
+                src_account = iat['src_expense_analytic_id'][0]
+                dest_account = iat['dest_proj_analytic_id'][0]
             if src_account==dest_account:
-                raise osv.except_osv(_('Error !'), _('Source and destination PAT accounts must not be the same!'))
+                raise osv.except_osv(_('Error !'), _('Source and destination accounts must not be the same!'))
             if src_account!=dest_account:
                 src_analytic_read = self.pool.get('account.analytic.account').read(cr, uid,src_account,context=None)
                 dest_analytic_read = self.pool.get('account.analytic.account').read(cr, uid, dest_account,context=None)
@@ -289,10 +288,10 @@ class iat(osv.osv):
                     analytic_name = src_analytic_read['name']
                     raise osv.except_osv(_('Error !'), _('Please add a related account to %s')%analytic_name)
                 move_line = {
-                        'name':'Source Account',
+                        'name':'Destination Account',
                         'journal_id':journal_id,
                         'period_id':period_id,
-                        'account_id':src_analytic_read['normal_account'][0],
+                        'account_id':dest_analytic_read['normal_account'][0],
                         'credit':amount,
                         'analytic_account_id':dest_analytic_read['id'],
                         'date':iat['date'],
@@ -303,10 +302,10 @@ class iat(osv.osv):
                         }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
                 move_line = {
-                        'name':'Destination Account',
+                        'name':'Source Account',
                         'journal_id':journal_id,
                         'period_id':period_id,
-                        'account_id':dest_analytic_read['normal_account'][0],
+                        'account_id':src_analytic_read['normal_account'][0],
                         'debit':amount,
                         'analytic_account_id':src_analytic_read['id'],
                         'date':iat['date'],
@@ -348,6 +347,21 @@ class iat(osv.osv):
             if iat['transfer_type']=='proj2proj':
                 src_account = iat['src_proj_analytic_id'][0]
                 dest_account = iat['proj_iatd_ids']
+            if iat['transfer_type']=='people2income':
+                src_account = iat['src_pat_analytic_id'][0]
+                dest_account = iat['income_iatd_ids']
+            if iat['transfer_type']=='proj2income':
+                src_account = iat['src_proj_analytic_id'][0]
+                dest_account = iat['income_iatd_ids']
+            if iat['transfer_type']=='expense2income':
+                src_account = iat['src_expense_analytic_id'][0]
+                dest_account = iat['income_iatd_ids']
+            if iat['transfer_type']=='expense2people':
+                src_account = iat['src_expense_analytic_id'][0]
+                dest_account = iat['pat_iatd_ids']
+            if iat['transfer_type']=='expense2proj':
+                src_account = iat['src_expense_analytic_id'][0]
+                dest_account = iat['proj_iatd_ids']
             if not dest_account:
                 raise osv.except_osv(_('Error !'), _('Please add destination accounts!'))
             src_analytic_read = self.pool.get('account.analytic.account').read(cr, uid,src_account,context=None)
@@ -360,17 +374,19 @@ class iat(osv.osv):
             for dest_account_ids in dest_account:
                 dest_acc = False
                 iatd_read = self.pool.get('internal.account.transfer.destination').read(cr, uid,dest_account_ids,context=None)
-                if iat['transfer_type'] in ['people2people','proj2people']:
+                if iat['transfer_type'] in ['people2people','proj2people','expense2people']:
                     dest_acc = iatd_read['pat_analytic_id'][0]
-                if iat['transfer_type'] in ['people2proj','proj2proj']:
+                if iat['transfer_type'] in ['people2proj','proj2proj','expense2proj']:
                     dest_acc = iatd_read['proj_analytic_id'][0]
+                if iat['transfer_type'] in ['people2income','proj2income','expense2income']:
+                    dest_acc = iatd_read['income_analytic_id'][0]
                 dest_analytic_read = self.pool.get('account.analytic.account').read(cr, uid, dest_acc,context=None)
                 amount = iatd_read['amount'] / rate
                 move_line = {
-                        'name':'Source Account',
+                        'name':'Destination Account',
                         'journal_id':journal_id,
                         'period_id':period_id,
-                        'account_id':src_analytic_read['normal_account'][0],
+                        'account_id':dest_analytic_read['normal_account'][0],
                         'credit':amount,
                         'analytic_account_id':dest_analytic_read['id'],
                         'date':iat['date'],
@@ -380,20 +396,20 @@ class iat(osv.osv):
                         'currency_id':currency,
                         }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
-                move_line = {
-                        'name':'Destination Account',
+            move_line = {
+                        'name':'Source Account',
                         'journal_id':journal_id,
                         'period_id':period_id,
-                        'account_id':dest_analytic_read['normal_account'][0],
-                        'debit':amount,
+                        'account_id':src_analytic_read['normal_account'][0],
+                        'debit':iat['amount'],
                         'analytic_account_id':src_analytic_read['id'],
                         'date':iat['date'],
                         'ref':iat['name'],
                         'move_id':move_id,
-                        'amount_currency':iatd_read['amount'],
+                        'amount_currency':iat['amount'],
                         'currency_id':currency,
-                    }
-                self.pool.get('account.move.line').create(cr, uid, move_line)
+                }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
             self.pool.get('account.move').post(cr, uid, [move_id])
             self.write(cr, uid, ids, {'move_id':move_id,'state':'transfer'})
         return True
