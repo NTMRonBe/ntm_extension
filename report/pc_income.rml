@@ -36,8 +36,8 @@
     <paraStyle name="P5" fontName="Helvetica" fontSize="13.0" leading="16" alignment="LEFT"/>
     <paraStyle name="P6" fontName="Helvetica" fontSize="11.0" leading="14"/>
     <paraStyle name="P7" fontName="Helvetica" fontSize="11.0" leading="14" alignment="RIGHT"/>
-    <paraStyle name="P8" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT"/>
-    <paraStyle name="P9" fontName="Helvetica" fontSize="11.0" leading="14" alignment="LEFT"/>
+    <paraStyle name="P8" fontName="Helvetica" fontSize="11.0" leading="14" alignment="LEFT"/>
+    <paraStyle name="P9" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
@@ -63,16 +63,16 @@
   </stylesheet>
   <story>
     <para style="P1">[[repeatIn(objects,'o')]]NEW TRIBES MISSION – PHILIPPINE BRANCH OFFICE</para>
-    <para style="P2">CASH OUT</para>
+    <para style="P2">CASH IN</para>
     <blockTable colWidths="272.0,284.0" style="Table1">
       <tr>
         <td>
-          <para style="P8">
+          <para style="P9">
             <font color="white"> </font>
           </para>
         </td>
         <td>
-          <para style="P8">
+          <para style="P9">
             <font color="white"> </font>
           </para>
         </td>
@@ -112,10 +112,10 @@
     <blockTable colWidths="278.0,278.0" style="Table2">
       <tr>
         <td>
-          <para style="P9">Released by:_________________________________</para>
+          <para style="P8">Released by:_________________________________</para>
         </td>
         <td>
-          <para style="P9">Received by:__________________________________</para>
+          <para style="P8">Received by:__________________________________</para>
         </td>
       </tr>
     </blockTable>

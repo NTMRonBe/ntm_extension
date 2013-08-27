@@ -79,14 +79,14 @@
         <menuitem id="menu_pettycash" action="action_pettycash_form" parent="main_pettycash" sequence="10" groups="base.group_user"/>
         <menuitem id="menu_be" action="action_be_form" parent="main_pettycash" sequence="20" groups="base.group_user"/>
         <menuitem id="menu_pcr" action="action_pcr_form" parent="main_pettycash" sequence="30" groups="base.group_user"/>
-        <menuitem id="menu_crs" action="action_crs_form" parent="main_pettycash" sequence="40" groups="base.group_user"/>
-        <menuitem id="menu_pcd" action="action_pcd_form" parent="main_pettycash" sequence="50" groups="base.group_user"/>
+     <!-- <menuitem id="menu_crs" action="action_crs_form" parent="main_pettycash" sequence="40" groups="base.group_user"/>
+        <menuitem id="menu_pcd" action="action_pcd_form" parent="main_pettycash" sequence="50" groups="base.group_user"/> -->   
         <menuitem id="menu_pc_transfer_main" parent="main_pettycash" sequence="60" name="Transfers"/>
         <menuitem id="menu_pcl" action="action_pcl_form" parent="main_pettycash" sequence="70" groups="base.group_user"/>
         <menuitem id="menu_pettycash_transfer" action="action_pettycash_transfer_form" parent="menu_pc_transfer_main" sequence="10"  groups="base.group_user"/>
-        <menuitem id="iat_people2pc" parent="menu_pc_transfer_main" sequence="20" action="action_people2pc_tree"/>
+        <!-- <menuitem id="iat_people2pc" parent="menu_pc_transfer_main" sequence="20" action="action_people2pc_tree"/>
         <menuitem id="iat_proj2pc" parent="menu_pc_transfer_main" sequence="30" action="action_proj2pc_tree"/>
-        <menuitem id="iat_income2pc" parent="menu_pc_transfer_main" sequence="40" action="action_income2pc_tree"/>
+        <menuitem id="iat_income2pc" parent="menu_pc_transfer_main" sequence="40" action="action_income2pc_tree"/> -->
         <menuitem id="fund_transfer_p2b" parent="menu_pc_transfer_main" sequence="50" action="action_fund_transfer_p2b_tree"/>
         
         

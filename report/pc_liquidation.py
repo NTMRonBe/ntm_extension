@@ -29,4 +29,16 @@ class pc_liquidation_lines(report_sxw.rml_parse):
             'time': time,
         })
 report_sxw.report_sxw('report.pc.liquidation.lines','pc.liquidation.lines','addons/ntm_extension/report/pc_liquidation.rml',parser=pc_liquidation_lines)
+
+
+class pc_income_lines(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context):
+        super(pc_income_lines, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+        })
+report_sxw.report_sxw('report.pc.income.lines','pc.income.lines','addons/ntm_extension/report/pc_income.rml',parser=pc_income_lines)
+
+
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

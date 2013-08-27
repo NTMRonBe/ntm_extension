@@ -40,12 +40,10 @@ class pettycash_denom(osv.osv):
         }
     
     def write(self, cr, uid, ids, vals, context=None):
-        print context
         if not context or ('be' not in context):
             res = super(pettycash_denom, self).write(cr, uid, ids, vals, context)
             return res
         if 'be' in context:
-            print context
             res = super(pettycash_denom, self).write(cr, uid, ids, vals, context)
             return res
     

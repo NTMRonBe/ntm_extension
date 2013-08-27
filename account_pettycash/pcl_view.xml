@@ -12,6 +12,16 @@
             header = "False"
             menu="True"
             />
+    <report id="report_income_line_print"
+            string="Income Lines"
+            model="pc.income.lines"
+            name="pc.income.lines"
+            rml="ntm_extension/report/pc_liquidation.rml"
+            auto="False"
+            attachment="(object.name)"
+            header = "False"
+            menu="True"
+            />
             
     <!--Petty Cash Liquidation-->
         <record id="pcl_form" model="ir.ui.view">
@@ -19,7 +29,7 @@
             <field name="model">account.pettycash.liquidation</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Liquidation">
+                <form string="Daily Transactions">
                     <group colspan="4" col="4">
                         <field name="name" readonly="1"/>
                         <field name="journal_id" widget="selection" domain="[('type','=','pettycash')]" attrs="{'readonly': [('state','!=','draft')]}" required="1"/>
@@ -31,27 +41,28 @@
                         <field name="denom_filled" invisible="1"/>
                     </group>
                     <notebook colspan="4">
-                        <page string="Remaining Fund">
+                        <page string="Cash Count">
                         <button string="Fill Denominations" type="object" name="fill_denoms" icon="gtk-execute" attrs="{'invisible': [('denom_filled','=',True)]}" colspan="4"/>
 		                    <group colspan="4" col="2">
                                 <field name="denom_breakdown" mode="tree" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
-                                  <tree string="Denomination Breakdown" editable="top">
-                                      <field name="name"/>
-                                      <field name="quantity"/>
-                                      <field name="amount" sum="Total Amount"/>
+                                  <tree string="End of the Day Cash Count" editable="top">
+                                      <field name="name" readonly="1"/>
+                                      <field name="quantity" string="Previous Count" readonly="1"/>
+                                      <field name="new_qty"/>
+                                      <field name="new_amount" sum="Total Amount"/>
                                   </tree>
                                 </field>
                             </group>
                     	</page>
                     	<page string="Liquidation Lines">
-                    	   <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
+                           <field colspan="4" mode="tree,form" name="pcll_ids" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
                                 <tree string="Liquidation Lines">
-	                                <field name="name"/>
-	                                <field name="type" invisible="1"/>
-	                                <field name="acc_name"/>
-	                                <field name="reference"/>
-	                                <field name="amount" sum="Total Liquidations"/>
-	                                <button name="data_get" string="Print"  type="object" icon="gtk-jump-to"/>
+                                    <field name="name"/>
+                                    <field name="type" invisible="1"/>
+                                    <field name="acc_name"/>
+                                    <field name="reference"/>
+                                    <field name="amount" sum="Total Liquidations"/>
+                                    <button name="data_get" string="Print"  type="object" icon="gtk-jump-to"/>
                                 </tree>
                                 <form string="Liquidation Lines">
                                     <field name="name"/>
@@ -65,8 +76,39 @@
                                     <group colspan="4" attrs="{'invisible':[('multiple','=',False)]}">
                                         <field name="pclll_ids" mode="tree" nolabel="1" colspan="4">
                                             <tree string="Distribution Line" editable="top">
-	                                            <field name="name"/>
-	                                            <field name="amount" sum="Total"/>
+                                                <field name="name"/>
+                                                <field name="amount" sum="Total"/>
+                                            </tree>
+                                        </field>
+                                        <button string="Compute Total" type="object" name="compute" icon="gtk-execute"/>
+                                    </group>
+                                </form>
+                           </field>
+                        </page>
+                        <page string="Income Lines">
+                           <field colspan="4" mode="tree,form" name="pcil_ids" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
+                                <tree string="Income Lines">
+                                    <field name="name"/>
+                                    <field name="type" invisible="1"/>
+                                    <field name="acc_name"/>
+                                    <field name="reference"/>
+                                    <field name="amount" sum="Total Income"/>
+                                    <button name="data_get" string="Print"  type="object" icon="gtk-jump-to"/>
+                                </tree>
+                                <form string="Income Lines">
+                                    <field name="name"/>
+                                    <field name="type" on_change="onchange_type(type)"/>
+                                    <field name="account_id" attrs="{'invisible':[('type','=','analytic')]}" colspan="4" domain="[('type','=','other')]" on_change="onchange_account(account_id, analytic_id)"/>
+                                    <field name="analytic_id" attrs="{'invisible':[('type','=','normal')]}" colspan="4" domain="[('type','=','normal')]" on_change="onchange_account(account_id, analytic_id)"/>
+                                    <field name="acc_name" invisible="1"/>
+                                    <field name="reference"/>
+                                    <field name="amount" required="1" attrs="{'readonly':[('multiple','=',True)]}" />
+                                    <field name="multiple"/>
+                                    <group colspan="4" attrs="{'invisible':[('multiple','=',False)]}">
+                                        <field name="pcill_ids" mode="tree" nolabel="1" colspan="4">
+                                            <tree string="Income Lines" editable="top">
+                                                <field name="name"/>
+                                                <field name="amount" sum="Total"/>
                                             </tree>
                                         </field>
                                         <button string="Compute Total" type="object" name="compute" icon="gtk-execute"/>
@@ -92,7 +134,7 @@
                         </page>
                     </notebook>
                     <group col="10" colspan="4">
-                        <field name="state"/>
+                        <field name="state" readonly="1"/>
                         <button string="Cancel" type="object" name="cancel" icon="gtk-cancel" attrs="{'invisible': [('state','=','cancel')}"/>
                         <button string="Set to draft" type="object" name="set_to_draft" icon="terp-stock_effects-object-colorize" attrs="{'invisible': [('state','!=','cancel')]}"/>
                         <button string="Confirm" type="object" confirm="Have you double checked all the entries?" name="confirm_pcl" icon="gtk-execute" attrs="{'invisible': [('state','!=','draft')]}"/>
@@ -106,7 +148,7 @@
             <field name="model">account.pettycash.liquidation</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Liquidations">
+                <tree string="Daily Transactions">
 					    <field name="name"/>
                         <field name="date"/>
                         <field name="journal_id"/>
@@ -119,7 +161,7 @@
             <field name="model">account.pettycash.liquidation</field>
             <field name="type">search</field>
             <field name="arch" type="xml">
-                <search string="Liquidation">
+                <search string="Daily Transaction">
 					    <field name="name"/>
                         <field name="date"/>
                         <field name="journal_id"/>
@@ -129,7 +171,7 @@
         </record>
         
         <record model="ir.actions.act_window" id="action_pcl_form">
-        	<field name="name">Messenger's Liquidations</field>
+        	<field name="name">Daily Transactions</field>
 	        <field name="res_model">account.pettycash.liquidation</field>
 		    <field name="view_type">form</field>
             <field name="view_mode">tree,form,calendar,graph</field>

@@ -43,7 +43,7 @@
                     	<page string="Journal Items">
                     	    <group colspan="4" col="2">
 	                    	    <group colspan="4" col="2">
-	                    	    	<field name="move_id"  attrs="{'readonly': [('state','!=','confirmed')]}"/>
+	                    	    	<field name="move_id"  attrs="{'readonly': [('state','!=','confirmed')]}" invisible="1"/>
 	                    	    </group>
 		                    	<group colspan="4" col="2">
 	                    	    	<separator string="Journal Items"/>

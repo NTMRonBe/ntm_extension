@@ -37,7 +37,7 @@
                    "wizard/user_set_location_view.xml",
                    "soa_view.xml",
                    "wizard/upload_view.xml",
-                   "wizard/dbf_reader.xml",
+                   #"wizard/dbf_reader.xml",
                    "bank_transfer_view.xml",
                    "wizard/account_analytic_statement_view.xml","phone_bill_view.xml",
                    "wizard/voucher_import_view.xml","income_distribution_view.xml",
