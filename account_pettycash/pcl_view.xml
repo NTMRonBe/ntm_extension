@@ -153,6 +153,7 @@
                         <field name="date"/>
                         <field name="journal_id"/>
                         <field name="pc_id"/>
+                        <field name="state"/>
                 </tree>
             </field>
         </record>
