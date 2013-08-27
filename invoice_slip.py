@@ -16,6 +16,7 @@ class regional_uploader(osv.osv):
         'transdesc':fields.char('Description',size=64),
         'date':fields.date('Date'),
         'uploaded':fields.boolean('Uploaded'),
+        'no_match':fields.boolean('No Match'),
         }
 regional_uploader()
 
@@ -48,19 +49,28 @@ class regional_upload(osv.osv):
                 account_search = False
                 analytic_search = False
                 regional_entries_read = self.pool.get('regional.uploader').read(cr, uid, regional_entry,context=None)
-                account_search = self.pool.get('account.account').search(cr, uid,['|',('code','=',regional_entries_read['acctid']),('code_accpac','=',regional_entries_read['acctid'])])
+                account_search = self.pool.get('account.accpac').search(cr, uid,[('name','=',regional_entries_read['acctid'])])
+                accpac_acc = regional_entries_read['acctid']
                 if not account_search:
-                    analytic_search = self.pool.get('account.analytic.account').search(cr, uid,['|',('code','=',regional_entries_read['acctid']),('code_accpac','=',regional_entries_read['acctid'])])
-                    if not analytic_search:
-                        raise osv.except_osv(_('Error !'), _('Account ID not existing!'))
-                    elif analytic_search:
-                        for analytic in analytic_search:
-                            analytic_id = analytic
-                            analytic_read = self.pool.get('account.analytic.account').read(cr, uid, analytic, ['normal_account'])
-                            account_id = analytic_read['normal_account'][0]
+                    accSearchNormal = self.pool.get('account.account').search(cr, uid, [('code','=',regional_entries_read['acctid'])])
+                    if not accSearchNormal:
+                        accSearchAnalytic = self.pool.get('account.analytic.account').search(cr, uid, [('code','=',regional_entries_read['acctid'])])
+                        if not accSearchAnalytic:
+                            raise osv.except_osv(_('Error !'), _('Account %s is not on the list of any accounts!')%accpac_acc)
+                        elif accSearchAnalytic:
+                            analyticRead = self.pool.get('account.analytic.account').read(cr, uid, accSearchAnalytic[0],['normal_account'])
+                            analytic_id = accSearchAnalytic[0]
+                            account_id = analyticRead['normal_account'][0]
+                    elif accSearchNormal:
+                        account_id = accSearchNormal[0]
                 elif account_search:
-                    for account in account_search:
-                        account_id = account
+                    acc_read = self.pool.get('account.accpac').read(cr, uid, account_search[0], context=None)
+                    if acc_read['account_id']:
+                        account_id = acc_read['account_id'][0]
+                    elif acc_read['analytic_id']:
+                        analyticRead = self.pool.get('account.analytic.account').read(cr, uid, acc_read['analytic_id'][0],['normal_account'])
+                        analytic_id = acc_read['analytic_id'][0]
+                        account_id = analyticRead['normal_account'][0]
                 curr_search = self.pool.get('res.currency').search(cr, uid, [('name','ilike',regional_entries_read['currency'])])
                 for currency in curr_search:
                     curr_id = currency
@@ -74,14 +84,15 @@ class regional_upload(osv.osv):
                 elif amount < 0.00:
                     credit = amount * -1
                     debit = 0.00
+                name = regional_entries_read['transdesc'] +' '+regional_entries_read['date']
                 move_line = {
-                    'name':regional_entries_read['transdesc'],
+                    'name':name,
                     'journal_id':journal_id,
                     'period_id':period_id,
                     'account_id':account_id,
                     'credit':credit,
                     'debit':debit,
-                    'analytic_account_id':analytic_read['id'],
+                    'analytic_account_id':analytic_id,
                     'date':regional_entries_read['date'],
                     'ref':regional_entries_read['ref'],
                     'move_id':move_id,
@@ -89,8 +100,7 @@ class regional_upload(osv.osv):
                     'currency_id':curr_id,
                     }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
-                print regional_entry
                 self.pool.get('regional.uploader').write(cr, uid, regional_entry, {'uploaded':True})
-            self.pool.get('account.move').post(cr, uid, [move_id])
+            #self.pool.get('account.move').post(cr, uid, [move_id])
         return {'type': 'ir.actions.act_window_close'}
 regional_upload()

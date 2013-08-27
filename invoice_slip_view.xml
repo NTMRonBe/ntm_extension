@@ -15,6 +15,7 @@
                     <field name="transdesc"/>
                     <field name="date"/>
                     <field name="uploaded"/>
+                    <field name="no_match"/>
                 </form>
             </field>
         </record>        
@@ -30,6 +31,7 @@
                     <field name="ref"/>
                     <field name="transdesc"/>
                     <field name="date"/>
+                    <field name="no_match"/>
                     <field name="uploaded"/>
                 </tree>
             </field>
