@@ -892,17 +892,21 @@ class internal_account_transfer_destination(osv.osv):
         return result 
     
     def write(self,cr, uid,ids,vals, context=None):
+	netsvc.Logger().notifyChannel("Test", netsvc.LOG_INFO, ''+str(vals))
         if 'percentage' in vals:
             amount = 0.00
-            for iatd in self.read(cr, uid, ids, context=None):
-                if iatd['proj_iat_id']:
-                    iat_read = self.pool.get('internal.account.transfer').read(cr, uid, iatd['proj_iat_id'][0],['amount'])
-                    amount = iat_read['amount']
-                elif iatd['pat_iat_id']:
-                    iat_read = self.pool.get('internal.account.transfer').read(cr, uid, iatd['pat_iat_id'][0],['amount'])
-                    amount=iat_read['amount']
-            amount = (amount * vals['percentage']) / 100
-            vals['amount']=amount
+	    if vals['percentage']>0.00:
+                for iatd in self.read(cr, uid, ids, context=None):
+                    if iatd['proj_iat_id']:
+                        iat_read = self.pool.get('internal.account.transfer').read(cr, uid, iatd['proj_iat_id'][0],['amount'])
+                        amount = iat_read['amount']
+                    elif iatd['pat_iat_id']:
+                        iat_read = self.pool.get('internal.account.transfer').read(cr, uid, iatd['pat_iat_id'][0],['amount'])
+                        amount=iat_read['amount']
+                amount = (amount * vals['percentage']) / 100
+                vals['amount']=amount
+	    elif vals['percentage']<1.00:
+		vals['amount']=vals['amount']
         return super(internal_account_transfer_destination,self).write(cr, uid,ids, vals,context=None)
                     
                 

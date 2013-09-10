@@ -463,7 +463,7 @@ class pcl(osv.osv):
             if denoms:
                 for denom in denoms:
                     denom_read = self.pool.get('pettycash.denom').read(cr, uid, denom, context=None)
-                    if denom_read['quantity']:
+                    if denom_read['new_qty']:
                         denom_reader = self.pool.get('denominations').read(cr, uid, denom_read['name'][0],['multiplier'])
                         product = denom_reader['multiplier'] * denom_read['new_qty']
                         denom_sum+=product
@@ -487,7 +487,7 @@ class pcl(osv.osv):
             rec_amount = "%.2f" % check_amount
             check_amount = float(rec_amount)
             rec_amount = "%.2f" % denom_sum
-            denom_read = float(rec_amount)
+            denom_sum = float(rec_amount)
             if check_amount != denom_sum:
                 checker = check_amount - denom_sum
                 raise osv.except_osv(_('Error !'), _('Please double check your transaction! \n There is a difference of %s on your transaction')% checker)

@@ -235,16 +235,16 @@
                             </group>
                             <group colspan="2" col="2" attrs="{'invisible': [('multiple','=',False)]}">
                                <field name="pat_iatd_ids" mode="tree,form" nolabel="1" attrs="{'invisible': [('transfer_type','not in',['people2people','proj2people','expense2people'])],'readonly':[('state','!=','draft')]}" context="{'filterdoc':[src_pat_analytic_id]}">
-                                   <tree string="Destination Accounts">
+                                   <tree string="Destination Accounts" editable="top">
                                        <field name="pat_analytic_id"/>
                                        <field name="remarks"/>
                                        <field name="percentage" on_change="onchange_percentage(percentage)" attrs="{'readonly': [('distribute_type','!=','percentage')]}"/>
-                                       <field name="amount" sum="Total" attrs="{'readonly': [('distribute_type','in',['percentage','fixed'])]}"/>
+                                       <field name="amount" sum="Total" attrs="{'readonly': [('distribute_type','in',['percentage','equal'])]}"/>
                                    </tree>
                                    <form string="Destination Account">
                                        <field name="pat_analytic_id"/>
                                        <field name="percentage" on_change="onchange_percentage(percentage)" attrs="{'readonly': [('distribute_type','!=','percentage')]}"/>
-                                       <field name="amount" attrs="{'readonly': [('distribute_type','in',['percentage','fixed'])]}"/>
+                                       <field name="amount" attrs="{'readonly': [('distribute_type','in',['percentage','equal'])]}"/>
                                        <field name="remarks"/>
                                    </form>
                                </field>
@@ -258,7 +258,7 @@
                                    <form string="Destination Account">
                                        <field name="proj_analytic_id"/>
                                        <field name="percentage" on_change="onchange_percentage(percentage)"/>
-                                       <field name="amount"/>
+                                       <field name="amount" attrs="{'readonly': [('distribute_type','in',['percentage','equal'])]}"/>
                                    </form>
                                </field>
                                <field name="income_iatd_ids" mode="tree" nolabel="1" 
@@ -272,7 +272,7 @@
                                    <form string="Destination Account">
                                        <field name="income_analytic_id"/>
                                        <field name="percentage" on_change="onchange_percentage(percentage)"/>
-                                       <field name="amount"/>
+                                       <field name="amount" attrs="{'readonly': [('distribute_type','in',['percentage','equal'])]}"/>
                                        <field name="remarks"/>
                                    </form>
                                </field>

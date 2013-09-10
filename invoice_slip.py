@@ -20,22 +20,31 @@ class regional_uploader(osv.osv):
         }
 regional_uploader()
 
-class regional_upload(osv.osv):
+class regional_upload(osv.osv_memory):
     _name = 'regional.upload'
+    _columns = {
+	'period_id':fields.many2one('account.period','Effective Period', required=True),
+	'date':fields.date('Effective Date', required=True),
+	}
     def upload(self, cr, uid, ids, context=None):
         regional_entries = self.pool.get('regional.uploader').search(cr, uid, [('uploaded','=',False)])
+	period_id = False
+	date_now = False
+	for form in self.read(cr, uid, ids, context=None):
+	    period_id = form['period_id']
+	    date_now = form['date']
         if regional_entries:
             date = datetime.datetime.now()
-            period = date.strftime("%m/%Y")
-            date_now = date.strftime("%Y/%m/%d")
-            period_search = self.pool.get('account.period').search(cr, uid, [('name','=',period)])
+#            period = date.strftime("%m/%Y")
+#            date_now = date.strftime("%Y/%m/%d")
+#            period_search = self.pool.get('account.period').search(cr, uid, [('name','=',period)])
             journal_search = self.pool.get('account.journal').search(cr, uid, [('type','=','regional_report')],limit=1)
             journal_id = False
-            period_id = False
+#            period_id = False
             for journal in journal_search:
                 journal_id = journal
-            for period in period_search:
-                period_id = period
+#            for period in period_search:
+#                period_id = period
             move = {
                 'journal_id':journal_id,
                 'period_id':period_id,
@@ -85,7 +94,8 @@ class regional_upload(osv.osv):
                     credit = amount * -1
                     debit = 0.00
                 name = regional_entries_read['transdesc'] +' '+regional_entries_read['date']
-                move_line = {
+                netsvc.Logger().notifyChannel("name", netsvc.LOG_INFO, ' '+str(name))
+		move_line = {
                     'name':name,
                     'journal_id':journal_id,
                     'period_id':period_id,
