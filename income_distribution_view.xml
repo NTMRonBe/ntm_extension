@@ -138,166 +138,189 @@
                 <form string = "Voucher Distribution">
                     <group colspan="4" col="4">
                         <group colspan="2" col="2">
+                            <field name="rdate" attrs="{'invisible':[('state','!=','draft')],'required':[('state','=','draft')]}"/>
+	                        <field name="rperiod_id" attrs="{'invisible':[('state','!=','draft')],'required':[('state','=','draft')]}"/>
+	                        <field name="date" string="Voucher Period" attrs="{'invisible':[('state','=','draft')]}"/>
+                            <field name="period_id" required="1" string="Voucher Period"/>
+	                        <field name="bank_id" attrs="{'invisible':[('state','!=','draft')],'required':[('state','=','draft')]}" domain="[('ownership','=','company')]"/>
+	                        <field name="rremarks" attrs="{'invisible':[('state','!=','draft')],'required':[('state','=','draft')]}"/>
 	                        <field name="name" invisible="1"/>
-	                        <field name="date"/>
-	                        <field name="period_id"/>
 	                        <field name="journal_id" invisible="1"/>
-	                        <field name="country" widget="selection"/>
+	                        <field name="country" widget="selection" attrs="{'invisible':[('state','=','draft')]}"/>
 	                        <field name="generated" invisible="1"/>
 	                        <field name="currency_id" widget="selection"/>
                         </group>
                         <group colspan="2" col="2">
+                            <field name="money_received" attrs="{'invisible':[('state','!=','draft')],'required':[('state','=','draft')]}"/>
+                            <field name="vd_holder" attrs="{'invisible':[('state','!=','draft')],'required':[('state','=','draft')]}"/>
+                            <field name="wire_fee" attrs="{'invisible':[('state','!=','draft')],'required':[('state','=','draft')]}"/>
+                            <field name="wire_fee_account" attrs="{'invisible':[('state','!=','draft')],'required':[('state','=','draft')]}"/>
                             <field name="state" colspan="2"/>
-                            <button name="%(action_view_voucher_file_import)d" string="Generate Voucher" type="action" icon="gtk-apply" states='draft' colspan="2"/>
-                            <!-- <button name="match_accounts" string="Match" type="object" icon="gtk-apply"/>
-                            createMISSentry 
-                            <button name="check_accounts" string="Check" type="object" icon="gtk-apply" colspan="2" states='generated'/>-->
+                            <button name="receive" string="Received Money" type="object" icon="gtk-apply" colspan="2" states='draft'/>
+                            <button name="%(action_view_voucher_file_import)d" string="Generate Voucher" type="action" icon="gtk-apply" states='received' colspan="2"/>
                             <button name="count_transactions" string="Distribute Voucher Lines" type="object" icon="gtk-apply" colspan="2" states='generated'/>
                             <button name="createMISSentry" string="Create Entries" type="object" icon="gtk-apply" states='distributed' colspan="2"/>
                         </group>
                         
                     </group>
-                    <notebook>
-                        <page string="Voucher Lines">
-                            <field name="voucher_lines" mode="tree,form" nolabel="1" height="40">
-                                <tree string="Voucher Lines" colors="blue:account_name==False;red:included_in_charged==False;black:included_in_charged==True">
-                                    <field name="name"/>
-                                    <field name="comments"/>
-                                    <field name="co1"/>
-                                    <field name="batch_date"/>
-                                    <field name="doc_num"/>
-                                    <field name="code"/>
-                                    <field name="account_name"/>
-                                    <field name="type"/>
-                                    <field name="included_in_charged" invisible="True"/>
-                                    <field name="amount" sum="Total"/>
-                                </tree>
-                                <form string="Voucher Line">
-                                    <field name="name"/>
-                                    <field name="comments"/>
-                                    <field name="batch_date"/>
-                                    <field name="code"/>
-                                    <field name="account_name" invisible="1"/>
-                                    <field name="analytic_account_id" on_change="onchange_analyticid(analytic_account_id)"/>
-                                    <field name="account_id" on_change="onchange_accountid(account_id)"/>
-                                </form>
-                            </field>
-                        </page>
-                        <page string="Personal Section">
-                            <field name="dp_section" mode="tree" nolabel="1">
-                                <tree string="Deposits to Personal" editable="top">
-                                    <field name="name"/>
-                                    <field name="account_name"/>
-                                    <field name="account_id" on_change="onchange_accountid(account_id)"/>
-                                    <field name="analytic_id" on_change="onchange_analyticid(analytic_id)"/>
-                                    <field name="amount" sum="Total"/>
-                                </tree>
-                            </field>
-                            <field name="pdv_section" mode="tree" nolabel="1">
-                                <tree string="Personal Disbursements and Vouchers" editable="top">
-                                    <field name="name"/>
-                                    <field name="account_name"/>
-                                    <field name="account_id" on_change="onchange_accountid(account_id)"/>
-                                    <field name="analytic_id" on_change="onchange_analyticid(analytic_id)"/>
-                                    <field name="amount" sum="Total"/>
-                                </tree>
-                            </field>
-                        </page>
-                        <page string="Expense Charging">
-                            <separator colspan="4"/>
-                            <notebook colspan="4">
-                                <page string="Email Charges">
-		                            <field name="email_charges" mode="tree" nolabel="1">
-		                                <tree string="Email Charging" editable="top">
-		                                    <field name="name" readonly="1"/>
-		                                    <field name="account_id"/>
-		                                    <field name="amount" readonly="1" sum="Total"/>
-		                                </tree>
-		                            </field>
-		                        </page>
-		                        <page string="N@W Charges">
-		                            <field name="natw_charges" mode="tree" nolabel="1" readonly="1">
-		                                <tree string="N@W Charges">
-		                                    <field name="name" readonly="1"/>
-		                                    <field name="amount" readonly="1" sum="Total"/>
-		                                </tree>
-		                            </field>
-		                        </page>
-		                        <page string="Account Charging">
-		                            <field name="charging_lines" mode="tree" nolabel="1">
-		                                <tree string="Charged Accounts" colors="green:charged==True">
-		                                    <field name="name"/>
-		                                    <field name="code"/>
-		                                    <field name="charged" invisible="True"/>
-		                                    <field name="total_entries" sum="Total"/>
-		                                    <field name="entries_amount" sum="Total"/>
-		                                    <field name="contingency" sum="Total"/>
-		                                    <field name="postage" sum="Total"/>
-		                                    <field name="natw" sum="Total"/>
-		                                    <field name="extra" sum="Total"/>
-		                                    <field name="total" sum="Total"/>
-		                                </tree>
-		                            </field>
-		                        </page>
-		                        <page string="Charging Computation">
-			                        <group colspan="4" col="4">
-	                                   <group colspan="2" col="2">
-                                           <separator string="Balance Mission Account" colspan="2"/>
-                                           <field name="total_gifts"/>
-                                           <field name="autocontribution"/>
-                                           <field name="missionary_subtotal" readonly="True"/>
-                                           <field name="recovery_charges" readonly="True"/>
-                                           <field name="natw_total_charges" readonly="True"/>
-                                           <field name="postage_recovery" readonly="True"/>
-                                           <field name="envelope_recovery" readonly="True"/>
-                                       </group>
-                                       <group colspan="2" col="2">
-                                           <separator string="Charging Percentage" colspan="2"/>
-                                           <field name="contingency_ratio"/>
-                                           <field name="postage_ratio"/>
-                                           <field name="natw_ratio"/>
-                                           <field name="extra_ratio"/>
-                                       </group>
-	                                </group>
-		                        </page>
-                            </notebook>
-                        </page>
-                        <page string="Voucher Transfers">
-                            <field name="voucher_transfer_lines" mode="tree,form" nolabel="1">
-                                <tree string="Missionary Voucher Distribution">
-                                    <field name="name" readonly="1"/>
-                                    <field name="comment" readonly="1"/>
-                                    <field name="account_name" readonly="1"/>
-                                    <field name="amount" readonly="1" sum="Total"/>
-                                </tree>
-                                <form string="Missionary Voucher Distribution">
-                                    <field name="name" readonly="1"/>
-                                    <field name="comment" readonly="1"/>
-                                    <field name="account_name" invisible="1"/>
-                                    <field name="account_id" on_change="onchange_account(account_id)"/>
-                                    <field name="analytic_account_id" on_change="onchange_analytic(analytic_account_id)"/>
-                                    <field name="amount" readonly="1"/>
-                                </form>
-                            </field>
-                        </page>
-                        <page string="Journal Entries">
-                            <group colspan="4" col="2">
-                                <field name="m_move_id" invisible="1"/>
-                                <field name="m_move_ids" mode="tree" nolabel="1" colspan="4">
-                                    <tree string="Missionary and Personal Entries">
-                                        <field name="date"/>
-                                        <field name="name"/>
-                                        <field name="account_id"/>
-                                        <field name="analytic_account_id"/>
-                                        <field name="debit" sum="Total Debit"/>
-                                        <field name="credit" sum="Total Credit"/>
-                                        <field name="currency_id" string="Encoding Currency"/>
-                                        <field name="amount_currency" string="Encoding Amount"/>
-                                    </tree>
-                                </field>
-                            </group>
-                        </page>
-                    </notebook>
+                    <group colspan="4" col="2" attrs="{'invisible':[('state','=','draft')]}">
+	                    <notebook>
+	                        <page string="Voucher Lines">
+	                            <field name="voucher_lines" mode="tree,form" nolabel="1" height="40">
+	                                <tree string="Voucher Lines" colors="blue:account_name==False;red:included_in_charged==False;black:included_in_charged==True">
+	                                    <field name="name"/>
+	                                    <field name="comments"/>
+	                                    <field name="co1"/>
+	                                    <field name="batch_date"/>
+	                                    <field name="doc_num"/>
+	                                    <field name="code"/>
+	                                    <field name="account_name"/>
+	                                    <field name="type"/>
+	                                    <field name="included_in_charged" invisible="True"/>
+	                                    <field name="amount" sum="Total"/>
+	                                </tree>
+	                                <form string="Voucher Line">
+	                                    <field name="name"/>
+	                                    <field name="comments"/>
+	                                    <field name="batch_date"/>
+	                                    <field name="code"/>
+	                                    <field name="account_name" invisible="1"/>
+	                                    <field name="analytic_account_id" on_change="onchange_analyticid(analytic_account_id)"/>
+	                                    <field name="account_id" on_change="onchange_accountid(account_id)"/>
+	                                </form>
+	                            </field>
+	                        </page>
+	                        <page string="Personal Section">
+	                            <field name="dp_section" mode="tree" nolabel="1">
+	                                <tree string="Deposits to Personal" editable="top">
+	                                    <field name="name"/>
+	                                    <field name="account_name"/>
+	                                    <field name="account_id" on_change="onchange_accountid(account_id)"/>
+	                                    <field name="analytic_id" on_change="onchange_analyticid(analytic_id)"/>
+	                                    <field name="amount" sum="Total"/>
+	                                </tree>
+	                            </field>
+	                            <field name="pdv_section" mode="tree" nolabel="1">
+	                                <tree string="Personal Disbursements and Vouchers" editable="top">
+	                                    <field name="name"/>
+	                                    <field name="account_name"/>
+	                                    <field name="account_id" on_change="onchange_accountid(account_id)"/>
+	                                    <field name="analytic_id" on_change="onchange_analyticid(analytic_id)"/>
+	                                    <field name="amount" sum="Total"/>
+	                                </tree>
+	                            </field>
+	                        </page>
+	                        <page string="Expense Charging">
+	                            <separator colspan="4"/>
+	                            <notebook colspan="4">
+	                                <page string="Email Charges">
+			                            <field name="email_charges" mode="tree" nolabel="1">
+			                                <tree string="Email Charging" editable="top">
+			                                    <field name="name" readonly="1"/>
+			                                    <field name="account_id"/>
+			                                    <field name="amount" readonly="1" sum="Total"/>
+			                                </tree>
+			                            </field>
+			                        </page>
+			                        <page string="N@W Charges">
+			                            <field name="natw_charges" mode="tree" nolabel="1" readonly="1">
+			                                <tree string="N@W Charges">
+			                                    <field name="name" readonly="1"/>
+			                                    <field name="amount" readonly="1" sum="Total"/>
+			                                </tree>
+			                            </field>
+			                        </page>
+			                        <page string="Account Charging">
+			                            <field name="charging_lines" mode="tree" nolabel="1">
+			                                <tree string="Charged Accounts" colors="green:charged==True">
+			                                    <field name="name"/>
+			                                    <field name="code"/>
+			                                    <field name="charged" invisible="True"/>
+			                                    <field name="total_entries" sum="Total"/>
+			                                    <field name="entries_amount" sum="Total"/>
+			                                    <field name="contingency" sum="Total"/>
+			                                    <field name="postage" sum="Total"/>
+			                                    <field name="natw" sum="Total"/>
+			                                    <field name="extra" sum="Total"/>
+			                                    <field name="total" sum="Total"/>
+			                                </tree>
+			                            </field>
+			                        </page>
+			                        <page string="Charging Computation">
+				                        <group colspan="4" col="4">
+		                                   <group colspan="2" col="2">
+	                                           <separator string="Balance Mission Account" colspan="2"/>
+	                                           <field name="total_gifts"/>
+	                                           <field name="autocontribution"/>
+	                                           <field name="missionary_subtotal" readonly="True"/>
+	                                           <field name="recovery_charges" readonly="True"/>
+	                                           <field name="natw_total_charges" readonly="True"/>
+	                                           <field name="postage_recovery" readonly="True"/>
+	                                           <field name="envelope_recovery" readonly="True"/>
+	                                       </group>
+	                                       <group colspan="2" col="2">
+	                                           <separator string="Charging Percentage" colspan="2"/>
+	                                           <field name="contingency_ratio"/>
+	                                           <field name="postage_ratio"/>
+	                                           <field name="natw_ratio"/>
+	                                           <field name="extra_ratio"/>
+	                                       </group>
+		                                </group>
+			                        </page>
+	                            </notebook>
+	                        </page>
+	                        <page string="Voucher Transfers">
+	                            <field name="voucher_transfer_lines" mode="tree,form" nolabel="1">
+	                                <tree string="Missionary Voucher Distribution">
+	                                    <field name="name" readonly="1"/>
+	                                    <field name="comment" readonly="1"/>
+	                                    <field name="account_name" readonly="1"/>
+	                                    <field name="amount" readonly="1" sum="Total"/>
+	                                </tree>
+	                                <form string="Missionary Voucher Distribution">
+	                                    <field name="name" readonly="1"/>
+	                                    <field name="comment" readonly="1"/>
+	                                    <field name="account_name" invisible="1"/>
+	                                    <field name="account_id" on_change="onchange_account(account_id)"/>
+	                                    <field name="analytic_account_id" on_change="onchange_analytic(analytic_account_id)"/>
+	                                    <field name="amount" readonly="1"/>
+	                                </form>
+	                            </field>
+	                        </page>
+	                        <page string="Journal Entries">
+	                            <group colspan="4" col="2">
+	                                <field name="r_move_id" invisible="1"/>
+	                                <field name="r_move_ids" mode="tree" nolabel="1" colspan="4">
+	                                    <tree string="Receiving Entries">
+	                                        <field name="date"/>
+	                                        <field name="name"/>
+	                                        <field name="account_id"/>
+	                                        <field name="analytic_account_id"/>
+	                                        <field name="debit" sum="Total Debit"/>
+	                                        <field name="credit" sum="Total Credit"/>
+	                                        <field name="currency_id" string="Encoding Currency"/>
+	                                        <field name="amount_currency" string="Encoding Amount"/>
+	                                        <field name="state"/>
+	                                    </tree>
+	                                </field>
+	                                <field name="m_move_id" invisible="1"/>
+	                                <field name="m_move_ids" mode="tree" nolabel="1" colspan="4">
+	                                    <tree string="Missionary and Personal Entries">
+	                                        <field name="date"/>
+	                                        <field name="name"/>
+	                                        <field name="account_id"/>
+	                                        <field name="analytic_account_id"/>
+	                                        <field name="debit" sum="Total Debit"/>
+	                                        <field name="credit" sum="Total Credit"/>
+	                                        <field name="currency_id" string="Encoding Currency"/>
+	                                        <field name="amount_currency" string="Encoding Amount"/>
+	                                        <field name="state"/>
+	                                    </tree>
+	                                </field>
+	                            </group>
+	                        </page>
+	                    </notebook>
+                    </group>
                 </form>
             </field>
         </record>        

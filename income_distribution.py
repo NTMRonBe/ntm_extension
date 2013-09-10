@@ -243,8 +243,8 @@ class idg(osv.osv):
                 self.pool.get('account.move.line').create(cr, uid, move_line)
             if total_distribution != idg['amount']:
                 raise osv.except_osv(_('Error!'), _('ERR-001: Total received amount is not equal to the total amount to be distributed!'))
-            elif total_distribution== idg['amount']:
-                name = "Total Distributed Amount with ref#" + idg['ref']
+	    elif total_distribution== idg['amount']:
+	    	name = "Total Distributed Amount with ref#" + idg['ref']
                 move_line = {
                         'name':name,
                         'journal_id':journal_id,
@@ -291,9 +291,17 @@ class voucher_distribution(osv.osv):
     _description = "US and Canada Voucher Distribution"
     _columns ={
         'name':fields.char('Description',size=100),
-        'date':fields.date('Date', required=True),
+        'date':fields.date('Date'),
+        'rdate':fields.date('Receiving Date'),
+        'vd_holder':fields.many2one('account.account','Voucher Account'),
+        'wire_fee':fields.float('US Wire Fee'),
+        'money_received':fields.float('Money Received'),
+        'wire_fee_account':fields.many2one('account.analytic.account','Wire Fee Expense Account'),
         'country':fields.many2one('res.country','Country',domain=[('code','in',['US','CA'])],required=True),
-        'period_id':fields.many2one('account.period','Period',required=True),
+        'period_id':fields.many2one('account.period','Period'),
+        'rperiod_id':fields.many2one('account.period','Period'),
+        'bank_id':fields.many2one('res.partner.bank','Bank'),
+        'rremarks':fields.char('Remarks', size=100),
         'generated':fields.boolean('Generated'),
         'journal_id':fields.many2one('account.journal','Journal ID'),
         'missionary_subtotal':fields.float('Missionary Account Subtotal',digits_compute=dp.get_precision('Account')),
@@ -302,14 +310,21 @@ class voucher_distribution(osv.osv):
         'postage_recovery':fields.float('Postage Recovery Expense',digits_compute=dp.get_precision('Account')),
         'envelope_recovery':fields.float('Envelope Recovery Expense',digits_compute=dp.get_precision('Account')),
         'currency_id':fields.many2one('res.currency','Currency', required=True),
-        'state':fields.selection([('draft','Draft'),('generated','Generated'),('entry_created','Entry Created'),('distributed','Voucher Distributed')],'State'),
+        'state':fields.selection([('draft','Draft'),
+                                  ('received','Received'),
+                                  ('generated','Generated'),
+                                  ('distributed','Voucher Distributed'),
+                                  ('entry_created','Entry Created')],'State'),
         'm_move_id':fields.many2one('account.move','Missionary Entries'),
         'm_move_ids': fields.related('m_move_id','line_id', type='one2many', relation='account.move.line', string='Missionary Entries', readonly=True),
+        'r_move_id':fields.many2one('account.move','Receiving Entries'),
+        'r_move_ids': fields.related('r_move_id','line_id', type='one2many', relation='account.move.line', string='Receiving Entries', readonly=True),
         }
     _defaults = {
             'date': lambda *a: time.strftime('%Y-%m-%d'),
             'state':'draft',
             'journal_id':_get_journal,
+            'rdate': lambda *a: time.strftime('%Y-%m-%d'),
             }
     
     def create(self, cr, uid, vals, context):
@@ -320,6 +335,82 @@ class voucher_distribution(osv.osv):
                 'name': name
                 })
         return super(voucher_distribution, self).create(cr, uid, vals, context)
+    
+    def receive(self, cr, uid, ids, context=None):
+        for vd in self.read(cr, uid, ids, context=None):
+            bankRead = self.pool.get('res.partner.bank').read(cr, uid, vd['bank_id'][0], context=None)
+            period_id = vd['rperiod_id'][0]
+            date = vd['rdate']
+            journal_id = bankRead['journal_id'][0]
+            bankAcct = bankRead['account_id'][0]
+            currRead = self.pool.get('res.currency').read(cr, uid, vd['currency_id'][0], context=None)
+            wireAccRead = self.pool.get('account.analytic.account').read(cr, uid, vd['wire_fee_account'][0], ['normal_account'])
+            move = {
+                'journal_id':journal_id,
+                'period_id':period_id,
+                'date':date,
+                'ref':vd['rremarks'],
+                }
+            move_id = self.pool.get('account.move').create(cr, uid, move)
+            name = 'Total Amount transferred to Bank'
+            transferred_curr= vd['money_received'] + vd['wire_fee']
+            transferred_comp_curr = transferred_curr / currRead['rate']
+            amount = "%.2f" % transferred_comp_curr
+            transferred_comp_curr = float(amount)
+            print transferred_comp_curr
+            move_line = {
+                        'name':name,
+                        'journal_id':journal_id,
+                        'period_id':period_id,
+                        'account_id':vd['vd_holder'][0],
+                        'credit':transferred_comp_curr,                        
+                        'date':date,
+                        'ref':vd['rremarks'],
+                        'move_id':move_id,
+                        'amount_currency':transferred_curr,
+                        'currency_id':vd['currency_id'][0],
+                        }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            name = 'Bank Fee - '+ vd['rremarks']
+            transferred_curr= + vd['wire_fee']
+            transferred_comp_curr = transferred_curr / currRead['rate']
+            amount = "%.2f" % transferred_comp_curr
+            transferred_comp_curr = float(amount)
+            print transferred_comp_curr
+            move_line = {
+                        'name':name,
+                        'journal_id':journal_id,
+                        'period_id':period_id,
+                        'account_id':wireAccRead['normal_account'][0],
+                        'debit':transferred_comp_curr,                        
+                        'date':date,
+                        'ref':vd['rremarks'],
+                        'move_id':move_id,
+                        'analytic_account_id':vd['wire_fee_account'][0],
+                        'amount_currency':transferred_curr,
+                        'currency_id':vd['currency_id'][0],
+                        }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            name = 'Money Received - '+ vd['rremarks']
+            transferred_curr= + vd['money_received']
+            transferred_comp_curr = transferred_curr / currRead['rate']
+            amount = "%.2f" % transferred_comp_curr
+            transferred_comp_curr = float(amount)
+            print transferred_comp_curr
+            move_line = {
+                        'name':name,
+                        'journal_id':journal_id,
+                        'period_id':period_id,
+                        'account_id':bankAcct,
+                        'debit':transferred_comp_curr,                        
+                        'date':date,
+                        'ref':vd['rremarks'],
+                        'move_id':move_id,
+                        'amount_currency':transferred_curr,
+                        'currency_id':vd['currency_id'][0],
+                        }
+            self.pool.get('account.move.line').create(cr, uid, move_line)
+            self.write(cr, uid, ids, {'state':'received','r_move_id':move_id})
 voucher_distribution()
 
 class voucher_distribution_line(osv.osv):
@@ -491,7 +582,7 @@ class voucher_distribution_voucher_transfer(osv.osv):
         'name':fields.char('Description',size=64),
         'comment':fields.char('Comments',size=64),
         'amount':fields.float('Amount',digits_compute=dp.get_precision('Account')),
-        'account_name':fields.char('Account Name',size=100),
+        'account_name':fields.char('`Account Name',size=100),
         'analytic_account_id':fields.many2one('account.analytic.account','Analytic Account'),
         'account_id':fields.many2one('account.account','Normal Account'),
         'voucher_id':fields.many2one('voucher.distribution','Voucher ID',ondelete='cascade'),

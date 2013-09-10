@@ -24,8 +24,11 @@ import tools
 
 from StringIO import StringIO
 import base64
+import netsvc
+import pooler
+import psycopg2
 from tools.translate import _
-from osv import osv, fields
+from osv import osv, fields, orm
 import dbf
 
 class voucher_file_import(osv.osv_memory):
@@ -43,20 +46,33 @@ class voucher_file_import(osv.osv_memory):
     _defaults = {  
         'state': 'init',
     }
-
+    def tester(self, cr, uid, ids, context=None):
+	   netsvc.Logger().notifyChannel("this is a test", netsvc.LOG_INFO,'Testing')
+	   return True
     def importzip(self, cr, uid, ids, context):
-        user = uid
-        user_read =self.pool.get('res.users').read(cr, uid, user, ['company_id'])
-        company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['voucher_dbf'])
-        voucher_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'],['name'])
-        voucher_name = voucher_read['name']
+    #	netsvc.Logger().notifyChannel("Context", netsvc.LOG_INFO,' '+str(context))
+    	voucher_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'], ['name'])
+    #	netsvc.Logger().notifyChannel("Reader", netsvc.LOG_INFO,' '+str(voucher_read))
+    	voucher_name = voucher_read['name']
         voucher_name = voucher_name.replace(' ','_')
         voucher_name = voucher_name.replace('/','_')
-        ad = tools.config['root_path'].split(",")[-1]
-        file= os.path.join(ad, voucher_name+'.dbf')
+    	netsvc.Logger().notifyChannel("Voucher Name", netsvc.LOG_INFO, ' '+ str(voucher_name))
+    #        ad = tools.config['root_path'].split(",")[-1]
+    	root = tools.config['root_path']
+    	netsvc.Logger().notifyChannel("root", netsvc.LOG_INFO, ' '+str(root))
+    	file = ''
+    	try:
+    	    os.makedirs(root+'/dbfs/')
+    	except OSError:
+    	    pass
+    #        file= os.path.join(ad, voucher_name+'.dbf')
+    	file = root+'/dbfs/'+voucher_name+'.dbf'
+    	netsvc.Logger().notifyChannel("filename", netsvc.LOG_INFO, ' '+str(file))
         (data,) = self.browse(cr, uid, ids , context=context)
+    	netsvc.Logger().notifyChannel("data", netsvc.LOG_INFO, '' + str(data.voucher_file))
         module_data = data.voucher_file
         val = base64.decodestring(module_data)
+    	netsvc.Logger().notifyChannel("passthis", netsvc.LOG_INFO, ' ')
         fp = open(file,'wb')
         fp.write(val)
         fp.close
@@ -71,8 +87,15 @@ class voucher_file_import(osv.osv_memory):
         voucher_name = voucher_read['name']
         voucher_name = voucher_name.replace(' ','_')
         voucher_name = voucher_name.replace('/','_')
-        ad = tools.config['root_path'].split(",")[-1]
-        file= os.path.join(ad, voucher_name+'.dbf')
+        root = tools.config['root_path']
+        netsvc.Logger().notifyChannel("root", netsvc.LOG_INFO, ' '+str(root))
+        file = ''
+        try:
+            os.makedirs(root+'/dbfs/')
+        except OSError:
+            pass
+    #        file= os.path.join(ad, voucher_name+'.dbf')
+        file = root+'/dbfs/'+voucher_name+'.dbf'
         #dbf_file = filename+voucher_name
         table = dbf.Table(file)
         table.open()
@@ -87,6 +110,9 @@ class voucher_file_import(osv.osv_memory):
             rec_code = rec_code.replace(' ','')
             sprice = (rec.amount)
             rec_amount = str(sprice)
+            rec_amount = float(rec_amount)
+            rec_amount = str(sprice)
+            rec_amount = float(rec_amount)
             rec_amount = float(rec_amount)
             rec_amount = "%.2f" % rec_amount
             rec_amount = float(rec_amount) 
@@ -114,6 +140,3 @@ class voucher_file_import(osv.osv_memory):
         return {'type': 'ir.actions.act_window_close'}
 
 voucher_file_import()
-
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
