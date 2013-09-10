@@ -46,7 +46,7 @@
                    ,"account_pettycash/pc_sequence.xml","account_pettycash/pcr_view.xml",
                    "account_pettycash/pcl_view.xml","fund_transfer_view.xml"
                    ,"account_pettycash/crs_view.xml","opening_balance.xml",
-                   "vehicle_charging_view.xml","invoice_slip_view.xml","bank_recon_view.xml","ntm_menus.xml"],
+                   "vehicle_charging_view.xml","invoice_slip_view.xml","bank_recon_view.xml","dbe_view.xml","ntm_menus.xml"],
     'demo_xml': [
     ],
     'test': [

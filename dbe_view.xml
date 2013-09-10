@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record id="dbe_form" model="ir.ui.view">
+            <field name="name">dbe.form</field>
+            <field name="model">direct.bank.expense</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Direct Bank Expenses">
+                    <group colspan="4" col="4">
+                        <field name="name" invisible="1"/>
+                        <group colspan="2" col="2">
+                            <field name="bank_id" widget="selection" required="1" domain="[('ownership','=','company')]" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <field name="ref" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        </group>
+                        <group colspan="2" col="2">
+	                        <field name="amount" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                        <field name="rdate" attrs="{'readonly':[('state','!=','draft')]}" required="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                       <page string="Distribution Details">
+                            <field mode="tree,form" name="distribution_ids" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
+                                <tree string="Account Distribution List">
+                                    <field name="account_id"/>
+                                    <field name="remarks"/>
+                                    <field name="amount" sum="Total"/>
+                                </tree>
+                                <form string="Account Distribution">
+                                    <group colspan="4" col="6">
+                                        <group colspan="4" col="2">
+		                                    <field name="account_id" required="True"/>
+		                                    <field name="remarks" required="True"/>
+	                                    </group>
+	                                    <group colspan="2" col="2">
+		                                    <field name="amount"/>
+	                                    </group>
+                                    </group>
+                                </form>
+                            </field>
+                       </page>
+                       <page string="Remarks">
+                        <field name="remarks" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                       </page>
+                       <page string="Journal Entries">
+                            <field name="move_ids" mode="tree" nolabel="1">
+                                <tree string="Distribution Entries">
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                    <field name="account_id"/>
+                                    <field name="analytic_account_id"/>
+                                    <field name="debit" sum="Total Debit"/>
+                                    <field name="credit" sum="Total Credit"/>
+                                    <field name="currency_id" string="Encoding Currency"/>
+                                    <field name="amount_currency" string="Encoding Amount"/>
+                                </tree>
+                            </field>
+                       </page>
+                    </notebook>
+                    <group colspan="4" col="13">
+                        <field name="state" readonly="1"/>
+                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
+                        <button name="distribute" attrs="{'invisible':[('state','!=','draft')]}" string="Process"  type="object" />
+                    </group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="dbe_tree">
+            <field name="name">dbe.tree</field>
+            <field name="model">direct.bank.expense</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Direct Bank Expenses">
+                    <field name="name"/>
+                    <field name="rdate"/>
+                    <field name="bank_id"/>
+                    <field name="amount" required="1"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_dbe_form">
+            <field name="name">Direct Bank Expenses</field>
+            <field name="res_model">direct.bank.expense</field>
+            <field name="view_type">form</field>
+        </record>
+        <record model="ir.actions.act_window.view" id="action_dbe_tree">
+            <field name="act_window_id" ref="action_dbe_form"/>
+            <field name="view_id" ref="dbe_tree"/>
+            <field name="view_mode">tree</field>
+            <field name="sequence">10</field>
+        </record>
+        <record model="ir.actions.act_window.view" id="action_dbe_form">
+            <field name="act_window_id" ref="action_dbe_form"/>
+            <field name="view_id" ref="dbe_form"/>
+            <field name="view_mode">form</field>
+            <field name="sequence">20</field>
+        </record>
+        
+    </data>
+</openerp>
