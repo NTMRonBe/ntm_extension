@@ -150,6 +150,29 @@ class res_currency_rate(osv.osv):
         }
 res_currency_rate()
 
+class account_allocations(osv.osv):
+    _name = 'account.allocations'
+    _description = "Account Allocation"
+    _columns = {
+        'account_id':fields.many2one('account.account','Account ID', ondelete='cascade'),
+        'analytic_id':fields.many2one('account.analytic.account','Analytic Account', ondelete='cascade'),
+        'name':fields.char('Description',size=64),
+        'percentage':fields.float('Percentage'),
+        }
+    
+    def create(self, cr, uid, vals, context=None):
+        account_id = vals['account_id']
+        totalPercentage = vals['percentage']
+        for allocations in self.pool.get('account.allocations').search(cr, uid, [('account_id','=',account_id)]):
+            allocationRead = self.pool.get('account.allocations').read(cr, uid, allocations, ['percentage'])
+            totalPercentage +=allocationRead['percentage']
+            print totalPercentage
+        if totalPercentage > 100.00:
+            raise osv.except_osv(('Error!'),('Total percentage will be greater than 100!'))
+        elif totalPercentage<=100.00:
+            return super(account_allocations, self).create(cr, uid, vals, context)
+account_allocations()
+
 class account_account(osv.osv):
     
     def __compute(self, cr, uid, ids, field_names, arg=None, context=None,
@@ -258,6 +281,7 @@ class account_account(osv.osv):
     _inherit = 'account.account'
     _columns = {
         'is_pr':fields.boolean('Partially Revaluated'),
+        'allocated':fields.boolean('Allocated'),
         'to_be_moved':fields.boolean('To be moved at EOY'),
         'include_pool':fields.boolean('Included in Money Pool'),
         'equity_account':fields.many2one('account.account','Equity Account'),
@@ -270,6 +294,7 @@ class account_account(osv.osv):
         'equity_reval_value_acc':fields.many2one('account.analytic.account','Equity Revaluated Value'),
         'equity_gain_loss_acc':fields.many2one('account.analytic.account','Equity Gain Loss Value'),
         'equity_check':fields.boolean('Is this an Equity Account?'),
+        'allocation_ids':fields.one2many('account.allocations','account_id','Account Allocations'),
         }
     
     def onchange_equity_bool(self, cr, uid, ids, include_pool):

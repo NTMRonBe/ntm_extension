@@ -138,7 +138,10 @@
                     </group>
                     <notebook>
                         <page string="General Information">
-                            <field name="active" groups="base.group_extended" />
+                            <group col="4" colspan="4">
+                                <field name="active" groups="base.group_extended"/>
+                                <field name="allocated"/>
+                            </group>
                             <newline/>
                             <group col="4" colspan="4">
                                 <separator string="Currency" colspan="4"/>
@@ -187,6 +190,20 @@
 		                           </tree>
 		                       </field>
 		                    </group>
+                        </page>
+                        <page string="Allocations" attrs="{'invisible':[('allocated','=',False)]}">
+                            <field name="allocation_ids" mode="tree,form" string="Account Allocations" height="250" nolabel="1">
+                                <tree string="Account Allocations">
+                                    <field name="analytic_id"/>
+                                    <field name="name"/>
+                                    <field name="percentage" sum="Total"/>
+                                </tree>
+                                <form string="Account Allocation">
+                                    <field name="analytic_id"/>
+                                    <field name="name"/>
+                                    <field name="percentage"/>
+                                </form>
+                            </field>
                         </page>
                         <page string="Notes">
                             <field colspan="4" name="note" nolabel="1"/>
