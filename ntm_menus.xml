@@ -126,6 +126,9 @@
         <menuitem id="base.menu_mail_gateway" parent="base.menu_emails" name="POP/IMAP"/>
         <menuitem id="base.menu_tools" groups="base.group_no_one"/>
         
+        <menuitem id="allocation_menu" parent="account.menu_account_end_year_treatments" action="action_allocate_funds_wiz" sequence="100"/>
+        <menuitem id="ntm_recurring_menu" parent="account.menu_configuration_misc" action="action_recur_secondary_curr_form" sequence="100"/>
+        
        <!-- <menuitem id="menu_manual_entries" action="ntm_action_account_move_form" parent="account.menu_finance_payables" sequence="100"/>
        Actions -->
         <record id="base.action_partner_customer_form" model="ir.actions.act_window">
