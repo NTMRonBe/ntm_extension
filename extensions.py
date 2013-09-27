@@ -110,6 +110,8 @@ class account_analytic_account(osv.osv):
     _columns = {
             'phone_pin':fields.one2many('phone.pin','account_id','Phone Pins'),
             'code_short':fields.char('Short Code',size=64),
+            'allocated':fields.boolean('Allocated'),
+            'allocation_ids':fields.one2many('account.allocations','account_id','Account Allocations'),
             'accpac_ids':fields.one2many('account.accpac','analytic_id','Accpac Codes'),
             'code':fields.char('Code',size=64),
             'ntm_type':fields.selection([('income','Income'),('expense','Expense')],'Account Type'),
@@ -154,7 +156,7 @@ class account_allocations(osv.osv):
     _name = 'account.allocations'
     _description = "Account Allocation"
     _columns = {
-        'account_id':fields.many2one('account.account','Account ID', ondelete='cascade'),
+        'account_id':fields.many2one('account.analytic.account','Account ID', ondelete='cascade'),
         'analytic_id':fields.many2one('account.analytic.account','Analytic Account', ondelete='cascade'),
         'name':fields.char('Description',size=64),
         'percentage':fields.float('Percentage'),
@@ -172,6 +174,52 @@ class account_allocations(osv.osv):
         elif totalPercentage<=100.00:
             return super(account_allocations, self).create(cr, uid, vals, context)
 account_allocations()
+
+class account_allocations_wiz(osv.osv_memory):
+    _name = 'account.allocations.wiz'
+    _description = "Allocate Funds"
+    _columns = {
+        'name':fields.date('Allocation Date'),
+        'period_id':fields.many2one('account.period','Effective Period'),
+        'journal_id':fields.many2one('account.journal','Effective Journal'),
+        }
+    
+    def allocate(self, cr, uid, ids, context=None):
+        checkAllAccounts = self.pool.get('account.account').search(cr, uid, [('allocated','=',True)])
+        if not checkAllAccounts:
+            return True
+        elif checkAllAccounts:
+            for account in checkAllAccounts:
+                percentage = 0.00
+                print account
+                allocationCheck = self.pool.get('account.allocations').search(cr, uid, [('account_id','=',account)])
+                if not allocationCheck:
+                    raise osv.except_osv(('Error!'),('There are no accounts where the fund will be allocated!'))
+                elif allocationCheck:
+                    for alloc in allocationCheck:
+                        allocRead = self.pool.get('account.allocations').read(cr, uid, alloc, ['percentage'])
+                        percentage +=allocRead['percentage']
+                    if percentage!=100.00:
+                        raise osv.except_osv(('Error!'),('Total percentage of all accounts to be allocated with is not equal to 100%!'))
+                    else:
+                        return self.procede(cr, uid, ids)
+    def procede(self, cr, uid, ids, context=None):
+        checkAllAccounts = self.pool.get('account.account').search(cr, uid, [('allocated','=',True)])
+        for account in checkAllAccounts:
+            allDebits = self.pool.get('account.move.line').search(cr, uid, [('debit','>',0.00),('account_id','=',account)])
+            allCredits = self.pool.get('account.move.line').search(cr, uid, [('credit','>',0.00),('account_id','=',account)])
+            sumDebit = 0.00
+            sumCredit = 0.00
+            for debit in allDebits:
+                debitRead = self.pool.get('account.move.line').read(cr, uid, debit, ['debit'])
+                sumDebit +=debitRead['debit']
+            for credit in allCredits:
+                creditRead = self.pool.get('account.move.line').read(cr, uid, credit, ['credit'])
+                sumCredit +=creditRead['credit']
+            print sumDebit
+            print sumCredit
+        return True
+account_allocations_wiz()
 
 class account_account(osv.osv):
     
@@ -281,7 +329,6 @@ class account_account(osv.osv):
     _inherit = 'account.account'
     _columns = {
         'is_pr':fields.boolean('Partially Revaluated'),
-        'allocated':fields.boolean('Allocated'),
         'to_be_moved':fields.boolean('To be moved at EOY'),
         'include_pool':fields.boolean('Included in Money Pool'),
         'equity_account':fields.many2one('account.account','Equity Account'),
@@ -294,7 +341,6 @@ class account_account(osv.osv):
         'equity_reval_value_acc':fields.many2one('account.analytic.account','Equity Revaluated Value'),
         'equity_gain_loss_acc':fields.many2one('account.analytic.account','Equity Gain Loss Value'),
         'equity_check':fields.boolean('Is this an Equity Account?'),
-        'allocation_ids':fields.one2many('account.allocations','account_id','Account Allocations'),
         }
     
     def onchange_equity_bool(self, cr, uid, ids, include_pool):

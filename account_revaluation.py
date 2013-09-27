@@ -226,7 +226,8 @@ class account_revaluation(osv.osv):
                         posts_second = False
                         encoded_second = False
                         for ending_move in ending_moves_search:
-                            ending_move_read = self.pool.get('account.move.line').read(cr, uid, ending_move, ['debit','amount_currency','credit','currency_id'])
+                            ending_move_read = self.pool.get('account.move.line').read(cr, uid, ending_move, ['debit','amount_currency','credit','currency_id', 'name'])
+                            print ending_move_read
                             if ending_move_read['currency_id'][0]==reval['comp_curr'][0]:
                                 posts_comp += ending_move_read['debit'] - ending_move_read['credit']
                             elif ending_move_read['currency_id'][0]==reval['second_curr'][0]:

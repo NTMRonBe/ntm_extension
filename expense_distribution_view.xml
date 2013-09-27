@@ -13,7 +13,7 @@
                 </field>
             </field>
         </record>
-        
+        <!-- 
         <record id="view_ntm_payments_phone_statement_form" model="ir.ui.view">
             <field name="name">ntm.payments.phone_statement.form</field>
             <field name="model">phone.statement</field>
@@ -38,6 +38,8 @@
                 </page>
             </field>
         </record>
+        
+         -->
         
         <record id="edg_form" model="ir.ui.view">
             <field name="name">edg.form</field>

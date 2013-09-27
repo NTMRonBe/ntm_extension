@@ -80,7 +80,7 @@
             <field name="arch" type="xml">
 				<field name="user_id" position="after">
 				    <newline/>
-					<field name="code_short"/>
+					<field name="allocated"/>
 					<field name="report"/>
 					<field name="normal_account"  attrs="{'invisible': [('type','=','view')]}"/>
 					<group colspan="2" col="4" attrs="{'invisible': [('type','=','view')]}">
@@ -116,6 +116,22 @@
 				        </group>
 				    </group>
 				</field>
+				<page string="Description" position="after">
+                        <page string="Allocations" attrs="{'invisible':[('allocated','=',False)]}">
+                            <field name="allocation_ids" mode="tree,form" string="Account Allocations" height="250" nolabel="1">
+                                <tree string="Account Allocations">
+                                    <field name="analytic_id"/>
+                                    <field name="name"/>
+                                    <field name="percentage" sum="Total"/>
+                                </tree>
+                                <form string="Account Allocation">
+                                    <field name="analytic_id"/>
+                                    <field name="name"/>
+                                    <field name="percentage"/>
+                                </form>
+                            </field>
+                        </page>
+				</page>
             </field>
         </record>
         
@@ -190,20 +206,6 @@
 		                           </tree>
 		                       </field>
 		                    </group>
-                        </page>
-                        <page string="Allocations" attrs="{'invisible':[('allocated','=',False)]}">
-                            <field name="allocation_ids" mode="tree,form" string="Account Allocations" height="250" nolabel="1">
-                                <tree string="Account Allocations">
-                                    <field name="analytic_id"/>
-                                    <field name="name"/>
-                                    <field name="percentage" sum="Total"/>
-                                </tree>
-                                <form string="Account Allocation">
-                                    <field name="analytic_id"/>
-                                    <field name="name"/>
-                                    <field name="percentage"/>
-                                </form>
-                            </field>
                         </page>
                         <page string="Notes">
                             <field colspan="4" name="note" nolabel="1"/>
