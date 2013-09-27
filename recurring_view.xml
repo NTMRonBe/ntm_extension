@@ -2,7 +2,35 @@
 <openerp>
     <data>
 		
-    <!--Forex Transactions-->
+        <record id="rsc_view" model="ir.ui.view">
+            <field name="name">Generate Entries</field>
+            <field name="model">recur.secondary.curr.generate</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Generate Entries">
+                <group colspan="4" col="4">
+                    <field name="date" required="1"/>
+                    <field name="period" required="1"/>
+                </group>
+               <button string="Check"
+                                            type="object"
+                                            name="add"
+                                            icon="gtk-execute"
+                                            />
+               </form>
+            </field>
+        </record>
+
+        <record id="action_rsc_form" model="ir.actions.act_window">
+            <field name="name">Generate Entries</field>
+            <field name="res_model">recur.secondary.curr.generate</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="rsc_view"/>
+            <field name="target">new</field>
+        </record>
+		
+		
         <record id="recur_secondary_curr_form" model="ir.ui.view">
             <field name="name">recur.secondary.curr.form</field>
             <field name="model">recur.secondary.curr</field>
@@ -12,33 +40,39 @@
                     <group colspan="4" col="4">
                         <field name="name"/>
                         <field name="journal_id"/>
+                        <field name="currency_id" widget="selection"/>
+                        <field name="acct_selection" attrs="{'readonly':[('line_ids','=',False)]}"/>
                     </group>
-                    <group colspan="4" col="4">
-	                    <separator string="Transfer Details" colspan="4"/>
-	                    <group col="2" colspan="2">
-	                        <separator colspan="4" string="Starts on"/>
-	                        <field name="date_start" />
-	                        <field name="period_total"/>
-	                    </group>
-	                    <group col="2" colspan="2">
-	                        <separator colspan="4" string="Valid Up to"/>
-	                        <field name="period_nbr" attrs="{'readonly':[('period_type','=','bimonthly')]}"/>
-	                        <field name="period_type"/>
-	                    </group>
+                    <notebook>
+                        <page string="Entries">
+                            <group colspan="4" col="2">
+		                        <field name="line_ids" mode="tree" nolabel="1">
+		                            <tree string="Entry Lines" editable="top">
+		                                <field name="name"/>
+		                                <field name="account_id" attrs="{'readonly':[('acct_selection','=','analytic')],'required':[('acct_selection','=','normal')]}"/>
+		                                <field name="analytic_id" attrs="{'readonly':[('acct_selection','=','normal')],'required':[('acct_selection','=','analytic')]}"/>
+		                                <field name="debit" sum="Total Debit"/>
+		                                <field name="credit" sum="Total Credit"/>
+		                            </tree>
+		                        </field>
+                            </group>   
+                        </page>
+                        <page string="Created Entries">
+                            <group colspan="4" col="2">
+                              <field name="sched_ids" mode="tree" nolabel="1" readonly="1">
+                                  <tree string="Entries">
+                                      <field name="date"/>
+                                      <field name="move_id"/>
+                                  </tree>
+                              </field>
+                            </group>
+                        </page>
+                    </notebook>
+                    <group colspan="4" col="13">
+                    <field name="state" readonly="1"/>
+                    <button name="compute" string="Activate" type="object" icon="terp-stock_format-scientific" attrs="{'invisible':[('state','!=','draft')]}"/>
+                    <button name="remove_line" string="Deactivate" type="object" icon="terp-stock_format-scientific" attrs="{'invisible':[('state','!=','running')]}"/>
                     </group>
-                    <group colspan="4" col="2">
-                        <field name="line_ids" mode="tree" nolabel="1">
-                            <tree string="Entry Lines" editable="top">
-                                <field name="name"/>
-                                <field name="analytic_bool"/>
-                                <field name="account_id" attrs="{'readonly':[('analytic_bool','=',True)],'required':[('analytic_bool','=',False)]}"/>
-                                <field name="analytic_id" attrs="{'required':[('analytic_bool','=',True)],'readonly':[('analytic_bool','=',False)]}"/>
-                                <field name="debit"/>
-                                <field name="credit"/>
-                                <field name="currency_id"/>
-                            </tree>
-                        </field>
-                    </group>    
                 </form>
             </field>
         </record>        
