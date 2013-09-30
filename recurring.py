@@ -8,42 +8,40 @@ import decimal_precision as dp
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-class recur_secondary_curr(osv.osv):
-    _name = 'recur.secondary.curr'
+class analytic_recur_entry(osv.osv):
+    _name = 'analytic.recur.entry'
     _description = "Secondary Currency Recurring Entries"
     _columns = {
         'name':fields.char('Name', size=64, required=True),
         'journal_id':fields.many2one('account.journal','Journal', required=True),
         'currency_id':fields.many2one('res.currency', 'Currency', required=True),
         'state': fields.selection([('draft','Draft'),('running','Running'),('done','Done')], 'State', required=True, readonly=True),
-        'acct_selection':fields.selection([('normal','Normal Accounts'),('analytic','Analytic Accounts')], 'Involved Accounts', required=True)
         }
     
     _defaults = {
         'state':'draft'
     }
-recur_secondary_curr()
+analytic_recur_entry()
 
-class recur_secondary_curr_line(osv.osv):
-    _name = 'recur.secondary.curr.line'
+class analytic_recur_entry_line(osv.osv):
+    _name = 'analytic.recur.entry.line'
     _description = "Recurring Lines"
     _columns = {
-        'name':fields.char('Name',size=64, required=True),
-        'account_id':fields.many2one('account.account','Normal Account'),
+        'name':fields.char('Description',size=64, required=True),
         'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
-        'recur_id':fields.many2one('recur.secondary.curr','Recurring ID'),
+        'recur_id':fields.many2one('analytic.recur.entry','Recurring ID'),
         'debit':fields.float('Debit'),
         'credit':fields.float('Credit'),
         }
-recur_secondary_curr_line()
+analytic_recur_entry_line()
 
-class recur_secondary_curr_sched(osv.osv):
-    _name = "recur.secondary.curr.sched"
+class analytic_recur_entry_sched(osv.osv):
+    _name = "analytic.recur.entry.sched"
     _description = "Schedule"
     _columns = {
-        'recur_id': fields.many2one('recur.secondary.curr', 'Recurring ID', required=True, select=True, ondelete='cascade'),
+        'recur_id': fields.many2one('analytic.recur.entry', 'Recurring ID', required=True, select=True, ondelete='cascade'),
         'date': fields.date('Date', required=True),
-        'move_id': fields.many2one('account.move', 'Entry'),
+        'move_id': fields.many2one('account.move', 'Entry', ondelete='cascade'),
     }
 
     def move_create(self, cr, uid, ids, context=None):
@@ -63,26 +61,16 @@ class recur_secondary_curr_sched(osv.osv):
         return all_moves
 
     _rec_name = 'date'
-recur_secondary_curr_sched()
+analytic_recur_entry_sched()
 
 class rsc(osv.osv):
-    _inherit = 'recur.secondary.curr'
+    _inherit = 'analytic.recur.entry'
     _columns = {
-        'line_ids':fields.one2many('recur.secondary.curr.line','recur_id', 'Entry Lines'),
-        'sched_ids':fields.one2many('recur.secondary.curr.sched','recur_id', 'Schedule'),
+        'line_ids':fields.one2many('analytic.recur.entry.line','recur_id', 'Entry Lines'),
+        'sched_ids':fields.one2many('analytic.recur.entry.sched','recur_id', 'Schedule'),
         }
     
-    def getNormalAccts(self, cr, uid, ids, context=None):
-        for sub in self.browse(cr, uid, ids, context=None):
-            for line in sub.line_ids:
-                if line.analytic_bool:
-                    analyticReader = self.pool.get('account.analytic.account').read(cr, uid, line.analytic_id.id, ['normal_account'])
-                    self.pool.get('recur.secondary.curr.line').write(cr, uid, line.id, {'account_id':analyticReader['normal_account'][0]})
-                elif not line.analytic_bool:
-                    continue
-        return True
     def compute(self, cr, uid, ids, context=None):
-        self.getNormalAccts(cr, uid, ids, context)
         for sub in self.browse(cr, uid, ids, context=context):
             if not sub.line_ids:
                 raise osv.except_osv(_('Error!'), _('No entries has been set!'))
@@ -104,7 +92,7 @@ class rsc(osv.osv):
 rsc()
 
 class generate(osv.osv_memory):
-    _name = 'recur.secondary.curr.generate'
+    _name = 'analytic.recur.entry.generate'
     _description = "Generate Recurring Entries"
     _columns = {
         'date':fields.date('Effective Date'),
@@ -113,4 +101,75 @@ class generate(osv.osv_memory):
     _defaults = {
             'date': lambda *a: time.strftime('%Y-%m-%d'),
             }
+    
+    def generateEntries(self, cr, uid, ids, context=None):
+        user_id = uid
+        user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
+        company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['currency_id'])
+        comp_curr = company_read['currency_id'][0]
+        rate = False
+        currency = False
+        for form in self.read(cr, uid, ids, context=None):
+            date = form['date']
+            period_id = form['period']
+            searchRecurring = self.pool.get('analytic.recur.entry').search(cr, uid, [('state','=','running')])
+            for eachRecurring in searchRecurring:
+                readRecur = self.pool.get('analytic.recur.entry').read(cr, uid, eachRecurring, context=None)
+                journal_id = readRecur['journal_id'][0]
+                name = readRecur['name']
+                move = {
+                    'journal_id':journal_id,
+                    'period_id':period_id,
+                    'date':date,
+                    'ref':name,
+                }
+                move_id = self.pool.get('account.move').create(cr, uid, move)
+                recurCurr = readRecur['currency_id'][0]
+                if recurCurr!=comp_curr:
+                    curr_read = self.pool.get('res.currency').read(cr, uid, recurCurr,['rate'])
+                    currency = recurCurr
+                    rate = curr_read['rate']
+                elif recurCurr==comp_curr:
+                    currency= recurCurr
+                    rate = 1.00
+                for entry in readRecur['line_ids']:
+                    lineRead = self.pool.get('analytic.recur.entry.line').read(cr, uid, entry, context=None)
+                    analytic_read = self.pool.get('account.analytic.account').read(cr, uid, lineRead['analytic_id'][0],['normal_account'])
+                    amount = False
+                    amnt_curr = False
+                    debit = False
+                    credit = False
+                    if lineRead['debit']>0.00:
+                        amount = lineRead['debit'] / rate
+                        amnt_curr = lineRead['debit']
+                        debit = 0.00
+                        credit = amount
+                    elif lineRead['credit']>0.00:
+                        amount = lineRead['credit'] / rate
+                        amnt_curr = lineRead['credit']
+                        debit = amount
+                        credit = 0.00
+                    move_line = {
+                        'name':lineRead['name'],
+                        'journal_id':journal_id,
+                        'period_id':period_id,
+                        'account_id':analytic_read['normal_account'][0],
+                        'debit':debit,
+                        'credit':credit,
+                        'date':date,
+                        'ref':name,
+                        'move_id':move_id,
+                        'analytic_account_id':lineRead['analytic_id'][0],
+                        'amount_currency':amnt_curr,
+                        'currency_id':currency,
+                        }
+                    self.pool.get('account.move.line').create(cr, uid, move_line)
+                self.pool.get('account.move').post(cr, uid, [move_id])
+                recur_entry = {
+                        'recur_id':eachRecurring,
+                        'date':date,
+                        'move_id':move_id,
+                        }
+                self.pool.get('analytic.recur.entry.sched').create(cr, uid, recur_entry)
+        return True
 generate()
