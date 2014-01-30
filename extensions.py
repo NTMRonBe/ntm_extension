@@ -15,6 +15,15 @@ class ntm_res_partner_extension(osv.osv):
             }
 ntm_res_partner_extension()
 
+class region_config(osv.osv):
+    _name = 'region.config'
+    _description = "Regional Settings"
+    _columns = {
+        'name':fields.char('Region Name',size=64, required=True),
+        'gain_loss_acct':fields.many2one('account.analytic.account','Gain/Loss Account', required=True),
+        }
+region_config()
+
 class res_company(osv.osv):
     _inherit = 'res.company'
     _columns = {
@@ -114,7 +123,12 @@ class account_analytic_account(osv.osv):
             'allocation_ids':fields.one2many('account.allocations','account_id','Account Allocations'),
             'accpac_ids':fields.one2many('account.accpac','analytic_id','Accpac Codes'),
             'code':fields.char('Code',size=64),
-            'ntm_type':fields.selection([('income','Income'),('expense','Expense')],'Account Type'),
+            'ntm_type':fields.selection([('income','Income'),
+                                         ('expense','Expense'),
+                                         ('gl','Gain Loss'),
+                                         ('pat','PAT Account'),
+                                         ('project','Project Account'),
+                                         ('equity','Equity')],'Account Type'),
             'supplier':fields.related('partner_id','supplier',type='boolean',store=True, string='People and Team',readonly=True),
             'project':fields.related('partner_id','project',type='boolean',store=True, string='Project',readonly=True),
             'normal_account':fields.many2one('account.account','Related Normal Account'),
@@ -124,6 +138,7 @@ class account_analytic_account(osv.osv):
                                 ('pal','Profit and Loss'),
                                 ('soa','Statement of Account')
                                 ], 'Report Type'),
+            'region_id':fields.many2one('region.config', 'Region ID'),
             
             }
     '''
@@ -143,12 +158,21 @@ class account_analytic_account(osv.osv):
        ''' 
 account_analytic_account()
 
+class rc(osv.osv):
+    _inherit = 'region.config'
+    _columns = {
+        'income_ids':fields.one2many('account.analytic.account', 'region_id', 'Income Accounts', domain=[('ntm_type','=','income')]),
+        'expense_ids':fields.one2many('account.analytic.account', 'region_id', 'Expense Accounts', domain=[('ntm_type','=','expense')]),
+        'equity_ids':fields.one2many('account.analytic.account', 'region_id', 'Equity Accounts', domain=[('ntm_type','=','equity')]),
+        }
+rc()
+
 class res_currency_rate(osv.osv):
     _inherit = 'res.currency.rate'
     _columns = {
-        'weighted_rate':fields.float('Weighted Rate', readonly=True),
-        'post_rate':fields.float('Post Rate'),
-        'end_rate':fields.float('End Rate'),
+        'weighted_rate':fields.float('Weighted Rate', readonly=True,digits=(12,6)),
+        'post_rate':fields.float('Post Rate',digits=(12,6)),
+        'end_rate':fields.float('End Rate',digits=(12,6)),
         }
 res_currency_rate()
 
@@ -332,8 +356,7 @@ class account_account(osv.osv):
         'to_be_moved':fields.boolean('To be moved at EOY'),
         'include_pool':fields.boolean('Included in Money Pool'),
         'equity_account':fields.many2one('account.account','Equity Account'),
-        'gain_loss':fields.many2one('account.account','Gain Loss Account',domain=[('gain_loss_acc','=',True),('type','in',['other','liquidity'])]),
-        'gain_loss_acc':fields.boolean('Is this a Gain/Loss Account?'),
+        'gain_loss':fields.many2one('account.analytic.account','Gain Loss Account',domain=[('ntm_type','=','gl')]),
         'code_short':fields.char('Code Short',size=16),
         'accpac_ids':fields.one2many('account.accpac','account_id','Accpac Codes'),
         'closing_account':fields.many2one('account.account','Closing Account'),
@@ -348,7 +371,6 @@ class account_account(osv.osv):
         if include_pool:
             res = {'value':
                    {
-                    'gain_loss_acc':False,
                     'gain_loss':False,
                     'equity_check':False,
                     'equity_reval_value_acc':False,

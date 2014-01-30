@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+    
+    <report id="report_regional_ntma_print"
+            string="NTM Report"
+            model="region.ntma"
+            name="region.ntma"
+            rml="ntm_extension/report/regional_ntma_report.rml"
+            auto="False"
+            header = "False"
+            menu="True"/>
+    
+    <record id="region_report_form" model="ir.ui.view">
+            <field name="name">region.report.form</field>
+            <field name="model">region.report</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Regional Report">
+                    <field name="name"/>
+                    <field name="period_id"/>
+                    <separator string="Gain Loss Details" colspan="4"/>
+                    <group colspan="4" col="6">
+                        <field name="gl_acc" readonly="1"/>
+                        <field name="gl_mtd" readonly="1"/>
+                        <field name="gl_ytd" readonly="1"/>
+                    </group>
+                    <group colspan="4">
+                        <notebook>
+                            <page string="Income Accounts">
+                                <field name="income_ids" mode="tree" nolabel="1" readonly="1" height="200">
+                                    <tree string="Income Accounts">
+                                        <field name="name"/>
+                                        <field name="mtd"/>
+                                        <field name="ytd"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Expense Accounts">
+                                <field name="expense_ids" mode="tree" nolabel="1" readonly="1" height="200">
+                                    <tree string="Expense Accounts">
+                                        <field name="name"/>
+                                        <field name="mtd"/>
+                                        <field name="ytd"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Equity Accounts">
+                                <field name="equity_ids" mode="tree" nolabel="1" readonly="1" height="200">
+                                    <tree string="Equity Accounts">
+                                        <field name="name"/>
+                                        <field name="beg_balance_equity"/>
+                                        <field name="ytd" string="Year to Date Balance"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="region_report_tree">
+            <field name="name">region.report.tree</field>
+            <field name="model">region.report</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Regional Reports">
+                    <field name="name"/>
+                    <field name="period_id"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_region_report_form">
+            <field name="name">Regional Reports</field>
+            <field name="res_model">region.report</field>
+            <field name="view_type">form</field>
+        </record>
+        
+        <record id="region_report_wiz_view" model="ir.ui.view">
+            <field name="name">Generate Report</field>
+            <field name="model">region.report.wiz</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Generate Regional Report">
+                <separator string="Fetching Entries" colspan="4"/>
+					<group colspan="2" col="2">
+					<field name="region_id"/>
+					<field name="period_id"/>
+					<field name="date"/>
+					</group>
+                <separator colspan="4"/>
+                    <group colspan="4" col="6">
+                        <button icon="gtk-cancel" special="cancel" string="Cancel"/>
+                        <button icon="gtk-ok" string="Generate" name="generate" type="object" default_focus="1"/>
+                   </group>
+            </form>
+            </field>
+        </record>
+
+        <record id="action_region_report_wiz" model="ir.actions.act_window">
+            <field name="name">Generate Regional Report</field>
+            <field name="res_model">region.report.wiz</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+           <field name="view_id" ref="region_report_wiz_view"/>
+           <field name="target">new</field>
+        </record>
+        
+        
+        
+        <!-- Budget -->
+        
+        
+        <record id="region_budget_wiz_view" model="ir.ui.view">
+            <field name="name">Generate Regional Budget</field>
+            <field name="model">region.budget.wiz</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Generate Regional Budget">
+                <separator string="Budget Configuration" colspan="4"/>
+                    <group colspan="2" col="2">
+                    <field name="region_id"/>
+                    <field name="fiscal_id"/>
+                    <field name="income_position"/>
+                    <field name="expense_position"/>
+                    </group>
+                <separator colspan="4"/>
+                    <group colspan="4" col="6">
+                        <button icon="gtk-cancel" special="cancel" string="Cancel"/>
+                        <button icon="gtk-ok" string="Generate" name="generate" type="object" default_focus="1"/>
+                   </group>
+            </form>
+            </field>
+        </record>
+
+        <record id="action_region_budget_wiz" model="ir.actions.act_window">
+            <field name="name">Generate Regional Budget</field>
+            <field name="res_model">region.budget.wiz</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+           <field name="view_id" ref="region_budget_wiz_view"/>
+           <field name="target">new</field>
+        </record>
+        
+        
+       </data>
+</openerp>

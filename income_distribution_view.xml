@@ -110,13 +110,13 @@
             <field name="res_model">income.distribution.generic</field>
             <field name="view_type">form</field>
         </record>
-        <record model="ir.actions.act_window.view" id="action_idg_tree">
+        <record model="ir.actions.act_window.view" id="action_idg_tree_view">
             <field name="act_window_id" ref="action_idg_form"/>
             <field name="view_id" ref="idg_tree"/>
             <field name="view_mode">tree</field>
             <field name="sequence">10</field>
         </record>
-        <record model="ir.actions.act_window.view" id="action_idg_form">
+        <record model="ir.actions.act_window.view" id="action_idg_form_view">
             <field name="act_window_id" ref="action_idg_form"/>
             <field name="view_id" ref="idg_form"/>
             <field name="view_mode">form</field>
@@ -170,14 +170,15 @@
 	                                <tree string="Voucher Lines" colors="blue:account_name==False;red:included_in_charged==False;black:included_in_charged==True">
 	                                    <field name="name"/>
 	                                    <field name="comments"/>
-	                                    <field name="co1"/>
 	                                    <field name="batch_date"/>
-	                                    <field name="doc_num"/>
-	                                    <field name="code"/>
+	                                    <field name="dcno"/>
+	                                    <field name="donorname"/>
+	                                    <field name="city"/>
+	                                    <field name="addr2"/>
+	                                    <field name="state"/>
 	                                    <field name="account_name"/>
-	                                    <field name="type"/>
-	                                    <field name="included_in_charged" invisible="True"/>
-	                                    <field name="amount" sum="Total"/>
+                                        <field name="included_in_charged" invisible="True"/>
+                                        <field name="amount" sum="Total"/>
 	                                </tree>
 	                                <form string="Voucher Line">
 	                                    <field name="name"/>

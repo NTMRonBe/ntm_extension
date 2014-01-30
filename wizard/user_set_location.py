@@ -19,4 +19,5 @@ class res_users_set_location(osv.osv_memory):
 					users_pool.write(cr, uid, user_uid, {'location':loc})
 		return {'type': 'ir.actions.act_window_close'}
 res_users_set_location()
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

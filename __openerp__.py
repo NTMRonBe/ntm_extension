@@ -28,7 +28,7 @@
     """,
     'website': '',
     'init_xml': [],
-    "depends" : ["account","account_voucher","base","analytic","fetchmail","email_template"],
+    "depends" : ["account","account_voucher","base","analytic","fetchmail","account_budget","email_template"],
     'update_xml': ["data.xml","ntm_extensions_view.xml"
                    ,"users_view.xml",
                    #"account_move_view.xml",
@@ -45,8 +45,10 @@
                    ,"forex_view.xml","forex_data.xml","ft_data.xml","account_pettycash/account_pettycash_view.xml"
                    ,"account_pettycash/pc_sequence.xml","account_pettycash/pcr_view.xml",
                    "account_pettycash/pcl_view.xml","fund_transfer_view.xml"
-                   ,"account_pettycash/crs_view.xml","opening_balance.xml",
-                   "vehicle_charging_view.xml","invoice_slip_view.xml","bank_recon_view.xml","dbe_view.xml","allocate_view.xml","recurring_view.xml","ntm_menus.xml"],
+                   ,"account_pettycash/crs_view.xml","opening_balance.xml","region_report_view.xml",
+                   "vehicle_charging_view.xml","invoice_slip_view.xml","bank_recon_view.xml",
+                   "dbe_view.xml","allocate_view.xml","recurring_view.xml","region_view.xml","ntm_menus.xml"
+                   ],
     'demo_xml': [
     ],
     'test': [

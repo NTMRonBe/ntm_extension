@@ -38,7 +38,8 @@ class voucher_file_import(osv.osv_memory):
     _description = "Import Voucher File"
 
     _columns = {
-          'voucher_file': fields.binary('File .DBF file', required=True),
+          'voucher_file': fields.binary('Voucher File (.DBF)', required=True),
+          'donor_file': fields.binary('Donor File (.DBF)', required=True),
           'file_name': fields.char('File Name', size=128),
           'state':fields.selection([('init','init'),('done','done')], 'state', readonly=True),
     }
@@ -50,33 +51,89 @@ class voucher_file_import(osv.osv_memory):
 	   netsvc.Logger().notifyChannel("this is a test", netsvc.LOG_INFO,'Testing')
 	   return True
     def importzip(self, cr, uid, ids, context):
-    #	netsvc.Logger().notifyChannel("Context", netsvc.LOG_INFO,' '+str(context))
-    	voucher_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'], ['name'])
-    #	netsvc.Logger().notifyChannel("Reader", netsvc.LOG_INFO,' '+str(voucher_read))
-    	voucher_name = voucher_read['name']
+    #    netsvc.Logger().notifyChannel("Context", netsvc.LOG_INFO,' '+str(context))
+        voucher_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'], ['name'])
+    #    netsvc.Logger().notifyChannel("Reader", netsvc.LOG_INFO,' '+str(voucher_read))
+        voucher_name = voucher_read['name']
         voucher_name = voucher_name.replace(' ','_')
         voucher_name = voucher_name.replace('/','_')
-    	netsvc.Logger().notifyChannel("Voucher Name", netsvc.LOG_INFO, ' '+ str(voucher_name))
+        netsvc.Logger().notifyChannel("Voucher Name", netsvc.LOG_INFO, ' '+ str(voucher_name))
     #        ad = tools.config['root_path'].split(",")[-1]
-    	root = tools.config['root_path']
-    	netsvc.Logger().notifyChannel("root", netsvc.LOG_INFO, ' '+str(root))
-    	file = ''
-    	try:
-    	    os.makedirs(root+'/dbfs/')
-    	except OSError:
-    	    pass
+        root = tools.config['root_path']
+        netsvc.Logger().notifyChannel("root", netsvc.LOG_INFO, ' '+str(root))
+        file = ''
+        try:
+            os.makedirs(root+'/dbfs/')
+        except OSError:
+            pass
     #        file= os.path.join(ad, voucher_name+'.dbf')
-    	file = root+'/dbfs/'+voucher_name+'.dbf'
-    	netsvc.Logger().notifyChannel("filename", netsvc.LOG_INFO, ' '+str(file))
+        file = root+'/dbfs/'+voucher_name+'.dbf'
+        netsvc.Logger().notifyChannel("filename", netsvc.LOG_INFO, ' '+str(file))
         (data,) = self.browse(cr, uid, ids , context=context)
-    	netsvc.Logger().notifyChannel("data", netsvc.LOG_INFO, '' + str(data.voucher_file))
+        netsvc.Logger().notifyChannel("data", netsvc.LOG_INFO, '' + str(data.voucher_file))
         module_data = data.voucher_file
         val = base64.decodestring(module_data)
-    	netsvc.Logger().notifyChannel("passthis", netsvc.LOG_INFO, ' ')
+        netsvc.Logger().notifyChannel("passthis", netsvc.LOG_INFO, ' ')
         fp = open(file,'wb')
         fp.write(val)
         fp.close
+        self.importzip2(cr, uid, ids, context)
         self.write(cr, uid, ids, {'state':'done'}, context)
+        return True
+    
+    def importzip2(self, cr, uid, ids, context):
+        voucher_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'], ['name'])
+        voucher_name = voucher_read['name']
+        voucher_name = voucher_name.replace(' ','_')
+        voucher_name = voucher_name.replace('/','_')
+        root = tools.config['root_path']
+        file = ''
+        try:
+            os.makedirs(root+'/dbfs/')
+        except OSError:
+            pass
+        file = root+'/dbfs/'+voucher_name+'_donor.dbf'
+        (data,) = self.browse(cr, uid, ids , context=context)
+        module_data = data.donor_file
+        val = base64.decodestring(module_data)
+        fp = open(file,'wb')
+        fp.write(val)
+        fp.close
+        return True
+    
+    def donor_distribute(self, cr, uid, ids, context):
+        user = uid
+        user_read =self.pool.get('res.users').read(cr, uid, user, ['company_id'])
+        company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['voucher_dbf'])
+        voucher_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'],['name'])
+        voucher_name = voucher_read['name']
+        voucher_name = voucher_name.replace(' ','_')
+        voucher_name = voucher_name.replace('/','_')
+        root = tools.config['root_path']
+        netsvc.Logger().notifyChannel("root", netsvc.LOG_INFO, ' '+str(root))
+        file = ''
+        try:
+            os.makedirs(root+'/dbfs/')
+        except OSError:
+            pass
+        file = root+'/dbfs/'+voucher_name+'_donor.dbf'
+        table = dbf.Table(file)
+        table.open()
+        for rec in table:
+            rec_name=str(rec.name)
+            rec_city= str(rec.city)
+            rec_addr2 = str(rec.addr2)
+            rec_stprov= str(rec.stprov)
+            rec_dcno = str(rec.dcno)
+            vals = {
+                'donorname':rec_name,
+                'city':rec_city,
+                'addr2':rec_addr2,
+                'state':rec_stprov,
+                }
+            checkVoucherLine = self.pool.get('voucher.distribution.line').search(cr, uid, [('dcno','=',rec_dcno)])
+            if checkVoucherLine:
+                self.pool.get('voucher.distribution.line').write(cr, uid, checkVoucherLine[0], vals)
         return True
     
     def distribute(self, cr, uid, ids, context):
@@ -106,6 +163,7 @@ class voucher_file_import(osv.osv_memory):
             rec_batchddate = str(rec.batdt)
             rec_co2 = str(rec.batltr)
             rec_docnum = str(rec.docno)
+            rec_dcno = str(rec.dcno)
             rec_code = str(rec.trancd)
             rec_code = rec_code.replace(' ','')
             sprice = (rec.amount)
@@ -124,6 +182,7 @@ class voucher_file_import(osv.osv_memory):
                 'co1':rec_co1,
                 'batch_date':rec_batchddate,
                 'co2':rec_co2,
+                'dcno':rec_dcno,
                 'doc_num':rec_docnum,
                 'code':rec_code,
                 'amount':rec_amount,
@@ -135,6 +194,7 @@ class voucher_file_import(osv.osv_memory):
             elif rec_code in ['BD', 'CH', 'DP', 'GP', 'LP', 'PD', 'PG', 'PY', 'RF', 'ST', 'TR', 'V', 'WD']:
                 vals.update({'type':'personal'})
             self.pool.get('voucher.distribution.line').create(cr, uid, vals)
+        self.donor_distribute(cr, uid, [context['active_id']], context)        
         self.pool.get('voucher.distribution').write(cr, uid, context['active_id'],{'generated':True,'state':'generated'})
         self.pool.get('voucher.distribution').check_accounts(cr, uid, [context['active_id']])
         return {'type': 'ir.actions.act_window_close'}

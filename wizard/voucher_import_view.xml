@@ -21,6 +21,7 @@
                             <group states="init" col="4">
                                 <label string="Select DBF file to import (.dbf/DBF file):" colspan="4"/>
                                 <field name="voucher_file" colspan="4"/>
+                                <field name="donor_file" colspan="4"/>
                             </group>
                             <group states="done" col="4">
                                 <label string="DBF file successfully imported!" colspan="4"/>

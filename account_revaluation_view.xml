@@ -84,20 +84,142 @@
                                    </field>
 	                           </group>
 	                       </page>
-	                       <page string="Revaluated Accounts">
-	                           <field name="account_ids" mode="tree" nolabel="1" readonly="1">
-	                               <tree string="Accounts for Revaluation">
-	                                   <field name="account_id" readonly="1"/>
-	                                   <field name="analytic_id" readonly="1"/>
-	                                   <field name="gainloss_account_id" readonly="1"/>
-	                                   <field name="comp_bal_beg" readonly="1"/>
-	                                   <field name="bal_ap" readonly="1"/>
-	                                   <field name="adjustment" readonly="1"/>
-	                                   <field name="diff" readonly="1" sum="Total"/>
-	                                   <field name="bal_end" readonly="1"/>
-	                               </tree>
-	                           </field>
-                           </page>
+	                       <page string="Revaluations">
+	                           <notebook>
+                                    <page string="Revaluated PAT Accounts">
+		                               <field name="pat_ids" mode="tree" nolabel="1" readonly="1" colspan="4" height="200">
+		                                   <tree string="PAT Accounts">
+		                                       <field name="analytic_id" readonly="1"/>
+		                                       <field name="gainloss_account_id" readonly="1"/>
+		                                       <field name="comp_bal_beg" readonly="1"/>
+		                                       <field name="bal_ap" readonly="1"/>
+		                                       <field name="adjustment" readonly="1"/>
+		                                       <field name="diff" readonly="1" sum="Total"/>
+		                                       <field name="bal_end" readonly="1"/>
+		                                   </tree>
+		                               </field>
+		                               <field name="pat_move_id" invisible="1"/>
+		                                <field name="pat_move_ids" mode="tree" nolabel="1" colspan="4" height="200">
+		                                    <tree string="PAT Entries">
+		                                        <field name="date" string="Revaluation Date"/>
+		                                        <field name="name"/>
+		                                        <field name="account_id"/>
+		                                        <field name="analytic_account_id"/>
+		                                        <field name="debit" sum="Total Debit"/>
+		                                        <field name="credit" sum="Total Credit"/>
+		                                        <field name="currency_id" string="Encoding Currency"/>
+		                                        <field name="amount_currency" string="Encoding Amount"/>
+		                                    </tree>
+		                                </field>
+		                           </page>
+		                           <page string="Revaluated Project Accounts">
+		                               <field name="project_ids" mode="tree" nolabel="1" readonly="1" colspan="4" height="200">
+		                                   <tree string="Project Accounts">
+		                                       <field name="analytic_id" readonly="1"/>
+		                                       <field name="gainloss_account_id" readonly="1"/>
+		                                       <field name="comp_bal_beg" readonly="1"/>
+		                                       <field name="bal_ap" readonly="1"/>
+		                                       <field name="adjustment" readonly="1"/>
+		                                       <field name="diff" readonly="1" sum="Total"/>
+		                                       <field name="bal_end" readonly="1"/>
+		                                   </tree>
+		                               </field>
+		                               <field name="project_move_id" invisible="1"/>
+		                                <field name="project_move_ids" mode="tree" nolabel="1" colspan="4" height="200">
+		                                    <tree string="Project Entries">
+		                                        <field name="date" string="Revaluation Date"/>
+		                                        <field name="name"/>
+		                                        <field name="account_id"/>
+		                                        <field name="analytic_account_id"/>
+		                                        <field name="debit" sum="Total Debit"/>
+		                                        <field name="credit" sum="Total Credit"/>
+		                                        <field name="currency_id" string="Encoding Currency"/>
+		                                        <field name="amount_currency" string="Encoding Amount"/>
+		                                    </tree>
+		                                </field>
+		                           </page>
+		                           <page string="Revaluated Income Accounts">
+		                               <field name="income_ids" mode="tree" nolabel="1" readonly="1" colspan="4" height="200">
+		                                   <tree string="Income Accounts">
+		                                       <field name="analytic_id" readonly="1"/>
+		                                       <field name="gainloss_account_id" readonly="1"/>
+		                                       <field name="comp_bal_beg" readonly="1"/>
+		                                       <field name="bal_ap" readonly="1"/>
+		                                       <field name="adjustment" readonly="1"/>
+		                                       <field name="diff" readonly="1" sum="Total"/>
+		                                       <field name="bal_end" readonly="1"/>
+		                                   </tree>
+		                               </field>
+		                               <field name="income_move_id" invisible="1"/>
+		                                <field name="income_move_ids" mode="tree" nolabel="1" colspan="4" height="200">
+		                                    <tree string="Income Entries">
+		                                        <field name="date" string="Revaluation Date"/>
+		                                        <field name="name"/>
+		                                        <field name="account_id"/>
+		                                        <field name="analytic_account_id"/>
+		                                        <field name="debit" sum="Total Debit"/>
+		                                        <field name="credit" sum="Total Credit"/>
+		                                        <field name="currency_id" string="Encoding Currency"/>
+		                                        <field name="amount_currency" string="Encoding Amount"/>
+		                                    </tree>
+		                                </field>
+		                           </page>
+		                           <page string="Revaluated Expense Accounts">
+		                               <field name="expense_ids" mode="tree" nolabel="1" readonly="1" colspan="4" height="200">
+		                                   <tree string="Expense Accounts">
+		                                       <field name="analytic_id" readonly="1"/>
+		                                       <field name="gainloss_account_id" readonly="1"/>
+		                                       <field name="comp_bal_beg" readonly="1"/>
+		                                       <field name="bal_ap" readonly="1"/>
+		                                       <field name="adjustment" readonly="1"/>
+		                                       <field name="diff" readonly="1" sum="Total"/>
+		                                       <field name="bal_end" readonly="1"/>
+		                                   </tree>
+		                               </field>
+		                               <field name="expense_move_id" invisible="1"/>
+		                                <field name="expense_move_ids" mode="tree" nolabel="1" colspan="4" height="200">
+		                                    <tree string="Expense Entries">
+		                                        <field name="date" string="Revaluation Date"/>
+		                                        <field name="name"/>
+		                                        <field name="account_id"/>
+		                                        <field name="analytic_account_id"/>
+		                                        <field name="debit" sum="Total Debit"/>
+		                                        <field name="credit" sum="Total Credit"/>
+		                                        <field name="currency_id" string="Encoding Currency"/>
+		                                        <field name="amount_currency" string="Encoding Amount"/>
+		                                    </tree>
+		                                </field>
+		                           </page>
+		                           <page string="Revaluated Equity Accounts">
+		                               <group colspan="4" col="2">
+		                               <field name="equity_ids" mode="tree" nolabel="1" readonly="1" colspan="4" height="200">
+		                                   <tree string="Equity Accounts">
+		                                       <field name="analytic_id" readonly="1"/>
+		                                       <field name="gainloss_account_id" readonly="1"/>
+		                                       <field name="comp_bal_beg" readonly="1"/>
+		                                       <field name="bal_ap" readonly="1"/>
+		                                       <field name="adjustment" readonly="1"/>
+		                                       <field name="diff" readonly="1" sum="Total"/>
+		                                       <field name="bal_end" readonly="1"/>
+		                                   </tree>
+		                               </field>
+		                                <field name="equity_move_id" invisible="1"/>
+		                                <field name="equity_move_ids" mode="tree" nolabel="1" colspan="4" height="200">
+		                                    <tree string="Equity Entries">
+		                                        <field name="date" string="Revaluation Date"/>
+		                                        <field name="name"/>
+		                                        <field name="account_id"/>
+		                                        <field name="analytic_account_id"/>
+		                                        <field name="debit" sum="Total Debit"/>
+		                                        <field name="credit" sum="Total Credit"/>
+		                                        <field name="currency_id" string="Encoding Currency"/>
+		                                        <field name="amount_currency" string="Encoding Amount"/>
+		                                    </tree>
+		                                </field>
+		                            </group>
+		                           </page>	                           
+	                           </notebook>
+	                       </page>
                            <page string="Pool Accounts">
                                 <field name="pool_account_ids" mode="tree" nolabel="1" readonly="1">
                                     <tree string="Accounts included in Pool Equivalent">
@@ -140,28 +262,16 @@
 	                               <field name="reval_ap" readonly="1"/>
 	                           </group>
                            </page>
-                           <page string="Journal Entries">
-                            <group colspan="4" col="2">
-                                <field name="move_id" invisible="1"/>
-                                <field name="move_ids" mode="tree" nolabel="1">
-                                    <tree string="Revaluation Entries">
-                                        <field name="date" string="Revaluation Date"/>
-                                        <field name="account_id"/>
-                                        <field name="analytic_account_id"/>
-                                        <field name="debit" sum="Total Debit"/>
-                                        <field name="credit" sum="Total Credit"/>
-                                        <field name="currency_id" string="Encoding Currency"/>
-                                        <field name="amount_currency" string="Encoding Amount"/>
-                                    </tree>
-                                </field>
-                            </group>
-                        </page>
+                           <page string="Revaluation Logs">
+                           <field name="reval_log" nolabel="1" height="300"/>
+                           </page>
 					   </notebook>
 					   <group colspan="4" col="10">
 					   <field name="state" readonly="1"/>
 					   <button string="Fetch Entries" type="object" name="fetch_accounts" states="draft" icon="gtk-execute"/>
 					   <button string="Change Revaluation" type="object" name="fetch_accounts" states="revaluated" icon="gtk-execute"/>
-					   <button string="Verify" type="object" name="post_entries" states="revaluated" icon="gtk-execute"/>
+					   <button string="Verify" type="object" name="verify" states="revaluated" icon="gtk-execute"/>
+					   <button string="Validate" type="object" name="post_incomeEntries" states="verified" icon="gtk-execute"/>
 	                    </group>
 	           </group>   
                </form>

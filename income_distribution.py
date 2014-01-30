@@ -226,22 +226,30 @@ class idg(osv.osv):
                         'currency_id':currency,
                         }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
-                name = "Contribution of " + idgl_read['remarks'] + " with reference#" + idg['ref']
-                move_line = {
-                        'name':name,
-                        'journal_id':journal_id,
-                        'period_id':period_id,
-                        'account_id':account_read['normal_account'][0],
-                        'debit':contribution,                        
-                        'date':idg['ddate'],
-                        'ref':idg['name'],
-                        'move_id':move_id,
-                        'analytic_account_id':idgl_read['account_id'][0],
-                        'amount_currency':idgl_read['charges'],
-                        'currency_id':currency,
-                        }
-                self.pool.get('account.move.line').create(cr, uid, move_line)
-            if total_distribution != idg['amount']:
+		if contribution!=0.00:
+                    name = "Contribution of " + idgl_read['remarks'] + " with reference#" + idg['ref']
+                    move_line = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':period_id,
+                            'account_id':account_read['normal_account'][0],
+                            'debit':contribution,                        
+                            'date':idg['ddate'],
+                            'ref':idg['name'],
+                            'move_id':move_id,
+                            'analytic_account_id':idgl_read['account_id'][0],
+                            'amount_currency':idgl_read['charges'],
+                            'currency_id':currency,
+                            }
+                    self.pool.get('account.move.line').create(cr, uid, move_line)
+	    netsvc.Logger().notifyChannel("name", netsvc.LOG_INFO, ' '+str(idg['amount']))
+	    netsvc.Logger().notifyChannel("name", netsvc.LOG_INFO, ' '+str(total_distribution))
+	    idg_amount = idg['amount']
+	    idg_amount = "%.3f" % idg_amount
+	    idg_amount = float(idg_amount)
+	    total_distribution = "%.3f" % total_distribution
+	    total_distribution = float(total_distribution)
+            if total_distribution != idg_amount:
                 raise osv.except_osv(_('Error!'), _('ERR-001: Total received amount is not equal to the total amount to be distributed!'))
 	    elif total_distribution== idg['amount']:
 	    	name = "Total Distributed Amount with ref#" + idg['ref']
@@ -258,20 +266,21 @@ class idg(osv.osv):
                         'currency_id':currency,
                         }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
-                name = "Total Contributed Amount with ref#" + idg['ref']
-                move_line = {
-                        'name':name,
-                        'journal_id':journal_id,
-                        'period_id':period_id,
-                        'account_id':company_read['contributions_acct'][0],
-                        'credit':curr_contribution,                        
-                        'date':idg['ddate'],
-                        'ref':idg['name'],
-                        'move_id':move_id,
-                        'amount_currency':total_contribution,
-                        'currency_id':currency,
-                        }
-                self.pool.get('account.move.line').create(cr, uid, move_line)
+		if curr_contribution!=0.00:
+                   name = "Total Contributed Amount with ref#" + idg['ref']
+                   move_line = {
+                           'name':name,
+                           'journal_id':journal_id,
+                           'period_id':period_id,
+                           'account_id':company_read['contributions_acct'][0],
+                           'credit':curr_contribution,                        
+                           'date':idg['ddate'],
+                           'ref':idg['name'],
+                           'move_id':move_id,
+                           'amount_currency':total_contribution,
+                           'currency_id':currency,
+                           }
+                   self.pool.get('account.move.line').create(cr, uid, move_line)
                 #self.pool.get('account.move').post(cr, uid, [move_id])
                 self.write(cr, uid, ids, {'state':'distributed','dmove_id':move_id})
         return True
@@ -427,6 +436,11 @@ class voucher_distribution_line(osv.osv):
         'doc_num':fields.char('DOC No',size=10),
         'code':fields.char('CODE',size=10),
         'amount':fields.float('Amount'),
+        'donorname':fields.char('Donor Name', size=64),
+        'dcno':fields.char('DC No',size=32),
+        'city':fields.char('City', size=64),
+        'addr2':fields.char('Address', size=100),
+        'state':fields.char('State/Province',size=32),
         'account_name':fields.char('Account Name',size=100),
         'analytic_account_id':fields.many2one('account.analytic.account','Analytic Account'),
         'account_id':fields.many2one('account.account','Normal Account'),

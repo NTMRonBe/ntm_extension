@@ -49,7 +49,7 @@ class fund_transfer(osv.osv):
                             ('released','Released'),
                             ('done','Transferred'),
                             ('cancel','Cancelled'),
-                            ],'State',readonly=True),
+                            ],'State'),
         }
     
     _defaults = {

@@ -36,6 +36,7 @@ class expense_distribution_generic(osv.osv):
         'amount':fields.float('Amount to Distribute'),
         'name':fields.char('ID',size=16),
         'date':fields.date('Date'),
+	'user_id':fields.many2one('res.users','Book Keeper'),
         'description':fields.text('Description'),
         'move_id':fields.many2one('account.move','Journal Entry'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
@@ -44,6 +45,7 @@ class expense_distribution_generic(osv.osv):
     _defaults = {
         'date': lambda *a: time.strftime('%Y-%m-%d'),
         'name':'/',
+	'user_id': lambda obj, cr, uid, context: uid,
         }
 expense_distribution_generic()
 

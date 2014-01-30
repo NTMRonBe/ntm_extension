@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+    
+        <record id="allocate_funds_wiz_view" model="ir.ui.view">
+            <field name="name">Allocate Funds</field>
+            <field name="model">account.allocations.wiz</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Allocate Funds">
+                <separator string="Fund Allocation" colspan="4"/>
+                <label string="This will create the allocations for all accounts that is set for allocation of balances." colspan="4"/>
+<group colspan="2" col="2">
+<field name="journal_id"/>
+<field name="period_id"/>
+<field name="name"/>
+</group>
+                <separator colspan="4"/>
+                    <group colspan="4" col="6">
+                        <button icon="gtk-cancel" special="cancel" string="Cancel"/>
+                        <button icon="gtk-ok" string="Allocate" name="allocate" type="object" default_focus="1"/>
+                   </group>
+            </form>
+            </field>
+        </record>
+
+        <record id="action_allocate_funds_wiz" model="ir.actions.act_window">
+            <field name="name">Allocate Funds</field>
+            <field name="res_model">account.allocations.wiz</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+           <field name="view_id" ref="allocate_funds_wiz_view"/>
+           <field name="target">new</field>
+        </record>
+        
+       </data>
+</openerp>

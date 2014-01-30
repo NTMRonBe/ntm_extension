@@ -35,16 +35,10 @@ class regional_upload(osv.osv_memory):
 	    date_now = form['date']
         if regional_entries:
             date = datetime.datetime.now()
-#            period = date.strftime("%m/%Y")
-#            date_now = date.strftime("%Y/%m/%d")
-#            period_search = self.pool.get('account.period').search(cr, uid, [('name','=',period)])
             journal_search = self.pool.get('account.journal').search(cr, uid, [('type','=','regional_report')],limit=1)
             journal_id = False
-#            period_id = False
             for journal in journal_search:
                 journal_id = journal
-#            for period in period_search:
-#                period_id = period
             move = {
                 'journal_id':journal_id,
                 'period_id':period_id,
@@ -58,6 +52,7 @@ class regional_upload(osv.osv_memory):
                 account_search = False
                 analytic_search = False
                 regional_entries_read = self.pool.get('regional.uploader').read(cr, uid, regional_entry,context=None)
+                print regional_entries_read
                 account_search = self.pool.get('account.accpac').search(cr, uid,[('name','=',regional_entries_read['acctid'])])
                 accpac_acc = regional_entries_read['acctid']
                 if not account_search:
@@ -94,7 +89,6 @@ class regional_upload(osv.osv_memory):
                     credit = amount * -1
                     debit = 0.00
                 name = regional_entries_read['transdesc'] +' '+regional_entries_read['date']
-                netsvc.Logger().notifyChannel("name", netsvc.LOG_INFO, ' '+str(name))
 		move_line = {
                     'name':name,
                     'journal_id':journal_id,

@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+    
+    <record id="ntm_budget_form" model="ir.ui.view">
+            <field name="name">ntm.budget.form</field>
+            <field name="model">ntm.budget</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string = "Budget Management">
+                    <field name="name" attrs="{'readonly':[('state','!=','draft')]}"/>
+                    <field name="year_id" attrs="{'readonly':[('state','!=','draft')]}"/>
+                    <separator colspan="4"/>
+                    <group colspan="4" col="4">
+                        <field name="income_ids" colspan="4" nolabel="1" mode="tree,form" attrs="{'readonly':[('state','!=','draft')]}">
+                            <tree string="Income Accounts">
+                                <field name="name"/>
+                                <field name="previous_budget" sum="Total" string="Previous Expected Income"/>
+                                <field name="previous_actual" sum="Total" string="Previous Actual Income"/>
+                                <field name="present_budget" sum="Total" string="Expected Income"/>
+                                <field name="actual_amount" sum="Total" string="Actual Income"/>
+                                <field name="percentage"/>
+                            </tree>
+                            <form string="Account">
+                                <group colspan="4" col="4">
+                                    <field name="name" domain="[('ntm_type','=','income')]"/>
+                                    <field name="present_budget"/>
+                                    <field name="previous_budget"/>
+                                    <field name="percentage"/>
+                                </group>
+                                <group colspan="4" col="4">
+                                    <field name="period_ids" colspan="4" nolabel="1" mode="tree" readonly="1">
+                                        <tree string="Received Amount per Period">
+                                            <field name="name"/>
+                                            <field name="actual" string="Received Amount" sum="Total"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <separator colspan="4"/>
+                    <group colspan="4" col="4">
+                        <field name="expense_ids" colspan="4" nolabel="1" mode="tree,form" attrs="{'readonly':[('state','!=','draft')]}">
+                            <tree string="Expense Accounts">
+                                <field name="name"/>
+                                <field name="previous_budget" sum="Total" string="Previous Expected Expense"/>
+                                <field name="previous_actual" sum="Total" string="Previous Actual Expense"/>
+                                <field name="present_budget" sum="Total" string="Expected Expense"/>
+                                <field name="actual_amount" sum="Total" string="Actual Expense"/>
+                                <field name="percentage"/>
+                            </tree>
+                            <form string="Account">
+                                <group colspan="4" col="4">
+                                    <field name="name" domain="[('ntm_type','=','expense')]"/>
+                                    <field name="present_budget"/>
+                                    <field name="previous_budget"/>
+                                    <field name="percentage"/>
+                                </group>
+                                <group colspan="4" col="4">
+                                    <field name="period_ids" colspan="4" nolabel="1" mode="tree" readonly="1">
+                                        <tree string="Spent Amount per Period">
+                                            <field name="name"/>
+                                            <field name="actual" string="Spent Amount" sum="Total"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                    <group colspan="4" col="13">
+                        <field name="state" readonly="1"/>
+                        <button name="activate" string="Activate"  type="object" states="draft"/>
+                        <button name="update" string="Update Information"  type="object" states="active"/>
+                        <button name="close" string="Close"  type="object" states="active"/>
+                    </group>
+                </form>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="ntm_budget_tree">
+            <field name="name">ntm.budget.tree</field>
+            <field name="model">ntm.budget</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Budgets">
+                    <field name="name"/>
+                    <field name="year_id"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_ntm_budget_form">
+            <field name="name">Budgets</field>
+            <field name="res_model">ntm.budget</field>
+            <field name="view_type">form</field>
+        </record>
+        
+       </data>
+</openerp>

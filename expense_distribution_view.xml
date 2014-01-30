@@ -52,6 +52,7 @@
                         <field name="journal_id"/>
                         <field name="date"/>
                         <field name="amount"/>
+			<field name="user_id" readonly="1"/>
                     </group>
                     <notebook>
                         <page string="Distribution Details">

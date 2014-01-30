@@ -17,6 +17,7 @@ class direct_bank_expense(osv.osv):
         'remarks':fields.text('Remarks'),
         'rdate':fields.date('Received Date'),
         'move_id':fields.many2one('account.move','Move Name'),
+	'user_id':fields.many2one('res.users','Book Keeper'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
         'ref':fields.char('Reference',size=64),
         'state':fields.selection([
@@ -34,6 +35,7 @@ class direct_bank_expense(osv.osv):
     _defaults = {
         'state':'draft',
         'rdate':lambda *a: time.strftime('%Y-%m-%d'),
+	'user_id': lambda obj, cr, uid, context: uid,
         }
             
 direct_bank_expense()

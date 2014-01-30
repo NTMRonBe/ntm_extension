@@ -157,7 +157,7 @@
                         <page string="Call logs and Additional Charges">
                             <separator string="Call Logs" colspan="4"/>
                             <button name="%(action_local_change)d" colspan="4" attrs="{'invisible':[('state','!=','draft')]}" string="Change location to Local" icon="gtk-execute" type="action"/> 
-                            <!-- <field mode="tree" name="log_ids" nolabel="1">
+                            <field mode="tree,form" name="log_ids" nolabel="1">
                                 <tree string="Call Logs" editable="top" colors="red:price!=statement_price">
                                     <field name="name" readonly="1"/>
                                     <field name="time" readonly="1"/>
@@ -175,7 +175,6 @@
                                     <button name="reconcile" attrs="{'invisible':[('reconcile','=',True)]}" icon="gtk-execute" type="object"/>
                                 </tree>
                             </field>
-                            -->
                             <button name="%(action_additional_charge)d" colspan="4" attrs="{'invisible':[('state','!=','draft')]}" string="Add Additional Charge" icon="gtk-execute" type="action"/>
                             <separator string="Additional Charges" colspan="4"/>
                             <field mode="tree" name="additional_ids" nolabel="1">

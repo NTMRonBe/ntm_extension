@@ -17,6 +17,7 @@
                         <group colspan="2" col="2">
 	                        <field name="amount" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
 	                        <field name="rdate" attrs="{'readonly':[('state','!=','draft')]}" required="1"/>
+				<field name="user_id" readonly="1" invisible="1"/>
                         </group>
                     </group>
                     <notebook>
