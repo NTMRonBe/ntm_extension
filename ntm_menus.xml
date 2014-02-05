@@ -70,6 +70,8 @@
         
         <menuitem id="ntm_bankandcash_root" sequence="40" name="Bank and Cash" web_icon="images/safe.png"
             web_icon_hover="images/safe_hover.png"/>
+		<menuitem id="ntm_new_reval" sequence="100" name="Revised Revaluation" web_icon="images/safe.png"
+            web_icon_hover="images/safe_hover.png" action="action_new_reval_tree"/>
         <menuitem id="ntm_bankaccounts_main" sequence="10" name="Bank Accounts" parent="ntm_bankandcash_root"/>
         <menuitem id="menu_action_ntm_res_partner_bank_company_form" parent="ntm_bankaccounts_main" sequence="10" action="action_ntm_res_partner_bank_company_tree"/>
         <menuitem id="menu_action_ntm_res_partner_bank_entity_form" parent="ntm_bankaccounts_main" sequence="20" action="action_ntm_res_partner_bank_entity_tree"/>

@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+		<record model="ir.ui.view" id="view_new_reval_tree">
+            <field name="name">new.reval.tree</field>
+            <field name="model">new.reval</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Revaluation">
+                    <field name="name"/>
+                    <field name="period_id"/>
+					<field name="rate_sr"/>
+					<field name="rate_pr"/>
+					<field name="rate_er"/>
+                </tree>
+            </field>
+        </record>
+		
+		<record id="view_new_reval_filter" model="ir.ui.view">
+            <field name="name">new.reval.filter</field>
+            <field name="model">new.reval</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Revaluation">
+                    <field name="name"/>
+                    <field name="period_id"/>		    
+                    </search>
+            </field>
+        </record>      
+		
+		<record id="view_new_reval_form" model="ir.ui.view">
+            <field name="name">new.reval.form</field>
+            <field name="model">new.reval</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Revaluation">
+					<group colspan="4" col="4">
+						<group colspan="2" col="2">
+							<separator string="Revaluation Details" colspan="2"/>
+							<field name="name"/>
+							<field name="period_id" widget="selection" domain="[('state','=','draft')]"/>
+						</group>
+						<group col="2" colspan="2">
+							<separator string="Foreign Exchange Rates" colspan="2"/>
+							<group colspan="2" col="4">
+								<group col="2">
+									<separator string="Primary Currency Rates" colspan="2"/>
+									<field name="rate_sr"/>
+									<field name="rate_pr"/>
+									<field name="rate_er"/>
+								</group>
+								<group col="2">
+									<separator string="Secondary Currency Rates" colspan="2"/>
+									<field name="rate_sre"/>
+									<field name="rate_pre"/>
+									<field name="rate_ere"/>
+								</group>
+							</group>
+						</group>
+					</group>
+					<notebook>
+						<page string="Accounts Revaluation">
+							<button string="Fetch Accounts" type="object" name="get_pool_accts" icon="gtk-execute"/>
+							<field name="acc_ids" mode="tree" nolabel="1" readonly="1" colspan="4">
+								<tree string="Accounts for Revaluation">
+									<field name="acc_name"/>
+									<field name="account_id" invisible="1"/>
+									<field name="analytic_id" invisible="1"/>
+									<field name="pri_pool" invisible="1"/>
+									<field name="sec_pool" invisible="1"/>
+									<field name="is_pr" invisible="1"/>
+									<field name="currency_id" invisible="1"/>
+									<field name="beg_bal_src" invisible="1"/>
+									<field name="beg_bal_phpe" invisible="1"/>
+									<field name="beg_bal_sr" invisible="1"/>
+									<field name="pri_postings" invisible="1"/>
+									<field name="sec_postings" invisible="1"/>
+									<field name="phpe_postings_sr" invisible="1"/>
+									<field name="phpe_postings_pr" sum="Total" invisible="1"/>
+									<field name="diff_sr_pr" sum="Total" invisible="1"/>
+									<field name="rev_beg_bal" sum="Total" invisible="1"/>
+									<field name="diff1" sum="Total" invisible="1"/>
+									<field name="diff1_pool" sum="Total" invisible="1"/>
+									<field name="bal_ap" sum="Total"/>
+									<field name="bal_ap_diff1" sum="Total"/>
+									<field name="bal_ap_pool" sum="Total"/>
+									<field name="diff2" sum="Total"/>
+									<field name="end_bal_pr" sum="Total"/>
+									<field name="end_bal_pool" sum="Total"/>
+									<field name="post_corr" sum="Total"/>
+									<field name="diff_total_pr" sum="Total"/>
+									<field name="diff_total_sec" sum="Total"/>
+								</tree>
+							</field>
+						</page>
+						<page string="Computation Details">
+							<group colspan="4" col="4">
+								<field name="pool_total"/>
+								<field name="pool_aptotal"/>
+								<field name="rcf1"/>
+								<field name="rcf2"/>
+							</group>
+							<group colspan="4" col="4">
+								<group colspan="2" col="2">
+									<separator string="Primary Currency Details" colspan="2"/>		
+									<field name="primary_curr"/>
+								</group>
+								<group colspan="2" col="2">
+									<separator string="Secondary Currency Details" colspan="2"/>		
+									<field name="secondary_curr"/>
+								</group>
+							</group>
+							<group colspan="4" col="4">
+							<separator string="Beginning Balances" colspan="4"/>
+								<group colspan="2" col="2">
+									<field name="pri_pool"/>
+									<field name="pri_pf"/>
+								</group>
+								<group colspan="2" col="2">
+									<field name="sec_pool"/>
+									<field name="sec_pf"/>
+								</group>
+							</group>
+							<group colspan="4" col="4">
+							<separator string="After Posting Balances" colspan="4"/>
+								<group colspan="2" col="2">
+									<field name="pri_appool"/>
+									<field name="pri_appf"/>
+								</group>
+								<group colspan="2" col="2">
+										<field name="sec_appool"/>
+										<field name="sec_appf"/>
+								</group>
+							</group>
+						</page>
+					</notebook>
+                </form>
+            </field>
+        </record>     
+                
+        <record id="action_new_reval_tree" model="ir.actions.act_window">
+            <field name="name">Revised Revaluation</field>
+            <field name="res_model">new.reval</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+       </data>
+</openerp>
