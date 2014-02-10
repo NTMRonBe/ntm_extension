@@ -103,6 +103,7 @@ class account_soa(osv.osv):
             'total_expense':fields.float('Total Expense'),
             'inc_exp':fields.float('Income-Expenses'),
             'end_balance':fields.float('Ending Balance'),
+			'disclaimer':fields.text('Disclaimer'),
             }
 account_soa()
 

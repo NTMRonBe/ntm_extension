@@ -8,7 +8,7 @@
             rml="ntm_extension/report/account_soa.rml"
             auto="False"
             attachment="('SOA of '+(object.account_number.name)+' for '+(object.period_id.name))"
-            header = "False"
+            header = "True"
             menu="True"/>
             
             
@@ -64,6 +64,10 @@
                         </form>
                     </field>
                     </group>
+					<group colspan="4" col="2">
+						<separator string="Disclaimer" colspan="4"/>
+						<field name="disclaimer" nolabel="1"/>
+					</group>
                 </form>
             </field>
         </record>
