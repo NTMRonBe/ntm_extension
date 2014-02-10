@@ -70,17 +70,17 @@
 									<field name="sec_pool" invisible="1"/>
 									<field name="is_pr" invisible="1"/>
 									<field name="currency_id" invisible="1"/>
-									<field name="beg_bal_src" invisible="1"/>
-									<field name="beg_bal_phpe" invisible="1"/>
-									<field name="beg_bal_sr" invisible="1"/>
-									<field name="pri_postings" invisible="1"/>
-									<field name="sec_postings" invisible="1"/>
-									<field name="phpe_postings_sr" invisible="1"/>
-									<field name="phpe_postings_pr" sum="Total" invisible="1"/>
-									<field name="diff_sr_pr" sum="Total" invisible="1"/>
-									<field name="rev_beg_bal" sum="Total" invisible="1"/>
-									<field name="diff1" sum="Total" invisible="1"/>
-									<field name="diff1_pool" sum="Total" invisible="1"/>
+									<field name="beg_bal_src"/>
+									<field name="beg_bal_phpe" />
+									<field name="beg_bal_sr" />
+									<field name="pri_postings" />
+									<field name="sec_postings" />
+									<field name="phpe_postings_sr" />
+									<field name="phpe_postings_pr" sum="Total" />
+									<field name="diff_sr_pr" sum="Total" />
+									<field name="rev_beg_bal" sum="Total" />
+									<field name="diff1" sum="Total" />
+									<field name="diff1_pool" sum="Total" />
 									<field name="bal_ap" sum="Total"/>
 									<field name="bal_ap_diff1" sum="Total"/>
 									<field name="bal_ap_pool" sum="Total"/>
@@ -90,6 +90,9 @@
 									<field name="post_corr" sum="Total"/>
 									<field name="diff_total_pr" sum="Total"/>
 									<field name="diff_total_sec" sum="Total"/>
+									<field name="eba" sum="Total"/>
+									<field name="ebb" sum="Total"/>
+									<field name="ebc" sum="Total"/>
 								</tree>
 							</field>
 						</page>
@@ -132,6 +135,21 @@
 										<field name="sec_appf"/>
 								</group>
 							</group>
+						</page>
+						<page string="Journal Entries">
+							<field name="move_id" invisible="1"/>
+		                        <field name="move_ids" mode="tree" nolabel="1" colspan="4" height="200">
+									<tree string="Journal Entries">
+										<field name="date" string="Revaluation Date"/>
+		                                <field name="name"/>
+		                                <field name="account_id"/>
+		                                <field name="analytic_account_id"/>
+		                                <field name="debit" sum="Total Debit"/>
+		                                <field name="credit" sum="Total Credit"/>
+		                                <field name="currency_id" string="Encoding Currency"/>
+		                                <field name="amount_currency" string="Encoding Amount"/>
+		                            </tree>
+		                        </field>
 						</page>
 					</notebook>
                 </form>

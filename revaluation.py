@@ -70,12 +70,28 @@ class new_reval(osv.osv):
 		'sec_appf':fields.float('Portion Factor',digits=(16,8)),
 		'rcf1':fields.function(_rcf1_amount, method=True, type='float', string='Rate Change Factor 1', store=False,digits=(16,8)),
 		'rcf2':fields.function(_rcf2_amount, method=True, type='float', string='Rate Change Factor 2', store=False,digits=(16,8)),
+		'move_id':fields.many2one('account.move','Journal Entry'),
+        'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
 		}
 new_reval()
 
 class new_reval_accts(osv.osv):
 	_name = 'new.reval.accts'
 	_description = "Accounts"
+	
+	def _eba_amount(self, cr, uid, ids, field,arg, context=None):
+		rec = self.browse(cr, uid, ids, context=None)
+		result = {}
+		for r in rec:
+			rate_er = r.reval_id.rate_er
+			if r.is_pr == True:
+				result[r.id] = r.beg_bal_src+r.phpe_postings_sr+r.post_corr+r.diff_total_pr
+			elif r.pri_pool == True:
+				result[r.id] = r.beg_bal_src+r.phpe_postings_pr
+			elif r.sec_pool == True:
+				result[r.id] = (r.beg_bal_src + r.sec_postings)*rate_er
+		return result
+	
 	_columns = {
 		'account_id':fields.many2one('account.account','Normal Account'),
 		'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
@@ -105,6 +121,11 @@ class new_reval_accts(osv.osv):
 		'post_corr':fields.float('Posting Corrections(SR,PR)'),
 		'diff_total_pr':fields.float('Diff Total PR Accounts'),
 		'diff_total_sec':fields.float('Diff Total Secondary Currency Accounts'),
+		'eba':fields.float('Ending Balance A'),
+		'ebb':fields.float('Ending Balance B'),
+		'ebc':fields.float('Ending Balance C'),
+		#'eba':fields.function(_eba_amount, method=True, type='float', string='EB A.', store=False),
+		#'ebb':fields.function(_ebb_amount, method=True, type='float', string='EB B.', store=False),
 		}
 new_reval_accts()
 
@@ -159,7 +180,7 @@ class new_reval2(osv.osv):
 					for analytic_acc in analytic_acc_search:
 						analyticRead = self.pool.get('account.analytic.account').read(cr, uid, analytic_acc, ['name']),
 						analyticName = analyticRead[0]['name']
-						entries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',analytic_acc),('account_id','=',acct), ('period_id','=', beg_period)])
+						entries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',analytic_acc),('account_id','=',acct), ('period_id','<', reval_period)])
 						amount = 0.00
 						for entry in entries:
 							entryRead = self.pool.get('account.move.line').read(cr, uid, entry, ['debit','credit','amount_currency'])
@@ -213,10 +234,15 @@ class new_reval2(osv.osv):
 							end_bal_pool = amount + phpe_postings_pr
 							diff_total_sec = 0.00
 						diff2 = 0.00 * sec_appf * rcf2
+						eba = 0.00
+						if sec_pool == True:
+							eba = (amount + sec_posts) * end_rate
+						elif pri_pool == True:
+							eba = amount + phpe_postings_pr
 						vals.update({'analytic_id':analytic_acc, 'acc_name':analyticName, 'beg_bal_src':amount,'beg_bal_sr':phpe_sr, 'beg_bal_phpe':phpe_sr,'pri_postings':pri_posts,'sec_postings':sec_posts,'phpe_postings_sr':phpe_postings_sr,'phpe_postings_pr':phpe_postings_pr,'diff_sr_pr':diff_sr_pr,'rev_beg_bal':rev_beg_bal, 'diff1_pool':diff1_pool,'bal_ap':bal_ap,'bal_ap_pool':bal_ap_pool,'diff2':diff2, 'end_bal_pool':end_bal_pool,'diff_total_sec':diff_total_sec})
 						self.pool.get('new.reval.accts').create(cr, uid, vals)
 				elif not analytic_acc_search:
-					entries = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',acct), ('period_id','=', beg_period)])
+					entries = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',acct), ('period_id','<', reval_period)])
 					amount = 0.00
 					rev_amount = 0.00
 					for entry in entries:
@@ -269,7 +295,12 @@ class new_reval2(osv.osv):
 						primary_appool += bal_ap_pool
 						end_bal_pool = amount + phpe_postings_pr
 						diff_total_sec = 0.00
-					vals.update({'acc_name':acctRead['name'],'beg_bal_src':amount,'beg_bal_sr':phpe_sr, 'beg_bal_phpe':phpe_sr,'pri_postings':pri_posts,'sec_postings':sec_posts,'phpe_postings_sr':phpe_postings_sr,'phpe_postings_pr':phpe_postings_pr,'diff_sr_pr':diff_sr_pr,'rev_beg_bal':rev_beg_bal,'diff1_pool':diff1_pool,'bal_ap':bal_ap,'bal_ap_pool':bal_ap_pool, 'end_bal_pool':end_bal_pool,'diff_total_sec':diff_total_sec})
+					eba = 0.00
+					if sec_pool == True:
+						eba = (amount + sec_posts) * end_rate
+					elif pri_pool == True:
+						eba = amount + phpe_postings_pr
+					vals.update({'acc_name':acctRead['name'],'beg_bal_src':amount,'beg_bal_sr':phpe_sr, 'beg_bal_phpe':phpe_sr,'pri_postings':pri_posts,'sec_postings':sec_posts,'phpe_postings_sr':phpe_postings_sr,'phpe_postings_pr':phpe_postings_pr,'diff_sr_pr':diff_sr_pr,'rev_beg_bal':rev_beg_bal,'diff1_pool':diff1_pool,'bal_ap':bal_ap,'bal_ap_pool':bal_ap_pool, 'end_bal_pool':end_bal_pool,'diff_total_sec':diff_total_sec, 'eba':eba,'ebb':eba,'ebc':eba})
 					self.pool.get('new.reval.accts').create(cr, uid, vals)
 			pool_total = primary_pool + secondary_pool
 			pool_aptotal = primary_appool + secondary_appool
@@ -303,9 +334,10 @@ class new_reval2(osv.osv):
 				analytic_acc_search = self.pool.get('account.analytic.account').search(cr, uid, [('normal_account','=',acct)])
 				if analytic_acc_search:
 					for analytic_acc in analytic_acc_search:
-						analyticRead = self.pool.get('account.analytic.account').read(cr, uid, analytic_acc, ['name']),
+						analyticRead = self.pool.get('account.analytic.account').read(cr, uid, analytic_acc, ['name','ntm_type']),
+						print analyticRead
 						analyticName = analyticRead[0]['name']
-						entries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',analytic_acc),('account_id','=',acct), ('period_id','=', beg_period)])
+						entries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',analytic_acc),('account_id','=',acct), ('period_id','<', reval_period)])
 						amount = 0.00
 						for entry in entries:
 							entryRead = self.pool.get('account.move.line').read(cr, uid, entry, ['debit','credit','amount_currency'])
@@ -342,10 +374,19 @@ class new_reval2(osv.osv):
 						end_bal_pr = bal_ap_diff1 + diff2
 						post_corr = phpe_postings_pr - phpe_postings_sr
 						diff_total_pr = diff1 + diff2
-						vals.update({'analytic_id':analytic_acc, 'acc_name':analyticName, 'beg_bal_src':amount,'beg_bal_sr':amount, 'beg_bal_phpe':amount,'pri_postings':pri_posts,'sec_postings':sec_posts,'phpe_postings_sr':phpe_postings_sr,'phpe_postings_pr':phpe_postings_pr,'diff_sr_pr':diff_sr_pr,'rev_beg_bal':rev_beg_bal,'diff1':diff1,'bal_ap':bal_ap,'bal_ap_diff1':bal_ap_diff1,'diff2':diff2,'end_bal_pr':end_bal_pr,'post_corr':post_corr, 'diff_total_pr':diff_total_pr})
+						eba = amount+ phpe_postings_sr+ post_corr+ diff_total_pr
+						ebb = 0.00
+						ebc = 0.00
+						if analyticRead[0]['ntm_type'] in ['equity','income','expense']:
+							ebb = amount + phpe_postings_sr + post_corr
+							ebc = amount + phpe_postings_sr
+						elif analyticRead[0]['ntm_type'] not in ['equity','income','expense','gl']:
+							ebb = eba
+							ebc = eba
+						vals.update({'analytic_id':analytic_acc, 'acc_name':analyticName, 'beg_bal_src':amount,'beg_bal_sr':amount, 'beg_bal_phpe':amount,'pri_postings':pri_posts,'sec_postings':sec_posts,'phpe_postings_sr':phpe_postings_sr,'phpe_postings_pr':phpe_postings_pr,'diff_sr_pr':diff_sr_pr,'rev_beg_bal':rev_beg_bal,'diff1':diff1,'bal_ap':bal_ap,'bal_ap_diff1':bal_ap_diff1,'diff2':diff2,'end_bal_pr':end_bal_pr,'post_corr':post_corr, 'diff_total_pr':diff_total_pr, 'eba':eba, 'ebb':ebb, 'ebc':ebc})
 						self.pool.get('new.reval.accts').create(cr, uid, vals)
 				elif not analytic_acc_search:
-					entries = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',acct), ('period_id','=', beg_period)])
+					entries = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',acct), ('period_id','<', reval_period)])
 					amount = 0.00
 					for entry in entries:
 						entryRead = self.pool.get('account.move.line').read(cr, uid, entry, ['debit','credit','amount_currency'])
@@ -382,7 +423,8 @@ class new_reval2(osv.osv):
 					end_bal_pr = bal_ap_diff1 + diff2
 					post_corr = phpe_postings_pr - phpe_postings_sr
 					diff_total_pr = diff1 + diff2
-					vals.update({'acc_name':acctRead['name'],'beg_bal_src':amount,'beg_bal_sr':amount, 'beg_bal_phpe':amount,'pri_postings':pri_posts,'sec_postings':sec_posts,'phpe_postings_sr':phpe_postings_sr,'phpe_postings_pr':phpe_postings_pr,'diff_sr_pr':diff_sr_pr,'rev_beg_bal':rev_beg_bal,'diff1':diff1,'bal_ap':bal_ap,'bal_ap_diff1':bal_ap_diff1,'diff2':diff2,'end_bal_pr':end_bal_pr,'post_corr':post_corr, 'diff_total_pr':diff_total_pr})
+					eba = amount+ phpe_postings_sr+ post_corr+ diff_total_pr
+					vals.update({'acc_name':acctRead['name'],'beg_bal_src':amount,'beg_bal_sr':amount, 'beg_bal_phpe':amount,'pri_postings':pri_posts,'sec_postings':sec_posts,'phpe_postings_sr':phpe_postings_sr,'phpe_postings_pr':phpe_postings_pr,'diff_sr_pr':diff_sr_pr,'rev_beg_bal':rev_beg_bal,'diff1':diff1,'bal_ap':bal_ap,'bal_ap_diff1':bal_ap_diff1,'diff2':diff2,'end_bal_pr':end_bal_pr,'post_corr':post_corr, 'diff_total_pr':diff_total_pr, 'eba':eba, 'ebb':eba, 'ebc':eba})
 					self.pool.get('new.reval.accts').create(cr, uid, vals)
 		return True
 new_reval2()
