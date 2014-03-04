@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="0">
+
+    <record id="group_pettycash_manager" model="res.groups">
+        <field name="name">Petty Cash Manager</field>
+    </record>
+    
+    <record id="group_vehicle_manager" model="res.groups">
+        <field name="name">Vehicle Manager</field>
+    </record>
+    
+    <record id="group_vehicle_log_user" model="res.groups">
+        <field name="name">Vehicle Log Users</field>
+    </record>
+
+</data>
+</openerp>
