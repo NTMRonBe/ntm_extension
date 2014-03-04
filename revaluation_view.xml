@@ -38,7 +38,8 @@
 						<group colspan="2" col="2">
 							<separator string="Revaluation Details" colspan="2"/>
 							<field name="name"/>
-							<field name="period_id" widget="selection" domain="[('state','=','draft')]"/>
+							<field name="period_id" widget="selection" domain="[('state','=','draft')]" required="1"/>
+							<field name="journal_id" widget="selection" domain="[('type','=','arj')]" readonly="1"/>
 						</group>
 						<group col="2" colspan="2">
 							<separator string="Foreign Exchange Rates" colspan="2"/>
@@ -59,41 +60,162 @@
 						</group>
 					</group>
 					<notebook>
-						<page string="Accounts Revaluation">
-							<button string="Fetch Accounts" type="object" name="get_pool_accts" icon="gtk-execute"/>
-							<field name="acc_ids" mode="tree" nolabel="1" readonly="1" colspan="4">
-								<tree string="Accounts for Revaluation">
+						<page string="Foreign Exchanges">
+							<group colspan="4">
+								<field name="src_exchange_ids" mode="tree" nolabel="1" readonly="1" colspan="4">
+									<tree string="From Company Currency Exchanges" limit="100">
+										<field name="name"/>
+										<field name="period_id"/>
+										<field name="journal_id"/>
+										<field name="src"/>
+										<field name="src_amount" sum="Total"/>
+										<field name="dest"/>
+										<field name="dest_amount" sum="Total"/>
+										<field name="rate"/>
+									</tree>
+								</field>
+								<field name="dest_exchange_ids" mode="tree" nolabel="1" readonly="1" colspan="4">
+									<tree string="To Company Currency Exchanges">
+										<field name="name"/>
+										<field name="period_id"/>
+										<field name="journal_id"/>
+										<field name="src"/>
+										<field name="src_amount" sum="Total"/>
+										<field name="dest"/>
+										<field name="dest_amount" sum="Total"/>
+										<field name="rate"/>
+									</tree>
+								</field>
+							</group>
+	                    </page>
+						<page string="Money Pool Accounts">
+							<button string="Fetch Accounts" type="object" name="get_poolaccts" icon="gtk-execute"/>
+							<field name="pool_ids" mode="tree,form" nolabel="1" readonly="1" colspan="4">
+								<tree string="Money Pool Accounts">
 									<field name="acc_name"/>
-									<field name="account_id" invisible="1"/>
-									<field name="analytic_id" invisible="1"/>
 									<field name="pri_pool" invisible="1"/>
 									<field name="sec_pool" invisible="1"/>
-									<field name="is_pr" invisible="1"/>
-									<field name="currency_id" invisible="1"/>
-									<field name="beg_bal_src"/>
-									<field name="beg_bal_phpe" />
-									<field name="beg_bal_sr" />
-									<field name="pri_postings" />
-									<field name="sec_postings" />
-									<field name="phpe_postings_sr" />
-									<field name="phpe_postings_pr" sum="Total" />
-									<field name="diff_sr_pr" sum="Total" />
-									<field name="rev_beg_bal" sum="Total" />
-									<field name="diff1" sum="Total" />
-									<field name="diff1_pool" sum="Total" />
-									<field name="bal_ap" sum="Total"/>
-									<field name="bal_ap_diff1" sum="Total"/>
-									<field name="bal_ap_pool" sum="Total"/>
-									<field name="diff2" sum="Total"/>
-									<field name="end_bal_pr" sum="Total"/>
-									<field name="end_bal_pool" sum="Total"/>
-									<field name="post_corr" sum="Total"/>
-									<field name="diff_total_pr" sum="Total"/>
-									<field name="diff_total_sec" sum="Total"/>
+									<field name="beg_bal_src" sum="Total" invisible="1"/>
+									<field name="beg_bal_phpe" invisible="1"/>
+									<field name="beg_bal_sr" sum="Total" invisible="1"/>
+									<field name="pri_postings" invisible="1"/>
+									<field name="sec_postings" invisible="1"/>
+									<field name="phpe_postings_sr" invisible="0"/>
+									<field name="phpe_postings_pr" invisible="1"/>
+									<field name="diff_sr_pr" invisible="1"/>
+									<field name="rev_beg_bal" invisible="1"/>
+									<field name="diff1_pool"/>
+									<field name="bal_ap"/>
+									<field name="bal_ap_pool"/>
+									<field name="end_bal_pool"/>
+									<field name="diff_total_sec"/>
 									<field name="eba" sum="Total"/>
 									<field name="ebb" sum="Total"/>
 									<field name="ebc" sum="Total"/>
 								</tree>
+								<form string="Money Pool Information">
+									<group colspan="4" col="4">
+										<group colspan="2" col="2">
+											<field name="acc_name"/>
+											<field name="account_id"/>
+											<field name="analytic_id"/>
+											<field name="currency_id"/>
+										</group>
+										<group colspan="2" col="2">
+											<field name="pri_pool" />
+											<field name="sec_pool" />
+											<field name="is_pr" />
+										</group>
+									</group>
+									<group colspan="4" col="4">
+										<group colspan="2" col="2">
+											<separator string="Computation Requirements" colspan="2"/>
+											<field name="beg_bal_src"/>
+											<field name="beg_bal_phpe" />
+											<field name="beg_bal_sr" />
+											<field name="pri_postings" />
+											<field name="sec_postings" />
+											<field name="phpe_postings_sr" />
+											<field name="phpe_postings_pr" sum="Total" />
+											<field name="diff_sr_pr" sum="Total" />
+											<field name="rev_beg_bal" sum="Total" />
+										</group>
+										<group colspan="2" col="2">
+											<separator string="Computation Results" colspan="2"/>
+											<field name="diff1" sum="Total" />
+											<field name="diff1_pool" sum="Total" />
+											<field name="bal_ap" sum="Total"/>
+											<field name="bal_ap_diff1" sum="Total"/>
+											<field name="bal_ap_pool" sum="Total"/>
+											<field name="diff2" sum="Total"/>
+											<field name="end_bal_pr" sum="Total"/>
+											<field name="end_bal_pool" sum="Total"/>
+											<field name="post_corr" sum="Total"/>
+											<field name="diff_total_pr" sum="Total"/>
+											<field name="diff_total_sec" sum="Total"/>
+											<field name="eba" sum="Total"/>
+											<field name="ebb" sum="Total"/>
+											<field name="ebc" sum="Total"/>
+										</group>
+									</group>
+								</form>
+							</field>
+						</page>
+						<page string="Accounts Revaluation">
+							<button string="Fetch Accounts" type="object" name="getRevaluatedAccounts" icon="gtk-execute"/>
+							<field name="acc_ids" mode="tree,form" nolabel="1" readonly="1" colspan="4">
+								<tree string="Accounts for Revaluation">
+									<field name="acc_name"/>
+									<field name="eba" sum="Total"/>
+									<field name="ebb" sum="Total"/>
+									<field name="ebc" sum="Total"/>
+								</tree>
+								<form string="Revaluation Information">
+									<group colspan="4" col="4">
+										<group colspan="2" col="2">
+											<field name="acc_name"/>
+											<field name="account_id"/>
+											<field name="analytic_id"/>
+											<field name="currency_id"/>
+										</group>
+										<group colspan="2" col="2">
+											<field name="pri_pool" />
+											<field name="sec_pool" />
+											<field name="is_pr" />
+										</group>
+									</group>
+									<group colspan="4" col="4">
+										<group colspan="2" col="2">
+											<separator string="Computation Requirements" colspan="2"/>
+											<field name="beg_bal_src"/>
+											<field name="beg_bal_phpe" />
+											<field name="beg_bal_sr" />
+											<field name="pri_postings" />
+											<field name="sec_postings" />
+											<field name="phpe_postings_sr" />
+											<field name="phpe_postings_pr" sum="Total" />
+											<field name="diff_sr_pr" sum="Total" />
+											<field name="rev_beg_bal" sum="Total" />
+										</group>
+										<group colspan="2" col="2">
+											<separator string="Computation Results" colspan="2"/>
+											<field name="diff1" sum="Total" />
+											<field name="diff1_pool" sum="Total" />
+											<field name="bal_ap" sum="Total"/>
+											<field name="bal_ap_diff1" sum="Total"/>
+											<field name="bal_ap_pool" sum="Total"/>
+											<field name="diff2" sum="Total"/>
+											<field name="end_bal_pr" sum="Total"/>
+											<field name="end_bal_pool" sum="Total"/>
+											<field name="post_corr" sum="Total"/>
+											<field name="diff_total_pr" sum="Total"/>
+											<field name="diff_total_sec" sum="Total"/>
+											<field name="eba" sum="Total"/>
+											<field name="ebb" sum="Total"/>
+											<field name="ebc" sum="Total"/>
+										</group>
+									</group>
+								</form>
 							</field>
 						</page>
 						<page string="Computation Details">
@@ -106,11 +228,11 @@
 							<group colspan="4" col="4">
 								<group colspan="2" col="2">
 									<separator string="Primary Currency Details" colspan="2"/>		
-									<field name="primary_curr"/>
+									<field name="primary_curr" readonly="1"/>
 								</group>
 								<group colspan="2" col="2">
 									<separator string="Secondary Currency Details" colspan="2"/>		
-									<field name="secondary_curr"/>
+									<field name="secondary_curr" readonly="1"/>
 								</group>
 							</group>
 							<group colspan="4" col="4">

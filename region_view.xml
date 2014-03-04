@@ -13,10 +13,9 @@
                         <field name="gain_loss_acct"/>
                         <button name="budget" string="Generate Budget" type="object" icon="gtk-apply" colspan="4"/>
                     </group>
-                    <separator string="Income and Expense Accounts" colspan="4"/>
-                    <group colspan="4" col="4">
-                        <group colspan="2" col="2">
-                            <field name="income_ids" nolabel="1" height="350">
+					<notebook>
+						<page string="Income Accounts">
+							<field name="income_ids" nolabel="1" height="350">
                                 <tree string="Income Accounts">
                                     <field name="code"/>
                                     <field name="name"/>
@@ -25,8 +24,8 @@
                                     <field name="balance"/>
                                 </tree>
                             </field>
-                        </group>
-                        <group colspan="2" col="2">
+						</page>
+						<page string="Expense Accounts">
                             <field name="expense_ids" nolabel="1" height="350">
                                 <tree string="Expense Accounts">
                                     <field name="code"/>
@@ -36,8 +35,8 @@
                                     <field name="balance"/>
                                 </tree>
                             </field>
-                        </group>
-                        <group colspan="2" col="2">
+						</page>
+						<page string="Equity Accounts">
                             <field name="equity_ids" nolabel="1" height="350">
                                 <tree string="Equity Accounts">
                                     <field name="code"/>
@@ -47,10 +46,8 @@
                                     <field name="balance"/>
                                 </tree>
                             </field>
-                        </group>
-                        <group colspan="2" col="2">
-                        </group>
-                    </group>
+						</page>
+					</notebook>
                 </form>
             </field>
         </record>        
