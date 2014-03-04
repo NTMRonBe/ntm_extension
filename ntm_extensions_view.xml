@@ -346,7 +346,18 @@
             </field>
         </record>
         
-        
+        <record id="view_ntm_res_company2_form" model="ir.ui.view">
+            <field name="name">ntm.res.company2.form.inherit</field>
+            <field name="model">res.company</field>
+            <field name="type">form</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <field name="currency_id" position="after">
+                    <field name="sec_currency"/>
+                </field>
+            </field>
+        </record>
         <record id="view_ntm_res_company_form" model="ir.ui.view">
             <field name="name">ntm.res.company.form.inherit</field>
             <field name="model">res.company</field>

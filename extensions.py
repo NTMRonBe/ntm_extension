@@ -36,6 +36,7 @@ class res_company(osv.osv):
         'bank_charge':fields.many2one('account.account','Bank Charges Account', required=True),
         'contributions_acct':fields.many2one('account.account','Contributions Account'),
         'def_gain_loss':fields.many2one('account.account','Default Exchange Gain/Loss'),
+		'sec_currency':fields.many2one('res.currency','Secondary Currency'),
         }
 res_company()
 

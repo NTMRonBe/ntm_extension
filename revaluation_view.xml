@@ -166,6 +166,13 @@
 							<field name="acc_ids" mode="tree,form" nolabel="1" readonly="1" colspan="4">
 								<tree string="Accounts for Revaluation">
 									<field name="acc_name"/>
+									<field name="diff1" sum="Total" />
+									<field name="bal_ap" sum="Total"/>
+									<field name="bal_ap_diff1" sum="Total"/>
+									<field name="diff2" sum="Total"/>
+									<field name="end_bal_pr" sum="Total"/>
+									<field name="post_corr" sum="Total"/>
+									<field name="diff_total_pr" sum="Total"/>
 									<field name="eba" sum="Total"/>
 									<field name="ebb" sum="Total"/>
 									<field name="ebc" sum="Total"/>
