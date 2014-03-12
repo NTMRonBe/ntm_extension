@@ -1,4 +1,5 @@
 import time
+import datetime
 from osv import osv, fields, orm
 import netsvc
 import pooler
@@ -93,7 +94,15 @@ class new_reval(osv.osv):
 		'pri_pool':fields.float('Money Pool'),
 		'sec_pool':fields.float('Money Pool'),
 		'pri_appool':fields.float('Money Pool'),
+		'date':fields.date('Revaluation Date'),
 		'sec_appool':fields.float('Money Pool'),
+		'state':fields.selection([
+							('draft','Draft'),
+							('fetched','Accounts Fetched'),
+							('revaluated','Revaluated'),
+							('entryGenerated','Entries Generated'),
+							('updateSOA','SOAs Updated and Sent'),
+						],'State'),
 		'pool_total':fields.float('Total Money Pool'),
 		'pool_aptotal':fields.float('Total Money Pool(After Posting)'),
 		'pri_pf':fields.float('Portion Factor',digits=(16,8)),
@@ -102,8 +111,12 @@ class new_reval(osv.osv):
 		'sec_appf':fields.float('Portion Factor',digits=(16,8)),
 		'rcf1':fields.function(_rcf1_amount, method=True, type='float', string='Rate Change Factor 1', store=False,digits=(16,8)),
 		'rcf2':fields.function(_rcf2_amount, method=True, type='float', string='Rate Change Factor 2', store=False,digits=(16,8)),
-		'move_id':fields.many2one('account.move','Journal Entry'),
-        'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
+		'ugl_fgl_move_id':fields.many2one('account.move','Journal Entry'),
+        'ugl_fgl_move_ids': fields.related('ugl_fgl_move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
+		'region_fgl_move_id':fields.many2one('account.move','Journal Entry'),
+        'region_fgl_move_ids': fields.related('region_fgl_move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
+		'nonregion_fgl_move_id':fields.many2one('account.move','Journal Entry'),
+        'nonregion_fgl_move_ids': fields.related('nonregion_fgl_move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
 		}
 	def _get_ex_src(self, cr, uid, ids, context=None):
 		period_id = ids['default_period_id']
@@ -220,13 +233,6 @@ class new_reval2(osv.osv):
 		'acc_ids':fields.one2many('new.reval.accts','reval_id','Accounts for Revaluation'),
 		'pool_ids':fields.one2many('new.reval.accts','pool_id','Money Pool Accounts'),
 		}
-	
-	# def create_jes(self, cr, uid, ids, context=None):
-		# userRead = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
-		# companyRead = self.pool.get('res.company').read(cr, uid, userRead['company_id'][0],['currency_id'])
-		# for reval in self.read(cr, uid, ids, context=None):
-			# reval_period = reval['period_id'][0]
-			# for accts in reval['acc_ids']:
 	
 	def pesr(self, cr, uid, ids, context=None):
 		for reval in self.read(cr, uid, ids, context=None):
@@ -410,7 +416,7 @@ class new_reval2(osv.osv):
 					'eba':eba,
 					}
 				self.pool.get('new.reval.accts').write(cr, uid, acct, vals)
-		return self.revalAcctsGL(cr, uid, ids)
+		return True
 	
 	def get_poolaccts(self, cr, uid, ids, context=None):
 		for reval in self.read(cr, uid, ids, context=None):
@@ -469,21 +475,282 @@ class new_reval2(osv.osv):
 							for analyticItem in analyticSearch:
 								analyticRead2 = self.pool.get('account.analytic.account').read(cr, uid, analyticItem, ['name'])
 								revAcctSearch =  self.pool.get('new.reval.accts').search(cr, uid, [('analytic_id','=',analyticItem),('reval_id','=',reval['id'])])
-								revAcctRead =  self.pool.get('new.reval.accts').read(cr, uid, revAcctSearch[0],['diff_total_pr','post_corr'])
-								ebc_amt += revAcctRead['post_corr']
-								ebb_amt += revAcctRead['diff_total_pr']
+								for revAcct in revAcctSearch:
+									revAcctRead =  self.pool.get('new.reval.accts').read(cr, uid, revAcct,['diff_total_pr','post_corr'])
+									ebc_amt += revAcctRead['post_corr']
+									ebb_amt += revAcctRead['diff_total_pr']
 						ebb_amt = ebb_amt + acctRead['beg_bal_src'] + acctRead['phpe_postings_sr']
 						ebc_amt = ebc_amt + ebb_amt
 					elif analyticRead['ntm_type'] in ['income','expense','equity']:
 						ebb_amt = acctRead['beg_bal_src']+acctRead['phpe_postings_sr']+acctRead['post_corr']
 						ebc_amt = acctRead['beg_bal_src']+acctRead['phpe_postings_sr']
-					elif analyticRead['ntm_type'] in ['pat','project',]:
+					elif analyticRead['ntm_type'] in ['pat','project']:
 						ebb_amt = acctRead['eba']
 						ebc_amt = acctRead['eba']
 					vals = {'ebb':ebb_amt,'ebc':ebc_amt}
 					self.pool.get('new.reval.accts').write(cr, uid, acct, vals)
 		return True
+	
+	def createJERegionAccts(self, cr, uid, ids, context=None):
+		for reval in self.read(cr, uid, ids, context=None):
+			moveTemplate = {
+						'journal_id':reval['journal_id'][0],
+						'period_id':reval['period_id'][0],
+						'date':reval['date'],
+						'ref':reval['name'],
+						}
+			move_id = self.pool.get('account.move').create(cr, uid, moveTemplate)
+			entryTemplate = {
+						'journal_id':reval['journal_id'][0],
+						'period_id':reval['period_id'][0],
+						'date':reval['date'],
+						'currency_id':reval['primary_curr'][0],
+						'move_id':move_id,
+						}
+			debitSum = 0.00
+			creditSum = 0.00
+			narration = 'Entry Details'
+			for acct in reval['acc_ids']:
+				acctRead = self.pool.get('new.reval.accts').read(cr, uid, acct, context=None)
+				if acctRead['analytic_id']==False:
+					continue
+				else:
+					acctEntries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',acctRead['analytic_id'][0])])
+					balance = 0.00
+					name = 'Difference for ' + acctRead['acc_name'] + ' account'
+					for entry in acctEntries:
+						entryReader = self.pool.get('account.move.line').read(cr, uid, entry, ['debit','credit'])
+						balance +=entryReader['debit']-entryReader['credit']
+					analyticRead = self.pool.get('account.analytic.account').read(cr, uid, acctRead['analytic_id'][0],['ntm_type','region_id'])
+					if analyticRead['ntm_type'] in ['gl']:
+						debit = 0.00
+						credit = 0.00
+						amount_curr = 0.00
+						if acctRead['ebc']<0:
+							debit = 0.00
+							credit = (balance-acctRead['ebc'])
+							amount_curr = credit
+							creditSum +=amount_curr
+						elif acctRead['ebc']>0:
+							credit = 0.00
+							debit = balance - acctRead['ebc']
+							amount_curr=debit
+							debitSum +=amount_curr
+						entryTemplate.update({'account_id':acctRead['account_id'][0],'debit':debit,'credit':credit,'name':name,'amount_currency':amount_curr,'analytic_account_id':acctRead['analytic_id'][0]})
+						forNarration = '\n' +acctRead['acc_name'] +' '+str(amount_curr)
+						narration = narration + forNarration
+						self.pool.get('account.move.line').create(cr, uid, entryTemplate)
+			uidRead = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
+			compRead = self.pool.get('res.company').read(cr, uid, uidRead['company_id'][0], ['def_gain_loss'])
+			analyticRead2 = self.pool.get('account.analytic.account').read(cr, uid, compRead['def_gain_loss'][0],['normal_account'])
+			if creditSum != 0.00:
+				name = 'Regional Accounts Gains'
+				entryTemplate.update({'account_id':analyticRead2['normal_account'][0],'debit':creditSum,'credit':0.00,'name':name,'amount_currency':creditSum,'analytic_account_id':compRead['def_gain_loss'][0],'narration':narration})
+				self.pool.get('account.move.line').create(cr, uid, entryTemplate)
+			if debitSum != 0.00:
+				name = 'Regional Accounts Loses'
+				entryTemplate.update({'account_id':analyticRead2['normal_account'][0],'debit':0.00,'credit':debitSum,'name':name,'amount_currency':debitSum,'analytic_account_id':compRead['def_gain_loss'][0],'narration':narration})
+				self.pool.get('account.move.line').create(cr, uid, entryTemplate)
+			self.write(cr, uid, ids, {'region_fgl_move_id':move_id})
+		return True#self.createURGLEntry(cr, uid, ids)
+		
+	def createURGLEntry(self, cr, uid, ids, context=None):
+		for reval in self.read(cr, uid, ids, context=None):
+			moveTemplate = {
+						'journal_id':reval['journal_id'][0],
+						'period_id':reval['period_id'][0],
+						'date':reval['date'],
+						'ref':reval['name'],
+						}
+			move_id = self.pool.get('account.move').create(cr, uid, moveTemplate)
+			entryTemplate = {
+						'journal_id':reval['journal_id'][0],
+						'period_id':reval['period_id'][0],
+						'date':reval['date'],
+						'currency_id':reval['primary_curr'][0],
+						'move_id':move_id,
+						}
+			uidRead = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
+			compRead = self.pool.get('res.company').read(cr, uid, uidRead['company_id'][0], ['def_gain_loss','ur_gain_loss'])
+			defReader = self.pool.get('account.analytic.account').read(cr, uid, compRead['def_gain_loss'][0],['normal_account'])
+			defReaderacctEntries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',defReader['analytic_id'][0])])
+			defReaderBalance = 0.00
+			urGainLossBalance = 0.00
+			for entry in defReaderacctEntries:
+				entryReader = self.pool.get('account.move.line').read(cr, uid, entry, ['debit','credit'])
+				defReaderBalance +=entryReader['debit']-entryReader['credit']
+			urReaderacctEntries = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',compRead['ur_gain_loss'][0])])
+			name = 'Regional Accounts Gains'
+			entryTemplate.update({'account_id':analyticRead2['normal_account'][0],'debit':creditSum,'credit':0.00,'name':name,'amount_currency':creditSum,'analytic_account_id':compRead['def_gain_loss'][0],'narration':narration})
+			self.pool.get('account.move.line').create(cr, uid, entryTemplate)
+			self.write(cr, uid, ids, {'ugl_fgl_move_id':move_id})
+		return True
+		
+	def createJEnonRegionAccts(self, cr, uid, ids, context=None):
+		for reval in self.read(cr, uid, ids, context=None):
+			moveTemplate = {
+						'journal_id':reval['journal_id'][0],
+						'period_id':reval['period_id'][0],
+						'date':reval['date'],
+						'ref':reval['name'],
+						}
+			move_id = self.pool.get('account.move').create(cr, uid, moveTemplate)
+			entryTemplate = {
+						'journal_id':reval['journal_id'][0],
+						'period_id':reval['period_id'][0],
+						'date':reval['date'],
+						'currency_id':reval['primary_curr'][0],
+						'move_id':move_id,
+						}
+			debitSum = 0.00
+			creditSum = 0.00
+			narration = 'Entry Details'
+			for acct in reval['acc_ids']:
+				acctRead = self.pool.get('new.reval.accts').read(cr, uid, acct, context=None)
+				if acctRead['analytic_id']==False:
+					continue
+				else:
+					analyticRead = self.pool.get('account.analytic.account').read(cr, uid, acctRead['analytic_id'][0],['ntm_type','region_id'])
+					if analyticRead['ntm_type'] in ['pat','project']:
+						debit = 0.00
+						credit = 0.00
+						amount_curr = 0.00
+						if acctRead['diff_total_pr']<0:
+							debit = 0.00
+							credit = (acctRead['diff_total_pr'] + acctRead['post_corr']) * -1
+							amount_curr = credit
+							creditSum +=amount_curr
+						elif acctRead['diff_total_pr']>0:
+							credit = 0.00
+							debit = acctRead['diff_total_pr'] + acctRead['post_corr']
+							amount_curr=debit
+							debitSum +=amount_curr
+						name = 'Difference for ' + acctRead['acc_name'] + ' account'
+						entryTemplate.update({'account_id':acctRead['account_id'][0],'debit':debit,'credit':credit,'name':name,'amount_currency':amount_curr,'analytic_account_id':acctRead['analytic_id'][0]})
+						forNarration = '\n' +acctRead['acc_name'] +' '+str(amount_curr)
+						narration = narration + forNarration
+						self.pool.get('account.move.line').create(cr, uid, entryTemplate)
+			uidRead = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
+			compRead = self.pool.get('res.company').read(cr, uid, uidRead['company_id'][0], ['def_gain_loss'])
+			analyticRead2 = self.pool.get('account.analytic.account').read(cr, uid, compRead['def_gain_loss'][0],['normal_account'])
+			if creditSum != 0.00:
+				name = 'PAT and Project Accounts Gains'
+				entryTemplate.update({'account_id':analyticRead2['normal_account'][0],'debit':creditSum,'credit':0.00,'name':name,'amount_currency':creditSum,'analytic_account_id':compRead['def_gain_loss'][0],'narration':narration})
+				self.pool.get('account.move.line').create(cr, uid, entryTemplate)
+			if debitSum != 0.00:
+				name = 'PAT and Project Accounts Loses'
+				entryTemplate.update({'account_id':analyticRead2['normal_account'][0],'debit':0.00,'credit':debitSum,'name':name,'amount_currency':debitSum,'analytic_account_id':compRead['def_gain_loss'][0],'narration':narration})
+				self.pool.get('account.move.line').create(cr, uid, entryTemplate)
+			self.write(cr, uid, ids, {'nonregion_fgl_move_id':move_id})
+		return self.createJERegionAccts(cr, uid, ids)
+	
+	def updateSOAs(self, cr, uid, ids, context=None):
+		for reval in self.read(cr, uid, ids, context=None):
+			for acct in reval['acc_ids']:
+				acctReader = self.pool.get('new.reval.accts').read(cr, uid, acct, context=None)
+				if acctReader['analytic_id']==False:
+					continue
+				else:
+					self.generate_soa(cr, uid, ids)
+					statementSearch = self.pool.get('account.soa').search(cr, uid, [('account_number','=',acctReader['analytic_id'][0]),('period_id','=',reval['period_id'][0])])
+					if not statementSearch:
+						continue
+					elif statementSearch:
+						self.pool.get('account.soa').update_lines(cr, uid, [statementSearch[0]])
+						income = 0.00
+						expense = 0.00
+						prev_bal = acctReader['beg_bal_sr']
+						ending_balance = 0.00
+						if prev_bal < 0.00:
+							prev_bal = prev_bal * -1
+						else:
+							prev_bal = prev_bal
+						allEntries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',acctReader['analytic_id'][0]),('period_id','=',reval['period_id'][0])])
+						for entry in allEntries:
+							entryReader = self.pool.get('account.move.line').read(cr, uid, entry, ['debit','credit'])
+							income += entryReader['credit']
+							expense += entryReader['debit']
+						inc_exp = income - expense
+						allEntries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',acctReader['analytic_id'][0])])
+						for entry in allEntries:
+							entryReader = self.pool.get('account.move.line').read(cr, uid, entry, ['debit','credit'])
+							ending_balance +=  entryReader['credit'] - entryReader['debit']
+						self.pool.get('account.soa').write(cr, uid, statementSearch[0], {'prev_balance':prev_bal,'total_income':income,'total_expense':expense,'inc_exp':inc_exp,'end_balance':ending_balance})
+			self.soa_report(cr, uid, ids)
+		return True
+		
+	def soa_report(self,cr, uid, ids, context=None):
+		for reval in self.read(cr, uid, ids, context=None):
+			statements = self.pool.get('account.soa').search(cr, uid, [('period_id','=',reval['period_id'][0])])
+			self.pool.get('account.soa').create_soa_attachment(cr, uid, statements)
+		return True
+	
+	def generate_soa(self, cr, uid, ids, context=None):
+		date = datetime.datetime.now()
+		date_now = date.strftime("%Y/%m/%d %H:%M")
+		for reval in self.read(cr, uid, ids, context=None):
+			for aa in self.pool.get('account.analytic.account').search(cr, uid, [('report','=','soa')]):
+				statement = self.pool.get('account.soa').search(cr, uid, [('period_id','=',reval['period_id'][0]),('account_number','=',aa)])
+				if not statement:
+					values = {
+						'date':date_now,
+						'account_number':aa,
+						'period_id':reval['period_id'][0]
+						}
+					self.pool.get('account.soa').create(cr, uid, values)
+		return True
+											
 new_reval2()
+
+
+class new_reval_send(osv.osv_memory):
+	_name = 'new.reval.send'
+	_description = "Revaluated SOA Sender"
+	_columns = {
+		'email':fields.many2one('email_template.account','Email Sender', required=True),
+		}
+	def sendEmails(self, cr, uid, ids, context=None):
+		for sender in self.read(cr, uid, ids, context=context):
+			revalReader = self.pool.get('new.reval').read(cr, uid, context['active_id'], context=None)
+			for acct in revalReader['acc_ids']:
+				accReader = self.pool.get('new.reval.accts').read(cr, uid, acct, context=None)
+				if accReader['analytic_id']==False:
+					continue
+				else:
+					checkAnalytic = self.pool.get('account.analytic.account').read(cr, uid, accReader['analytic_id'][0],['report','partner_id'])
+					if checkAnalytic['report']=='soa':
+						emailAddresses = ''
+						emailChecker = self.pool.get('res.partner.address').search(cr, uid, [('partner_id','=',checkAnalytic['partner_id'][0]),('email','!=',False)])
+						for email in emailChecker:
+							emailReader = self.pool.get('res.partner.address').read(cr, uid, email, ['email'])
+							if emailAddresses=='':
+								emailAddresses = emailReader['email']
+							elif emailAddresses!='':
+								emailAddresses = emailAddresses +','+emailReader['email']
+						check_soa = self.pool.get('account.soa').search(cr, uid, [('account_number','=',accReader['analytic_id'][0]),('period_id','=',revalReader['period_id'][0])])
+						for soa_id in check_soa:
+							#smtp_acct = sender['email']
+							account_id = sender['email']
+							subject = 'Revaluated SOA: '+ accReader['acc_name']
+							email_to = emailAddresses
+							values = {
+								'account_id':account_id,
+								'email_to':email_to,
+								'folder':'outbox',
+								'subject':subject,
+								'state':'na',
+								'server_ref':0,
+								}
+							email_lists = []
+							email_created = self.pool.get('email_template.mailbox').create(cr, uid, values)
+							email_lists.append(email_created)
+							soa_attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','account.soa'),('res_id','=',soa_id)])
+							for soa_attachment in soa_attachments:
+								query = ("""insert into mail_attachments_rel(mail_id, att_id)values(%s,%s)"""%(email_created,soa_attachment))
+								cr.execute(query)
+							self.pool.get('email_template.mailbox').send_this_mail(cr, uid, email_lists)
+		return True
+new_reval_send()
 
 class account_period(osv.osv):
     _inherit = 'account.period'

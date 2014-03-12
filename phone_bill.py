@@ -452,8 +452,7 @@ class callsdbf_reader(osv.osv_memory):
     
     def importzip(self, cr, uid, ids, context):
         user = uid
-        ad = tools.config['root_path'].split(",")[-1]
-        file= os.path.join(ad, 'calls.dbf')
+        file= os.path.join('/var/tmp', 'calls.dbf')
         (data,) = self.browse(cr, uid, ids , context=context)
         module_data = data.calls_file
         val = base64.decodestring(module_data)
@@ -525,8 +524,8 @@ class callsdbf_reader(osv.osv_memory):
             elif end>start:
                 start_date = str(period[1])+'-'+str(period[0])+'-'+start_day
                 end_date = str(period[1])+'-'+str(period[0])+'-'+end_day
-            ad = tools.config['root_path'].split(",")[-1]
-            file= os.path.join(ad, 'calls')
+            #ad = tools.config['root_path'].split(",")[-1]
+            file= os.path.join('/var/tmp', 'calls')
             table = dbf.Table(file)
             table.open()
             for record in table:

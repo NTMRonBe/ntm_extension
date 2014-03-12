@@ -35,7 +35,8 @@ class res_company(osv.osv):
         'donations':fields.many2one('account.account','Donations Account', required=True),     
         'bank_charge':fields.many2one('account.account','Bank Charges Account', required=True),
         'contributions_acct':fields.many2one('account.account','Contributions Account'),
-        'def_gain_loss':fields.many2one('account.account','Default Exchange Gain/Loss'),
+        'def_gain_loss':fields.many2one('account.analytic.account','Default Exchange Gain/Loss',domain=[('ntm_type','=','gl')]),
+		'ur_gain_loss':fields.many2one('account.account','Unrealized Gain/Loss'),
 		'sec_currency':fields.many2one('res.currency','Secondary Currency'),
         }
 res_company()
@@ -129,7 +130,7 @@ class account_analytic_account(osv.osv):
                                          ('gl','Gain Loss'),
                                          ('pat','PAT Account'),
                                          ('project','Project Account'),
-                                         ('equity','Equity')],'Account Type'),
+                                         ('equity','Equity')],'NTM Account Type'),
             'supplier':fields.related('partner_id','supplier',type='boolean',store=True, string='People and Team',readonly=True),
             'project':fields.related('partner_id','project',type='boolean',store=True, string='Project',readonly=True),
             'normal_account':fields.many2one('account.account','Related Normal Account'),

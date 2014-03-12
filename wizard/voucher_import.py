@@ -51,14 +51,11 @@ class voucher_file_import(osv.osv_memory):
 	   netsvc.Logger().notifyChannel("this is a test", netsvc.LOG_INFO,'Testing')
 	   return True
     def importzip(self, cr, uid, ids, context):
-    #    netsvc.Logger().notifyChannel("Context", netsvc.LOG_INFO,' '+str(context))
         voucher_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'], ['name'])
-    #    netsvc.Logger().notifyChannel("Reader", netsvc.LOG_INFO,' '+str(voucher_read))
         voucher_name = voucher_read['name']
         voucher_name = voucher_name.replace(' ','_')
         voucher_name = voucher_name.replace('/','_')
         netsvc.Logger().notifyChannel("Voucher Name", netsvc.LOG_INFO, ' '+ str(voucher_name))
-    #        ad = tools.config['root_path'].split(",")[-1]
         root = tools.config['root_path']
         netsvc.Logger().notifyChannel("root", netsvc.LOG_INFO, ' '+str(root))
         file = ''
@@ -66,7 +63,6 @@ class voucher_file_import(osv.osv_memory):
             os.makedirs(root+'/dbfs/')
         except OSError:
             pass
-    #        file= os.path.join(ad, voucher_name+'.dbf')
         file = root+'/dbfs/'+voucher_name+'.dbf'
         netsvc.Logger().notifyChannel("filename", netsvc.LOG_INFO, ' '+str(file))
         (data,) = self.browse(cr, uid, ids , context=context)
@@ -151,9 +147,7 @@ class voucher_file_import(osv.osv_memory):
             os.makedirs(root+'/dbfs/')
         except OSError:
             pass
-    #        file= os.path.join(ad, voucher_name+'.dbf')
         file = root+'/dbfs/'+voucher_name+'.dbf'
-        #dbf_file = filename+voucher_name
         table = dbf.Table(file)
         table.open()
         for rec in table:

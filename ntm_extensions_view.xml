@@ -295,9 +295,6 @@
                     <field name="supplier" string="People and Teams"/>
                     <field name="project"/>
                 </field>
-                <field name="property_account_position" position="replace">
-                    <field name="project_id"/>
-                </field>
             </field>
         </record>
         
@@ -401,9 +398,10 @@
                             </group>
                         </group>
                         <group colspan="2" col="2">
-                            <separator string="Default Gain Loss Account" colspan="2"/>
+                            <separator string="Gain Loss Accounts" colspan="2"/>
                             <group colspan="2" col="2">
-                                <field name="def_gain_loss"/>
+                                <field name="def_gain_loss" domain="[('ntm_type','=','gl')]"/>
+								<field name="ur_gain_loss"/>
                             </group>
                         </group>
                     </group>

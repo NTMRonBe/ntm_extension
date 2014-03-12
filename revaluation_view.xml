@@ -1,6 +1,31 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <record id="new_reval_send_view" model="ir.ui.view">
+            <field name="name">Revaluated SOA Sender</field>
+            <field name="model">new.reval.send</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Revaluated SOA Sender">
+				<group colspan="4" col="2">
+                <field name="email" required="1"/>
+				<button string="Check" type="object" name="sendEmails" icon="gtk-execute" />
+				</group>
+               </form>
+            </field>
+        </record>
+
+        <record id="new_reval_send_view_action" model="ir.actions.act_window">
+            <field name="name">Revaluated SOA Sender</field>
+            <field name="res_model">new.reval.send</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="new_reval_send_view"/>
+            <field name="target">new</field>
+        </record>
+		
+		
+		
 		<record model="ir.ui.view" id="view_new_reval_tree">
             <field name="name">new.reval.tree</field>
             <field name="model">new.reval</field>
@@ -40,6 +65,8 @@
 							<field name="name"/>
 							<field name="period_id" widget="selection" domain="[('state','=','draft')]" required="1"/>
 							<field name="journal_id" widget="selection" domain="[('type','=','arj')]" readonly="1"/>
+							<field name="date"/>
+							
 						</group>
 						<group col="2" colspan="2">
 							<separator string="Foreign Exchange Rates" colspan="2"/>
@@ -60,7 +87,7 @@
 						</group>
 					</group>
 					<notebook>
-						<page string="Foreign Exchanges">
+						<page string="Foreign Exchanges" invisible="1">
 							<group colspan="4">
 								<field name="src_exchange_ids" mode="tree" nolabel="1" readonly="1" colspan="4">
 									<tree string="From Company Currency Exchanges" limit="100">
@@ -89,7 +116,7 @@
 							</group>
 	                    </page>
 						<page string="Money Pool Accounts">
-							<button string="Fetch Accounts" type="object" name="get_poolaccts" icon="gtk-execute"/>
+							
 							<field name="pool_ids" mode="tree,form" nolabel="1" readonly="1" colspan="4">
 								<tree string="Money Pool Accounts">
 									<field name="acc_name"/>
@@ -108,7 +135,7 @@
 									<field name="bal_ap"/>
 									<field name="bal_ap_pool"/>
 									<field name="end_bal_pool"/>
-									<field name="diff_total_sec"/>
+									<field name="diff_total_sec" sum="Total"/>
 									<field name="eba" sum="Total"/>
 									<field name="ebb" sum="Total"/>
 									<field name="ebc" sum="Total"/>
@@ -162,7 +189,6 @@
 							</field>
 						</page>
 						<page string="Accounts Revaluation">
-							<button string="Fetch Accounts" type="object" name="getRevaluatedAccounts" icon="gtk-execute"/>
 							<field name="acc_ids" mode="tree,form" nolabel="1" readonly="1" colspan="4">
 								<tree string="Accounts for Revaluation">
 									<field name="acc_name"/>
@@ -266,9 +292,35 @@
 							</group>
 						</page>
 						<page string="Journal Entries">
-							<field name="move_id" invisible="1"/>
-		                        <field name="move_ids" mode="tree" nolabel="1" colspan="4" height="200">
-									<tree string="Journal Entries">
+							<field name="nonregion_fgl_move_id" invisible="1"/>
+		                        <field name="nonregion_fgl_move_ids" mode="tree" nolabel="1" colspan="4" height="200">
+									<tree string="Non Regional Accounts JEs">
+										<field name="date" string="Revaluation Date"/>
+		                                <field name="name"/>
+		                                <field name="account_id"/>
+		                                <field name="analytic_account_id"/>
+		                                <field name="debit" sum="Total Debit"/>
+		                                <field name="credit" sum="Total Credit"/>
+		                                <field name="currency_id" string="Encoding Currency"/>
+		                                <field name="amount_currency" string="Encoding Amount"/>
+		                            </tree>
+		                        </field>
+							<field name="region_fgl_move_id" invisible="1"/>
+		                        <field name="region_fgl_move_ids" mode="tree" nolabel="1" colspan="4" height="200">
+									<tree string="Regional Account JEs">
+										<field name="date" string="Revaluation Date"/>
+		                                <field name="name"/>
+		                                <field name="account_id"/>
+		                                <field name="analytic_account_id"/>
+		                                <field name="debit" sum="Total Debit"/>
+		                                <field name="credit" sum="Total Credit"/>
+		                                <field name="currency_id" string="Encoding Currency"/>
+		                                <field name="amount_currency" string="Encoding Amount"/>
+		                            </tree>
+		                        </field>
+							<field name="ugl_fgl_move_id" invisible="1"/>
+		                        <field name="ugl_fgl_move_ids" mode="tree" nolabel="1" colspan="4" height="200">
+									<tree string="Field GL to Unrealized GL">
 										<field name="date" string="Revaluation Date"/>
 		                                <field name="name"/>
 		                                <field name="account_id"/>
@@ -281,6 +333,13 @@
 		                        </field>
 						</page>
 					</notebook>
+					<group colspan="4" col="13">
+						<button string="Fetch Accounts" type="object" name="get_poolaccts" icon="gtk-execute" />
+						<button string="Revaluate" type="object" name="revalAcctsGL" icon="gtk-execute" />
+						<button string="Create Entries" type="object" name="createJEnonRegionAccts" icon="gtk-execute"/>
+						<button string="Update SOAs" type="object" name="updateSOAs" icon="gtk-execute"/>
+						<button name="%(new_reval_send_view_action)d" string="Send Statements" icon="gtk-execute" type="action"/>
+					</group>
                 </form>
             </field>
         </record>     
