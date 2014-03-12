@@ -130,8 +130,7 @@ class soa_add_line(osv.osv):
     _columns = {
         'line_ids':fields.one2many('account.soa.line','soa_id','Details')
         }
-    
-    
+	
     def update_lines(self, cr, uid, ids, context=None):
         for soa in self.read(cr, uid, ids, context=None):
             date = datetime.datetime.now()

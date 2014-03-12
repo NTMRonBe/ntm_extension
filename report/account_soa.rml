@@ -70,27 +70,20 @@
       <paraStyle name="all" alignment="justify"/>
     </initialize>
     <paraStyle name="P1" fontName="Helvetica" fontSize="7.0" leading="9" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P2" fontName="Helvetica" fontSize="10.0" leading="13"/>
-    <paraStyle name="P3" fontName="Helvetica" fontSize="10.0" leading="13" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P4" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P5" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P6" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P7" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P8" fontName="Helvetica-Bold" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P9" fontName="Helvetica-Bold" fontSize="12.0" leading="15" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P10" fontName="Helvetica" fontSize="12.0" leading="15" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P11" fontName="Helvetica" fontSize="7.0" leading="9" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P12" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P13" fontName="Helvetica" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P14" fontName="Helvetica" fontSize="24.0" leading="29" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P15" rightIndent="0.0" leftIndent="24.0" fontName="Helvetica-Bold" fontSize="11.0" leading="14" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P16" rightIndent="0.0" leftIndent="24.0" fontName="Helvetica-Bold" fontSize="11.0" leading="14" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P17" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Bold" fontSize="11.0" leading="14" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P18" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Bold" fontSize="16.0" leading="20" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P19" fontName="Helvetica" fontSize="10.0" leading="13" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P20" fontName="Helvetica" fontSize="16.0" leading="20" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P21" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="6.0" spaceAfter="6.0"/>
-    <paraStyle name="P22" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P2" fontName="Helvetica-Bold" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P3" fontName="Helvetica" fontSize="12.0" leading="15" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P4" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P5" fontName="Helvetica" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P6" fontName="Helvetica" fontSize="24.0" leading="29" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P7" fontName="Helvetica" fontSize="10.0" leading="13"/>
+    <paraStyle name="P8" fontName="Helvetica" fontSize="10.0" leading="13" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P9" fontName="Helvetica" fontSize="16.0" leading="20" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P10" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P11" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P12" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P13" rightIndent="0.0" leftIndent="24.0" fontName="Helvetica-Bold" fontSize="11.0" leading="14" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P14" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Bold" fontSize="16.0" leading="20" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P15" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="6.0" spaceAfter="6.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="List" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
@@ -130,11 +123,11 @@
     <images/>
   </stylesheet>
   <story>
-    <para style="P2">[[repeatIn(objects,'soa')]]</para>
+    <para style="P7">[[repeatIn(objects,'soa')]]</para>
     <blockTable colWidths="530.0" style="Table1">
       <tr>
         <td>
-          <para style="P14">Statement of Account</para>
+          <para style="P6">Statement of Account</para>
         </td>
       </tr>
     </blockTable>
@@ -144,85 +137,81 @@
     <blockTable colWidths="129.0,129.0,136.0,136.0" style="Table4">
       <tr>
         <td>
-          <para style="P12">Account:</para>
-          <para style="P12">Account Description: </para>
-          <para style="P12">Exchange Rate:</para>
+          <para style="P4">Account:</para>
+          <para style="P4">Account Description: </para>
+          <para style="P4">Exchange Rate:</para>
           <para style="P1">
             <font color="white"> </font>
           </para>
         </td>
         <td>
-          <para style="P13">[[ soa.account_number.code ]]</para>
-          <para style="P13">[[ soa.account_number.name ]]</para>
+          <para style="P5">[[ soa.account_number.code ]]</para>
+          <para style="P5">[[ soa.account_number.name ]]</para>
         </td>
         <td>
-          <para style="P12">Date of Statement: </para>
-          <para style="P12">Period of Time: </para>
+          <para style="P4">Date of Statement: </para>
+          <para style="P4">Period of Time: </para>
         </td>
         <td>
-          <para style="P13">[[soa.date]]</para>
-          <para style="P13">[[ soa.period_id.name ]]</para>
+          <para style="P5">[[soa.date]]</para>
+          <para style="P5">[[ soa.period_id.name ]]</para>
         </td>
       </tr>
     </blockTable>
     <blockTable colWidths="265.0,265.0" style="Table2">
       <tr>
         <td>
-          <para style="P18">SUMMARY </para>
+          <para style="P14">SUMMARY </para>
         </td>
         <td>
-          <para style="P16">PHP</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P8">Previous Balance</para>
-        </td>
-        <td>
-          <para style="P10">
-            <font color="white"> </font>
-          </para>
+          <para style="P13">PHP</para>
         </td>
       </tr>
       <tr>
         <td>
-          <para style="P8">Total Income</para>
+          <para style="P2">Previous Balance</para>
         </td>
         <td>
-          <para style="P10">[[soa.total_income]]</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P8">Total Expenses</para>
-        </td>
-        <td>
-          <para style="P10">[[soa.total_expense]]</para>
+          <para style="P3">[[soa.prev_balance]]</para>
         </td>
       </tr>
       <tr>
         <td>
-          <para style="P8">Income - Expenses</para>
+          <para style="P2">Total Income</para>
         </td>
         <td>
-          <para style="P10">[[soa.inc_exp]]</para>
+          <para style="P3">[[soa.total_income]]</para>
         </td>
       </tr>
       <tr>
         <td>
-          <para style="P8">Ending Balance</para>
+          <para style="P2">Total Expenses</para>
         </td>
         <td>
-          <para style="P10">
-            <font color="white"> </font>
-          </para>
+          <para style="P3">[[soa.total_expense]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P2">Income - Expenses</para>
+        </td>
+        <td>
+          <para style="P3">[[soa.inc_exp]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P2">Ending Balance</para>
+        </td>
+        <td>
+          <para style="P3">[[soa.end_balance]]</para>
         </td>
       </tr>
     </blockTable>
     <para style="Horizontal Line">
       <font color="white"> </font>
     </para>
-    <para style="P20">Transactions</para>
+    <para style="P9">Transactions</para>
     <blockTable colWidths="74.0,182.0,83.0,73.0,58.0,59.0" style="Table7">
       <tr>
         <td>
@@ -238,34 +227,34 @@
           <para style="terp_tblheader_Details_Centre">Expense</para>
         </td>
         <td>
-          <para style="P21">Currency</para>
+          <para style="P15">Currency</para>
         </td>
         <td>
-          <para style="P21">Amount in Currency</para>
+          <para style="P15">Amount in Currency</para>
         </td>
       </tr>
     </blockTable>
     <section>
-      <para style="P4">[[ repeatIn(soa.line_ids,'l') ]]</para>
+      <para style="P10">[[ repeatIn(soa.line_ids,'l') ]]</para>
       <blockTable colWidths="74.0,182.0,84.0,73.0,59.0,59.0" style="Table8">
         <tr>
           <td>
-            <para style="P5">[[l.date]]</para>
+            <para style="P11">[[l.date]]</para>
           </td>
           <td>
-            <para style="P5">[[ l.name ]]</para>
+            <para style="P11">[[ l.name ]]</para>
           </td>
           <td>
-            <para style="P6">[[l.debit]]</para>
+            <para style="P12">[[l.debit]]</para>
           </td>
           <td>
-            <para style="P6">[[l.credit]]</para>
+            <para style="P12">[[l.credit]]</para>
           </td>
           <td>
-            <para style="P6">[[l.link_to.currency_id.name]]</para>
+            <para style="P12">[[l.link_to.currency_id.name]]</para>
           </td>
           <td>
-            <para style="P6">[[l.currency_amount]]</para>
+            <para style="P12">[[l.currency_amount]]</para>
           </td>
         </tr>
         <tr>
@@ -300,9 +289,9 @@
         </tr>
       </blockTable>
     </section>
-    <para style="P3">
+    <para style="P8">
       <font color="white"> </font>
     </para>
-    <para style="P3">[[soa.disclaimer]]</para>
+    <para style="P8">[[soa.disclaimer]]</para>
   </story>
 </document>
