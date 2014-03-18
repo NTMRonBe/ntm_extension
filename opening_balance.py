@@ -28,47 +28,16 @@ class ob_import(osv.osv):
     _description = "Import Opening Balance Entries"
     _columns = {
         'name':fields.char('Name',size=64),
-        'journal_id':fields.many2one('account.journal','Journal'),
-        'ref':fields.char('Reference',size=64),
-        'period_id':fields.many2one('account.period','Period'),
         'account_id':fields.many2one('account.account','Account'),
         'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
+        'accpac_id':fields.char('Accpac Account',size=64),
         'debit':fields.float('Debit'),
         'credit':fields.float('Credit'),
-        'currency_id':fields.related('account_id','currency_id',type='many2one',relation='res.currency',store=True, string='Posting Currency'),
-        'date':fields.date('Effective Date'),
-        'partner_id':fields.many2one('res.partner','Partner'),
-        'imported':fields.boolean('Imported'),
+        'currency_id':fields.many2one('res.currency','Posting Currency'),
         }
     
     def import_data(self, cr, uid, fields, datas, mode='init', current_module='', noupdate=False, context=None, filename=None):
-        """
-        Import given data in given module
-
-        :param cr: database cursor
-        :param uid: current user id
-        :param fields: list of fields
-        :param data: data to import
-        :param mode: 'init' or 'update' for record creation
-        :param current_module: module name
-        :param noupdate: flag for record creation
-        :param context: context arguments, like lang, time zone,
-        :param filename: optional file to store partial import state for recovery
-        :rtype: tuple
-
-        This method is used when importing data via client menu.
-
-        Example of fields to import for a sale.order::
-
-            .id,                         (=database_id)
-            partner_id,                  (=name_search)
-            order_line/.id,              (=database_id)
-            order_line/name,
-            order_line/product_id/id,    (=xml id)
-            order_line/price_unit,
-            order_line/product_uom_qty,
-            order_line/product_uom/id    (=xml_id)
-        """
+        
         if not context:
             context = {}
         def _replace_field(x):
@@ -107,15 +76,6 @@ class ob_import(osv.osv):
                 id = ids[0][0]
             return id
 
-        # IN:
-        #   datas: a list of records, each record is defined by a list of values
-        #   prefix: a list of prefix fields ['line_ids']
-        #   position: the line to process, skip is False if it's the first line of the current record
-        # OUT:
-        #   (res, position, warning, res_id) with
-        #     res: the record for the next line to process (including it's one2many)
-        #     position: the new position for the next line
-        #     res_id: the ID of the record if it's a modification
         def process_liness(self, datas, prefix, current_module, model_name, fields_def, position=0, skip=0):
             line = datas[position]
             row = {}
@@ -256,68 +216,63 @@ ob_import()
 
 class ob_import_wiz(osv.osv_memory):
     _name = 'ob.import.wiz'
+    _columns = {
+        'journal_id':fields.many2one('account.journal','Opening Balance Journal', domain=[('type','=','situation')],required=True),
+        'period_id':fields.many2one('account.period','Effective Period',required=True),
+        'date':fields.date('Effectivity Date',required=True),
+        'name':fields.char('Reference',size=64, required=True),
+    }
         
-    def import_wiz(self, cr, uid, ids, context=None):
-        aml_pool = self.pool.get('account.move.line')
-        am_pool = self.pool.get('account.move')
-        obi = self.pool.get('ob.import')
-        for obi_lines in obi.search(cr, uid, [('imported','=',False)]):
-            obi_fields = ['name','journal_id','ref','period_id','currency_id','account_id','analytic_id',
-                          'debit','credit','currency_id','date','partner_id']
-            obi_read = obi.read(cr, uid, obi_lines,obi_fields)
-            am_check = am_pool.search(cr, uid,[('ref','=',obi_read['ref'])])
-            partner_id= False
-            analytic_id= False
-            curr_id = False
-            if obi_read['partner_id']:
-                 partner_id=obi_read['partner_id'][0]
-            if obi_read['analytic_id']:
-                analytic_id=obi_read['analytic_id'][0]
-            if obi_read['currency_id']:
-                curr_id=obi_read['currency_id'][0]
-            if not am_check:
-                move = {
-                    'ref':obi_read['ref'],
-                    'journal_id':obi_read['journal_id'][0],
-                    'period_id':obi_read['period_id'][0],
-                    'date':obi_read['date'],
-                    'state':'draft',
+    def createEntries(self, cr, uid, ids, context=None):
+        for form in self.read(cr, uid, ids, context=None):
+            move = {
+                'ref':form['name'],
+                'journal_id':form['journal_id'],
+                'period_id':form['period_id'],
+                'date':form['date'],
+                'state':'draft',
                 }
-                move_id = am_pool.create(cr, uid, move)
-                
+            move_id = self.pool.get('account.move').create(cr, uid, move)
+            for line in context['active_ids']:
+                lineRead = self.pool.get('ob.import').read(cr, uid, line, context=None)
+                account_id = False
+                curr_id = False
+                analytic_id = False
+                if lineRead['analytic_id']:
+                    analytic_id = lineRead['analytic_id'][0]
+                    analyticRead = self.pool.get('account.analytic.account').read(cr, uid, analytic_id, ['normal_account'])
+                    account_id = analyticRead['normal_account'][0]
+                elif lineRead['account_id']:
+                    account_id = lineRead['account_id'][0]
+                    analytic_id = False
+                elif lineRead['accpac_id']:
+                    checker = self.pool.get('account.accpac').search(cr, uid, [('name','=',lineRead['accpac_id']),('state','=','matched')], limit=1)
+                    if checker:
+                        checker_read = self.pool.get('account.accpac').read(cr, uid, checker[0],context=None)
+                        if checker_read['account_id']:
+                            account_id = checker_read['account_id'][0]
+                        elif checker_read['analytic_id']:
+                            analytic_id = checker_read['analytic_id'][0]
+                            analyticReader = self.pool.get('account.analytic.account').read(cr, uid, analytic_id,['normal_account'])
+                            account_id = analyticReader['normal_account'][0]
+                    if not checker:
+                        account_number = lineRead['accpac_id']
+                        raise osv.except_osv(_('Error!'), _('Please use the Accpac Account Matcher and Wizard to add a link to %s account!')%(account_number))
+                curr_id = lineRead['currency_id'][0]    
                 move_line = {
-                    'name':obi_read['name'],
-                    'ref':obi_read['ref'],
-                    'partner_id':partner_id,
-                    'journal_id':obi_read['journal_id'][0],
-                    'period_id':obi_read['period_id'][0],
-                    'account_id':obi_read['account_id'][0],
+                    'name':lineRead['name'],
+                    'journal_id':form['journal_id'],
+                    'period_id':form['period_id'],
+                    'date':form['date'],
+                    'account_id':account_id,
                     'currency_id':curr_id,
                     'analytic_account_id':analytic_id,
-                    'debit':obi_read['debit'],
-                    'credit':obi_read['credit'],
-                    'date':obi_read['date'],
+                    'debit':lineRead['debit'],
+                    'credit':lineRead['credit'],
                     'move_id':move_id,
                 }
-                aml_pool.create(cr, uid, move_line)
-            elif am_check:
-                for aml in am_check:
-                    am_read = am_pool.read(cr, uid, aml, ['id'])
-                    move_line = {
-                        'name':obi_read['name'],
-                        'ref':obi_read['ref'],
-                        'partner_id':partner_id,
-                        'currency_id':curr_id,
-                        'journal_id':obi_read['journal_id'][0],
-                        'period_id':obi_read['period_id'][0],
-                        'account_id':obi_read['account_id'][0],
-                        'analytic_account_id':analytic_id,
-                        'debit':obi_read['debit'],
-                        'credit':obi_read['credit'],
-                        'date':obi_read['date'],
-                        'move_id':am_read['id'],
-                    }
-                    aml_pool.create(cr, uid, move_line)
-            obi.write(cr, uid,obi_lines,{'imported':True})
+                self.pool.get('account.move.line').create(cr, uid, move_line)
+            lines = context['active_ids']
+            self.pool.get('ob.import').unlink(cr, uid, lines)
         return {'type': 'ir.actions.act_window_close'}
 ob_import_wiz()
