@@ -63,15 +63,14 @@
         <menuitem id="menu_eca" parent="voucher_main_config" sequence="70" action="action_email_charging_account_form"/>
         <menuitem id="menu_phna" parent="voucher_main_config" sequence="80" action="action_voucher_distribution_philnational_form"/>
         <menuitem id="menu_vdaa" parent="voucher_main_config" sequence="90" action="action_voucher_distribution_account_assignment_form"/>
-        
+        <menuitem id="database_menu" parent="base.menu_security" sequence="50" action="admin_backuprestoredb_view_action"/>
        
         
         
         
         <menuitem id="ntm_bankandcash_root" sequence="40" name="Bank and Cash" web_icon="images/safe.png"
             web_icon_hover="images/safe_hover.png"/>
-		<menuitem id="ntm_new_reval" sequence="100" name="Revised Revaluation" web_icon="images/safe.png"
-            web_icon_hover="images/safe_hover.png" action="action_new_reval_tree"/>
+		<menuitem id="ntm_new_reval" sequence="100" parent="account.menu_account_end_year_treatments" name="Revised Revaluation" action="action_new_reval_tree"/>
         <menuitem id="ntm_bankaccounts_main" sequence="10" name="Bank Accounts" parent="ntm_bankandcash_root"/>
         <menuitem id="menu_action_ntm_res_partner_bank_company_form" parent="ntm_bankaccounts_main" sequence="10" action="action_ntm_res_partner_bank_company_tree"/>
         <menuitem id="menu_action_ntm_res_partner_bank_entity_form" parent="ntm_bankaccounts_main" sequence="20" action="action_ntm_res_partner_bank_entity_tree"/>

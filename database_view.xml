@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="admin_backuprestoredb_view" model="ir.ui.view">
+            <field name="name">Database Administrative Function</field>
+            <field name="model">admin.backuprestoredb</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            <form string="Database Administrative Function">
+				<group colspan="2" col="2">
+                <field name="date" required="1"/>
+				<field name="db_name" required="1"/>
+				<field name="db_func" required="1"/>
+				<field name="master_password" required="1" password="True"/>
+				<button string="Check" type="object" name="sendEmails" icon="gtk-execute" colspan="2"/>
+				</group>
+               </form>
+            </field>
+        </record>
+
+        <record id="admin_backuprestoredb_view_action" model="ir.actions.act_window">
+            <field name="name">Database Administrative Function</field>
+            <field name="res_model">admin.backuprestoredb</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="admin_backuprestoredb_view"/>
+            <field name="target">new</field>
+        </record>
+		
+       </data>
+</openerp>
