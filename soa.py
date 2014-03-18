@@ -26,7 +26,7 @@ class soa_request(osv.osv):
         subject = msg.get('subject') or _("No Subject")
         body = msg.get('body')
         msg_from = msg.get('from')
-
+        
         vals = {
             'name': subject,
             'email_from': msg_from,
@@ -44,10 +44,8 @@ class soa_request(osv.osv):
             subj_split_period_code = subj_split[1].split(',')
             code = subj_split_period_code[1]
             period = subj_split_period_code[0]
-            netsvc.Logger().notifyChannel("subj_split", netsvc.LOG_INFO, ' '+str(subj_split_period_code))
             acc_search = self.pool.get('account.analytic.account').search(cr, uid, [('code','ilike',code)])
             period_search = self.pool.get('account.period').search(cr, uid, [('name','ilike',period)])
-            netsvc.Logger().notifyChannel("period_search", netsvc.LOG_INFO, ' '+str(period_search))
             smtp_login = self.pool.get('email_template.account').search(cr, uid, [('smtpuname','ilike','openerp'),('company','=','yes')])
             use_smtp= False
             for smtp in smtp_login:
@@ -55,6 +53,16 @@ class soa_request(osv.osv):
             if not acc_search:
                 raise osv.except_osv(_('Error !'), _('There is no existing account with account code %s')%code)
             elif acc_search:
+                emailAddresses = ''
+                for account in acc_search:
+                    accReader = self.pool.get('account.analytic.account').read(cr, uid, account, ['partner_id'])
+                    emailChecker = self.pool.get('res.partner.address').search(cr, uid, [('partner_id','=',accReader['partner_id'][0]),('email','!=',False)])
+                    for email in emailChecker:
+                            emailReader = self.pool.get('res.partner.address').read(cr, uid, email, ['email'])
+                            if emailAddresses=='':
+                                emailAddresses = emailReader['email']
+                            elif emailAddresses!='':
+                                emailAddresses = emailAddresses +','+emailReader['email']
                 if not period_search:
                     raise osv.except_osv(_('Error !'), _('Period %s is not existing!')%period)
                 elif period_search:
@@ -66,7 +74,7 @@ class soa_request(osv.osv):
                                     smtp_acct = self.pool.get('email_template.account').read(cr, uid, use_smtp,['email_id'])
                                     account_id = use_smtp
                                     subject = 'Re:' + subj
-                                    email_to = request_read['email_adds']
+                                    email_to = emailAddresses
                                     values = {
                                             'account_id':account_id,
                                             'email_to':email_to,
