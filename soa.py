@@ -38,6 +38,7 @@ class soa_request(osv.osv):
     
     def create_reply(self, cr, uid, ids, context=None):
         for requests in self.pool.get('soa.request').search(cr, uid, [('generated','=',False)]):
+            self.pool.get('soa.request').write(cr, uid, requests, {'generated':True} )
             request_read = self.pool.get('soa.request').read(cr, uid, requests, context=None)
             subj = request_read['name']
             subj_split = subj.split(':')
