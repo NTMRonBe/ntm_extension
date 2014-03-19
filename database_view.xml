@@ -9,10 +9,12 @@
             <form string="Database Administrative Function">
 				<group colspan="2" col="2">
                 <field name="date" required="1"/>
-				<field name="db_name" required="1"/>
+				<field name="db_name" attrs="{'required': [('db_func','=','backup')],'invisible':[('db_func','=','restore')]}"/>
+				<field name="new_db" attrs="{'required': [('db_func','=','restore')],'invisible':[('db_func','=','backup')]}"/>
+				<field name="backup_name" attrs="{'required': [('db_func','=','restore')],'invisible':[('db_func','=','backup')]}"/>
 				<field name="db_func" required="1"/>
-				<field name="master_password" required="1" password="True"/>
-				<button string="Check" type="object" name="sendEmails" icon="gtk-execute" colspan="2"/>
+				<field name="master_password" attrs="{'required': [('db_func','=','restore')],'invisible':[('db_func','=','backup')]}" password="True"/>
+				<button string="Check" type="object" name="backup_restore" icon="gtk-execute" colspan="2" confirm="Are you sure that no one is logged in except you?"/>
 				</group>
                </form>
             </field>
