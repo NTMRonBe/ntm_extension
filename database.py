@@ -21,14 +21,17 @@ class admin_backuprestoredb(osv.osv_memory):
 		'new_db':fields.char('New Database Name',size=64),
 		'backup_name':fields.char('Backup Name',size=64),
 		'master_password':fields.char('Master Password', size=32),
+		'email':fields.many2one('email_template.account','Email Sender', required=True),
 		}
 	
 	def backup_restore(self, cr, uid, ids, context=None):
 		for db in self.read(cr, uid, ids, context=None):
 			if db['db_func']=='backup':
 				self.createBackup(cr, uid, ids, context)
+				self.createEmailNotification(cr, uid, ids, context)
 			elif db['db_func']=='restore':
 				self.createRestore(cr, uid, ids, context)
+				self.createEmailNotification(cr, uid, ids, context)
 		return {'type': 'ir.actions.act_window_close'}
 			
 	
@@ -37,10 +40,6 @@ class admin_backuprestoredb(osv.osv_memory):
 		configdb_user = tools.config['db_user']
 		configdb_host = tools.config['db_host']
 		configdb_port = tools.config['db_port']
-		print configdb_password
-		print configdb_user
-		print configdb_host
-		print configdb_port
 		if configdb_password==False:
 			configdb_password = '1'
 		if configdb_user == False:
@@ -66,10 +65,6 @@ class admin_backuprestoredb(osv.osv_memory):
 		configdb_user = tools.config['db_user']
 		configdb_host = tools.config['db_host']
 		configdb_port = tools.config['db_port']
-		print configdb_password
-		print configdb_user
-		print configdb_host
-		print configdb_port
 		if configdb_password==False:
 			configdb_password = '1'
 		if configdb_user == False:
@@ -88,4 +83,47 @@ class admin_backuprestoredb(osv.osv_memory):
 			os.system(cmd)
 		return True
 	
+	def createEmailNotification(self, cr, uid, ids, context=None):
+		uidRead = self.pool.get('res.users').read(cr, uid, uid, ['user_email'])
+		email_to = uidRead['user_email']
+		subject = ''
+		backupfile_name = ''
+		for db in self.read(cr, uid, ids, context=None):
+			if db['db_func']=='backup':
+				backupfile_name = db['db_name']+'_'+db['date'] +'.backup.gz'
+				subject = 'Database Backup: ' + db['db_name']
+				bodytext = 'Database Backup Information: \n Database Name: '+ db['db_name']+'\nDate: '+ db['date'] + '\nBackup Filename: ' + backupfile_name
+				account_id = db['email']
+				values = {
+					'account_id':account_id,
+					'email_to':email_to,
+					'folder':'outbox',
+					'subject':subject,
+					'body_text':bodytext,
+					'state':'na',
+					'server_ref':0,
+					}
+				email_lists = []
+				email_created = self.pool.get('email_template.mailbox').create(cr, uid, values)
+				email_lists.append(email_created)
+				self.pool.get('email_template.mailbox').send_this_mail(cr, uid, email_lists)
+			elif db['db_func']=='restore':
+				subject = 'Database Restored: ' + db['backup_name']
+				bodytext = 'Database Restoration Information: \n Database Name: '+ db['new_db']+'\nDate: '+ db['date'] + '\nBackup Filename: ' + db['backup_name']
+				account_id = db['email']
+				values = {
+					'account_id':account_id,
+					'email_to':email_to,
+					'folder':'outbox',
+					'subject':subject,
+					'body_text':bodytext,
+					'state':'na',
+					'server_ref':0,
+					}
+				email_lists = []
+				email_created = self.pool.get('email_template.mailbox').create(cr, uid, values)
+				email_lists.append(email_created)
+				self.pool.get('email_template.mailbox').send_this_mail(cr, uid, email_lists)
+		return True
+							 
 admin_backuprestoredb()
