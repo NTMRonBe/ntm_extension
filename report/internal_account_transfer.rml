@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<document filename="test.pdf">
+  <template pageSize="(595.0,842.0)" title="Test" author="Martin Simon" allowSplitting="20">
+    <pageTemplate id="first">
+      <frame id="first" x1="28.0" y1="28.0" width="539" height="786"/>
+    </pageTemplate>
+  </template>
+  <stylesheet>
+    <blockTableStyle id="Standard_Outline">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <initialize>
+      <paraStyle name="all" alignment="justify"/>
+    </initialize>
+    <paraStyle name="P1" fontName="Helvetica" fontSize="10.0" leading="13"/>
+    <paraStyle name="P2" fontName="Helvetica" fontSize="22.0" leading="27" alignment="CENTER"/>
+    <paraStyle name="P3" fontName="Helvetica" fontSize="16.0" leading="20"/>
+    <paraStyle name="P4" fontName="Helvetica" fontSize="11.0" leading="14" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P5" fontName="Helvetica-Bold" fontSize="10.0" leading="13" alignment="LEFT"/>
+    <paraStyle name="P6" fontName="Helvetica" fontSize="16.0" leading="20"/>
+    <paraStyle name="P7" fontName="Helvetica" fontSize="16.0" leading="20"/>
+    <paraStyle name="P8" fontName="Helvetica" fontSize="16.0" leading="20"/>
+    <paraStyle name="P9" fontName="Helvetica" fontSize="10.0" leading="13"/>
+    <paraStyle name="Standard" fontName="Helvetica"/>
+    <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="List" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="Caption" fontName="Helvetica" fontSize="12.0" leading="15" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="Index" fontName="Helvetica"/>
+    <paraStyle name="Table Contents" fontName="Helvetica"/>
+    <paraStyle name="terp_header" fontName="Helvetica-Bold" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_default_8" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_tblheader_Details" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_Details_Centre" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_Details_Right" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_default_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_2" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="2.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Centre_8" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Centre_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Right_8" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Right_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Note" rightIndent="0.0" leftIndent="9.0" fontName="Helvetica-Oblique" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="Table Heading" fontName="Helvetica" alignment="CENTER"/>
+    <paraStyle name="Horizontal Line" fontName="Helvetica" fontSize="6.0" leading="8" spaceBefore="0.0" spaceAfter="14.0"/>
+    <images/>
+  </stylesheet>
+  <story>
+    <para style="P5">[[ repeatIn(objects,'iat') ]]</para>
+    <para style="P2">Internal Account Transfer</para>
+    <para style="Horizontal Line">
+      <font color="white"> </font>
+    </para>
+    <para style="P8">
+      <font face="Helvetica">Description: [[iat.remarks]]</font>
+    </para>
+    <para style="P3">
+      <font color="white"> </font>
+    </para>
+    <para style="P3">Account Transferred From:[[ ((iat.transfer_type== 'people2people') or (iat.transfer_type== 'people2income') or (iat.transfer_type== 'people2proj') or removeParentNode('para')) and '' ]] [[iat.src_pat_analytic_id.name]]</para>
+    <para style="P7">
+      <font face="Helvetica">Account Transferred From:[[ ((iat.transfer_type== 'proj2people') or (iat.transfer_type== 'proj2proj') or (iat.transfer_type== 'proj2income') or removeParentNode('para')) and '' ]] [[iat.src_proj_analytic_id.name]]</font>
+    </para>
+    <para style="P7">
+      <font face="Helvetica">Account Transferred From:[[ ((iat.transfer_type== 'expense2people') or (iat.transfer_type== 'expense2proj') or (iat.transfer_type== 'expense2income') or removeParentNode('para')) and '' ]] [[iat.src_expense_analytic_id.name]]</font>
+    </para>
+    <para style="P3">
+      <font color="white"> </font>
+    </para>
+    <para style="P3">Reference: [[iat.name]]</para>
+    <para style="P3">
+      <font color="white"> </font>
+    </para>
+    <para style="P3">Amount:[[iat.currency_id.symbol]] [[iat.amount]]</para>
+    <para style="P3">
+      <font color="white"> </font>
+    </para>
+    <para style="P3">Date:[[iat.date]]</para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+    <para style="P3">Account Transferred To:[[ ((iat.transfer_type== 'people2people') or (iat.transfer_type== 'people2income') or (iat.transfer_type== 'people2proj') or removeParentNode('para')) and '' ]] [[iat.dest_pat_analytic_id.name]]</para>
+    <para style="P7">
+      <font face="Helvetica">Account Transferred To:[[ ((iat.transfer_type== 'proj2people') or (iat.transfer_type== 'proj2proj') or (iat.transfer_type== 'proj2income') or removeParentNode('para')) and '' ]] [[iat.dest_proj_analytic_id.name]]</font>
+    </para>
+    <para style="P3">Account Transferred To:[[ ((iat.transfer_type== 'expense2people') or (iat.transfer_type== 'expense2proj') or (iat.transfer_type== 'expense2income') or removeParentNode('para')) and '' ]] [[iat.dest_expense_analytic_id.name]]</para>
+    <para style="P3">
+      <font color="white"> </font>
+    </para>
+    <para style="P3">
+      <font color="white"> </font>
+    </para>
+    <para style="P4">
+      <font face="Helvetica" size="16.0">Internal Transfer Requested By</font>
+      <font face="Helvetica">:____________________________</font>
+    </para>
+    <para style="Horizontal Line">
+      <font color="white"> </font>
+    </para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+  </story>
+</document>

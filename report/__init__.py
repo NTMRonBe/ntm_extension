@@ -7,3 +7,4 @@ import internal_fund_transfer
 import pc_liquidation
 import regional_report
 import regional_ntma_report
+import internal_account_transfer

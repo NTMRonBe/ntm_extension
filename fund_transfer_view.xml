@@ -11,6 +11,16 @@
             header = "False"
             menu="True"
             />
+        <report id="report_internal_account_transfer_print"
+            string="Internal Account Transfer"
+            model="internal.account.transfer"
+            name="internal.account.transfer"
+            rml="ntm_extension/report/internal_account_transfer.rml"
+            auto="False"
+            attachment="(object.name)"
+            header = "True"
+            menu="True"
+            />
 		<record model="ir.ui.view" id="view_fund_transfer_tree">
             <field name="name">fund.transfer.tree</field>
             <field name="model">fund.transfer</field>
