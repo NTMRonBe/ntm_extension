@@ -153,16 +153,16 @@
 	                    <field name="journal_id" invisible="1"/>
 	                    <field name="amount" attrs="{'readonly':[('state','!=','draft')]}"/>
                     </group>
-                    <notebook>
+                    <notebook colspan="4">
                         <page string="Call logs and Additional Charges">
                             <separator string="Call Logs" colspan="4"/>
-                            <button name="%(action_local_change)d" colspan="4" attrs="{'invisible':[('state','!=','draft')]}" string="Change location to Local" icon="gtk-execute" type="action"/> 
-                            <field mode="tree,form" name="log_ids" nolabel="1">
-                                <tree string="Call Logs" editable="top" colors="red:price!=statement_price">
+                            <button name="%(action_local_change)d" colspan="4" attrs="{'invisible':[('state','!=','draft')]}" string="Change location to Local" icon="gtk-execute" type="action"/>
+                            <field name="calllogsreconciled" invisible="1"/>
+                            <button name="reconcileLogs" attrs="{'invisible':[('calllogsreconciled','=',True)]}" icon="gtk-execute" type="object" string="Reconcile Call Logs"/> 
+                            <field mode="tree" name="log_ids" nolabel="1" colspan="4">
+                                <tree string="Call Logs">
                                     <field name="name" readonly="1"/>
                                     <field name="time" readonly="1"/>
-                                    <field name="line_id" invisible="1"/>
-                                    <field name="extension" invisible="1"/>
                                     <field name="phone_pin" readonly="1"/>
                                     <field name="number" readonly="1"/>
                                     <field name="duration" readonly="1"/>
@@ -172,12 +172,11 @@
                                     <field name="reconcile" readonly="1"/>
                                     <field name="statement_price" attrs="{'readonly':[('reconcile','=',True)]}" sum="Total Statement Price"/>
                                     <field name="taxed_price" readonly="1" sum="Total Tax Price"/>
-                                    <button name="reconcile" attrs="{'invisible':[('reconcile','=',True)]}" icon="gtk-execute" type="object"/>
                                 </tree>
                             </field>
                             <button name="%(action_additional_charge)d" colspan="4" attrs="{'invisible':[('state','!=','draft')]}" string="Add Additional Charge" icon="gtk-execute" type="action"/>
                             <separator string="Additional Charges" colspan="4"/>
-                            <field mode="tree" name="additional_ids" nolabel="1">
+                            <field mode="tree" name="additional_ids" nolabel="1" colspan="4">
                                 <tree string="Additional Charges" editable="top">
                                     <field name="name" />
                                     <field name="description" />

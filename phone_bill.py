@@ -281,7 +281,37 @@ class phone_statement_logs(osv.osv):
         'log_ids':fields.one2many('phone.logs','statement_id','Phone Logs'),
         'distribution_ids':fields.one2many('phone.statement.distribution','statement_id','Distribution Lists'),
         'additional_ids':fields.one2many('phone.statement.additional','statement_id','Additional Charges'),
+        'calllogsreconciled':fields.boolean('Call Logs Reconciled'),
         }
+    def reconcileLogs(self, cr, uid, ids,context=None):
+        for statement in self.read(cr, uid, ids, context=None):
+            for log in statement['log_ids']:
+                logReader = self.pool.get('phone.logs').read(cr, uid, log, context=None)
+                statement_read = self.pool.get('phone.line').read(cr, uid, logReader['line_id'][0],context=None)
+                tax_included = True
+                if statement_read['it_bool'] or statement_read['lt_bool']:
+                    tax_included = True
+                elif not statement_read['it_bool'] and not statement_read['lt_bool']:
+                    tax_included = False
+                taxed = 0.00
+                if tax_included ==True:
+                    taxed = logReader['statement_price']
+                    if logReader['location']==False:
+                        raise osv.except_osv(_('Error!'), _('Please change the location!'))
+                    elif logReader['location']!=False:
+                        self.pool.get('phone.logs').write(cr, uid,log, {'reconcile':True, 'taxed_price':taxed})
+                elif tax_included==False:
+                    if logReader['location']=='local':
+                        tax = logReader['statement_price'] * statement_read['lt_value']
+                        taxed = logReader['statement_price'] * statement_read['lt_value']
+                        self.pool.get('phone.logs').write(cr, uid,log, {'reconcile':True, 'taxed_price':taxed})
+                    elif logReader['location']=='international':
+                        taxed = logReader['statement_price']
+                        self.pool.get('phone.logs').write(cr, uid,log, {'reconcile':True, 'taxed_price':taxed})
+                    elif logReader['location']==False:
+                        raise osv.except_osv(_('Error!'), _('Please change the location of the receiving end!'))
+            self.write(cr, uid, ids, {'calllogsreconciled':True})
+        return True
     
     def reconcile(self, cr, uid, ids, context=None):
         for statement in self.read(cr, uid, ids, context=None):
