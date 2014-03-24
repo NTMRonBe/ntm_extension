@@ -283,12 +283,6 @@
             <field name="res_model">account.revaluation</field>
             <field name="view_type">form</field>
         </record>
-		<menuitem
-            name="Monthly Revaluations"
-            parent="account.menu_account_end_year_treatments"
-            action="action_account_revaluation"
-            id="menu_account_revaluation"
-            sequence="50"
-           />
+		
     </data>
 </openerp>

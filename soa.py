@@ -80,7 +80,6 @@ class soa_request(osv.osv):
                                             'account_id':account_id,
                                             'email_to':email_to,
                                             'folder':'outbox',
-                                            'body_text':'This is a test',
                                             'subject':subject,
                                             'state':'na',
                                             'server_ref':0
@@ -89,7 +88,6 @@ class soa_request(osv.osv):
                                     email_created = self.pool.get('email_template.mailbox').create(cr, uid, values)
                                     email_lists.append(email_created)
                                     soa_attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','account.soa'),('res_id','=',soa_id)])
-                                    netsvc.Logger().notifyChannel("soa_attachments", netsvc.LOG_INFO, ' '+str(soa_attachments))
                                     for soa_attachment in soa_attachments:
                                         query=("""insert into mail_attachments_rel(mail_id,att_id)values(%s,%s)"""%(email_created,soa_attachment))
                                         cr.execute(query)
@@ -238,7 +236,6 @@ class soa_add_line(osv.osv):
             attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','account.soa'),('res_id','=',rec)])
             self.pool.get('ir.attachment').unlink(cr, uid, attachments)
             period = soa_read['period_id'][1]
-            netsvc.Logger().notifyChannel("period", netsvc.LOG_INFO, ' '+str(period))
             split_period = period.split('/')
             period = str(split_period[0])+'_'+split_period[1]
             account = soa_read['account_number'][0]

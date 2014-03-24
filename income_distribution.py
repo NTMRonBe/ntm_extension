@@ -27,8 +27,9 @@ class income_distribution_generic(osv.osv):
         'ref':fields.char('Reference',size=64),
         'state':fields.selection([
                         ('draft','Draft'),
-                        ('received','Received'),
-                        ('distributed','Distributed'),
+                        ('received','Money Received'),
+                        ('distributed','Received Money Distributed'),
+                        ('cancelled','Transaction Cancelled'),
                         ],'State')
         }
     
@@ -37,6 +38,26 @@ class income_distribution_generic(osv.osv):
             'name': self.pool.get('ir.sequence').get(cr, uid, 'income.distribution.generic'),
             })
         return super(income_distribution_generic, self).create(cr, uid, vals, context)
+    
+    def cancel(self, cr, uid, ids, context=None):
+        for form in self.read(cr, uid, ids, context=None):
+            if form['state']=='draft':
+                self.write(cr, uid, ids, {'state':'cancelled'})
+            elif form['state']=='received':
+                self.pool.get('account.move').button_cancel(cr, uid, [form['rmove_id'][0]])
+                self.pool.get('account.move').unlink(cr, uid, [form['rmove_id'][0]])
+                self.write(cr, uid, ids, {'state':'cancelled'})
+            elif form['state']=='distributed':
+                self.pool.get('account.move').unlink(cr, uid, [form['dmove_id'][0]])
+                self.write(cr, uid, ids, {'state':'received'})
+        return True
+    
+    def cancelTransaction(self, cr, uid, ids, context=None):
+        for form in self.read(cr, uid, ids, context=None):
+            self.pool.get('account.move').unlink(cr, uid, [form['dmove_id'][0]])
+            self.pool.get('account.move').unlink(cr, uid, [form['rmove_id'][0]])
+            self.write(cr, uid, ids, {'state':'cancelled'})
+        return True
     
     _defaults = {
         'state':'draft',
@@ -131,23 +152,26 @@ class idg(osv.osv):
             if not idg['charges_included']:
                 donated_amt = idg['amount']
             elif idg['charges_included']:
-                donated_amt = idg['amount'] - idg['bank_charges']
-                charge_amt = idg['bank_charges']
-                amount = charge_amt / rate
-                name = "Charges for donation with reference #" + idg['ref']
-                move_line = {
-                        'name':name,
-                        'journal_id':journal_id,
-                        'period_id':period_id,
-                        'account_id':company_read['bank_charge'][0],
-                        'debit':amount,
-                        'date':idg['rdate'],
-                        'ref':idg['name'],
-                        'move_id':move_id,
-                        'amount_currency':charge_amt,
-                        'currency_id':currency,
-                        }
-                self.pool.get('account.move.line').create(cr, uid, move_line)
+                if idg['bank_charges']<=0.00:
+                    raise osv.except_osv(_('Error!'), _('ERROR CODE - IDG-001: If Charges are still included, bank charges must be greater than 0.00!'))
+                elif idg['bank_charges']>0.00:
+                        donated_amt = idg['amount'] - idg['bank_charges']
+                        charge_amt = idg['bank_charges']
+                        amount = charge_amt / rate
+                        name = "Charges for donation with reference #" + idg['ref']
+                        move_line = {
+                                'name':name,
+                                'journal_id':journal_id,
+                                'period_id':period_id,
+                                'account_id':company_read['bank_charge'][0],
+                                'debit':amount,
+                                'date':idg['rdate'],
+                                'ref':idg['name'],
+                                'move_id':move_id,
+                                'amount_currency':charge_amt,
+                                'currency_id':currency,
+                                }
+                        self.pool.get('account.move.line').create(cr, uid, move_line)
             amount = donated_amt / rate
             name = "Received donations with reference #" + idg['ref']
             move_line = {
@@ -198,91 +222,92 @@ class idg(osv.osv):
             total_contribution = False
             curr_distribution = False
             curr_contribution = False
-            for idgl in idg['distribution_ids']:
-                idgl_read = self.pool.get('income.distribution.generic.lines').read(cr, uid, idgl, context=None)
-                account_read = self.pool.get('account.analytic.account').read(cr, uid, idgl_read['account_id'][0],['normal_account'])
-                distribution_amt = idgl_read['amount'] / rate
-                contribution = idgl_read['charges'] / rate
-                amount = "%.3f" % distribution_amt
-                distribution_amt = float(amount)
-                curr_distribution +=distribution_amt
-                amount = "%.3f" % contribution
-                contribution = float(amount)
-                curr_contribution +=contribution                
-                total_distribution += idgl_read['amount']
-                total_contribution += idgl_read['charges']
-                name = "Distribution for "+idgl_read['remarks'] +" with reference#" + idg['ref']
-                move_line = {
-                        'name':name,
-                        'journal_id':journal_id,
-                        'period_id':period_id,
-                        'account_id':account_read['normal_account'][0],
-                        'credit':distribution_amt,                        
-                        'date':idg['ddate'],
-                        'ref':idg['name'],
-                        'move_id':move_id,
-                        'analytic_account_id':idgl_read['account_id'][0],
-                        'amount_currency':idgl_read['amount'],
-                        'currency_id':currency,
-                        }
-                self.pool.get('account.move.line').create(cr, uid, move_line)
-		if contribution!=0.00:
-                    name = "Contribution of " + idgl_read['remarks'] + " with reference#" + idg['ref']
+            if idg['distribution_ids']==[]:
+                raise osv.except_osv(_('Error!'), _('ERROR CODE - IDG-002: You must have a distribution list before distribution!'))
+            elif idg['distribution_ids']!=[]:
+                for idgl in idg['distribution_ids']:
+                    idgl_read = self.pool.get('income.distribution.generic.lines').read(cr, uid, idgl, context=None)
+                    account_read = self.pool.get('account.analytic.account').read(cr, uid, idgl_read['account_id'][0],['normal_account'])
+                    distribution_amt = idgl_read['amount'] / rate
+                    contribution = idgl_read['charges'] / rate
+                    amount = "%.3f" % distribution_amt
+                    distribution_amt = float(amount)
+                    curr_distribution +=distribution_amt
+                    amount = "%.3f" % contribution
+                    contribution = float(amount)
+                    curr_contribution +=contribution                
+                    total_distribution += idgl_read['amount']
+                    total_contribution += idgl_read['charges']
+                    name = "Distribution for "+idgl_read['remarks'] +" with reference#" + idg['ref']
                     move_line = {
                             'name':name,
                             'journal_id':journal_id,
                             'period_id':period_id,
                             'account_id':account_read['normal_account'][0],
-                            'debit':contribution,                        
+                            'credit':distribution_amt,                        
                             'date':idg['ddate'],
                             'ref':idg['name'],
                             'move_id':move_id,
                             'analytic_account_id':idgl_read['account_id'][0],
-                            'amount_currency':idgl_read['charges'],
+                            'amount_currency':idgl_read['amount'],
                             'currency_id':currency,
                             }
                     self.pool.get('account.move.line').create(cr, uid, move_line)
-	    netsvc.Logger().notifyChannel("name", netsvc.LOG_INFO, ' '+str(idg['amount']))
-	    netsvc.Logger().notifyChannel("name", netsvc.LOG_INFO, ' '+str(total_distribution))
-	    idg_amount = idg['amount']
-	    idg_amount = "%.3f" % idg_amount
-	    idg_amount = float(idg_amount)
-	    total_distribution = "%.3f" % total_distribution
-	    total_distribution = float(total_distribution)
-            if total_distribution != idg_amount:
-                raise osv.except_osv(_('Error!'), _('ERR-001: Total received amount is not equal to the total amount to be distributed!'))
-	    elif total_distribution== idg['amount']:
-	    	name = "Total Distributed Amount with ref#" + idg['ref']
-                move_line = {
-                        'name':name,
-                        'journal_id':journal_id,
-                        'period_id':period_id,
-                        'account_id':company_read['donations'][0],
-                        'debit':curr_distribution,                        
-                        'date':idg['ddate'],
-                        'ref':idg['name'],
-                        'move_id':move_id,
-                        'amount_currency':total_distribution,
-                        'currency_id':currency,
-                        }
-                self.pool.get('account.move.line').create(cr, uid, move_line)
-		if curr_contribution!=0.00:
-                   name = "Total Contributed Amount with ref#" + idg['ref']
-                   move_line = {
-                           'name':name,
-                           'journal_id':journal_id,
-                           'period_id':period_id,
-                           'account_id':company_read['contributions_acct'][0],
-                           'credit':curr_contribution,                        
-                           'date':idg['ddate'],
-                           'ref':idg['name'],
-                           'move_id':move_id,
-                           'amount_currency':total_contribution,
-                           'currency_id':currency,
-                           }
-                   self.pool.get('account.move.line').create(cr, uid, move_line)
-                #self.pool.get('account.move').post(cr, uid, [move_id])
-                self.write(cr, uid, ids, {'state':'distributed','dmove_id':move_id})
+                    if contribution!=0.00:
+                        name = "Contribution of " + idgl_read['remarks'] + " with reference#" + idg['ref']
+                        move_line = {
+                                'name':name,
+                                'journal_id':journal_id,
+                                'period_id':period_id,
+                                'account_id':account_read['normal_account'][0],
+                                'debit':contribution,                        
+                                'date':idg['ddate'],
+                                'ref':idg['name'],
+                                'move_id':move_id,
+                                'analytic_account_id':idgl_read['account_id'][0],
+                                'amount_currency':idgl_read['charges'],
+                                'currency_id':currency,
+                                }
+                        self.pool.get('account.move.line').create(cr, uid, move_line)
+                    idg_amount = idg['amount']
+                    idg_amount = "%.3f" % idg_amount
+                    idg_amount = float(idg_amount)
+                    total_distribution = "%.3f" % total_distribution
+                    total_distribution = float(total_distribution)
+                    if total_distribution != idg_amount:
+                        raise osv.except_osv(_('Error!'), _('ERROR CODE - IDG-003: Total received amount is not equal to the total amount to be distributed!'))
+                    elif total_distribution== idg['amount']:
+                        name = "Total Distributed Amount with ref#" + idg['ref']
+                        move_line = {
+                            'name':name,
+                            'journal_id':journal_id,
+                            'period_id':period_id,
+                            'account_id':company_read['donations'][0],
+                            'debit':curr_distribution,                        
+                            'date':idg['ddate'],
+                            'ref':idg['name'],
+                            'move_id':move_id,
+                            'amount_currency':total_distribution,
+                            'currency_id':currency,
+                            }
+                        self.pool.get('account.move.line').create(cr, uid, move_line)
+                    if curr_contribution!=0.00:
+                        name = "Total Contributed Amount with ref#" + idg['ref']
+                        move_line = {
+                               'name':name,
+                               'journal_id':journal_id,
+                               'period_id':period_id,
+                               'account_id':company_read['contributions_acct'][0],
+                               'credit':curr_contribution,                        
+                               'date':idg['ddate'],
+                               'ref':idg['name'],
+                               'move_id':move_id,
+                               'amount_currency':total_contribution,
+                               'currency_id':currency,
+                            }
+                        self.pool.get('account.move.line').create(cr, uid, move_line)
+                    self.pool.get('account.move').post(cr, uid, [move_id])
+            self.write(cr, uid, ids, {'state':'distributed','dmove_id':move_id})
         return True
 idg()
 

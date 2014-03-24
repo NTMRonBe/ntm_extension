@@ -280,12 +280,6 @@
                                 <field name="category_id" nolabel="1"/>
                             </group>                        
                         </group>
-                        <group colspan="2" col="2">
-                            <separator string="Entity Codes"/>
-                            <group colspan="2" col="2">
-                                <field name="partner_dict" string="Entity Codes" nolabel="1"/>
-                            </group>                        
-                        </group>
                     </group>
                 </field>
                 <field name="customer" position="replace">

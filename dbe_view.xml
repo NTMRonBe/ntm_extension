@@ -81,19 +81,19 @@
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_dbe_form">
+        <record model="ir.actions.act_window" id="action_dbe_view_form">
             <field name="name">Direct Bank Expenses</field>
             <field name="res_model">direct.bank.expense</field>
             <field name="view_type">form</field>
         </record>
         <record model="ir.actions.act_window.view" id="action_dbe_tree">
-            <field name="act_window_id" ref="action_dbe_form"/>
+            <field name="act_window_id" ref="action_dbe_view_form"/>
             <field name="view_id" ref="dbe_tree"/>
             <field name="view_mode">tree</field>
             <field name="sequence">10</field>
         </record>
         <record model="ir.actions.act_window.view" id="action_dbe_form">
-            <field name="act_window_id" ref="action_dbe_form"/>
+            <field name="act_window_id" ref="action_dbe_view_form"/>
             <field name="view_id" ref="dbe_form"/>
             <field name="view_mode">form</field>
             <field name="sequence">20</field>

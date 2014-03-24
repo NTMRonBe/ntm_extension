@@ -17,7 +17,7 @@
                         <group colspan="2" col="2">
 	                        <field name="amount" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
 	                        <field name="charges_included" attrs="{'readonly':[('state','!=','draft')]}"/>
-	                        <field name="bank_charges" attrs="{'invisible':[('charges_included','=',False)],'readonly':[('state','!=','draft')]}"/>
+	                        <field name="bank_charges" attrs="{'invisible':[('charges_included','=',False)],'readonly':[('state','!=','draft')],'required':[('charges_included','=',True)]}"/>
                         </group>
                     </group>
                     <separator string="Dates" colspan="4"/>
@@ -81,9 +81,11 @@
                        </page>
                     </notebook>
                     <group colspan="4" col="13">
-                        <field name="state" readonly="1"/>
-                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
-                        <button name="receive" attrs="{'invisible':[('state','!=','draft')]}" string="Money Received"  type="object" />
+                        <field name="state"/>
+                        <button name="cancel" attrs="{'invisible':[('state','!=','received')]}" string="Cancel Receiving Transaction"  type="object"/>
+                        <button name="cancel" attrs="{'invisible':[('state','!=','distributed')]}" string="Cancel Distribution"  type="object"/>
+                        <button name="cancelTransaction" attrs="{'invisible':[('state','!=','distributed')]}" string="Cancel Transaction"  type="object" confirm="Are you sure you want to cancel the whole transaction including the receiving of money?"/>
+                        <button name="receive" attrs="{'invisible':[('state','!=','draft')]}" string="Receive Money"  type="object" />
                         <button name="distribute" attrs="{'invisible':[('state','!=','received')]}" string="Distribute Donation"  type="object" />
                     </group>
                 </form>

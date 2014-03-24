@@ -71,16 +71,7 @@
             <field name="view_id" ref="view_ob_import_wiz"/>
             <field name="target">new</field>
         </record>
-        <menuitem
-            name="Opening Balance"
-            parent="account.menu_finance_periodical_processing"
-            id="menu_opening_balance"
-           />
-        <menuitem id="menu_ob_import" 
-            action="action_ob_import_form" 
-            parent="menu_opening_balance"
-            sequence="100" 
-            groups="base.group_user"/>  
+          
             
          <record id="action_ob_import_side" model="ir.values">
             <field name="model_id" ref="model_ob_import" />

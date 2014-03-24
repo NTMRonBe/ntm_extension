@@ -28,7 +28,9 @@
     """,
     'website': '',
     'init_xml': [],
-    "depends" : ["account","account_voucher","base","analytic","fetchmail","account_budget","email_template"],
+    "depends" : ["account","account_accountant","account_cancel","account_chart","account_voucher","base","analytic","fetchmail","account_budget","email_template"],
+    
+    
     'update_xml': ["data.xml","ntm_extensions_view.xml"
                    ,"users_view.xml",
                    #"account_move_view.xml",
@@ -47,7 +49,8 @@
                    "account_pettycash/pcl_view.xml","fund_transfer_view.xml"
                    ,"account_pettycash/crs_view.xml","opening_balance.xml","region_report_view.xml",
                    "vehicle_charging_view.xml","invoice_slip_view.xml","bank_recon_view.xml",
-                   "dbe_view.xml","allocate_view.xml","recurring_view.xml","region_view.xml","revaluation_view.xml","database_view.xml","ntm_menus.xml"
+                   "dbe_view.xml","allocate_view.xml","recurring_view.xml","region_view.xml",
+                   "revaluation_view.xml","database_view.xml","ntm_menu2.xml","ntm_menus.xml"
                    ],
     'demo_xml': [
     ],
