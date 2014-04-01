@@ -26,16 +26,16 @@
                         <field name="name" invisible="1"/>
                         <group colspan="2" col="2">
                         <button name="enabler" attrs="{'invisible':[('enabled','=',True)]}" string="Enable Bank"  type="object"/>
-                        <field name="bank_id" domain="[('ownership','=','company'),('type','=','checking')]" attrs="{'invisible':[('enabled','=',False)]}"
+                        <field name="bank_id" domain="[('ownership','=','company'),('type','=','checking')]" attrs="{'invisible':[('enabled','=',False)],'readonly':[('state','!=','draft')]}"
                         widget="selection" on_change="onchange_bankid(bank_id,date)"/>
                         </group>
-                        <field name="date" on_change="onchange_bankid(bank_id,date)"/>
+                        <field name="date" on_change="onchange_bankid(bank_id,date)" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
                         <field name="type" invisible="1"/>
                         <field name="enabled" invisible="1"/>
                     </group>
                     <notebook>
 	                    <page string="Checks for Clearing">
-	                        <field name="line_ids" mode="tree" nolabel="1">
+	                        <field name="line_ids" mode="tree" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
 	                            <tree string="Checks for Clearing" editable="top">
 	                                <field name="name" readonly="1"/>
 	                                <field name="date" readonly="1"/>
@@ -63,10 +63,9 @@
                         </page>
                     </notebook>
                     <group colspan="4" col="13">
-                        <field name="state"/>
-                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
+                        <field name="state" readonly="1"/>
+                        <button name="cancel" attrs="{'invisible':[('state','in',['cancel','draft'])]}" string="Cancel"  type="object"/>
                         <button name="reconcile" attrs="{'invisible':[('state','!=','draft')]}" string="Reconcile"  type="object" />
-                        <button name="distribute" attrs="{'invisible':[('state','!=','confirm')]}" string="Distribute"  type="object" />
                     </group>
                 </form>
             </field>

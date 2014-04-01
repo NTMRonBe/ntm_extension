@@ -136,7 +136,7 @@
                     <notebook>
                         <page string="Trip Details" >
 	                       <group col="2" attrs="{'invisible':[('shared_trip','=',True)]}">
-                                <field name="account_id" attrs="{'readonly':[('state','!=','draft')]}" colspan="4"/>
+                                <field name="account_id" attrs="{'readonly':[('state','!=','draft')], 'required':[('shared_trip','=',False),('state','=','draft')]}" colspan="4"/>
                                 <separator string="Trip Details" colspan="4"/>
                                 <field name="details" nolabel="1" colspan="4" attrs="{'readonly':[('state','!=','draft')]}"/>
                            </group>
@@ -171,8 +171,8 @@
                         </page>
                     </notebook>
                      <group colspan="4" col="13">
-                        <field name="state" select="1"/>
-                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
+                        <field name="state" readonly="0"/>
+                        <button name="cancel" attrs="{'invisible':[('state','in',['draft','cancel'])]}" string="Cancel"  type="object"/>
                         <button name="confirm" attrs="{'invisible':[('state','!=','draft')]}" string="Confirm"  type="object" />
                         <button name="distribute" attrs="{'invisible':[('state','!=','confirm')]}" string="Distribute"  type="object" />
                     </group>
@@ -191,6 +191,7 @@
                     <field name="end_km"/>
                     <field name="kms"/>
                     <field name="vehicle_id"/>
+                    <field name="state"/>
                 </tree>
             </field>
         </record>

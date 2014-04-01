@@ -40,9 +40,8 @@
                                     </group>
                                 </form>
                             </field>
-                       </page>
-                       <page string="Remarks">
-                        <field name="remarks" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}"/>
+                            <separator string="Remarks" colspan="4"/>
+                            <field name="remarks" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}"/>
                        </page>
                        <page string="Journal Entries">
                             <field name="move_ids" mode="tree" nolabel="1">

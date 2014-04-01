@@ -47,29 +47,23 @@ class voucher_file_import(osv.osv_memory):
     _defaults = {  
         'state': 'init',
     }
-    def tester(self, cr, uid, ids, context=None):
-	   netsvc.Logger().notifyChannel("this is a test", netsvc.LOG_INFO,'Testing')
-	   return True
+
     def importzip(self, cr, uid, ids, context):
         voucher_read = self.pool.get('voucher.distribution').read(cr, uid, context['active_id'], ['name'])
+        print voucher_read
         voucher_name = voucher_read['name']
         voucher_name = voucher_name.replace(' ','_')
         voucher_name = voucher_name.replace('/','_')
-        netsvc.Logger().notifyChannel("Voucher Name", netsvc.LOG_INFO, ' '+ str(voucher_name))
         root = tools.config['root_path']
-        netsvc.Logger().notifyChannel("root", netsvc.LOG_INFO, ' '+str(root))
         file = ''
         try:
             os.makedirs(root+'/dbfs/')
         except OSError:
             pass
         file = root+'/dbfs/'+voucher_name+'.dbf'
-        netsvc.Logger().notifyChannel("filename", netsvc.LOG_INFO, ' '+str(file))
         (data,) = self.browse(cr, uid, ids , context=context)
-        netsvc.Logger().notifyChannel("data", netsvc.LOG_INFO, '' + str(data.voucher_file))
         module_data = data.voucher_file
         val = base64.decodestring(module_data)
-        netsvc.Logger().notifyChannel("passthis", netsvc.LOG_INFO, ' ')
         fp = open(file,'wb')
         fp.write(val)
         fp.close
@@ -106,7 +100,6 @@ class voucher_file_import(osv.osv_memory):
         voucher_name = voucher_name.replace(' ','_')
         voucher_name = voucher_name.replace('/','_')
         root = tools.config['root_path']
-        netsvc.Logger().notifyChannel("root", netsvc.LOG_INFO, ' '+str(root))
         file = ''
         try:
             os.makedirs(root+'/dbfs/')
@@ -141,7 +134,6 @@ class voucher_file_import(osv.osv_memory):
         voucher_name = voucher_name.replace(' ','_')
         voucher_name = voucher_name.replace('/','_')
         root = tools.config['root_path']
-        netsvc.Logger().notifyChannel("root", netsvc.LOG_INFO, ' '+str(root))
         file = ''
         try:
             os.makedirs(root+'/dbfs/')

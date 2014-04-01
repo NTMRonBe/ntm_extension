@@ -348,7 +348,7 @@ class voucher_distribution(osv.osv):
                                   ('received','Received'),
                                   ('generated','Generated'),
                                   ('distributed','Voucher Distributed'),
-                                  ('entry_created','Entry Created')],'State'),
+                                  ('entry_created','Distribution Done')],'State'),
         'm_move_id':fields.many2one('account.move','Missionary Entries'),
         'm_move_ids': fields.related('m_move_id','line_id', type='one2many', relation='account.move.line', string='Missionary Entries', readonly=True),
         'r_move_id':fields.many2one('account.move','Receiving Entries'),
@@ -477,23 +477,6 @@ class voucher_distribution_line(osv.osv):
                         ],'Type'),
         }
     _order = 'account_name desc'
-    def match_account(self, cr, uid, ids, context=None):
-        for vdl in self.read(cr, uid, ids, context=None):
-            comment = vdl['name']
-            check_exact_match = self.pool.get('voucher.distribution.rule').search(cr, uid, [('name','=',comment),('condition','=','exact')])
-            if check_exact_match:
-                match_read = self.pool.get('voucher.distribution.rule').read(cr, uid, check_exact_match[0], context=None)
-                read_analytic = self.pool.get('account.analytic.account').read(cr, uid, match_read['account_id'][0],['name'])
-                self.write(cr, uid, ids, {'analytic_account_id':match_read['account_id'][0],'account_name':read_analytic['name']})
-            elif not check_exact_match:
-                any= self.pool.get('voucher.distribution.rule').search(cr, uid,[('condition','=','any')])
-                account_id = False
-                for rule in any:
-                    rule_read = self.pool.get('voucher.distribution.rule').read(cr, uid, rule, context=None)
-                    read_analytic = self.pool.get('account.analytic.account').read(cr, uid, rule_read['account_id'][0],['name'])
-                    if comment.find(rule_read['name'])==0:
-                        self.write(cr, uid, ids, {'analytic_account_id':rule_read['account_id'][0],'account_name':read_analytic['name']})
-        return True
     
     def onchange_accountid(self, cr, uid, ids, account_id):
         res = {}
@@ -569,9 +552,9 @@ class email_charging_account(osv.osv):
     _name = 'email.charging.account'
     _description = "Email Charging Account Configuration"
     _columns = {
-        'name':fields.char('Email Account (Voucher)',size=64),
-        'description':fields.char('Description',size=64),
-        'account_id':fields.many2one('account.analytic.account','Analytic Account')
+        'name':fields.char('Email Account (Voucher)',size=64, required=True),
+        'description':fields.char('Description',size=64, required=True),
+        'account_id':fields.many2one('account.analytic.account','Analytic Account', required=True)
         }
 email_charging_account()
 
@@ -608,8 +591,8 @@ class voucher_distribution_9phna(osv.osv):
     _name = 'voucher.distribution.missionaries'
     _description = "Missionary Charging"
     _columns = {
-        'name':fields.char('Name',size=64),
-        'account_id':fields.many2one('account.analytic.account','Account Name'),
+        'name':fields.char('Name',size=64, required=True),
+        'account_id':fields.many2one('account.analytic.account','Account Name', required=True),
         'national':fields.boolean('Philippine National'),
         }
 voucher_distribution_9phna()
@@ -664,12 +647,6 @@ class vd(osv.osv):
         'natw_ratio':fields.float('N@W Ratio',readonly=True,digits=(16,8)),
         'extra_ratio':fields.float('Extra Charges', readonly=True,digits=(16,8))
         }
-    def match_accounts(self, cr, uid, ids, context=None):
-        for vd in self.read(cr, uid, ids, context=None):
-            for vdl in vd['voucher_lines']:
-                self.pool.get('voucher.distribution.line').match_account(cr, uid, [vdl])
-        return True
-    
     def check_accounts(self, cr, uid, ids, context=None):
         phna_pool = []
         phna_idpool = []
@@ -1356,21 +1333,6 @@ class vd(osv.osv):
         return True
     
 vd()
-class voucher_distribution_rule(osv.osv):
-    _name = 'voucher.distribution.rule'
-    _description = "Distribution Rules"
-    _columns = {
-        'name':fields.char('Phrase 1',size=100),
-        'name2':fields.char('Phrase 2',size=100),
-        'account_id':fields.many2one('account.analytic.account','Account Name'),
-        'condition':fields.selection([
-                            ('exact','Exact Match'),
-                            ('both','Both words in phrase'),
-                            ('any','Any word in phrase')
-                            ],'Condition'),
-        } 
-voucher_distribution_rule()
-
 
 class voucher_distribution_account_assignment(osv.osv):
     _name = 'voucher.distribution.account.assignment'

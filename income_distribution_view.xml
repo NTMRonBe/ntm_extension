@@ -351,42 +351,6 @@
         
         <!-- VOucher DIstribution Canada and US -->
         
-        
-         <record id="voucher_distribution_rule_form" model="ir.ui.view">
-            <field name="name">voucher.distribution.rule.form</field>
-            <field name="model">voucher.distribution.rule</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <form string = "Voucher Distribution Rule">
-                    <field name="name"/>
-                    <field name="name2"/>
-                    <field name="account_id"/>
-                    <field name="condition"/>
-                </form>
-            </field>
-        </record>        
-        <record model="ir.ui.view" id="voucher_distribution_rule_tree">
-            <field name="name">voucher.distribution.rule.tree</field>
-            <field name="model">voucher.distribution.rule</field>
-            <field name="type">tree</field>
-            <field name="arch" type="xml">
-                <tree string="Voucher Distribution Rules">
-                    <field name="name"/>
-                    <field name="name2"/>
-                    <field name="account_id"/>
-                    <field name="condition"/>
-                </tree>
-            </field>
-        </record>
-        
-        <record model="ir.actions.act_window" id="action_voucher_distribution_rule_form">
-            <field name="name">Voucher Distribution Rules</field>
-            <field name="res_model">voucher.distribution.rule</field>
-            <field name="view_type">form</field>
-        </record>
-        
-        
-        
         <record id="email_charging_account_form" model="ir.ui.view">
             <field name="name">email.charging.account.form</field>
             <field name="model">email.charging.account</field>
@@ -476,7 +440,7 @@
             <field name="model">voucher.distribution.account.assignment</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string = "Project Distribution Account Reference">
+                <form string = "Project Account Distribution Reference">
                     <group colspan="4" col="4">
                         <group colspan="2" col="2">
                             <separator string="Rule Values" colspan="2"/>
@@ -499,7 +463,7 @@
             <field name="model">voucher.distribution.account.assignment</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Project Distribution Account Reference">
+                <tree string="Project Account Distribution Reference">
                     <field name="name"/>
                     <field name="field2match"/>
                     <field name="match_rule"/>
@@ -509,7 +473,7 @@
         </record>
         
         <record model="ir.actions.act_window" id="action_voucher_distribution_account_assignment_form">
-            <field name="name">Project Distribution Account Reference</field>
+            <field name="name">Project Account Distribution Reference</field>
             <field name="res_model">voucher.distribution.account.assignment</field>
             <field name="view_type">form</field>
         </record>

@@ -68,6 +68,7 @@ class idg(osv.osv):
                             ('confirm','Confirmed'),
                             ('distributed','Distributed'),
                             ('paid','Paid'),
+                            ('cancelled','Cancelled'),
                             ],'State')
         }
     
@@ -130,18 +131,28 @@ class idg(osv.osv):
     def confirm(self, cr, uid, ids, context=None):
         for edg in self.read(cr, uid, ids, context=None):
             if edg['amount']==0.00:
-                raise osv.except_osv(_('Error!'), _('ERR-008: Zero expense amounts are not allowed!'))
+                raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-013: Zero expense amounts are not allowed!'))
             elif edg['amount']!=0.00:
                 total_amount = 0.00
                 for edgl in edg['distribution_ids']:
                     edgl_read = self.pool.get('expense.distribution.generic.lines').read(cr, uid, edgl,['amount'])
                     if edgl_read['amount']==0.00:
-                        raise osv.except_osv(_('Error!'), _('ERR-009: Zero charged amount is not allowed!'))
+                        raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-014: Zero charged amount is not allowed!'))
                     total_amount +=edgl_read['amount']
                 if total_amount==edg['amount']:
                     self.write(cr, uid, ids, {'state':'confirm'})
                 elif total_amount!=edg['amount']:
-                    raise osv.except_osv(_('Error!'), _('ERR-010: Expense amount is not equal to distribution lines amount total!'))
+                    raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-015: Expense amount is not equal to distribution lines amount total!'))
+        return True
+    
+    def cancel(self, cr, uid, ids, context=None):
+        for edg in self.read(cr, uid, ids, context=None):
+            if edg['state']=='confirm':
+                self.write(cr, uid, ids, {'state':'cancelled'})
+            elif edg['state']=='distributed':
+                self.pool.get('account.move').button_cancel(cr, uid, [edg['move_id'][0]])
+                self.pool.get('account.move').unlink(cr, uid, [edg['move_id'][0]])
+                self.write(cr, uid, ids, {'state':'cancelled'})
         return True
 idg()
 

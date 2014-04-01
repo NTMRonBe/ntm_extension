@@ -109,9 +109,9 @@ class phone_pins(osv.osv):
     _name = 'phone.pin'
     _description = "Phone Pin Assignment"
     _columns = {
-        'name':fields.char('Phone Pin',size=6),
-        'account_id':fields.many2one('account.analytic.account','Account Name', ondelete='cascade'),
-        'description':fields.char('Description',size=64),
+        'name':fields.char('Phone Pin',size=6, required=True),
+        'account_id':fields.many2one('account.analytic.account','Account Name', ondelete='cascade',required=True),
+        'description':fields.char('Description',size=64,required=True),
         }
 phone_pins()
 

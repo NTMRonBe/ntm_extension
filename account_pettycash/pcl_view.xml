@@ -193,12 +193,20 @@
             
             
             
-            
-            
-            
-            
-            
-            
+       <record model="ir.ui.view" id="be_tree">
+            <field name="name">be.tree</field>
+            <field name="model">bill.exchange</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Bill Exchange">
+                        <field name="name"/>
+                        <field name="date"/>
+                        <field name="pettycash_id"/>
+                        <field name="currency_id"/>
+                        <field name="state"/>
+                </tree>
+            </field>
+        </record>
             
         <record id="be_form" model="ir.ui.view">
             <field name="name">be.form</field>
@@ -217,7 +225,7 @@
 	                    <group colspan="2" col="2">
 	                       <field name="cash_in" mode="tree" nolabel="1" colspan="2">
                                   <tree string="Cash IN" editable="top" >
-                                      <field name="name"/>
+                                      <field name="name" readonly="1"/>
                                       <field name="quantity"/>
                                       <field name="amount" sum="Total"/>
                                   </tree>
@@ -226,7 +234,7 @@
 	                    <group colspan="2" col="2">
                            <field name="cash_out" mode="tree" nolabel="1" colspan="2">
                                   <tree string="Cash OUT" editable="top" >
-                                      <field name="name"/>
+                                      <field name="name" readonly="1"/>
                                       <field name="quantity"/>
                                       <field name="amount" sum="Total"/>
                                   </tree>

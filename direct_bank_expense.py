@@ -13,7 +13,7 @@ class direct_bank_expense(osv.osv):
     _columns = {
         'bank_id':fields.many2one('res.partner.bank','Bank Account'),
         'amount':fields.float('Amount to Distribute'),
-        'name':fields.char('ID',size=16),
+        'name':fields.char('DBE #',size=16),
         'remarks':fields.text('Remarks'),
         'rdate':fields.date('Received Date'),
         'move_id':fields.many2one('account.move','Move Name'),
@@ -112,7 +112,7 @@ class dbe(osv.osv):
                         }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
             if total_distribution != dbe['amount']:
-                raise osv.except_osv(_('Error!'), _('ERR-001: Total received amount is not equal to the total amount to be distributed!'))
+                raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-016: Total received amount is not equal to the total amount to be distributed!'))
             elif total_distribution== dbe['amount']:
                 move_line = {
                         'name':dbe['name'],

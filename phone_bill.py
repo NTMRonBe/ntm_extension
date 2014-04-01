@@ -18,7 +18,7 @@ class phone_provider(osv.osv):
     _name = 'phone.provider'
     _description = "Telecommunication Companies"
     _columns = {
-        'name':fields.char('Company',size=64),
+        'name':fields.char('Company',size=64, required=True),
         }
 phone_provider()
 
@@ -26,11 +26,11 @@ class phone_line(osv.osv):
     _name = 'phone.line'
     _description = "Phone Lines"
     _columns = {
-        'name':fields.char('Code',size=2),
-        'company_id':fields.many2one('phone.provider','Company'),
-        'number':fields.char('Phone Number',size=10),
+        'name':fields.char('Code',size=2, required=True),
+        'company_id':fields.many2one('phone.provider','Company',required=True),
+        'number':fields.char('Phone Number',size=10,required=True),
         'monthly_recur':fields.float('Monthly Recurring Charges'),
-        'account_number':fields.char('Account Number',size=32),
+        'account_number':fields.char('Account Number',size=32,required=True),
         'phone_bill_start':fields.selection([
                                 ('01','01'),('02','02'),('03','03'),
                                 ('04','04'),('05','05'),('06','06'),
@@ -61,7 +61,7 @@ class phone_line(osv.osv):
         'it_bool':fields.boolean('International Tax included?'),
         'lt_value':fields.float('Local Tax Rate'),
         'it_value':fields.float('International Tax Rate'),
-        'account_id':fields.many2one('account.analytic.account','Phone Account Expense'),
+        'account_id':fields.many2one('account.analytic.account','Phone Account Expense',required=True),
         }
 phone_line()
 
@@ -86,32 +86,6 @@ class phone_logs(osv.osv):
                             ],'Location'),
         'reconcile':fields.boolean('Reconcile?', readonly=True),
         }
-    def reconcile(self, cr, uid, ids,context=None):
-        for log in self.read(cr, uid, ids, context=None):
-            statement_read = self.pool.get('phone.line').read(cr, uid, log['line_id'][0],context=None)
-            tax_included = True
-            if statement_read['it_bool'] or statement_read['lt_bool']:
-                tax_included = True
-            elif not statement_read['it_bool'] and not statement_read['lt_bool']:
-                tax_included = False
-            taxed = 0.00
-            if tax_included ==True:
-                taxed = log['statement_price']
-                if log['location']==False:
-                    raise osv.except_osv(_('Error!'), _('Please change the location!'))
-                elif log['location']!=False:
-                    self.write(cr, uid,ids, {'reconcile':True, 'taxed_price':taxed})
-            elif tax_included==False:
-                if log['location']=='local':
-                    tax = log['statement_price'] * statement_read['lt_value']
-                    taxed = log['statement_price'] * statement_read['lt_value']
-                    self.write(cr, uid,ids, {'reconcile':True, 'taxed_price':taxed})
-                elif log['location']=='international':
-                    taxed = log['statement_price']
-                    self.write(cr, uid,ids, {'reconcile':True, 'taxed_price':taxed})
-                elif log['location']==False:
-                    raise osv.except_osv(_('Error!'), _('Please change the location of the receiving end!'))
-        return True                
 phone_logs()
 
 class phone_statement(osv.osv):
@@ -130,11 +104,12 @@ class phone_statement(osv.osv):
         'line_id':fields.many2one('phone.line','Phone Line'),
         'bill_period':fields.many2one('account.period','Billing Period'),
         'state':fields.selection([
-                        ('draft','For Reconciliation'),
-                        ('reconciled','For Distribution'),
-                        ('distributed','For Payment'),
-                        ('paid','Check Clearing'),
-                        ('cleared','Check Cleared'),
+                        ('draft','Draft'),
+                        ('reconciled','Reconciled'),
+                        ('distributed','Distributed'),
+                        ('charged','Charged'),
+                        ('paid','Paid'),
+                        ('cleared','Cleared'),
                         ],'State'),
         'bank_id':fields.many2one('res.partner.bank','Bank Account',domain=[('ownership','=','company')]),
         'amount':fields.float('Total Billed Amount'),
@@ -297,7 +272,7 @@ class phone_statement_logs(osv.osv):
                 if tax_included ==True:
                     taxed = logReader['statement_price']
                     if logReader['location']==False:
-                        raise osv.except_osv(_('Error!'), _('Please change the location!'))
+                        raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-008: Please change the location!'))
                     elif logReader['location']!=False:
                         self.pool.get('phone.logs').write(cr, uid,log, {'reconcile':True, 'taxed_price':taxed})
                 elif tax_included==False:
@@ -309,7 +284,7 @@ class phone_statement_logs(osv.osv):
                         taxed = logReader['statement_price']
                         self.pool.get('phone.logs').write(cr, uid,log, {'reconcile':True, 'taxed_price':taxed})
                     elif logReader['location']==False:
-                        raise osv.except_osv(_('Error!'), _('Please change the location of the receiving end!'))
+                        raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-008: Please change the location!'))
             self.write(cr, uid, ids, {'calllogsreconciled':True})
         return True
     
@@ -321,7 +296,7 @@ class phone_statement_logs(osv.osv):
             reconciled_logs = self.pool.get('phone.logs').search(cr, uid, [('statement_id','=',statement['id']),('reconcile','=',True)])
             unreconciled_logs = self.pool.get('phone.logs').search(cr, uid, [('statement_id','=',statement['id']),('reconcile','=',False)])
             if unreconciled_logs:
-                raise osv.except_osv(_('Error!'), _('All Call logs must be reconciled first before reconciling the statement!'))
+                raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-009: All Call logs must be reconciled first before reconciling the statement!'))
             elif not unreconciled_logs:
                 for log_id in statement['log_ids']:
                     log_read = self.pool.get('phone.logs').read(cr, uid, log_id,['phone_pin','statement_id','taxed_price'])
@@ -340,8 +315,9 @@ class phone_statement_logs(osv.osv):
                 elif statement_amount!=total_amount:
                     total_amount = str(total_amount)
                     statement_amount = str(statement_amount)
-                    raise osv.except_osv(_('Error!'), _('Please check the reconciliation! Total amount of call logs and additional charges is not equal to billed amount!'))
+                    raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-010: Please check the reconciliation! Total amount of call logs and additional charges is not equal to billed amount!'))
         return True
+    
     def distribute(self, cr, uid, ids, context=None):
         for statement in self.read(cr, uid, ids, context=None):
             for log_id in statement['log_ids']:
@@ -349,11 +325,11 @@ class phone_statement_logs(osv.osv):
                 pin = log_read['phone_pin']
                 acc_search = self.pool.get('phone.pin').search(cr, uid, [('name','=',log_read['phone_pin'])])
                 if not acc_search:
-                    raise osv.except_osv(_('Error!'), _('No account connected to phone pin %s!')%pin)
+                    raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-011: Pin #%s is not yet configured. Please create this phone pin on the Phone Pin Configuration!')%pin)
                 elif acc_search:
                     accRead = self.pool.get('phone.pin').read(cr, uid, acc_search[0], ['account_id'])
                     if not accRead['account_id']:
-                        raise osv.except_osv(_('Error!'), _('No account connected to phone pin %s!')%pin)
+                        raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-012: No account connected to phone pin %s!')%pin)
                     acc_id = accRead['account_id'][0]
                     dist_search = self.pool.get('phone.statement.distribution').search(cr, uid, [('statement_id','=',log_read['statement_id'][0]),
                                                                                                  ('account_id','=',acc_id)])
@@ -370,11 +346,10 @@ class phone_statement_logs(osv.osv):
                         dist_read = self.pool.get('phone.statement.distribution').read(cr, uid, dist_id,['amount'])
                         new_amt = dist_read['amount']+log_read['taxed_price']
                         self.pool.get('phone.statement.distribution').write(cr, uid, dist_id,{'amount':new_amt})
-            self.distribute_entries(cr, uid, ids)
             self.write(cr, uid, ids, {'state':'distributed'})
         return True
                 
-    def distribute_entries(self, cr, uid, ids, context=None):
+    def charge(self, cr, uid, ids, context=None):
         for statement in self.read(cr, uid, ids, context=None):
             date = datetime.datetime.now()
             journal_id = statement['journal_id'][0]
@@ -442,7 +417,7 @@ class phone_statement_logs(osv.osv):
                     }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
             self.pool.get('account.move').post(cr, uid, [move_id])
-            self.write(cr, uid, ids,{'distribution_move_id':move_id})
+            self.write(cr, uid, ids,{'distribution_move_id':move_id,'state':'charged'})
         return True
         
 phone_statement_logs()    
@@ -497,7 +472,7 @@ class callsdbf_reader(osv.osv_memory):
                                                                                  ('name','=',form['soa']),
                                                                                  ])
             if statement_search:
-                raise osv.except_osv(_('Error!'), _('ERR-007: Statement for SOA %s has already been created!')%soa)
+                raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-007: Statement for SOA %s has already been created!')%soa)
             elif not statement_search:
                 self.write(cr, uid, ids, {'state':'done'})
             return True

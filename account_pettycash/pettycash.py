@@ -12,14 +12,14 @@ class account_pettycash(osv.osv):
     _description = "Petty Cash"
     _columns = {
         'name':fields.char('Petty Cash ID', size=64),
-        'manager_id':fields.many2one('res.users','Manager'),
-        'date':fields.date('Creation Date'),
-        'account_code':fields.many2one('account.account','Account'),
-        'currency_id':fields.many2one('res.currency','Currency'),
+        'manager_id':fields.many2one('res.users','Manager', required=True),
+        'date':fields.date('Creation Date', required=True),
+        'account_code':fields.many2one('account.account','Account', required=True),
+        'currency_id':fields.many2one('res.currency','Currency', required=True,),
         'state': fields.selection([
             ('draft','Draft'),
             ('active','Active'),
-            ],'Status', select=True),
+            ],'Status', readonly=True),
         }
     _defaults = {
             'name':'NEW',

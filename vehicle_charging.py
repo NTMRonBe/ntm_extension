@@ -19,14 +19,14 @@ class vehicle(osv.osv):
     _name = 'vehicle'
     _description = 'Vehicles'
     _columns = {
-        'name':fields.char('Plate Number',size=10),
+        'name':fields.char('Plate Number',size=10, required=True),
         'km':fields.float('Number of KM',readonly=True),
         'perkmcharge':fields.float('Per KM charge (less than 150KM)'),
         'perkmcharge150':fields.float('Per KM charge (over 150KM)'),
-        'account_id':fields.many2one('account.analytic.account','Vehicle Regional Account'),
-        'brand':fields.many2one('vehicle.brand','Brand'),
-        'model':fields.char('Model',size=32),
-        'color':fields.char('Color',size=32),
+        'account_id':fields.many2one('account.analytic.account','Vehicle Regional Account',required=True),
+        'brand':fields.many2one('vehicle.brand','Brand',required=True),
+        'model':fields.char('Model',size=32,required=True),
+        'color':fields.char('Color',size=32,required=True),
         'description':fields.text('Description'),
         }
 vehicle()
@@ -67,8 +67,9 @@ class vehicle_log(osv.osv):
                                 ],'Distribution Type'),
         'state':fields.selection([
                             ('draft','Draft'),
-                            ('confirm','Confirm'),
-                            ('distributed','Distribute'),
+                            ('confirm','Confirmed'),
+                            ('distributed','Distributed'),
+                            ('cancel','Cancelled'),
                             ],'State'),
         'details':fields.text('Trip Details'),
         'total':fields.float('Total Distributed Amount', readonly=True),
@@ -117,7 +118,7 @@ class vehicle_log(osv.osv):
                 elif kms<151 and kms>0:
                     charge=vehicle_read['perkmcharge']
                 elif kms<1:
-                    raise osv.except_osv(_('Error!'), _('ERR-004: Negative Ending KM is not allowed!'))
+                    raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-004: Negative Ending KM is not allowed!'))
                 result = {'value':{
                             'kms':kms,
                             'perkmcharge':charge,
@@ -136,13 +137,19 @@ class vehicle_log(osv.osv):
                 elif kms<151 and kms>0:
                     charge=vehicle_read['perkmcharge']
                 elif kms<1:
-                    raise osv.except_osv(_('Error!'), _('ERR-004: Negative Ending KM is not allowed!'))
+                    raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-004: Negative Ending KM is not allowed!'))
                 vals['kms']=kms
                 vals['perkmcharge']=charge
         return super(vehicle_log,self).write(cr, uid,ids, vals,context=None)
     
     def cancel(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'state':'cancel'})
+        for form in self.read(cr, uid, ids, context=None):
+            if form['state'] in ['draft','confirm']:
+                return self.write(cr, uid, ids, {'state':'cancel'})
+            elif form['state']=='distributed':
+                self.pool.get('account.move').button_cancel(cr, uid, [form['move_id'][0]])
+                self.pool.get('account.move').unlink(cr, uid, [form['move_id'][0]])
+                return self.write(cr, uid, ids, {'state':'cancel'})
     
     def confirm(self, cr, uid, ids, context=None):
         for log in self.read(cr, uid, ids, context=None):
@@ -331,12 +338,12 @@ class add_vehicle(osv.osv_memory):
                     share_read = self.pool.get('vehicle.log.shared').read(cr, uid, share,['percentage'])
                     total_percent +=share_read['percentage']
                 if total_percent==100.00:
-                    raise osv.except_osv(_('Error!'), _('ERR-005: Percentage of all shared trips is already 100%!'))
+                    raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-005: Percentage of the shared trips is already 100%!'))
                 elif total_percent <100.00:
                     total_percent+=form['percentage']
                     if total_percent>100.00:
                         over = total_percent - 100.00
-                        raise osv.except_osv(_('Error!'), _('ERR-006: Shared trip percentage is over by %s! Adjust your percentage!')%over)
+                        raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-006: Shared trip percentage is over by %s! Adjust your percentage!')%over)
                     elif total_percent<=100:
                         vals = {
                         'account_id':form['account_id'],

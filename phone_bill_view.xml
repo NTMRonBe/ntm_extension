@@ -134,11 +134,6 @@
             <field name="view_type">form</field>
         </record>
 
-        
-        
-        
-        
-        
         <record id="phone_statement_form" model="ir.ui.view">
             <field name="name">phone.statement.form</field>
             <field name="model">phone.statement</field>
@@ -169,7 +164,7 @@
                                     <field name="status" readonly="1"/>
                                     <field name="location" attrs="{'readonly':[('reconcile','=',True)]}"/>
                                     <field name="price" readonly="1" sum="Total Log Price"/>
-                                    <field name="reconcile" readonly="1"/>
+                                    <field name="reconcile" readonly="1" invisible="1"/>
                                     <field name="statement_price" attrs="{'readonly':[('reconcile','=',True)]}" sum="Total Statement Price"/>
                                     <field name="taxed_price" readonly="1" sum="Total Tax Price"/>
                                 </tree>
@@ -186,7 +181,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Payment and Distribution Details">
+                        <page string="Distribution Details">
                             <field mode="tree" name="distribution_ids" nolabel="1" readonly="1">
                                 <tree string="Distribution Lists">
                                     <field name="name" readonly="1"/>
@@ -199,15 +194,6 @@
                                     <field name="amount" readonly="1"/>
                                 </form>
                             </field>
-                            <group colspan="4" col="2" attrs="{'invisible':[('state','in',['reconciled','distributed','draft'])]}">
-                                <separator string="Payment Details"/>
-                                <group colspan="4" col="4">
-                                    <field name="bank_id"/>
-                                    <field name="check_number"/>
-                                    <field name="check_date"/>
-                                    <field name="check_amount"/>
-                                </group>
-                            </group>
                         </page>
                         <page string="Journal Entries">
                             <group colspan="4" col="2">
@@ -227,10 +213,11 @@
                         </page>
                     </notebook>
                     <group colspan="4" col="13">
-                        <field name="state" select="1"/>
+                        <field name="state"/>
                         <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
                         <button name="reconcile" attrs="{'invisible':[('state','!=','draft')]}" string="Reconcile"  type="object" />
                         <button name="distribute" attrs="{'invisible':[('state','!=','reconciled')]}" string="Distribute"  type="object" />
+                        <button name="charge" attrs="{'invisible':[('state','!=','distributed')]}" string="Charge Phone Expenses"  type="object" />
                     </group>
                 </form>
             </field>
@@ -243,6 +230,10 @@
                 <tree string="Statement of Account">
                     <field name="name"/>
                     <field name="line_id"/>
+                    <field name="bill_period"/>
+                    <field name="due_date"/>
+                    <field name="amount"/>
+                    <field name="state"/>
                 </tree>
             </field>
         </record>

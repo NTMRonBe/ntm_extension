@@ -98,7 +98,7 @@
                     </notebook>
                     <group colspan="4" col="13">
                         <field name="state"/>
-                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object"/>
+                        <button name="cancel" attrs="{'invisible':[('state','=','cancel')]}" string="Cancel"  type="object" confirm="Do you really want to cancel this transaction?"/>
                         <button name="confirm" attrs="{'invisible':[('state','!=','draft')]}" string="Confirm"  type="object" />
                         <button name="distribute" attrs="{'invisible':[('state','!=','confirm')]}" string="Distribute"  type="object" />
                     </group>
