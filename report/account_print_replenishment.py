@@ -32,6 +32,6 @@ report_sxw.report_sxw(
     'report.pettycash.replenishment',
     'pettycash.replenishment',
     'addons/ntm_extension/report/account_print_replenishment.rml',
-    parser=pettycash_replenishment
+    parser=pettycash_replenishment,header="external"
 )
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

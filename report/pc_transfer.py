@@ -28,5 +28,6 @@ class account_pettycash_transfer(report_sxw.rml_parse):
         self.localcontext.update({
             'time': time,
         })
-report_sxw.report_sxw('report.account.pettycash.transfer','account.pettycash.transfer','addons/ntm_extension/report/apt.rml',parser=account_pettycash_transfer)
+report_sxw.report_sxw('report.account.pettycash.transfer','account.pettycash.transfer',
+                      'addons/ntm_extension/report/apt.rml',parser=account_pettycash_transfer,header="external")
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

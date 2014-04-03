@@ -28,5 +28,5 @@ class internal_fund_transfer(report_sxw.rml_parse):
         self.localcontext.update({
             'time': time,
         })
-report_sxw.report_sxw('report.internal.fund.transfer','fund.transfer','addons/ntm_extension/report/internal_fund_transfer.rml',parser=internal_fund_transfer)
+report_sxw.report_sxw('report.internal.fund.transfer','b2b.fund.transfer','addons/ntm_extension/report/internal_fund_transfer.rml',parser=internal_fund_transfer)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

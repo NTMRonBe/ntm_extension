@@ -2,7 +2,7 @@
 <document filename="test.pdf">
   <template pageSize="(612.0,792.0)" title="Test" author="Martin Simon" allowSplitting="20">
     <pageTemplate id="first">
-      <frame id="first" x1="57.0" y1="57.0" width="498" height="678"/>
+      <frame id="first" x1="34.0" y1="28.0" width="547" height="736"/>
     </pageTemplate>
   </template>
   <stylesheet>
@@ -36,39 +36,16 @@
       <lineStyle kind="LINEAFTER" colorName="#000000" start="3,1" stop="3,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
     </blockTableStyle>
-    <blockTableStyle id="Table2">
-      <blockAlignment value="LEFT"/>
-      <blockValign value="TOP"/>
-      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
-      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
-      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
-      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
-      <lineStyle kind="LINEAFTER" colorName="#000000" start="1,0" stop="1,-1"/>
-      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
-      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
-    </blockTableStyle>
-    <blockTableStyle id="Table3">
-      <blockAlignment value="LEFT"/>
-      <blockValign value="TOP"/>
-      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
-      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
-      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
-      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
-      <lineStyle kind="LINEAFTER" colorName="#000000" start="1,0" stop="1,-1"/>
-      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
-      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
-    </blockTableStyle>
     <initialize>
       <paraStyle name="all" alignment="justify"/>
     </initialize>
     <paraStyle name="P1" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P2" fontName="Helvetica-Bold" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P3" fontName="Helvetica" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P4" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P5" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="7.0" leading="9" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P6" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P7" fontName="Helvetica-Bold" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P8" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P2" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="7.0" leading="9" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P3" fontName="Helvetica-Bold" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P4" fontName="Helvetica-Bold" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P5" fontName="Helvetica" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P6" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P7" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
@@ -91,61 +68,37 @@
     <para style="terp_header">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="125.0,125.0,125.0,125.0" style="Table1">
+    <blockTable colWidths="137.0,137.0,137.0,137.0" style="Table1">
       <tr>
         <td>
-          <para style="P2">Date</para>
+          <para style="P3">Date</para>
         </td>
         <td>
-          <para style="P2">Pettycash Account</para>
+          <para style="P3">Pettycash Account</para>
         </td>
         <td>
-          <para style="P2">Bank Account</para>
+          <para style="P3">Bank Account</para>
         </td>
         <td>
-          <para style="P2">Total Amount</para>
+          <para style="P3">Total Amount</para>
         </td>
       </tr>
       <tr>
         <td>
-          <para style="P3">[[o.date]]</para>
+          <para style="P5">[[o.date]]</para>
         </td>
         <td>
-          <para style="P3">[[o.pettycash_id.name]]</para>
+          <para style="P5">[[o.pettycash_id.name]]</para>
         </td>
         <td>
-          <para style="P3">[[o.journal_id.name]]</para>
+          <para style="P5">[[o.journal_id.name]]</para>
         </td>
         <td>
-          <para style="P3">[[o.total_amount]]</para>
-        </td>
-      </tr>
-    </blockTable>
-    <para style="P4">
-      <font color="white"> </font>
-    </para>
-    <blockTable colWidths="133.0,133.0" style="Table2">
-      <tr>
-        <td>
-          <para style="P7">Denomination</para>
-        </td>
-        <td>
-          <para style="P7">Quantity</para>
+          <para style="P5">[[o.total_amount]]</para>
         </td>
       </tr>
     </blockTable>
-    <para style="P5">[[ repeatIn(o.denom_breakdown,'denom_breakdown') ]]</para>
-    <blockTable colWidths="133.0,133.0" style="Table3">
-      <tr>
-        <td>
-          <para style="P8">[[ line.name]]</para>
-        </td>
-        <td>
-          <para style="P8">[[ line.quantity ]]</para>
-        </td>
-      </tr>
-    </blockTable>
-    <para style="P6">
+    <para style="P7">
       <font color="white"> </font>
     </para>
     <para style="P1">
