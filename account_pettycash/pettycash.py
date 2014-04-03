@@ -82,7 +82,6 @@ class apc(osv.osv):
 		denominations = self.pool.get('denominations')
 		for inv in self.browse(cr, uid, ids):
 			inv_id = inv.id
-			netsvc.Logger().notifyChannel("Values", netsvc.LOG_INFO, ''+str(inv_id))
 			currency_id=0.00
 			if inv.account_code:
 				if inv.account_code.currency_id:

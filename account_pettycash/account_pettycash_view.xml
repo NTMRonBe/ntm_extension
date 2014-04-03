@@ -8,7 +8,7 @@
             name="account.pettycash.transfer"
             rml="ntm_extension/report/apt.rml"
             auto="False"
-            header = "False"
+            header = "True"
             menu="True"/>
             
         <!--Denominations-->
@@ -106,7 +106,7 @@
                     	<group colspan="4" col="4">
 	                        <field name="name" readonly="1"/>
 	                        <field name="journal_id" readonly="1" widget="selection" required="1"/>
-	                        <field name="transaction_date" attrs="{'readonly': [('state','!=','draft')]}" required="1"/>
+	                        <field name="transaction_date" attrs="{'readonly': [('filled','=',True)]}" required="1"/>
 	                        <field name="period_id" readonly="1"/>
 	                        <field name="src_pc_id" required="1" attrs="{'readonly': [('filled','=',True)]}"/>
 	                        <field name="dest_pc_id" required="1" attrs="{'readonly': [('filled','=',True)]}"/>
@@ -119,14 +119,14 @@
                             <group colspan="4" col="2">
                                 <field name="sdenom_breakdown" mode="tree" nolabel="1" attrs="{'readonly': [('state','!=','draft')]}">
                                   <tree string="Source Denominations" editable="top">
-                                      <field name="name"/>
+                                      <field name="name" readonly="1"/>
                                       <field name="quantity"/>
                                       <field name="amount" sum="Total"/>
                                   </tree>
                                 </field>
                                 <field name="ddenom_breakdown" mode="tree" nolabel="1" attrs="{'readonly': [('state','!=','released')]}">
                                   <tree string="Destination Denominations" editable="top">
-                                      <field name="name"/>
+                                      <field name="name" readonly="1"/>
                                       <field name="quantity"/>
                                       <field name="amount" sum="Total"/>
                                   </tree>

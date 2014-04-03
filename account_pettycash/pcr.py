@@ -54,7 +54,7 @@ class pettycash_replenishment(osv.osv):
                  multiplier = pc_denom.name.multiplier
                  amount += quantity * multiplier
             if amount == 0.00 or amount < 0.00:
-                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-022: Replenishments with no amount are not allowed!'))
+                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-022: Replenishments with amount less than or equal to ZERO are not allowed!'))
             bankReader = self.pool.get('res.partner.bank').read(cr, uid, pcr.bank_id.id, ['balance'])
             if bankReader['balance']<amount:
                 raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-023: Insufficient Funds! Please check your bank balance.'))
@@ -256,10 +256,8 @@ class pcr(osv.osv):
             move_line_pool.create(cr, uid, move_line)
             for denominations in pc_denom.search(cr, uid, [('pcr_id','=',pcr_id)]):
                 denom_read = pc_denom.read(cr, uid, denominations,context=None)
-                netsvc.Logger().notifyChannel("denom_read", netsvc.LOG_INFO, ' '+str(denom_read))
                 for denom_pca in pc_denom.search(cr, uid,[('pettycash_id','=',pca_id),('name','=',denom_read['name'][0])]):
                     denom_pca_read = pc_denom.read(cr, uid, denom_pca)
-                    netsvc.Logger().notifyChannel("denom_pca_read", netsvc.LOG_INFO, ' '+str(denom_pca_read))
                     quantity = denom_pca_read['quantity'] + denom_read['quantity']
                     pc_denom.write(cr, uid, denom_pca,{'quantity':quantity})
             move_pool.post(cr, uid, [move_id], context={})

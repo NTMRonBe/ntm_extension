@@ -82,7 +82,7 @@ class apt(osv.osv):
             dest_pc = pct['dest_pc_id'][0]
             pct_denom_check = self.pool.get('pettycash.denom').search(cr, uid, [('spct_id','=',pct['id']),('quantity','>','0')])
             if not pct_denom_check:
-                raise osv.except_osv(_('Error !'), _('Kindly change the quantity of the denomination to transfer!'))
+                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-026: Change the quantity of the denomination to transfer!'))
             if pct_denom_check:
                 amount = 0.00
                 for pct_denom in pct_denom_check:
@@ -93,7 +93,7 @@ class apt(osv.osv):
                     for src_pc_denom in src_pc_denom_check:
                         src_pc_denom_read = self.pool.get('pettycash.denom').read(cr, uid, src_pc_denom,['name','quantity','amount'])
                         if src_pc_denom_read['quantity']<pct_denom_read['quantity']:
-                            raise osv.except_osv(_('Error !'), _('Quantity of the source denomination is less than the requested quantity!'))
+                            raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-027: Quantity of the source denomination is less than the requested quantity!'))
                         if src_pc_denom_read['quantity']>=pct_denom_read['quantity']:
                             amount +=pct_denom_read['amount']
                 self.write(cr, uid, pct['id'],{'amount':amount,'state':'confirmed'})
@@ -104,12 +104,12 @@ class apt(osv.osv):
             src_read = self.pool.get('account.pettycash').read(cr, uid, pct['src_pc_id'][0],['account_code','currency_id'])
             dest_read = self.pool.get('account.pettycash').read(cr, uid, pct['dest_pc_id'][0],['account_code','currency_id'])
             if src_read['currency_id'][0]!=dest_read['currency_id'][0]:
-                raise osv.except_osv(_('Error !'), _('Source and destination pettycash accounts have different currencies!'))
+                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-025: Source and destination pettycash accounts have different currencies!'))
             if src_read['currency_id'][0]==dest_read['currency_id'][0]: 
                 currency_name = src_read['currency_id'][1]  
                 check_denoms = self.pool.get('denominations').search(cr, uid, [('currency_id','=',src_read['currency_id'][0])])
                 if not check_denoms:
-                    raise osv.except_osv(_('Error !'), _('No available denominations for the currency!')%currency_name)
+                    raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-024: No available denominations for the currency!')%currency_name)
                 if check_denoms:
                     for denoms in check_denoms:
                         values = {
@@ -131,14 +131,14 @@ class apt(osv.osv):
                 readSRC =self.pool.get('account.pettycash').read(cr, uid, pct['src_pc_id'][0],['manager_id'])
                 if readSRC['manager_id'][0]!=uid:
                     managerName = readSRC['manager_id'][1]
-                    raise osv.except_osv(_('Error !'), _('You are not %s! Only %s can release cash on this drawer!')%(managerName,managerName))
+                    raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-028: You are not %s! Only %s can release/receive cash for this drawer!')%(managerName,managerName))
                 elif readSRC['manager_id'][0]==uid:
                     self.post_pct(cr, uid, ids, context)
             if pct['state']=='released':
                 readSRC =self.pool.get('account.pettycash').read(cr, uid, pct['dest_pc_id'][0],['manager_id'])
                 if readSRC['manager_id'][0]!=uid:
                     managerName = readSRC['manager_id'][1]
-                    raise osv.except_osv(_('Error !'), _('You are not %s! Only %s can receive cash for this drawer!')%(managerName,managerName))
+                    raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-028: You are not %s! Only %s can release/receive cash for this drawer!')%(managerName,managerName))
                 elif readSRC['manager_id'][0]==uid:
                     self.post_pct(cr, uid, ids, context)
         return True
@@ -157,7 +157,7 @@ class apt(osv.osv):
                 src_denom_check = self.pool.get('pettycash.denom').search(cr, uid, [('spct_id','=',pct['id']),('quantity','>','0')])
                 pct_denom_check = self.pool.get('pettycash.denom').search(cr, uid, [('dpct_id','=',pct['id']),('quantity','>','0')])
                 if not pct_denom_check:
-                    raise osv.except_osv(_('Error !'), _('Kindly change the quantity of the denomination to receive!'))
+                    raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-029: Kindly change the quantity of the denomination to receive!'))
                 src_amount = 0
                 dest_amount = 0
                 for src_denoms in src_denom_check:
@@ -169,7 +169,7 @@ class apt(osv.osv):
                     denom_multiple_read = self.pool.get('denominations').read(cr, uid, dest_denoms_read['name'][0],['multiplier'])
                     dest_amount += dest_denoms_read['quantity'] * denom_multiple_read['multiplier']
                 if src_amount!=dest_amount:
-                    raise osv.except_osv(_('Error !'), _('Total amounts are not equal!'))
+                    raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-030: Total amounts are not equal!'))
             for pct_denoms in pct_denom_check:
                 denom_read = self.pool.get('pettycash.denom').read(cr, uid, pct_denoms,['quantity','name'])
                 if pct['state']=='confirmed':

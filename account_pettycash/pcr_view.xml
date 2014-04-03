@@ -8,7 +8,7 @@
             name="pettycash.replenishment"
             rml="ntm_extension/report/account_print_replenishment.rml"
             auto="False"
-            header = "False"
+            header = "True"
             menu="True"/>
         
         <record id="pcr_form" model="ir.ui.view">
