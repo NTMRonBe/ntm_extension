@@ -3,7 +3,7 @@
     <data>        
     
     <report id="report_account_pettyycash_transfer_print"
-            string="P/C to P/C Transfer"
+            string="Transfer Receipt"
             model="account.pettycash.transfer"
             name="account.pettycash.transfer"
             rml="ntm_extension/report/apt.rml"
@@ -172,12 +172,12 @@
                     </notebook>
                         <newline/>
                         <group colspan="4" col="10">
-                            <field name="state"/>
+                            <field name="state" readonly="1"/>
                                     <button string="Cancel"
                                             type="object"
                                             name="button_cancel"
                                             icon="gtk-cancel"
-                                            attrs="{'invisible': [('state','in',('cancel','released','received'))]}"
+                                            attrs="{'invisible': [('state','in',('cancel'))]}"
                                             />
                                     <button string="Confirm"
                                             type="object"
@@ -207,11 +207,12 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="P/C to P/C Transfer">
-					    <field name="name"/>
-	                        <field name="transaction_date"/>
-	                        <field name="src_pc_id"/>
-	                        <field name="dest_pc_id"/>
-	                       <field name="state"/>
+                    <field name="name"/>
+	                <field name="transaction_date"/>
+	                <field name="period_id"/>
+	                <field name="src_pc_id"/>
+	                <field name="dest_pc_id"/>
+	                <field name="state"/>
                 </tree>
             </field>
         </record>
@@ -222,10 +223,18 @@
             <field name="arch" type="xml">
                 <search string="P/C to P/C Transfer">
 					    <field name="name"/>
-	                        <field name="transaction_date"/>
-	                        <field name="src_pc_id"/>
-	                        <field name="dest_pc_id"/>
-	                       <field name="state"/>
+	                    <field name="transaction_date"/>
+	                    <field name="src_pc_id"/>
+	                    <field name="dest_pc_id"/>
+	                    <field name="state"/>
+	                    <newline/>
+	                    <group expand="0" string="Group By...">
+                        <filter string="Source Account" icon="terp-folder-blue" domain="[]" context="{'group_by':'src_pc_id'}"/>
+                        <filter string="Destination Account" icon="terp-folder-yellow" domain="[]" context="{'group_by':'dest_pc_id'}"/>
+                        <filter string="Period" icon="terp-personal" domain="[]"  context="{'group_by':'period_id'}"/>
+                        <separator orientation="vertical"/>
+                        <filter string="State" icon="terp-stock_effects-object-colorize" domain="[]"  context="{'group_by':'state'}"/>
+                    </group>
                 </search>
             </field>
         </record>

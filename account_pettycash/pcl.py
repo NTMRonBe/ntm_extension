@@ -51,7 +51,7 @@ class bill_exchange(osv.osv):
             currency = pcr['currency_id'][1]
             denoms = self.pool.get('denominations').search(cr, uid, [('currency_id','=',curr_id)])
             if not denoms:
-                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-017: %s has no available denominations.Please add them!')%currency)
+                raise osv.except_osv(_('Error !'), _('BE-001: %s has no available denominations.Please add them!')%currency)
             if denoms:
                 for denom in denoms:
                     values = {
@@ -72,9 +72,9 @@ class bill_exchange(osv.osv):
             cash_in_search = self.pool.get('pettycash.denom').search(cr, uid, [('be_id','=',be['id']),('quantity','>',0)])
             cash_out_search = self.pool.get('pettycash.denom').search(cr, uid, [('be_id2','=',be['id']),('quantity','>',0)])
             if not cash_in_search:
-                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-018: Please indicate the quantities of the denominations to be exchanged!'))
+                raise osv.except_osv(_('Error !'), _('BE-002: Please indicate the quantities of the denominations to be exchanged!'))
             if not cash_out_search:
-                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-019: Please indicate the quantities of the denominations to be released!'))
+                raise osv.except_osv(_('Error !'), _('BE-003: Please indicate the quantities of the denominations to be released!'))
             if cash_in_search and cash_out_search:
                 cash_in_amount = 0
                 cash_out_amount = 0
@@ -87,7 +87,7 @@ class bill_exchange(osv.osv):
                     denom_read = self.pool.get('denominations').read(cr, uid, cash_out_read['name'][0],['multiplier'])
                     cash_out_amount +=cash_out_read['quantity'] * denom_read['multiplier']
                 if cash_in_amount != cash_out_amount:
-                    raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-020: Total amounts are not equal!'))
+                    raise osv.except_osv(_('Error !'), _('BE-004: Total amounts are not equal!'))
                 elif cash_in_amount==cash_out_amount:
                     pc_id = be['pettycash_id'][0]
                     for cash_in_id in cash_in_search:
@@ -104,7 +104,7 @@ class bill_exchange(osv.osv):
                             denom_reader = self.pool.get('pettycash.denom').read(cr, uid, denom_id,['quantity','name'])
                             denomination = denom_reader['name'][1]
                             if denom_reader['quantity'] < cash_out_read['quantity']:
-                                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-021: Quantity to be release is greater than the cash on petty cash for denomination %s!')%denomination)
+                                raise osv.except_osv(_('Error !'), _('BE-005: Quantity to be release is greater than the cash on petty cash for denomination %s!')%denomination)
                             else:
                                 new_qty = denom_reader['quantity'] - cash_out_read['quantity'] 
                                 self.pool.get('pettycash.denom').write(cr, uid, denom_id,{'quantity':new_qty})

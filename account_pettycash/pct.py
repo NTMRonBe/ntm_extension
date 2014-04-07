@@ -1,4 +1,3 @@
-
 import time
 from osv import osv, fields, orm
 import netsvc
@@ -55,9 +54,7 @@ class account_pettycash_transfer(osv.osv):
                 'name': self.pool.get('ir.sequence').get(cr, uid, 'account.pettycash.transfer'),
         })
         return super(account_pettycash_transfer, self).create(cr, uid, vals, context)
-    
-    def button_cancel(self, cr, uid, ids, context=None):
-        return self.write(cr, uid, ids, {'state': 'cancel'})    
+
 account_pettycash_transfer()
 
 class pettycash_denom(osv.osv):
@@ -82,7 +79,7 @@ class apt(osv.osv):
             dest_pc = pct['dest_pc_id'][0]
             pct_denom_check = self.pool.get('pettycash.denom').search(cr, uid, [('spct_id','=',pct['id']),('quantity','>','0')])
             if not pct_denom_check:
-                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-026: Change the quantity of the denomination to transfer!'))
+                raise osv.except_osv(_('Error !'), _('PCT-002: Change the quantity of the denomination to transfer!'))
             if pct_denom_check:
                 amount = 0.00
                 for pct_denom in pct_denom_check:
@@ -93,7 +90,7 @@ class apt(osv.osv):
                     for src_pc_denom in src_pc_denom_check:
                         src_pc_denom_read = self.pool.get('pettycash.denom').read(cr, uid, src_pc_denom,['name','quantity','amount'])
                         if src_pc_denom_read['quantity']<pct_denom_read['quantity']:
-                            raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-027: Quantity of the source denomination is less than the requested quantity!'))
+                            raise osv.except_osv(_('Error !'), _('PCT-003: Quantity of the source denomination is less than the requested quantity!'))
                         if src_pc_denom_read['quantity']>=pct_denom_read['quantity']:
                             amount +=pct_denom_read['amount']
                 self.write(cr, uid, pct['id'],{'amount':amount,'state':'confirmed'})
@@ -104,7 +101,7 @@ class apt(osv.osv):
             src_read = self.pool.get('account.pettycash').read(cr, uid, pct['src_pc_id'][0],['account_code','currency_id'])
             dest_read = self.pool.get('account.pettycash').read(cr, uid, pct['dest_pc_id'][0],['account_code','currency_id'])
             if src_read['currency_id'][0]!=dest_read['currency_id'][0]:
-                raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-025: Source and destination pettycash accounts have different currencies!'))
+                raise osv.except_osv(_('Error !'), _('PCT-001: Source and destination pettycash accounts have different currencies!'))
             if src_read['currency_id'][0]==dest_read['currency_id'][0]: 
                 currency_name = src_read['currency_id'][1]  
                 check_denoms = self.pool.get('denominations').search(cr, uid, [('currency_id','=',src_read['currency_id'][0])])
@@ -262,5 +259,46 @@ class apt(osv.osv):
             if pct['state']=='released':
                 self.write(cr, uid, ids, {'state':'received','move2_id':move_id})
         return True
-
+    
+    def button_cancel(self, cr, uid, ids, context=None):
+        for pct in self.read(cr, uid, ids, context=None):
+            if pct['state']in ['confirmed','draft']:
+                return self.write(cr,uid,ids, {'state':'cancel'})
+            elif pct['state']=='released':
+                self.pool.get('account.move').button_cancel(cr, uid, [pct['move_id'][0]])
+                self.pool.get('account.move').unlink(cr, uid, [pct['move_id'][0]])
+                for denom_line in pct['sdenom_breakdown']:
+                    denom_lineReader = self.pool.get('pettycash.denom').read(cr, uid, denom_line, ['quantity','name'])
+                    pc_denom_search = self.pool.get('pettycash.denom').search(cr, uid, [('name','=',denom_lineReader['name'][0]),
+                                                                                        ('pettycash_id','=',pct['src_pc_id'][0])])
+                    if pc_denom_search:
+                        pc_denom_read = self.pool.get('pettycash.denom').read(cr, uid, pc_denom_search[0],['quantity'])
+                        new_qty = pc_denom_read['quantity'] + denom_lineReader['quantity']
+                        self.pool.get('pettycash.denom').write(cr, uid, pc_denom_search[0], {'quantity':new_qty})
+                return self.write(cr,uid,ids, {'state':'cancel'})
+            elif pct['state']=='received':
+                for denom_line in pct['ddenom_breakdown']:
+                    denom_lineReader = self.pool.get('pettycash.denom').read(cr, uid, denom_line, ['quantity','name'])
+                    pc_denom_search = self.pool.get('pettycash.denom').search(cr, uid, [('name','=',denom_lineReader['name'][0]),
+                                                                                        ('pettycash_id','=',pct['dest_pc_id'][0])])
+                    if pc_denom_search:
+                        pc_denom_read = self.pool.get('pettycash.denom').read(cr, uid, pc_denom_search[0],['quantity'])
+                        if pc_denom_read['quantity'] < denom_lineReader['quantity']:
+                            raise osv.except_osv(_('Error !'), _('ERROR CODE - ERR-029: Cancellation is not allowed if the destination quantity is greater than the quantity of the same denomination!'))
+                        new_qty = pc_denom_read['quantity'] - denom_lineReader['quantity']
+                        self.pool.get('pettycash.denom').write(cr, uid, pc_denom_search[0], {'quantity':new_qty})
+                for denom_line in pct['sdenom_breakdown']:
+                    denom_lineReader = self.pool.get('pettycash.denom').read(cr, uid, denom_line, ['quantity','name'])
+                    pc_denom_search = self.pool.get('pettycash.denom').search(cr, uid, [('name','=',denom_lineReader['name'][0]),
+                                                                                        ('pettycash_id','=',pct['src_pc_id'][0])])
+                    if pc_denom_search:
+                        pc_denom_read = self.pool.get('pettycash.denom').read(cr, uid, pc_denom_search[0],['quantity'])
+                        new_qty = pc_denom_read['quantity'] + denom_lineReader['quantity']
+                        self.pool.get('pettycash.denom').write(cr, uid, pc_denom_search[0], {'quantity':new_qty})
+                self.pool.get('account.move').button_cancel(cr, uid, [pct['move2_id'][0]])
+                self.pool.get('account.move').unlink(cr, uid, [pct['move2_id'][0]])
+                self.pool.get('account.move').button_cancel(cr, uid, [pct['move_id'][0]])
+                self.pool.get('account.move').unlink(cr, uid, [pct['move_id'][0]])
+                return self.write(cr,uid,ids, {'state':'cancel'})
+            
 apt()

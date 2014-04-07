@@ -99,9 +99,10 @@ class apc(osv.osv):
 								}
 					pc_denom_pool.create(cr, uid, pc_denominations)
 			elif not inv.account_code:
-				raise osv.except_osv(_('Error !'), _('Please define the pettycash account !'))
+				raise osv.except_osv(_('Error !'), _('PCM-001: Please define the petty cash account !'))
 		self.write(cr, uid, ids, {'state':'active'})
 		return True
+                
 apc()
 
 class apc_1(osv.osv):
