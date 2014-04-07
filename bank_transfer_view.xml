@@ -377,46 +377,48 @@
 	                    <group colspan="2" col="2">
 	                        <separator string="Bank Details"/>
 	                        <field name="company_bank_name"/>
-	                        <field name="company_bank_id"/>
+	                        <field name="company_bank_id" attrs="{'readonly':[('compute','=',True)]}"/>
 	                        <field name="company_acc_name"/>
 	                    </group>
 	                    <group colspan="2" col="2">
 	                        <separator string="Recipient Details"/>
-	                        <field name="account_id"/>
+	                        <field name="account_id" attrs="{'readonly':[('compute','=',True)]}"/>
 	                        <field name="account_name" invisible="1"/>
-	                        <field name="entity_bank_id" domain="[('partner_id.name','=',account_name)]"/>
+	                        <field name="entity_bank_id" domain="[('partner_id.name','=',account_name)]" attrs="{'readonly':['|',('account_id','=',False),('compute','=',True)]}"/>
 	                        <field name="entity_bank_name"/>
 	                    </group>
                     </group>
-                    <separator string="Transfer Details" colspan="4"/>
-                    <group col="2" colspan="2">
-                        <separator colspan="4" string="Starts on"/>
-                        <field name="date_start" />
-                        <field name="period_total"/>
-                        <field name="amount"/>
-                    </group>
-
-                    <group col="2" colspan="2">
-                        <separator colspan="4" string="Valid Up to"/>
-                        <field name="period_nbr" attrs="{'readonly':[('period_type','=','bimonthly')]}"/>
-                        <field name="period_type"/>
-                        <field name="compute" invisible="1"/>
-                        <button name="compute" string="Compute" type="object" icon="terp-stock_format-scientific" attrs="{'invisible':[('compute','=',True)]}"/>
-                    </group>
-                    <separator string="Remarks"/>
-                    <field name="remarks" colspan="4" nolabel="1"/>
-                    <group colspan="4" col="2">
-                        <field colspan="4" mode="tree,form" name="lines_id" nolabel="1">
-                            <tree string="Schedule Requests">
-                                <field name="name"/>
-                                <field name="date"/>
-                                <field name="state"/>
-                                <field name="transfer_id"/>
-                                <field name="transfer_state"/>
-                                <button name="cancel" type="object" icon="gtk-remove" states="confirm"/>
-                            </tree>
-                        </field>
-                    </group>
+                    <notebook>
+                        <page string="Transfer Details">
+                            <group col="2" colspan="2">
+		                        <separator colspan="4" string="Starts on"/>
+		                        <field name="date_start" attrs="{'readonly':[('compute','=',True)]}" />
+		                        <field name="period_total" attrs="{'readonly':[('compute','=',True)]}"/>
+		                        <field name="amount" attrs="{'readonly':[('compute','=',True)]}"/>
+		                    </group>
+		                    <group col="2" colspan="2">
+		                        <separator colspan="4" string="Valid Up to"/>
+		                        <field name="period_nbr" attrs="{'readonly':[('compute','=',True)]}"/>
+		                        <field name="period_type" attrs="{'readonly':[('compute','=',True)]}"/>
+		                        <field name="compute" invisible="1"/>
+		                        <button name="compute" string="Compute" type="object" icon="terp-stock_format-scientific" attrs="{'invisible':[('compute','=',True)]}"/>
+		                    </group>
+		                    <separator string="Remarks"/>
+		                    <field name="remarks" colspan="4" nolabel="1"/>
+                        </page>
+                        <page string="Transfer Schedules" attrs="{'invisible':[('compute','=',False)]}">
+                            <field colspan="4" mode="tree,form" name="lines_id" nolabel="1">
+	                            <tree string="Schedule Requests">
+	                                <field name="name"/>
+	                                <field name="date"/>
+	                                <field name="state"/>
+	                                <field name="transfer_id"/>
+	                                <field name="transfer_state"/>
+	                                <button name="cancel" type="object" icon="gtk-remove" states="confirm"/>
+	                            </tree>
+	                        </field>
+                        </page>
+                    </notebook>
                 </form>
             </field>
         </record> 
