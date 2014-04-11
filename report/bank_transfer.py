@@ -28,5 +28,5 @@ class bank_transfer(report_sxw.rml_parse):
         self.localcontext.update({
             'time': time,
         })
-report_sxw.report_sxw('report.bank.transfer','bank.transfer','addons/ntm_extension/report/bank_transfer.rml',parser=bank_transfer)
+report_sxw.report_sxw('report.bank.transfer','bank.transfer','addons/ntm_extension/report/bank_transfer.rml',parser=bank_transfer, header="external")
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

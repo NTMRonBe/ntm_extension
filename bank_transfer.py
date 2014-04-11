@@ -116,7 +116,7 @@ class bank_transfer_request(osv.osv):
         'is_special':fields.boolean('Special Request?'),
         'state':fields.selection([
                             ('draft','Draft'),
-                            ('confirm','Confirm'),
+                            ('confirm','Confirmed'),
                             ('cancel','Cancelled'),
                             ('transferred','Transferred'),
                             ],'State'),

@@ -98,9 +98,8 @@
     <paraStyle name="P7" fontName="Helvetica" fontSize="12.0" leading="15" alignment="RIGHT"/>
     <paraStyle name="P8" fontName="Helvetica" fontSize="10.0" leading="13" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="P9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P10" fontName="Helvetica" fontSize="12.0" leading="15"/>
-    <paraStyle name="P11" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P12" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P10" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P11" fontName="Helvetica" fontSize="16.0" leading="20"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
@@ -126,10 +125,6 @@
   <story>
     <para style="Standard">[[ repeatIn(objects,'bt') ]]</para>
     <para style="Standard">
-      <font color="white"> </font>
-    </para>
-    <para style="P1">New Tribes Mission</para>
-    <para style="P1">
       <font color="white"> </font>
     </para>
     <blockTable colWidths="268.0,270.0" style="Table1">
@@ -176,10 +171,10 @@
           <para style="P9">Account Number</para>
         </td>
         <td>
-          <para style="P12">Amount</para>
+          <para style="P10">Amount</para>
         </td>
         <td>
-          <para style="P12">Internal Code</para>
+          <para style="P10">Internal Code</para>
         </td>
       </tr>
     </blockTable>
@@ -194,10 +189,10 @@
             <para style="P9">[[ l.account_number.acc_number]]</para>
           </td>
           <td>
-            <para style="P12">[[l.amount]]</para>
+            <para style="P10">[[l.amount]]</para>
           </td>
           <td>
-            <para style="P12">[[l.analytic_id.code]]</para>
+            <para style="P10">[[l.analytic_id.code]]</para>
           </td>
         </tr>
         <tr>
@@ -238,10 +233,10 @@
           <para style="P9">Account Number</para>
         </td>
         <td>
-          <para style="P12">Amount</para>
+          <para style="P10">Amount</para>
         </td>
         <td>
-          <para style="P12">Internal Code</para>
+          <para style="P10">Internal Code</para>
         </td>
       </tr>
     </blockTable>
@@ -256,10 +251,10 @@
             <para style="P9">[[ l.account_number.acc_number]]</para>
           </td>
           <td>
-            <para style="P12">[[l.amount]]</para>
+            <para style="P10">[[l.amount]]</para>
           </td>
           <td>
-            <para style="P12">[[l.analytic_id.code]]</para>
+            <para style="P10">[[l.analytic_id.code]]</para>
           </td>
         </tr>
         <tr>
