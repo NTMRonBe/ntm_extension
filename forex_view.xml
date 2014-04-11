@@ -16,12 +16,12 @@
                     	</group>
                     	<group colspan="4" col="4">
                     	    <group colspan="2" col="2">
-                    	        <field name="src" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Source Bank"/>
-                    	        <field name="src_amount" attrs="{'readonly': [('state','!=','draft')]}"/>
+                    	        <field name="src" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Source Bank" required="1"/>
+                    	        <field name="src_amount" attrs="{'readonly': [('state','!=','draft')]}" required="1" string="To Exchange Amount"/>
                     	    </group>
               				<group colspan="2" col="2">
-                        		<field name="dest" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Destination Bank"/>
-                        		<field name="dest_amount" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        		<field name="dest" attrs="{'readonly': [('state','!=','draft')]}" domain="[('ownership','=','company')]" string="Destination Bank" required="1"/>
+                        		<field name="dest_amount" attrs="{'readonly': [('state','!=','draft')]}" required="1" string="Converted Amount"/>
               				</group>
                         </group>
                         <group colspan="4" col="4">

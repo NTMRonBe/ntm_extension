@@ -29,8 +29,9 @@ class forex_transaction(osv.osv):
     _name = "forex.transaction"
     _description = "Forex Transaction"
     _columns = {
-            'name':fields.many2one('account.move','Name'),
-            'move_ids': fields.related('name','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
+            'name':fields.related('move_id','name',type='char', size=64, string="Name", readonly=True),
+            'move_id':fields.many2one('account.move','Move'),
+            'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Journal Items', readonly=True),
             'src':fields.many2one('res.partner.bank', "Source Bank"),
             'dest':fields.many2one('res.partner.bank', "Destination Bank"),
             'src_amount':fields.float('Amount'),
@@ -50,32 +51,6 @@ class forex_transaction(osv.osv):
                'state':'draft',
                'period_id':_get_period,
                }
-    
-        
-    def create_moves(self, cr, uid, ids, name, debit, credit, account_id, move_id, 
-                     journal_id, date, period_id, currency_id, amount_currency, rate):
-        move_line_pool = self.pool.get('account.move.line')
-        move_line = {
-                    'name': name or '/',
-                    'debit': debit,
-                    'credit': credit,
-                    'account_id': account_id,
-                    'move_id': move_id,
-                    'journal_id': journal_id,
-                    'date': date,
-                    'period_id': period_id,
-                    'currency_id':currency_id,
-                    'amount_currency':amount_currency,
-                    'post_rate':rate,
-                }
-        move_line_pool.create(cr, uid, move_line)
-        return True
-    
-    
-    def confirm(self, cr, uid, ids, context=None):
-        for forex in self.read(cr, uid, ids, context=None):
-            self.write(cr, uid, forex['id'],{'state':'confirm'})
-        return True
     
     def post_exchange(self, cr, uid, ids, context=None):
         bank_pool = self.pool.get('res.partner.bank')
@@ -108,8 +83,10 @@ class forex_transaction(osv.osv):
                 curr_dest= check_dest_curr['company_currency_id'][0]
                 curr_name = check_dest_curr['company_currency_id'][1]
             if curr_src==curr_dest:
-                raise osv.except_osv(_('Error !'), _('Both banks has the same currency:%s!\n Please use the bank to bank transfer module if you want to transfer funds instead.')%curr_name)
-            if not curr_src==curr_dest:
+                raise osv.except_osv(_('Error!'), _('FOREX-001: Exchanges with the same bank account currencies are not allowed!'))
+            if exchange['src_amount'] <= 0.00 or exchange['dest_amount'] <= 0.00 :
+                raise osv.except_osv(_('Error!'), _('FOREX-002: Zero amounts are not allowed!'))
+            if not curr_src==curr_dest and exchange['src_amount'] > 0.00 or exchange['dest_amount'] > 0.00:
                 src_amt = exchange['src_amount']
                 dest_amt = exchange['dest_amount']
                 if curr_src == comp_curr:
@@ -118,9 +95,6 @@ class forex_transaction(osv.osv):
                 if curr_dest == comp_curr:
                     rate = src_amt / dest_amt
                     comp_curr_amt = dest_amt
-                #netsvc.Logger().notifyChannel("src", netsvc.LOG_INFO, ' '+str(src_amt))
-                #netsvc.Logger().notifyChannel("dest", netsvc.LOG_INFO, ' '+str(dest_amt))
-                #netsvc.Logger().notifyChannel("rate", netsvc.LOG_INFO, ' '+str(rate))
                 move= {
                     'journal_id':journal_id,
                     'period_id':period_id,
@@ -158,10 +132,6 @@ class forex_transaction(osv.osv):
                             'post_rate':rate,
                             }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
-                
-                ### End of Withdraw
-                
-                ### Exchange
                 name = 'Exchange of COH on' + check_dest_acc['transit_id'][1]
                 move_line = {
                             'name':check_dest_acc['transit_id'][1],
@@ -192,10 +162,6 @@ class forex_transaction(osv.osv):
                             'post_rate':rate,
                             }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
-                
-                ### End of Exchange
-                
-                ### Deposit
                 name = 'Deposit from COH on  ' + check_dest_acc['transit_id'][1]
                 move_line = {
                             'name':name,
@@ -227,6 +193,6 @@ class forex_transaction(osv.osv):
                             }
                 self.pool.get('account.move.line').create(cr, uid, move_line)
                 self.pool.get('account.move').post(cr, uid, [move_id], context={})
-                self.write(cr, uid, ids, {'rate':rate,'state':'post','name':move_id})
+                self.write(cr, uid, ids, {'rate':rate,'state':'post','move_id':move_id})
         return True
 forex_transaction()
