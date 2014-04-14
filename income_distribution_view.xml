@@ -18,6 +18,7 @@
 	                        <field name="amount" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
 	                        <field name="charges_included" attrs="{'readonly':[('state','!=','draft')]}"/>
 	                        <field name="bank_charges" attrs="{'invisible':[('charges_included','=',False)],'readonly':[('state','!=','draft')],'required':[('charges_included','=',True)]}"/>
+	                        <field name="bank_charge_account" attrs="{'invisible':[('charges_included','=',False)],'readonly':[('state','!=','draft')],'required':[('charges_included','=',True)]}"/>
                         </group>
                     </group>
                     <separator string="Dates" colspan="4"/>

@@ -14,6 +14,7 @@ class income_distribution_generic(osv.osv):
     _description = "Generic Income Distribution"
     _columns = {
         'bank_id':fields.many2one('res.partner.bank','Bank Account'),
+        'bank_charge_account':fields.many2one('account.analytic.account','Bank Charge Account'),
         'amount':fields.float('Amount to Distribute'),
         'bank_charges':fields.float('Bank Charges'),
         'name':fields.char('ID',size=16),
@@ -110,11 +111,11 @@ class idg(osv.osv):
         user_id = uid
         user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
         company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['currency_id','donations','bank_charge'])
-        bankChargeAccount = self.pool.get('account.analytic.account').read(cr, uid, company_read['bank_charge'][0], ['normal_account'])
         comp_curr = company_read['currency_id'][0]
         rate = False
         currency = False
         for idg in self.read(cr, uid, ids, context=None):
+            bankChargeAccount = self.pool.get('account.analytic.account').read(cr, uid, idg['bank_charge_account'][0], ['normal_account'])
             bank_read = self.pool.get('res.partner.bank').read(cr, uid, idg['bank_id'][0],['currency_id','journal_id','account_id'])
             journal_id = bank_read['journal_id'][0]
             period_search = self.pool.get('account.period').search(cr, uid, [('date_start','<=',idg['rdate']),('date_stop','>=',idg['rdate'])],limit=1)
@@ -169,7 +170,7 @@ class idg(osv.osv):
                                 'date':idg['rdate'],
                                 'ref':idg['name'],
                                 'move_id':move_id,
-                                'analytic_account_id':company_read['bank_charge'][0],
+                                'analytic_account_id':idg['bank_charge_account'][0],
                                 'amount_currency':charge_amt,
                                 'currency_id':currency,
                                 }
