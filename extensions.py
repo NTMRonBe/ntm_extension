@@ -33,7 +33,7 @@ class res_company(osv.osv):
         'other_ap':fields.many2one('account.account','Other Payable Accounts', required=True),
         'contribution':fields.float('Contribution Percentage'),
         'donations':fields.many2one('account.account','Donations Account', required=True),     
-        'bank_charge':fields.many2one('account.account','Bank Charges Account', required=True),
+        'bank_charge':fields.many2one('account.analytic.account','Bank Charges Account', required=True),
         'contributions_acct':fields.many2one('account.account','Contributions Account'),
         'def_gain_loss':fields.many2one('account.analytic.account','Default Exchange Gain/Loss',domain=[('ntm_type','=','gl')]),
 		'ur_gain_loss':fields.many2one('account.account','Unrealized Gain/Loss'),
