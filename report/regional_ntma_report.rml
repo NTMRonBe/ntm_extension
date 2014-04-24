@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <document filename="test.pdf">
-  <template pageSize="(612.0,792.0)" title="Test" author="Martin Simon" allowSplitting="20">
+  <template pageSize="(595.0,842.0)" title="Test" author="Martin Simon" allowSplitting="20">
     <pageTemplate id="first">
-      <frame id="first" x1="57.0" y1="57.0" width="498" height="678"/>
+      <frame id="first" x1="57.0" y1="57.0" width="481" height="728"/>
     </pageTemplate>
   </template>
   <stylesheet>
@@ -10,47 +10,109 @@
       <blockAlignment value="LEFT"/>
       <blockValign value="TOP"/>
     </blockTableStyle>
-    <blockTableStyle id="Table3">
+    <blockTableStyle id="Table4">
       <blockAlignment value="LEFT"/>
       <blockValign value="TOP"/>
       <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
     </blockTableStyle>
+    <blockTableStyle id="Table7">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+    </blockTableStyle>
     <blockTableStyle id="Table1">
       <blockAlignment value="LEFT"/>
       <blockValign value="TOP"/>
-      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="0,-1" stop="0,-1"/>
-      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
-      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="2,-1" stop="2,-1"/>
-    </blockTableStyle>
-    <blockTableStyle id="Table8">
-      <blockAlignment value="LEFT"/>
-      <blockValign value="TOP"/>
-      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="0,-1" stop="0,-1"/>
-      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
-      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
     </blockTableStyle>
     <blockTableStyle id="Table2">
       <blockAlignment value="LEFT"/>
       <blockValign value="TOP"/>
-      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="0,-1" stop="0,-1"/>
-      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table3">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table5">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table6">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
     </blockTableStyle>
     <initialize>
       <paraStyle name="all" alignment="justify"/>
     </initialize>
     <paraStyle name="P1" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="P2" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P3" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P4" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT"/>
-    <paraStyle name="P5" fontName="Helvetica" fontSize="18.0" leading="22" alignment="CENTER"/>
-    <paraStyle name="P6" fontName="Helvetica" fontSize="10.0" leading="13"/>
+    <paraStyle name="P3" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="6.0" leading="8" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P4" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P5" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT"/>
+    <paraStyle name="P6" fontName="Helvetica" fontSize="18.0" leading="22" alignment="CENTER"/>
     <paraStyle name="P7" fontName="Helvetica" fontSize="10.0" leading="13" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="P8" fontName="Helvetica" fontSize="24.0" leading="29" alignment="CENTER" backColor="#83caff"/>
-    <paraStyle name="P9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P10" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="6.0" leading="8" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P11" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P12" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Oblique" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Oblique" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P10" fontName="Helvetica" fontSize="10.0" leading="13"/>
+    <paraStyle name="P11" fontName="Helvetica" fontSize="24.0" leading="29" alignment="CENTER"/>
+    <paraStyle name="P12" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P13" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P14" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="P15" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P16" fontName="Helvetica" fontSize="10.0" leading="13" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
@@ -69,138 +131,188 @@
     <paraStyle name="terp_default_Right_8" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_Right_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_8_Italic" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Oblique" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_tblheader_Details" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_Details_Right" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="6.0" spaceAfter="6.0"/>
     <images/>
   </stylesheet>
   <story>
-    <para style="Standard">[[repeatIn(objects,'o')]]<font face="Helvetica" size="10.0">[[ setLang(o.partner_id.lang) ]]</font></para>
-    <blockTable colWidths="499.0" style="Table3">
+    <para style="Standard">[[repeatIn(objects,'o')]]</para>
+    <blockTable colWidths="482.0" style="Table4">
       <tr>
         <td>
-          <para style="P8">Aviation Report</para>
+          <para style="P11">[[o.name]] Aviation Report</para>
         </td>
       </tr>
     </blockTable>
-    <para style="P5">
+    <para style="P12">
+      <font face="Helvetica" size="14.0"/>
+    </para>
+    <para style="P12">
+      <font face="Helvetica" size="14.0"/>
+    </para>
+    <para style="P12">GL Account: [[o.gl_acc.name]] Period Balance:[[o.gl_mtd]] <font face="Helvetica">YTD Balance: </font><font face="Helvetica">[[o.gl_mtd]]</font></para>
+    <para style="P12">
+      <font face="Helvetica"/>
+    </para>
+    <para style="terp_default_2">
       <font color="white"> </font>
     </para>
-    <para style="P1">
+    <para style="terp_default_2">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="166.0,166.0,166.0" style="Table1">
+    <para style="terp_default_2">
+      <font color="white"> </font>
+    </para>
+    <blockTable colWidths="155.0,207.0,120.0" style="Table7">
       <tr>
         <td>
-          <para style="P2">AV Aircraft</para>
+          <para style="terp_tblheader_Details">AV Aircraft Accounts</para>
         </td>
         <td>
-          <para style="P2">Month to Date Balance</para>
+          <para style="P14">MTD Balance</para>
         </td>
         <td>
-          <para style="P2">Year to Date Balance</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P10">[[ repeatIn(o.income_ids,'l') ]]</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P2">[[l.name.name]]</para>
-        </td>
-        <td>
-          <para style="P2">[[l.mtd]]</para>
-        </td>
-        <td>
-          <para style="P3">[[l.ytd]]</para>
+          <para style="P14">YTD Balance</para>
         </td>
       </tr>
     </blockTable>
-    <para style="P4">
-      <font color="white"> </font>
-    </para>
-    <para style="P4">
-      <font color="white"> </font>
-    </para>
-    <blockTable colWidths="166.0,166.0,166.0" style="Table8">
-      <tr>
-        <td>
-          <para style="P2">AV Operations</para>
-        </td>
-        <td>
-          <para style="P2">Month to Date Balance</para>
-        </td>
-        <td>
-          <para style="P2">Year to Date Balance</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P10">[[repeatIn(o.expense_ids,'expi')]]</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P2">[[expi.name.name]]</para>
-        </td>
-        <td>
-          <para style="P2">[[expi.mtd]]</para>
-        </td>
-        <td>
-          <para style="P3">[[expi.ytd]]</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P12">[[removeParentNode('tr') ]]</para>
-        </td>
-        <td>
-          <para style="P2">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P3">
-            <font color="white"> </font>
-          </para>
-        </td>
-      </tr>
-    </blockTable>
+    <section>
+      <para style="P13">[[ repeatIn(o.income_ids,'inc') ]]</para>
+      <blockTable colWidths="156.0,205.0,121.0" style="Table1">
+        <tr>
+          <td>
+            <para style="P2">[[inc.name.name]]</para>
+          </td>
+          <td>
+            <para style="P2"><font face="Helvetica" size="9.0">[[ ((inc.mtd==0.00) or removeParentNode('para')) and '' ]] </font>0.00</para>
+            <para style="P2">
+              <font face="Helvetica" size="9.0">[[ ((inc.mtd!=0.00) or removeParentNode('para')) and '' ]] [[inc.mtd]]</font>
+            </para>
+          </td>
+          <td>
+            <para style="P2"><font face="Helvetica" size="9.0">[[ ((inc.ytd==0.00) or removeParentNode('para')) and '' ]] </font>0.00</para>
+            <para style="P2">
+              <font face="Helvetica" size="9.0">[[ ((inc.ytd!=0.00) or removeParentNode('para')) and '' ]] [[inc.ytd]]</font>
+            </para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="terp_default_Note">[[ removeParentNode('tr') ]]</para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">
+              <font color="white"> </font>
+            </para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">
+              <font color="white"> </font>
+            </para>
+          </td>
+        </tr>
+      </blockTable>
+    </section>
     <para style="P7">
       <font color="white"> </font>
     </para>
-    <para style="P7">
+    <para style="terp_default_2">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="249.0,249.0" style="Table2">
+    <blockTable colWidths="155.0,207.0,120.0" style="Table2">
       <tr>
         <td>
-          <para style="P2">Equities</para>
+          <para style="terp_tblheader_Details">AV Operation Accounts</para>
         </td>
         <td>
-          <para style="P2">Year to Date Balance</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P10">[[repeatIn(o.equity_ids,'expi')]]</para>
+          <para style="P14">MTD Balance</para>
         </td>
         <td>
-          <para style="P10">
-            <font color="white"> </font>
-          </para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P2">[[expi.name.name]]</para>
-        </td>
-        <td>
-          <para style="P3">[[expi.ytd]]</para>
+          <para style="P14">YTD Balance</para>
         </td>
       </tr>
     </blockTable>
-    <para style="Standard">
+    <section>
+      <para style="P13">[[ repeatIn(o.expense_ids,'inc') ]]</para>
+      <blockTable colWidths="156.0,205.0,121.0" style="Table3">
+        <tr>
+          <td>
+            <para style="P2">[[inc.name.name]]</para>
+          </td>
+          <td>
+            <para style="P2"><font face="Helvetica" size="9.0">[[ ((inc.mtd==0.00) or removeParentNode('para')) and '' ]] </font>0.00</para>
+            <para style="P2">
+              <font face="Helvetica" size="9.0">[[ ((inc.mtd!=0.00) or removeParentNode('para')) and '' ]] [[inc.mtd]]</font>
+            </para>
+          </td>
+          <td>
+            <para style="P2"><font face="Helvetica" size="9.0">[[ ((inc.ytd==0.00) or removeParentNode('para')) and '' ]] </font>0.00</para>
+            <para style="P2">
+              <font face="Helvetica" size="9.0">[[ ((inc.ytd!=0.00) or removeParentNode('para')) and '' ]] [[inc.ytd]]</font>
+            </para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="terp_default_Note">[[ removeParentNode('tr') ]]</para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">
+              <font color="white"> </font>
+            </para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">
+              <font color="white"> </font>
+            </para>
+          </td>
+        </tr>
+      </blockTable>
+    </section>
+    <para style="P7">
       <font color="white"> </font>
+    </para>
+    <para style="terp_default_2">
+      <font color="white"> </font>
+    </para>
+    <blockTable colWidths="258.0,224.0" style="Table5">
+      <tr>
+        <td>
+          <para style="terp_tblheader_Details">Equity Accounts</para>
+        </td>
+        <td>
+          <para style="P14">YTD Balance</para>
+        </td>
+      </tr>
+    </blockTable>
+    <section>
+      <para style="P13">[[ repeatIn(o.equity_ids,'inc') ]]</para>
+      <blockTable colWidths="258.0,224.0" style="Table6">
+        <tr>
+          <td>
+            <para style="P2">[[inc.name.name]]</para>
+          </td>
+          <td>
+            <para style="P2"><font face="Helvetica" size="9.0">[[ ((inc.ytd==0.00) or removeParentNode('para')) and '' ]] </font>0.00</para>
+            <para style="P2">
+              <font face="Helvetica" size="9.0">[[ ((inc.ytd!=0.00) or removeParentNode('para')) and '' ]] [[inc.ytd]]</font>
+            </para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="terp_default_Note">[[ removeParentNode('tr') ]]</para>
+          </td>
+          <td>
+            <para style="terp_default_Right_9">
+              <font color="white"> </font>
+            </para>
+          </td>
+        </tr>
+      </blockTable>
+    </section>
+    <para style="P10">
+      <font face="Helvetica" size="10.0"/>
     </para>
   </story>
 </document>

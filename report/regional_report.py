@@ -28,5 +28,6 @@ class regional(report_sxw.rml_parse):
         self.localcontext.update({
             'time': time,
         })
-report_sxw.report_sxw('report.region.config','region.report','addons/ntm_extension/report/regional_report.rml',parser=regional)
+report_sxw.report_sxw('report.region.report','region.report','addons/ntm_extension/report/regional_report.rml',parser=regional,
+                      header="external")
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
