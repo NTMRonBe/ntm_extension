@@ -9,17 +9,17 @@
             rml="ntm_extension/report/pc_liquidation.rml"
             auto="False"
             attachment="(object.name)"
-            header = "False"
+            header = "True"
             menu="True"
             />
     <report id="report_income_line_print"
             string="Income Lines"
             model="pc.income.lines"
             name="pc.income.lines"
-            rml="ntm_extension/report/pc_liquidation.rml"
+            rml="ntm_extension/report/pc_income.rml"
             auto="False"
             attachment="(object.name)"
-            header = "False"
+            header = "True"
             menu="True"
             />
             

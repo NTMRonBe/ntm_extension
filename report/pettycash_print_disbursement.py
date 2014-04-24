@@ -28,5 +28,6 @@ class pettycash_disbursement(report_sxw.rml_parse):
         self.localcontext.update({
             'time': time,
         })
-report_sxw.report_sxw('report.pettycash.disbursement','pettycash.disbursement','addons/ntm_extension/report/pettycash_print_disbursement.rml',parser=pettycash_disbursement)
+report_sxw.report_sxw('report.pettycash.disbursement','pettycash.disbursement',
+                      'addons/ntm_extension/report/pettycash_print_disbursement.rml',parser=pettycash_disbursement, header="external")
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

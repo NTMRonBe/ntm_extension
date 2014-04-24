@@ -28,7 +28,8 @@ class pc_liquidation_lines(report_sxw.rml_parse):
         self.localcontext.update({
             'time': time,
         })
-report_sxw.report_sxw('report.pc.liquidation.lines','pc.liquidation.lines','addons/ntm_extension/report/pc_liquidation.rml',parser=pc_liquidation_lines)
+report_sxw.report_sxw('report.pc.liquidation.lines','pc.liquidation.lines',
+                      'addons/ntm_extension/report/pc_liquidation.rml',parser=pc_liquidation_lines, header='external')
 
 
 class pc_income_lines(report_sxw.rml_parse):
@@ -37,7 +38,8 @@ class pc_income_lines(report_sxw.rml_parse):
         self.localcontext.update({
             'time': time,
         })
-report_sxw.report_sxw('report.pc.income.lines','pc.income.lines','addons/ntm_extension/report/pc_income.rml',parser=pc_income_lines)
+report_sxw.report_sxw('report.pc.income.lines','pc.income.lines',
+                      'addons/ntm_extension/report/pc_income.rml',parser=pc_income_lines,header='external')
 
 
 

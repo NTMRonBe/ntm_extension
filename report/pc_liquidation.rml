@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <document filename="test.pdf">
-  <template pageSize="(612.0,369.0)" title="Test" author="Martin Simon" allowSplitting="20">
+  <template pageSize="(595.0,842.0)" title="Test" author="Martin Simon" allowSplitting="20">
     <pageTemplate id="first">
-      <frame id="first" x1="28.0" y1="28.0" width="556" height="313"/>
+      <frame id="first" x1="28.0" y1="28.0" width="539" height="786"/>
     </pageTemplate>
   </template>
   <stylesheet>
@@ -10,11 +10,15 @@
       <blockAlignment value="LEFT"/>
       <blockValign value="TOP"/>
     </blockTableStyle>
-    <blockTableStyle id="Table1">
+    <blockTableStyle id="Table3">
       <blockAlignment value="LEFT"/>
       <blockValign value="TOP"/>
       <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
-      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table1">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
     </blockTableStyle>
     <blockTableStyle id="Table4">
       <blockAlignment value="LEFT"/>
@@ -29,15 +33,16 @@
     <initialize>
       <paraStyle name="all" alignment="justify"/>
     </initialize>
-    <paraStyle name="P1" fontName="Helvetica" fontSize="14.0" leading="17" alignment="CENTER"/>
-    <paraStyle name="P2" fontName="Helvetica" fontSize="10.0" leading="13" alignment="CENTER"/>
-    <paraStyle name="P3" fontName="Helvetica" fontSize="11.0" leading="14" alignment="LEFT"/>
-    <paraStyle name="P4" fontName="Helvetica" fontSize="11.0" leading="14" alignment="LEFT"/>
-    <paraStyle name="P5" fontName="Helvetica" fontSize="13.0" leading="16" alignment="LEFT"/>
-    <paraStyle name="P6" fontName="Helvetica" fontSize="11.0" leading="14"/>
-    <paraStyle name="P7" fontName="Helvetica" fontSize="11.0" leading="14" alignment="RIGHT"/>
-    <paraStyle name="P8" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT"/>
-    <paraStyle name="P9" fontName="Helvetica" fontSize="11.0" leading="14" alignment="LEFT"/>
+    <paraStyle name="P1" fontName="Helvetica" fontSize="11.0" leading="14" alignment="LEFT"/>
+    <paraStyle name="P2" fontName="Helvetica" fontSize="11.0" leading="14" alignment="LEFT"/>
+    <paraStyle name="P3" fontName="Helvetica" fontSize="13.0" leading="16" alignment="LEFT"/>
+    <paraStyle name="P4" fontName="Helvetica" fontSize="11.0" leading="14"/>
+    <paraStyle name="P5" fontName="Helvetica" fontSize="11.0" leading="14" alignment="RIGHT"/>
+    <paraStyle name="P6" fontName="Helvetica" fontSize="11.0" leading="14" alignment="LEFT"/>
+    <paraStyle name="P7" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT"/>
+    <paraStyle name="P8" fontName="Helvetica" fontSize="10.0" leading="13" alignment="CENTER"/>
+    <paraStyle name="P9" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT"/>
+    <paraStyle name="P10" fontName="Helvetica" fontSize="24.0" leading="29" alignment="CENTER"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
@@ -62,34 +67,24 @@
     <images/>
   </stylesheet>
   <story>
-    <para style="P1">[[repeatIn(objects,'o')]]NEW TRIBES MISSION – PHILIPPINE BRANCH OFFICE</para>
-    <para style="P2">CASH OUT</para>
-    <blockTable colWidths="272.0,284.0" style="Table1">
+    <para style="P9">[[repeatIn(objects,'o')]]</para>
+    <para style="Standard">
+      <font face="Helvetica" size="10.0"/>
+    </para>
+    <blockTable colWidths="539.0" style="Table3">
       <tr>
         <td>
-          <para style="P8">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P8">
-            <font color="white"> </font>
-          </para>
+          <para style="P10">Petty Cash - Cash Out</para>
         </td>
       </tr>
     </blockTable>
-    <para style="P5">Description: [[o.name]]</para>
-    <para style="P5">Account: [[o.acc_name]]</para>
-    <para style="P5">Reference: [[o.reference]]</para>
-    <para style="P5">Amount: [[o.amount]]</para>
-    <para style="P5">Date: [[o.pcl_id.date]]</para>
-    <para style="P3">
+    <para style="P8">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="279.0,278.0" style="Table4">
+    <blockTable colWidths="263.0,275.0" style="Table1">
       <tr>
         <td>
-          <para style="P6">
+          <para style="P7">
             <font color="white"> </font>
           </para>
         </td>
@@ -100,26 +95,48 @@
         </td>
       </tr>
     </blockTable>
-    <para style="P4">
+    <para style="P3">Description: [[o.name]]</para>
+    <para style="P3">Account: [[o.acc_name]]</para>
+    <para style="P3">Reference: [[o.reference]]</para>
+    <para style="P3">Amount: [[o.amount]]</para>
+    <para style="P3">Date: [[o.pcl_id.date]]</para>
+    <para style="P1">
       <font color="white"> </font>
     </para>
-    <para style="P3">
-      <font color="white"> </font>
-    </para>
-    <para style="P3">
-      <font color="white"> </font>
-    </para>
-    <blockTable colWidths="278.0,278.0" style="Table2">
+    <blockTable colWidths="270.0,270.0" style="Table4">
       <tr>
         <td>
-          <para style="P9">Released by:_________________________________</para>
+          <para style="P4">
+            <font color="white"> </font>
+          </para>
         </td>
         <td>
-          <para style="P9">Received by:__________________________________</para>
+          <para style="P5">
+            <font color="white"> </font>
+          </para>
         </td>
       </tr>
     </blockTable>
-    <para style="P3">
+    <para style="P2">
+      <font color="white"> </font>
+    </para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+    <para style="P1">
+      <font color="white"> </font>
+    </para>
+    <blockTable colWidths="269.0,269.0" style="Table2">
+      <tr>
+        <td>
+          <para style="P6">Released by:_________________________________</para>
+        </td>
+        <td>
+          <para style="P6">Received by:__________________________________</para>
+        </td>
+      </tr>
+    </blockTable>
+    <para style="P1">
       <font color="white"> </font>
     </para>
   </story>

@@ -190,7 +190,7 @@ class pc_income_lines(osv.osv):
         statements = []
         if context is None:
             context = {}
-        for data in self.read(cr, uid, ids, ['id']):
+        for data in self.read(cr, uid, ids, context=None):
             rec = data['id']
             attachments = self.pool.get('ir.attachment').search(cr, uid, [('res_model','=','pc.income.lines'),('res_id','=',rec)])
             self.pool.get('ir.attachment').unlink(cr, uid, attachments)
@@ -200,13 +200,14 @@ class pc_income_lines(osv.osv):
             'model':'pc.income.lines',
             'form':data
             }
+        new_name = data['acc_name'] + ' ' + data['name']
         return {
             'type': 'ir.actions.report.xml',
             'report_name': 'pc.income.lines',
             'nodestroy':True,
             'datas': datas,
-            #'name':data['name'],
-            'header':False,
+            'name':new_name,
+            'header':True,
             }
     
     def onchange_type(self, cr, uid, ids, type=False):
