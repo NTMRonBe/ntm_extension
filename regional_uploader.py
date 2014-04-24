@@ -21,11 +21,60 @@ class regional_uploader(osv.osv):
 regional_uploader()
 
 class regional_upload(osv.osv_memory):
+    
+    def _get_period(self, cr, uid, context=None):
+        if context is None: context = {}
+        if context.get('period_id', False):
+            return context.get('period_id')
+        periods = self.pool.get('account.period').find(cr, uid, context=context)
+        return periods and periods[0] or False
+    
     _name = 'regional.upload'
     _columns = {
+    'trans_nbr': fields.integer('# of Transaction', readonly=True),
+    'credit': fields.float('Credit amount', readonly=True),
+    'debit': fields.float('Debit amount', readonly=True),
+    'journal_id':fields.many2one('account.journal','Effective Journal', required=True),
 	'period_id':fields.many2one('account.period','Effective Period', required=True),
 	'date':fields.date('Effective Date', required=True),
+    'name':fields.char('Reference',size=64, required=True),
 	}
+    
+    _defaults = {
+        'date':lambda *a: time.strftime('%Y-%m-%d'),
+        'period_id':_get_period,         
+        }
+    
+    def default_get(self, cr, uid, fields, context=None):
+        res = super(regional_upload, self).default_get(cr, uid, fields, context=context)
+        data = self.trans_rec_get(cr, uid, context['active_ids'], context)
+        if 'trans_nbr' in fields:
+            res.update({'trans_nbr':data['trans_nbr']})
+        if 'credit' in fields:
+            res.update({'credit':data['credit']})
+        if 'debit' in fields:
+            res.update({'debit':data['debit']})
+        return res
+
+    def trans_rec_get(self, cr, uid, ids, context=None):
+        account_move_line_obj = self.pool.get('regional.uploader')
+        if context is None:
+            context = {}
+        credit = debit = 0
+        account_id = False
+        count = 0
+        for line in account_move_line_obj.browse(cr, uid, context['active_ids'], context=context):
+            count += 1
+            if line.scuramt <0.00:
+                credit +=line.scuramt
+            elif line.scuramt>0.00:
+                debit += line.scuramt
+        creditChecker = credit*-1
+        if creditChecker!=debit:
+            raise osv.except_osv(_('Error !'), _('Make sure that all entries has a corresponding entry!'))
+        return {'trans_nbr': count, 'credit': credit, 'debit': debit}
+
+    
     def upload(self, cr, uid, ids, context=None):
         regional_entries = self.pool.get('regional.uploader').search(cr, uid, [('uploaded','=',False)])
 	period_id = False
