@@ -2,23 +2,32 @@
 <openerp>
     <data>
     
-    <report id="report_regional_ntma_print"
+    <report id="report_regional_print"
             string="NTM Report"
-            model="region.ntma"
-            name="region.ntma"
+            model="region.report"
+            name="region.report"
+            rml="ntm_extension/report/regional_report.rml"
+            auto="False"
+            header = "True"
+            menu="True"/>
+            
+         <!-- <report id="report_regional_ntma_print"
+            string="Aviation Report"
+            model="region.report"
+            name="region.report"
             rml="ntm_extension/report/regional_ntma_report.rml"
             auto="False"
-            header = "False"
-            menu="True"/>
+            header = "True"
+            menu="True"/> -->
     
     <record id="region_report_form" model="ir.ui.view">
             <field name="name">region.report.form</field>
             <field name="model">region.report</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string = "Regional Report">
-                    <field name="name"/>
-                    <field name="period_id"/>
+                <form string = "Regional Profit and Loss">
+                    <field name="name" readonly="1"/>
+                    <field name="period_id" readonly="1"/>
                     <separator string="Gain Loss Details" colspan="4"/>
                     <group colspan="4" col="6">
                         <field name="gl_acc" readonly="1"/>
@@ -64,7 +73,7 @@
             <field name="model">region.report</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Regional Reports">
+                <tree string="Regional Profit and Loss">
                     <field name="name"/>
                     <field name="period_id"/>
                 </tree>
@@ -72,7 +81,7 @@
         </record>
         
         <record model="ir.actions.act_window" id="action_region_report_form">
-            <field name="name">Regional Reports</field>
+            <field name="name">Regional Profit and Loss</field>
             <field name="res_model">region.report</field>
             <field name="view_type">form</field>
         </record>
