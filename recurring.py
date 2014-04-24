@@ -92,6 +92,14 @@ class rsc(osv.osv):
 rsc()
 
 class generate(osv.osv_memory):
+    
+    def _get_period(self, cr, uid, context=None):
+        if context is None: context = {}
+        if context.get('period_id', False):
+            return context.get('period_id')
+        periods = self.pool.get('account.period').find(cr, uid, context=context)
+        return periods and periods[0] or False
+    
     _name = 'analytic.recur.entry.generate'
     _description = "Generate Recurring Entries"
     _columns = {
@@ -100,6 +108,7 @@ class generate(osv.osv_memory):
         }
     _defaults = {
             'date': lambda *a: time.strftime('%Y-%m-%d'),
+            'period':_get_period,
             }
     
     def generateEntries(self, cr, uid, ids, context=None):
@@ -171,5 +180,5 @@ class generate(osv.osv_memory):
                         'move_id':move_id,
                         }
                 self.pool.get('analytic.recur.entry.sched').create(cr, uid, recur_entry)
-        return True
+        return {'type': 'ir.actions.act_window_close'}
 generate()

@@ -81,13 +81,16 @@
         <menuitem id="menu_pcd" action="action_pcd_form" parent="main_pettycash" sequence="50" groups="base.group_user"/> -->   
         <menuitem id="menu_pc_transfer_main" parent="main_pettycash" sequence="60" name="Transfers"/>
         <menuitem id="menu_pcl" action="action_pcl_form" parent="main_pettycash" sequence="70" groups="base.group_user"/>
-        <menuitem id="menu_pettycash_transfer" action="action_pettycash_transfer_form" parent="menu_pc_transfer_main" sequence="10"  groups="base.group_user"/>
+        
        <!-- <menuitem id="iat_people2pc" parent="menu_pc_transfer_main" sequence="20" action="action_people2pc_tree"/>
         <menuitem id="iat_proj2pc" parent="menu_pc_transfer_main" sequence="30" action="action_proj2pc_tree"/>
         <menuitem id="iat_income2pc" parent="menu_pc_transfer_main" sequence="40" action="action_income2pc_tree"/> -->
-        <menuitem id="fund_transfer_p2b" parent="menu_pc_transfer_main" sequence="50" action="action_fund_transfer_p2b_tree"/>
-        <menuitem id="fund_transfer_b2b" parent="fund_transfers" sequence="10" action="action_fund_transfer_b2b_tree"/>
-        <menuitem id="iat_main" name="Internal Account Transfers" parent="fund_transfers" sequence="20"/>
+        <menuitem id="fund_transfer_p2b" parent="fund_transfers" sequence="40" action="action_p2b_fund_transfer"/>
+        <menuitem id="menu_pettycash_transfer" action="action_pettycash_transfer_form" parent="fund_transfers" sequence="30"  groups="base.group_user"/>
+        <menuitem id="b2b_fund_transfer" parent="fund_transfers" sequence="20" action="action_b2b_fund_transfer"/>
+        <menuitem id="iat_main" name="Internal Account Transfers" parent="fund_transfers" sequence="50" action="action_default_tree"/>
+        
+        <!-- Removed menus April 8 2014 
         <menuitem id="iat_people2people" parent="iat_main" sequence="10" action="action_people2people_tree"/>
         <menuitem id="iat_people2proj" parent="iat_main" sequence="20" action="action_people2proj_tree"/>
         <menuitem id="iat_proj2people" parent="iat_main" sequence="50" action="action_proj2people_tree"/>
@@ -97,7 +100,9 @@
         <menuitem id="iat_expense2income" parent="iat_main" sequence="80" action="action_expense2income_tree"/>
         <menuitem id="iat_expense2people" parent="iat_main" sequence="90" action="action_expense2people_tree"/>
         <menuitem id="iat_expense2proj" parent="iat_main" sequence="100" action="action_expense2proj_tree"/>
-        <menuitem id="bank_transfer_main" parent="fund_transfers" sequence="40" action="action_bank_transfer_tree"/>
+         -->
+         
+        <menuitem id="bank_transfer_main" parent="fund_transfers" sequence="10" action="action_bank_transfer_tree"/>
         <menuitem id="bank_transfer_schedule" parent="bank_transfer_main" sequence="20" action="action_bank_transfer_schedule_tree"/>
         <menuitem id="bank_transfer_requests" parent="bank_transfer_main" sequence="10" action="action_bank_transfer_request_tree"/>
         <menuitem id="bank_transfer_requests_all" parent="bank_transfer_main" sequence="30" action="action_bank_transfer_all_tree"/>
@@ -119,9 +124,10 @@
         <menuitem id="ntm_acct_je4_menu" sequence="40" name="Analytic Journal Items" parent="ntm_acct_jes_root" action="account.action_account_analytic_journal_open_form"/>
         
         <menuitem id="ntm_acct_pp1_menu" sequence="10" name="Opening Balance" parent="ntm_acct_periodical_root" action="action_ob_import_form"/>
-        <menuitem id="ntm_acct_pp2_menu" sequence="20" name="End of Period" parent="ntm_acct_periodical_root"/>
-        <menuitem id="ntm_acct_pp3_menu" sequence="30" name="Revaluations" parent="ntm_acct_periodical_root"/>
-        <menuitem id="ntm_acct_pp4_menu" sequence="40" name="Fund Allocation" parent="ntm_acct_periodical_root" action="action_allocate_funds_wiz"/>
+        <menuitem id="account.menu_finance_recurrent_entries" sequence="20" name="Recurring Entries" parent="ntm_acct_periodical_root"/>
+        <menuitem id="ntm_acct_pp2_menu" sequence="30" name="End of Period" parent="ntm_acct_periodical_root"/>
+        <menuitem id="ntm_acct_pp3_menu" sequence="40" name="Revaluations" parent="ntm_acct_periodical_root"/>
+        <menuitem id="ntm_acct_pp4_menu" sequence="50" name="Fund Allocation" parent="ntm_acct_periodical_root" action="action_allocate_funds_wiz"/>
         
         <menuitem id="ntm_acct_reports1_root" name="Statement of Accounts" parent="ntm_acct_reports_root" sequence="10"/>
         <menuitem id="ntm_acct_reports2_root" name="Regional Reports" parent="ntm_acct_reports_root" sequence="20"/>
@@ -162,6 +168,8 @@
         <menuitem id="menu_account_accpac_wiz" action="action_account_accpac_wiz" parent="ntm_acct_config3_root" sequence="20"/>
         
         <menuitem id="menu_region_config" action="action_region_config_form" parent="ntm_acct_config4_root" sequence="10"/>
+        <menuitem action="account.action_model_form" id="account.menu_action_model_form" sequence="20" parent="ntm_acct_config4_root" groups="base.group_extended"/>
+        <menuitem id="ntm_recurring_menu" parent="ntm_acct_config4_root" action="action_analytic_recur_entry_form" sequence="30"/>
         
         
         <!-- End of header 4 on Manual - Accounting-->

@@ -12,6 +12,7 @@
                     <field name="date" required="1"/>
                     <field name="period" required="1"/>
                 </group>
+                <button icon="gtk-cancel" special="cancel" string="Cancel" />
                <button string="Generate"
                                             type="object"
                                             name="generateEntries"
