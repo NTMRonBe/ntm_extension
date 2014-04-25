@@ -81,18 +81,14 @@
             <field name="arch" type="xml">
 				<field name="user_id" position="after">
 				    <newline/>
-					<field name="allocated"/>
-					<field name="report"/>
-					<field name="normal_account"  attrs="{'invisible': [('type','=','view')]}"/>
-					<group colspan="2" col="4" attrs="{'invisible': [('type','=','view')]}">
-					<field name="project_account"/>
-					<field name="voucher_expense" attrs="{'invisible': [('project_account','=',False)]}"/>
-					<group colspan="2" col="4">
-                        <field name="ntm_type"/>
-                        <field name="region_id"/>					
+					<field name="allocated" attrs="{'invisible': [('type','=','view')]}"/>
+					<field name="report" attrs="{'invisible': [('type','=','view')]}"/>
+					<field name="normal_account"  attrs="{'invisible': [('type','=','view')],'required':[('type','=','normal')]}"/>
+					<group colspan="2" col="2" attrs="{'invisible': ['|',('ntm_type','!=','project'),('type','=','view')]}">
+						<label string="Included on voucher expense distribution:" colspan="1"  />
+						<field name="voucher_expense" nolabel="1" colspan="1" />
 					</group>
-					</group>
-					<group colspan="4" col="4">
+					<group colspan="4" col="4" attrs="{'invisible': [('type','=','view')]}">
 					   <separator colspan="4"/>
 					   <field name="accpac_ids" mode="tree" colspan="2" nolabel="1">
 					       <tree string="Accpac Codes" editable="top">
@@ -100,11 +96,16 @@
 					           <field name="description"/>
 					       </tree>
 					   </field>
-					   <field name="phone_pin" mode="tree" colspan="2" nolabel="1">
+					   <field name="phone_pin" mode="tree,form" colspan="2" nolabel="1">
                            <tree string="Phone Pins">
                                <field name="name"/>
                                <field name="description"/>
                            </tree>
+                           <form string="Phone Pin">
+                               <field name="name"/>
+                               <field name="description"/>
+                           </form>
+                           
                        </field>
 					</group>
 				</field>
@@ -114,24 +115,24 @@
 				<field name="type" position="replace">
 				    <group colspan="4" col="4">
 				        <field name="type"/>
-				        <group colspan="2" col="2" attrs="{'invisible': [('partner_id','=',False)]}">
-					        <field name="supplier" attrs="{'invisible': [('project','=',True)]}"/>
-					        <field name="project" attrs="{'invisible': [('supplier','=',True)]}"/>
+				        <group colspan="2" col="2" attrs="{'invisible': [('type','=','view')]}">
+					        <field name="ntm_type" attrs="{'required': [('type','=','normal')]}"/>
+                            <field name="region_id" attrs="{'invisible': [('ntm_type','not in',['income','expense','equity'])],'required':[('ntm_type','in',['income','expense','equity'])]}"/>
 				        </group>
 				    </group>
 				</field>
 				<page string="Description" position="after">
-                        <page string="Allocations" attrs="{'invisible':[('allocated','=',False)]}">
+                        <page string="Allocations" attrs="{'invisible':['|',('allocated','=',False),('type','=','view')]}">
                             <field name="allocation_ids" mode="tree,form" string="Account Allocations" height="250" nolabel="1">
                                 <tree string="Account Allocations">
-                                    <field name="analytic_id"/>
+                                    <field name="analytic_id" />
                                     <field name="name"/>
                                     <field name="percentage" sum="Total"/>
                                 </tree>
                                 <form string="Account Allocation">
-                                    <field name="analytic_id"/>
-                                    <field name="name"/>
-                                    <field name="percentage"/>
+                                    <field name="analytic_id" domain="[('type','=','normal')]" required="1"/>
+                                    <field name="name" />
+                                    <field name="percentage" required="1"/>
                                 </form>
                             </field>
                         </page>
@@ -270,18 +271,6 @@
             <field name="priority">2</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
-                <separator string="Categories" position="replace">
-                </separator>
-                <field name="category_id" position="replace">
-                    <group colspan="4" col="6">
-                        <group colspan="4" col="2">
-                            <separator string="Entity Categories" colspan="4"/>
-                            <group colspan="4" col="2">
-                                <field name="category_id" nolabel="1"/>
-                            </group>                        
-                        </group>
-                    </group>
-                </field>
                 <field name="customer" position="replace">
                     <field name="customer" string="Donor"/>
                 </field>
@@ -511,6 +500,14 @@
             <field name="name">Phone Pins</field>
             <field name="res_model">phone.pin</field>
             <field name="view_type">form</field>
+        </record>
+        
+        <record id="account.action_account_period_form" model="ir.actions.act_window">
+            <field name="name">Periods</field>
+            <field name="res_model">account.period</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="help">Here you can define a financial period, an interval of time in your company's financial year. An accounting period typically is a month or a quarter. It usually corresponds to the periods of the tax declaration. Create and manage periods from here and decide whether a period should be closed or left open depending on your company's activities over a specific period.</field>
         </record>
         
        </data>

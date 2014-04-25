@@ -131,11 +131,8 @@ class account_analytic_account(osv.osv):
                                          ('pat','PAT Account'),
                                          ('project','Project Account'),
                                          ('equity','Equity')],'NTM Account Type'),
-            'supplier':fields.related('partner_id','supplier',type='boolean',store=True, string='People and Team',readonly=True),
-            'project':fields.related('partner_id','project',type='boolean',store=True, string='Project',readonly=True),
             'normal_account':fields.many2one('account.account','Related Normal Account'),
             'voucher_expense':fields.boolean('Include on voucher expense distribution?'),
-            'project_account':fields.boolean('Project Account?'),
             'report':fields.selection([
                                 ('pal','Profit and Loss'),
                                 ('soa','Statement of Account')
@@ -182,13 +179,14 @@ class account_allocations(osv.osv):
     _name = 'account.allocations'
     _description = "Account Allocation"
     _columns = {
-        'account_id':fields.many2one('account.analytic.account','Account ID', ondelete='cascade'),
+        'account_id':fields.many2one('account.analytic.account','Account'),
         'analytic_id':fields.many2one('account.analytic.account','Analytic Account', ondelete='cascade'),
         'name':fields.char('Description',size=64),
         'percentage':fields.float('Percentage'),
         }
     
     def create(self, cr, uid, vals, context=None):
+        print vals
         account_id = vals['account_id']
         totalPercentage = vals['percentage']
         for allocations in self.pool.get('account.allocations').search(cr, uid, [('account_id','=',account_id)]):
@@ -199,9 +197,35 @@ class account_allocations(osv.osv):
             raise osv.except_osv(('Error!'),('Total percentage will be greater than 100!'))
         elif totalPercentage<=100.00:
             return super(account_allocations, self).create(cr, uid, vals, context)
+    
+    def write(self, cr, uid, ids, vals, context=None):
+        account_id = False
+        totalPercentage = False
+        rec_id = False
+        for acct in self.read(cr, uid, ids, context=None):
+            account_id = acct['account_id'][0]
+            rec_id = acct['id']
+        for allocations in self.pool.get('account.allocations').search(cr, uid, [('account_id','=',account_id),('id','!=',rec_id)]):
+            allocationRead = self.pool.get('account.allocations').read(cr, uid, allocations,['percentage'])
+            totalPercentage += allocationRead['percentage']
+            print totalPercentage
+        totalPercentage +=vals['percentage']
+        print totalPercentage
+        if totalPercentage > 100.00:
+            raise osv.except_osv(('Error!'),('Total percentage will be greater than 100!'))
+        elif totalPercentage<=100.00:
+            return super(account_allocations, self).write(cr, uid, ids, vals, context)
 account_allocations()
 
 class account_allocations_wiz(osv.osv_memory):
+
+    def _get_period(self, cr, uid, context=None):
+        if context is None: context = {}
+        if context.get('period_id', False):
+            return context.get('period_id')
+        periods = self.pool.get('account.period').find(cr, uid, context=context)
+        return periods and periods[0] or False
+    
     _name = 'account.allocations.wiz'
     _description = "Allocate Funds"
     _columns = {
@@ -209,15 +233,19 @@ class account_allocations_wiz(osv.osv_memory):
         'period_id':fields.many2one('account.period','Effective Period'),
         'journal_id':fields.many2one('account.journal','Effective Journal'),
         }
+    _defaults = {
+        'name':lambda *a: time.strftime('%Y-%m-%d'),
+        'period_id':_get_period,
+        }
     
     def allocate(self, cr, uid, ids, context=None):
-        checkAllAccounts = self.pool.get('account.account').search(cr, uid, [('allocated','=',True)])
+        checkAllAccounts = self.pool.get('account.analytic.account').search(cr, uid, [('allocated','=',True)])
         if not checkAllAccounts:
             return True
         elif checkAllAccounts:
             for account in checkAllAccounts:
                 percentage = 0.00
-                print account
+                accountReader = self.pool.get('account.analytic.account').read(cr, uid, account, context=None)
                 allocationCheck = self.pool.get('account.allocations').search(cr, uid, [('account_id','=',account)])
                 if not allocationCheck:
                     raise osv.except_osv(('Error!'),('There are no accounts where the fund will be allocated!'))
@@ -230,21 +258,60 @@ class account_allocations_wiz(osv.osv_memory):
                     else:
                         return self.procede(cr, uid, ids)
     def procede(self, cr, uid, ids, context=None):
-        checkAllAccounts = self.pool.get('account.account').search(cr, uid, [('allocated','=',True)])
-        for account in checkAllAccounts:
-            allDebits = self.pool.get('account.move.line').search(cr, uid, [('debit','>',0.00),('account_id','=',account)])
-            allCredits = self.pool.get('account.move.line').search(cr, uid, [('credit','>',0.00),('account_id','=',account)])
-            sumDebit = 0.00
-            sumCredit = 0.00
-            for debit in allDebits:
-                debitRead = self.pool.get('account.move.line').read(cr, uid, debit, ['debit'])
-                sumDebit +=debitRead['debit']
-            for credit in allCredits:
-                creditRead = self.pool.get('account.move.line').read(cr, uid, credit, ['credit'])
-                sumCredit +=creditRead['credit']
-            print sumDebit
-            print sumCredit
-        return True
+        for form in self.read(cr, uid, ids, context=None):
+            checkAllAccounts = self.pool.get('account.analytic.account').search(cr, uid, [('allocated','=',True)])
+            for account in checkAllAccounts:
+                accountReader = self.pool.get('account.analytic.account').read(cr, uid, account, ['name','normal_account','balance','allocation_ids','currency_id'])
+                print accountReader
+                ctr = 0
+                move = {
+                    'journal_id':form['journal_id'],
+                    'period_id':form['period_id'],
+                    'date':form['name'],
+                    }
+                move_id = self.pool.get('account.move').create(cr, uid, move)
+                rec_amount = accountReader['balance']
+                rec_amount = "%.2f" % rec_amount
+                rec_amount = float(rec_amount) 
+                checker = False
+                if rec_amount>0.00:
+                    for allocation in accountReader['allocation_ids']:
+                        allocationReader = self.pool.get('account.allocations').read(cr, uid, allocation, context=None)
+                        acctReader = self.pool.get('account.analytic.account').read(cr, uid, allocationReader['analytic_id'][0],['name','normal_account'])
+                        amount = (rec_amount*allocationReader['percentage'])/100
+                        name = 'Allocation to '+ acctReader['name'] + ' from '+ accountReader['name']
+                        amount = "%.2f" % amount
+                        amount = float(amount)
+                        checker +=amount
+                        move_line = {
+                        'name':name,
+                        'journal_id':form['journal_id'],
+                        'period_id':form['period_id'],
+                        'account_id':acctReader['normal_account'][0],
+                        'credit':amount,
+                        'date':form['name'],
+                        'move_id':move_id,
+                        'analytic_account_id':allocationReader['analytic_id'][0],
+                        'amount_currency':amount,
+                        'currency_id':accountReader['currency_id'][0],
+                        }
+                        self.pool.get('account.move.line').create(cr, uid, move_line)
+                    print checker
+                    name = 'Balance Allocation of '+ accountReader['name']
+                    move_line = {
+                        'name':name,
+                        'journal_id':form['journal_id'],
+                        'period_id':form['period_id'],
+                        'account_id':accountReader['normal_account'][0],
+                        'debit':rec_amount,
+                        'date':form['name'],
+                        'move_id':move_id,
+                        'analytic_account_id':account,
+                        'amount_currency':rec_amount,
+                        'currency_id':accountReader['currency_id'][0],
+                        }
+                    self.pool.get('account.move.line').create(cr, uid, move_line)
+        return {'type': 'ir.actions.act_window_close'}
 account_allocations_wiz()
 
 class account_account(osv.osv):
