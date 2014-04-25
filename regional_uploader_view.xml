@@ -68,7 +68,7 @@
                 <separator colspan="4"/>
                     <group colspan="4" col="6">
                         <button icon="gtk-cancel" special="cancel" string="Cancel"/>
-                        <button icon="gtk-ok" string="Upload" name="upload" type="object" default_focus="1"/>
+                        <button icon="gtk-ok" string="Upload" name="uploadData" type="object" default_focus="1"/>
                    </group>
             </form>
             </field>
