@@ -80,8 +80,13 @@ class aaa_accpac(osv.osv):
         'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
         'account_id':fields.many2one('account.account','Normal Account'),
         'state':fields.selection([
-                        ('matched','Matched'),('nomatched','No Match'),
+                                  ('for_matching','For Matching'),
+                                  ('matched','Matched'),
+                                  ('nomatched','No Match'),
                         ],'Matching State', readonly=True),
+        }
+    _defaults = {
+        'state':'for_matching',
         }
 aaa_accpac()
 

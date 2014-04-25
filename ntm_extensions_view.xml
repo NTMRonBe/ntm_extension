@@ -409,6 +409,22 @@
             <field name="help">You can access all information regarding your projects  from the projects form: accounting data, history of emails, meetings, purchases, etc. You can uncheck the 'Projects' filter button in order to search in all your partners, including donors and prospects.</field>
         </record>
         
+        <record id="account_accpac_filter" model="ir.ui.view">
+            <field name="name">account.accpac.filter</field>
+            <field name="model">account.accpac</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string = "Accpac Account Matcher">
+                    <filter name="for_matching" icon="terp-document-new" string="For Matching" domain="[('state','=','for_matching')]" />
+                    <filter name="matched" icon="terp-gtk-media-pause" string="Matched" domain="[('state','=','matched')]"/>
+                    <filter name="nomatched" icon="terp-dolar" string="No Matches" domain="[('state','=','nomatched')]" />
+                    <separator orientation="vertical"/>
+                    <field name="name"/>
+                    <field name="analytic_id"/>
+                    <field name="account_id"/>
+                </search>
+            </field>
+        </record>
         
         <record id="account_accpac_form" model="ir.ui.view">
             <field name="name">account.accpac.form</field>
