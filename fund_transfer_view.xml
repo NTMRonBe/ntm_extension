@@ -21,29 +21,27 @@
             header = "True"
             menu="True"
             />
-		<record model="ir.ui.view" id="view_fund_transfer_tree">
-            <field name="name">fund.transfer.tree</field>
-            <field name="model">fund.transfer</field>
+		<record model="ir.ui.view" id="view_b2b_fund_transfer_tree">
+            <field name="name">b2b.fund.transfer.tree</field>
+            <field name="model">b2b.fund.transfer</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Fund Transfer">
+                <tree string="Internal Bank Transfers">
                     <field name="name"/>
                     <field name="journal_id" domain="[('type','=','transfer')]"/>
                     <field name="period_id"/>
-                    <field name="type" invisible="1"/>
-                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}"/>
-                    <field name="src_account" attrs="{'invisible':[('type','!=','b2b')]}"/>
-                    <field name="dest_account" attrs="{'invisible':[('type','not in',['b2b','p2b])]}"/>
+                    <field name="src_account"/>
+                    <field name="dest_account"/>
                 </tree>
             </field>
         </record>
 		
-		<record id="view_fund_transfer_filter" model="ir.ui.view">
-            <field name="name">fund.transfer.filter</field>
-            <field name="model">fund.transfer</field>
+		<record id="view_b2b_fund_transfer_filter" model="ir.ui.view">
+            <field name="name">b2b.fund.transfer.filter</field>
+            <field name="model">b2b.fund.transfer</field>
             <field name="type">search</field>
             <field name="arch" type="xml">
-                <search string="Fund Transfer">
+                <search string="Internal Bank Transfer">
                     <field name="name"/>
                     <field name="journal_id"/>
                     <field name="period_id"/>		    
@@ -51,53 +49,34 @@
             </field>
         </record>      
 		
-		<record id="view_fund_transfer_form" model="ir.ui.view">
-            <field name="name">fund.transfer.form</field>
-            <field name="model">fund.transfer</field>
+		<record id="view_b2b_fund_transfer_form" model="ir.ui.view">
+            <field name="name">b2b.fund.transfer.form</field>
+            <field name="model">b2b.fund.transfer</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Fund Transfer">
-                <notebook>
-                    <page string="Transfer Details">
-                    <group colspan="4" col="4">
+                <form string="Internal Bank Transfer">
+                <separator string="Transfer Details" colspan="4"/>
+                <group colspan="4" col="4">
+	                <group colspan="2" col="2">
 	                    <field name="name"/>
-	                    <field name="journal_id" domain="[('type','=','transfer')]" widget="selection"/>
 	                    <field name="date" readonly="1"/>
 	                    <field name="period_id" readonly="1"/>
-	                    <field name="type" invisible="1"/>
-                    </group>
-                    <group colspan="4" col="4" attrs="{'invisible':[('type','!=','b2b')]}">
-                        <field name="release_date" attrs="{'readonly':[('state','!=','requested')]}"/>
-                        <field name="receive_date" attrs="{'readonly':[('state','!=','released')]}"/>
-                    </group>
-                    <separator string="Accounts" colspan="6"/>
-                    <group colspan="6" col="6">
-	                    <field name="pettycash_id" attrs="{'invisible':[('type','!=','p2b')]}" widget="selection" on_change = "onchange_pettycash(pettycash_id)" domain="[('amount','>','0.00')]"/>
-	                    <field name="curr_id" invisible="1"/>
-	                    <field name="src_account" attrs="{'invisible':[('type','!=','b2b')]}" domain="[('ownership','=','company')]" on_change="onchange_srcaccount(src_account)"/>
-	                    <field name="dest_account" attrs="{'invisible':[('type','!=','b2b')]}" domain="[('currency_id','=',curr_id),('ownership','=','company')]"/>
-	                    <field name="dest_p2b_account" attrs="{'invisible':[('type','!=','p2b')]}" domain="[('ownership','=','company')]"/>
-	                    <field name="amount"/>
-                    </group>
-                    <group colspan="6" col="2" attrs="{'invisible':[('type','!=','p2b')]}">
-                        <separator string="Denominations" colspan="6"/>
-                        <field name="denom_ids" nolabel="1" colspan="6" domain="[('name.currency_id','=',curr_id)]"/>
-                    </group>
-                    </page>
-                    <page string="Journal Items">
-                            <group colspan="4" col="2" attrs="{'invisible':[('type','==','b2b')]}">
-                                <field name="move_ids" mode="tree" nolabel="1">
-                                    <tree string="Accounting Entries">
-                                        <field name="date"/>
-                                        <field name="account_id"/>
-                                        <field name="debit"/>
-                                        <field name="credit"/>
-                                        <field name="currency_id" string="Encoding Currency"/>
-                                        <field name="amount_currency" string="Encoding Amount"/>
-                                    </tree>
-                                </field>
-                            </group>
-                            <group colspan="4" col="2" attrs="{'invisible':[('type','!=','b2b')]}">
+	                    <field name="journal_id" domain="[('type','=','transfer')]" widget="selection" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                    
+	                </group>
+	                <group colspan="2" col="2">
+	                    <field name="src_account" domain="[('ownership','=','company')]" attrs="{'required':[('state','=','draft')],'readonly':[('state','!=','draft')]}"/>
+	                    <field name="dest_account" domain="[('ownership','=','company')]" attrs="{'required':[('state','=','draft')],'readonly':[('state','!=','draft')]}"/>
+	                    <field name="amount" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                    <group colspan="2" col="4">
+		                    <field name="release_date" attrs="{'readonly':[('state','!=','requested')],'required':[('state','=','requested')]}"/>
+	                        <field name="receive_date" attrs="{'readonly':[('state','!=','released')],'required':[('state','=','released')]}"/>
+                        </group>
+	                </group>
+                </group>
+                <separator string="Journal Entries" colspan="4"/>
+                <group colspan="4" col="4">
+                            <group colspan="2" col="2">
                                 <field name="b2breleasing_move_ids" mode="tree" nolabel="1">
                                     <tree string="Releasing Entries">
                                         <field name="date"/>
@@ -109,7 +88,7 @@
                                     </tree>
                                 </field>
                             </group>
-                            <group colspan="4" col="2" attrs="{'invisible':[('type','!=','b2b')]}">
+                            <group colspan="2" col="2" >
                                 <field name="b2breceiving_move_ids" mode="tree" nolabel="1">
                                     <tree string="Receiving Entries">
                                         <field name="date"/>
@@ -121,308 +100,116 @@
                                     </tree>
                                 </field>
                             </group>
-                        </page>
-                        </notebook>
+                 </group>
                     <group colspan="4" col="13">
                         <field name="state"/>
-                        <group colspan="4" col="13" attrs="{'invisible':[('type','==','b2b')]}" >
-                            <button name="transfer" states='draft' string="Transfer"  type="object" icon="gtk-jump-to"/>
-                        </group>    
-                        <!-- <button name="cancel" attrs="{'invisible':[('type','==','b2b')]}" string="Cancel"  type="object" icon="gtk-jump-to"/>
-                        <button name="set_to_draft" attrs="{'invisible':[('type','==','b2b')]}" string="Cancel"  type="object" icon="gtk-jump-to"/> -->
-                        <group colspan="4" col="13" attrs="{'invisible':[('type','!=','b2b')]}" >
-                        <button name="request" attrs="{'invisible':[('state','!=','draft')]}" string="Request"  type="object" icon="gtk-jump-to"/>
+                        <button name="request" attrs="{'invisible':[('state','!=','draft')]}" string="Send Request"  type="object" icon="gtk-jump-to"/>
                         <button name="data_get" attrs="{'invisible':[('state','!=','requested')]}" string="Print"  type="object" icon="gtk-jump-to"/>
-                        <button name="b2b_release" attrs="{'invisible':[('state','!=','requested')]}" string="Release"  type="object" icon="gtk-jump-to"/>
-                        <button name="b2b_receive" attrs="{'invisible':[('state','!=','released')]}" string="Receive"  type="object" icon="gtk-jump-to"/>
-                        </group>
+                        <button name="release" attrs="{'invisible':[('state','!=','requested')]}" string="Release from Bank"  type="object" icon="gtk-jump-to"/>
+                        <button name="receive" attrs="{'invisible':[('state','!=','released')]}" string="Receive to Bank"  type="object" icon="gtk-jump-to"/>
                     </group>
                 </form>
             </field>
-        </record>     
-                
-        <record id="action_fund_transfer_b2b_tree" model="ir.actions.act_window">
-            <field name="name">Internal Bank Transfer</field>
-            <field name="res_model">fund.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_fund_transfer_tree"/>
-            <field name="context">{'type':'b2b'}</field>
-            <field name="domain">[('type','=','b2b')]</field>
-            <field name="search_view_id" ref="view_fund_transfer_filter"/>
-        </record>
-
-        <record id="action_fund_transfer_p2b_tree" model="ir.actions.act_window">
-            <field name="name">Petty Cash to Bank</field>
-            <field name="res_model">fund.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_fund_transfer_tree"/>
-            <field name="context">{'type':'p2b'}</field>
-            <field name="domain">[('type','=','p2b')]</field>
-            <field name="search_view_id" ref="view_fund_transfer_filter"/>
-        </record>
+        </record>   
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        <!-- Internal Account Transfers -->
-        
-        <record model="ir.ui.view" id="view_iat_tree">
-            <field name="name">internal.account.transfer.tree</field>
-            <field name="model">internal.account.transfer</field>
+        <record model="ir.ui.view" id="view_p2b_fund_transfer_tree">
+            <field name="name">p2b.fund.transfer.tree</field>
+            <field name="model">p2b.fund.transfer</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Internal Account Transfers">
+                <tree string="Petty Cash to Bank Transfers">
                     <field name="name"/>
-                    <field name="date"/>
-                    <field name="period_id"/>
                     <field name="journal_id"/>
+                    <field name="period_id"/>
+                    <field name="pettycash_id"/>
+                    <field name="dest_p2b_account"/>
                     <field name="amount"/>
+                    <field name="state"/>
                 </tree>
             </field>
         </record>
         
-        <record id="view_iat_form" model="ir.ui.view">
-            <field name="name">internal.account.transfer.form</field>
-            <field name="model">internal.account.transfer</field>
+        <record id="view_p2b_fund_transfer_filter" model="ir.ui.view">
+            <field name="name">p2b.fund.transfer.filter</field>
+            <field name="model">p2b.fund.transfer</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Petty Cash to Bank Transfer">
+                    <field name="name"/>
+                    <field name="journal_id"/>
+                    <field name="period_id"/>           
+                    </search>
+            </field>
+        </record>  
+        
+        <record id="view_p2b_fund_transfer_form" model="ir.ui.view">
+            <field name="name">p2b.fund.transfer.form</field>
+            <field name="model">p2b.fund.transfer</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Internal Account Transfer">
-                    <group colspan="6" col="6">
-	                    <field name="name" readonly="1"/>
-		                    <field name="date" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
-		                    <field name="period_id" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
-	                    <field name="journal_id" invisible="1"/>
-	                    <field name="transfer_type" invisible="1"/>
+                <form string="Petty Cash to Bank Transfer">
+                    <group colspan="4" col="4">
+                        <field name="name"/>
+                        <field name="journal_id" widget="selection" domain="[('type','=','transfer')]" attrs="{'readonly':[('enabled','=',True)]}"/>
+                        <field name="date" attrs="{'readonly':[('enabled','=',True)]}"/>
+                        <field name="period_id" attrs="{'readonly':[('enabled','=',True)]}"/>
+                        <field name="currency_id" widget="selection" attrs="{'invisible':[('enabled','=',True)]}" required="1"/>
+                        <field name="enabled" invisible="1"/>
+                        <button name="enableAccounts" string="Enable Accounts"  type="object" icon="gtk-jump-to" attrs="{'invisible':[('enabled','=',True)]}" colspan="2"/>
                     </group>
-                    <separator colspan="6"/>
-                    <notebook>
-	                    <page string="Transfer Details">
-	                    <separator string="Source Details" colspan="4"/>
-	                        <group colspan="2" col="2" attrs="{'invisible': [('transfer_type','not in',['income2pc'])]}">
-	                           <field name="src_income_analytic_id" attrs="{'readonly':[('state','!=','draft')],'required': [('transfer_type','in',['income2pc'])]}"/>
-	                        </group>
-	                        <group colspan="2" col="2" attrs="{'invisible': [('transfer_type','in',['proj2proj','proj2people','proj2pc','income2pc','proj2income','expense2income','expense2people','expense2proj'])]}">
-                               <field name="src_pat_analytic_id" attrs="{'readonly':[('state','!=','draft')],'required': [('transfer_type','in',['people2proj','people2people','people2pc','people2income'])]}"/>
-                            </group>
-                            <group colspan="2" col="2" attrs="{'invisible': [('transfer_type','not in',['proj2proj','proj2people','proj2pc','proj2income'])]}">
-                               <field name="src_proj_analytic_id" attrs="{'required': [('transfer_type','in',['proj2proj','proj2people','proj2pc','proj2income'])],'readonly':[('state','!=','draft')]}"/>
-                            </group>
-                            <group colspan="2" col="2" attrs="{'invisible': [('transfer_type','not in',['expense2income','expense2people','expense2proj'])]}">
-                               <field name="src_expense_analytic_id" attrs="{'required': [('transfer_type','in',['expense2income','expense2people','expense2proj'])],'readonly':[('state','!=','draft')]}"/>
-                            </group>
-	                        <group colspan="4" col="4">
-                                <field name="currency_id" widget="selection" on_change="onchange_curr(currency_id)" attrs="{'readonly':[('state','!=','draft')]}"/>
-                                <field name="amount" on_change="onchange_amount(amount,distribute_type)" attrs="{'readonly':[('state','!=','draft')]}"/>
-                            </group>
-	                    <separator string="Destination Details" colspan="4"/>
-                            <group colspan="4" col="4" attrs="{'invisible': [('transfer_type','in',['people2pc'])]}">
-                               <field name="multiple" attrs="{'invisible': [('transfer_type','in',['people2pc','proj2pc','income2pc'])],'readonly':[('state','!=','draft')]}" on_change="onchange_multiple(multiple)"/>
-                               <field name="distribute_type" attrs="{'invisible': [('multiple','=',False)]}" on_change="onchange_distribution(distribute_type,amount)"/>
-                            </group>
-                            <group colspan="4" col="2" attrs="{'invisible': [('multiple','=',True)]}">
-                                <field name="dest_pat_analytic_id" attrs="{'invisible': [('transfer_type','not in',['people2people','proj2people','expense2people'])],'readonly':[('state','!=','draft')]}"/>
-                                <field name="dest_proj_analytic_id" attrs="{'invisible': [('transfer_type','not in',['proj2proj','people2proj','expense2proj'])],'readonly':[('state','!=','draft')]}"/>
-                                <field name="dest_income_analytic_id" attrs="{'invisible': [('transfer_type','not in',['people2income','proj2income','expense2income'])],'readonly':[('state','!=','draft')]}"/>
-                            </group>
-                            <group colspan="4" col="2" attrs="{'invisible': [('transfer_type','not in',['people2pc','proj2pc','income2pc'])]}">
-	                            <field name="pettycash_id" attrs="{'invisible': [('transfer_type','not in',['people2pc','proj2pc','income2pc'])],'readonly':[('state','!=','draft')]}" 
-	                            domain="[('currency_id','=',currency_id)]" colspan="4" on_change="onchange_pcid(pettycash_id)"/>
-	                            <field name="denom_ids" mode="tree" nolabel="1" colspan="4">
-	                               <tree string="Denomination" editable="top">
-	                                   <field name="name"/>
-	                                   <field name="quantity"/>
-	                                   <field name="amount" sum="Total"/>
-	                               </tree>
+                    <group colspan="4" col="2" attrs="{'invisible':[('enabled','=',False)]}">
+	                    <separator string="Accounts" colspan="4"/>
+	                    <group colspan="4" col="4">
+	                        <field name="pettycash_id" domain="[('currency_id','=',currency_id)]" attrs="{'required':[('state','=','draft'),('enabled','=',True)],'readonly':[('state','!=','draft')]}"/>
+	                        <field name="dest_p2b_account" domain="[('ownership','=','company'),('currency_id','=',currency_id)]" attrs="{'required':[('state','=','draft'),('enabled','=',True)],'readonly':[('state','!=','draft')]}"/>
+	                        
+	                    </group>
+	                    <notebook>
+	                        <page string="Denominations">
+	                            <field name="denom_ids" nolabel="1" colspan="4" mode="tree" attrs="{'readonly':[('state','!=','draft')]}">
+	                                <tree string="Denominations" editable="top">
+	                                    <field name="name" readonly="1"/>
+			                            <field name="quantity"/>
+			                            <field name="amount"/>
+			                        </tree>
+			                    </field>
+	                        </page>
+	                        <page string="Journal Items">
+	                            <field name="move_ids" mode="tree" nolabel="1">
+	                                <tree string="Accounting Entries">
+	                                    <field name="date"/>
+	                                    <field name="account_id"/>
+	                                    <field name="debit"/>
+	                                    <field name="credit"/>
+	                                    <field name="currency_id" string="Encoding Currency"/>
+	                                    <field name="amount_currency" string="Encoding Amount"/>
+	                                </tree>
 	                            </field>
-                            </group>
-                            <group colspan="2" col="2" attrs="{'invisible': [('multiple','=',False)]}">
-                               <field name="pat_iatd_ids" mode="tree,form" nolabel="1" attrs="{'invisible': [('transfer_type','not in',['people2people','proj2people','expense2people'])],'readonly':[('state','!=','draft')]}" context="{'filterdoc':[src_pat_analytic_id]}">
-                                   <tree string="Destination Accounts" editable="top">
-                                       <field name="pat_analytic_id"/>
-                                       <field name="remarks"/>
-                                       <field name="percentage" on_change="onchange_percentage(percentage)" attrs="{'readonly': [('distribute_type','!=','percentage')]}"/>
-                                       <field name="amount" sum="Total" attrs="{'readonly': [('distribute_type','in',['percentage','equal'])]}"/>
-                                   </tree>
-                                   <form string="Destination Account">
-                                       <field name="pat_analytic_id"/>
-                                       <field name="percentage" on_change="onchange_percentage(percentage)" attrs="{'readonly': [('distribute_type','!=','percentage')]}"/>
-                                       <field name="amount" attrs="{'readonly': [('distribute_type','in',['percentage','equal'])]}"/>
-                                       <field name="remarks"/>
-                                   </form>
-                               </field>
-                               <field name="proj_iatd_ids" mode="tree,form" nolabel="1" 
-                               attrs="{'invisible': [('transfer_type','not in',['proj2proj','people2proj','expense2proj'])],'readonly':[('state','!=','draft')]}" context="{'filterdoc':'src_proj_analytic_id'}">
-                                   <tree string="Destination Accounts">
-                                       <field name="proj_analytic_id"/>
-                                       <field name="percentage" on_change="onchange_percentage(percentage)"/>
-                                       <field name="amount" sum="Total"/>
-                                   </tree>
-                                   <form string="Destination Account">
-                                       <field name="proj_analytic_id"/>
-                                       <field name="percentage" on_change="onchange_percentage(percentage)"/>
-                                       <field name="amount" attrs="{'readonly': [('distribute_type','in',['percentage','equal'])]}"/>
-                                   </form>
-                               </field>
-                               <field name="income_iatd_ids" mode="tree" nolabel="1" 
-                               attrs="{'invisible': [('transfer_type','not in',['people2income','proj2income','expense2income'])],'readonly':[('state','!=','draft')]}" context="{'filterdoc':'src_income_analytic_id'}">
-                                   <tree string="Destination Accounts">
-                                       <field name="income_analytic_id"/>
-                                       <field name="percentage" on_change="onchange_percentage(percentage)"/>
-                                       <field name="amount" sum="Total"/>
-                                       <field name="remarks"/>
-                                   </tree>
-                                   <form string="Destination Account">
-                                       <field name="income_analytic_id"/>
-                                       <field name="percentage" on_change="onchange_percentage(percentage)"/>
-                                       <field name="amount" attrs="{'readonly': [('distribute_type','in',['percentage','equal'])]}"/>
-                                       <field name="remarks"/>
-                                   </form>
-                               </field>
-                            </group>
-	                    </page>
-	                    <page string="Remarks">
-	                    <field name="remarks" colspan="4" nolabel="1"/>
-	                    </page>
-	                    <page string="Journal Items">
-                            <group colspan="4" col="2">
-                                <field name="move_ids" mode="tree" nolabel="1">
-                                    <tree string="Accounting Entries">
-                                        <field name="date"/>
-                                        <field name="account_id"/>
-                                        <field name="analytic_account_id"/>
-                                        <field name="debit"/>
-                                        <field name="credit"/>
-                                        <field name="currency_id" string="Encoding Currency"/>
-                                        <field name="amount_currency" string="Encoding Amount"/>
-                                    </tree>
-                                </field>
-                            </group>
-                        </page>
-                    </notebook>
-                    <group colspan="4" col="10">
-                        <field name="state" readonly="1"/>
-                        <button name="transfer" attrs="{'invisible': [('state','!=','draft')]}" string="Transfer"  type="object" icon="gtk-jump-to"/>
+	                        </page>
+	                    </notebook>
+	                    <group colspan="4" col="13">
+	                        <field name="state" readonly="1"/>
+	                        <button name="transfer" states='draft' string="Transfer"  type="object" icon="gtk-jump-to"/>
+	                        <button name="cancel" string="Cancel"  type="object" icon="gtk-jump-to" attrs="{'invisible':[('state','=','cancel')]}"/>
+	                        <!-- <button name="set_to_draft" string="Cancel"  type="object" icon="gtk-jump-to"/> --> 
+	                    </group>
                     </group>
                 </form>
             </field>
-        </record>     
-                
-        <record id="action_people2proj_tree" model="ir.actions.act_window">
-            <field name="name">PAT to Project</field>
-            <field name="res_model">internal.account.transfer</field>
+        </record>                      
+        <record id="action_b2b_fund_transfer" model="ir.actions.act_window">
+            <field name="name">Internal Bank Transfer</field>
+            <field name="res_model">b2b.fund.transfer</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'people2proj'}</field>
-            <field name="domain">[('transfer_type','=','people2proj')]</field>
+            <field name="view_mode">tree,form</field>
         </record>
-        <record id="action_proj2people_tree" model="ir.actions.act_window">
-            <field name="name">Project to PAT</field>
-            <field name="res_model">internal.account.transfer</field>
+        
+        <record id="action_p2b_fund_transfer" model="ir.actions.act_window">
+            <field name="name">Petty Cash to Bank</field>
+            <field name="res_model">p2b.fund.transfer</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'proj2people'}</field>
-            <field name="domain">[('transfer_type','=','proj2people')]</field>
+            <field name="view_mode">tree,form</field>
         </record>
-        <record id="action_people2pc_tree" model="ir.actions.act_window">
-            <field name="name">PAT to Petty Cash Account </field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'people2pc'}</field>
-            <field name="domain">[('transfer_type','=','people2pc')]</field>
-        </record>
-        <record id="action_proj2pc_tree" model="ir.actions.act_window">
-            <field name="name">Project to Petty Cash Account</field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'proj2pc'}</field>
-            <field name="domain">[('transfer_type','=','proj2pc')]</field>
-        </record>
-        <record id="action_income2pc_tree" model="ir.actions.act_window">
-            <field name="name">Income to Petty Cash Account</field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'income2pc'}</field>
-            <field name="domain">[('transfer_type','=','income2pc')]</field>
-        </record>
-        <record id="action_people2people_tree" model="ir.actions.act_window">
-            <field name="name">PAT to PAT</field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'people2people'}</field>
-            <field name="domain">[('transfer_type','=','people2people')]</field>
-        </record>
-        <record id="action_proj2proj_tree" model="ir.actions.act_window">
-            <field name="name">Project to Project</field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'proj2proj'}</field>
-            <field name="domain">[('transfer_type','=','proj2proj')]</field>
-        </record>
-        <record id="action_people2income_tree" model="ir.actions.act_window">
-            <field name="name">PAT to Income</field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'people2income'}</field>
-            <field name="domain">[('transfer_type','=','people2income')]</field>
-        </record>
-        <record id="action_proj2income_tree" model="ir.actions.act_window">
-            <field name="name">Proj to Income</field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'proj2income'}</field>
-            <field name="domain">[('transfer_type','=','proj2income')]</field>
-        </record>
-        <record id="action_expense2income_tree" model="ir.actions.act_window">
-            <field name="name">Expense to Income</field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'expense2income'}</field>
-            <field name="domain">[('transfer_type','=','expense2income')]</field>
-        </record>
-        <record id="action_expense2people_tree" model="ir.actions.act_window">
-            <field name="name">Expense to PAT</field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'expense2people'}</field>
-            <field name="domain">[('transfer_type','=','expense2people')]</field>
-        </record>
-        <record id="action_expense2proj_tree" model="ir.actions.act_window">
-            <field name="name">Expense to Project</field>
-            <field name="res_model">internal.account.transfer</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="view_id" ref="view_iat_tree"/>
-            <field name="context">{'transfer_type':'expense2proj'}</field>
-            <field name="domain">[('transfer_type','=','expense2proj')]</field>
-        </record>
-
+         
        </data>
 </openerp>
