@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <record id="view_ntm_installer" model="ir.ui.view">
+      <field name="name">ntm.installer.view</field>
+      <field name="model">ntm.installer</field>
+      <field name="type">form</field>
+      <field name="inherit_id" ref="base.res_config_installer"/>
+      <field name="arch" type="xml">
+        <data>
+            <form position="attributes">
+                <attribute name="string">New Tribes Mission Configuration</attribute>
+            </form>
+            <separator string="title" position="attributes">
+                <attribute name="string">Remove User Groups</attribute>
+            </separator>
+            <xpath expr="//label[@string='description']" position="attributes">
+                <attribute name="string">You need to remove the default user groups created by other openerp modules as it was reconfigured by the NTM Installer.</attribute>
+            </xpath>
+          <group colspan="8">
+            <field name="group_ids" nolabel="1"/>
+            <newline/>
+            <button icon="STOCK_REMOVE" name="removeGroups" type="object" string="Remove Groups" />
+          </group>
+          <xpath expr="//button[@string='Install Modules']" position="attributes">
+              <attribute name="string">Done</attribute>
+          </xpath>
+        </data>
+      </field>
+    </record>
+
+    <record id="action_ntm_installer" model="ir.actions.act_window">
+      <field name="name">New Tribes Mission Configuration</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">ntm.installer</field>
+      <field name="view_id" ref="view_ntm_installer"/>
+      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+    <record id="ntm_installer_todo" model="ir.actions.todo">
+      <field name="action_id" ref="action_ntm_installer"/>
+      <field name="sequence">1000</field>
+            <field name="restart">always</field>
+    </record>
+
+  </data>
+</openerp>
