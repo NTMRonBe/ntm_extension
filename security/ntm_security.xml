@@ -2,16 +2,81 @@
 <openerp>
 <data noupdate="0">
 
-    <record id="group_pettycash_manager" model="res.groups">
-        <field name="name">Petty Cash Manager</field>
-    </record>
-    
+      
     <record id="group_vehicle_manager" model="res.groups">
         <field name="name">Vehicle Manager</field>
     </record>
     
     <record id="group_vehicle_log_user" model="res.groups">
-        <field name="name">Vehicle Log Users</field>
+        <field name="name">Vehicle Logger</field>
+    </record>
+    
+    <record id="group_income_distribution_manager" model="res.groups">
+        <field name="name">Income Distribution Manager</field>
+    </record>
+    
+    <record id="group_voucher_distribution_manager" model="res.groups">
+        <field name="name">Voucher Distribution Manager</field>
+    </record>
+    
+    <record id="group_phone_log_updater" model="res.groups">
+        <field name="name">Phone Log Updater</field>
+    </record>
+    
+    <record id="group_phone_manager" model="res.groups">
+        <field name="name">Phone Manager</field>
+    </record>
+       
+    <record id="group_expense_manager" model="res.groups">
+        <field name="name">Expense Manager</field>
+    </record>
+    
+    <record id="group_bank_reconciliation_manager" model="res.groups">
+        <field name="name">Bank Reconciliation Manager</field>
+    </record>
+    
+    <record id="group_petty_cash_administrator" model="res.groups">
+        <field name="name">Petty Cash Administrator</field>
+    </record>
+    
+    <record id="group_petty_cash_manager" model="res.groups">
+        <field name="name">Petty Cash Manager</field>
+    </record>
+    
+    <record id="group_bank_transfer_manager" model="res.groups">
+        <field name="name">Bank Transfer Manager</field>
+    </record>
+    
+    <record id="group_internal_bank_manager" model="res.groups">
+        <field name="name">Internal Bank Manager</field>
+    </record>
+
+    <record id="group_checks_manager" model="res.groups">
+        <field name="name">Checks Manager</field>
+    </record>
+    
+    <record id="group_bank_reconciliation_manager" model="res.groups">
+        <field name="name">Bank Reconciliation Manager</field>
+    </record>
+    
+    <record id="group_acctg_admin" model="res.groups">
+        <field name="name">Accounting Administrator</field>
+    </record>
+    
+    <record id="group_acctg_manager" model="res.groups">
+        <field name="name">Accounting Manager</field>
+    </record>
+    
+    <record id="group_acctg_revaluation_manager" model="res.groups">
+        <field name="name">Revaluation Manager</field>
+    </record>
+    
+    <record id="group_acctg_fundallocator" model="res.groups">
+        <field name="name">Fund Allocator</field>
+    </record>
+    
+    <record id="group_soa_generator" model="res.groups">
+        <field name="name">Statement of Account User</field>
     </record>
 
 </data>

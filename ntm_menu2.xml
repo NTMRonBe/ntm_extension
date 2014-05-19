@@ -49,14 +49,14 @@
         <menuitem id="menu_idg" action="action_idg_form" parent="menu_income_distribution_main" sequence="10"/>
         <menuitem id="menu_voucher_distribution" action="action_voucher_distribution_form" parent="menu_income_distribution_main" sequence="30"/>
         
-        <menuitem id="menu_vehicle_log" action="action_vehicle_log_form"  parent="menu_expense_distribution_main" sequence="10" groups="base.group_user"/>
+        <menuitem id="menu_vehicle_log" action="action_vehicle_log_form"  parent="menu_expense_distribution_main" sequence="10" groups="group_vehicle_manager"/>
         <menuitem id="menu_communications_cleaner" parent="menu_expense_distribution_main" sequence="20" action="action_callsdbf_reader"/>
         <menuitem id="menu_communications_statement" parent="menu_expense_distribution_main" sequence="30" action="action_phone_statement_form"/>
         <menuitem id="menu_edg" action="action_edg_form" parent="menu_expense_distribution_main" sequence="40"/>
         <menuitem id="menu_dbe" action="action_dbe_view_form" parent="menu_expense_distribution_main" sequence="50"/>
         
         <menuitem id="base.menu_config_address_book" name="Address Book" parent="pat_config_main" sequence="10"/>
-        <menuitem id="menu_vehicle_config" action="action_vehicle_form" parent="pat_config_main" sequence="20" groups="base.group_user"/>
+        <menuitem id="menu_vehicle_config" action="action_vehicle_form" parent="pat_config_main" sequence="20" groups="group_vehicle_manager"/>
         <menuitem id="menu_communications_line" parent="pat_config_main" sequence="30" action="action_phone_line_form"/>
         <menuitem id="menu_communications_pins" parent="pat_config_main" sequence="40" action="action_phone_pins_form"/>
         <menuitem id="menu_communications_company" parent="pat_config_main" sequence="50" action="action_phone_provider_form"/>
@@ -155,7 +155,7 @@
         <menuitem id="ntm_acct_reports2_1_root" action="action_region_report_wiz" parent="ntm_acct_reports2_root" sequence="10"/>
         <menuitem id="ntm_acct_reports2_2_root" string="Regional Profit and Loss" action="action_region_report_form" parent="ntm_acct_reports2_root" sequence="10"/>
         <menuitem id="ntm_acct_reports2_3_root" action="action_regional_uploader_form" parent="ntm_acct_reports2_root" sequence="20"/>
-        <menuitem id="ntm_acct_reports2_4_root" action="action_upload_invoice_slips" parent="ntm_acct_reports2_root" sequence="30"/>
+        <!-- <menuitem id="ntm_acct_reports2_4_root" action="action_upload_invoice_slips" parent="ntm_acct_reports2_root" sequence="30"/> -->
         
         <menuitem id="ntm_acct_config1_1_root" sequence="10" name="Periods" parent="ntm_acct_config1_root"/>
         <menuitem id="ntm_acct_config1_2_root" sequence="20" name="Journals" parent="ntm_acct_config1_root"/>

@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+ntm_access_vehicle_manager_vehicle_configuration,vehicle,model_vehicle,group_vehicle_manager,1,1,1,1
+ntm_access_vehicle_manager_vehicle_brand,vehicle.brand,model_vehicle_brand,group_vehicle_manager,1,1,1,0
+ntm_access_vehicle_manager_account_account,account.account,model_account_account,group_vehicle_manager,1,0,0,0
+ntm_access_vehicle_manager_account_journal,account.journal,model_account_journal,group_vehicle_manager,1,0,0,0
+ntm_access_vehicle_manager_account_period,account.period,model_account_period,group_vehicle_manager,1,0,0,0
+ntm_access_vehicle_manager_account_move_line,account.move.line,model_account_move_line,group_vehicle_manager,1,1,1,1
+ntm_access_vehicle_manager_vehicle_log,vehicle.log,model_vehicle_log,group_vehicle_manager,1,1,1,1
+ntm_access_vehicle_manager_vehicle_log_shared,vehicle.log.shared,model_vehicle_log_shared,group_vehicle_manager,1,1,1,1
+ntm_access_vehicle_manager_account_move,account.move,account.model_account_account,group_vehicle_manager,1,1,1,1
+ntm_access_vehicle_manager_account_analytic_line,account.analytic.line,account.model_account_analytic_line,group_vehicle_manager,1,1,1,1
+ntm_access_vehicle_manager_account_analytic_account,account.analytic.account,model_account_analytic_account,group_vehicle_manager,1,0,0,0
