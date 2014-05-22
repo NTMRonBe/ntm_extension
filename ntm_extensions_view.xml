@@ -392,6 +392,10 @@
                     <group colspan="4" col="4">
                         <field name="contribution"/>
                     </group>
+                    <separator string="Default Directories" colspan="4"/>
+                    <group colspan="4" col="4">
+                        <field name="def_calls_directory"/>
+                    </group>
                     
                 </field>
             </field>
@@ -471,6 +475,7 @@
             <field name="arch" type="xml">
             <form string="Match Accounts">
                 <group colspan="4" col="2">
+                    <button icon="gtk-cancel" special="cancel" string="Cancel" />
                     <button string="Match" type="object" name="match_accounts" icon="gtk-execute"/>
                 </group>
                </form>

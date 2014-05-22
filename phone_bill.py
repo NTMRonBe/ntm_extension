@@ -439,6 +439,19 @@ class phone_statement_local(osv.osv_memory):
 phone_statement_local()
 
 class callsdbf_reader(osv.osv_memory):
+    def _get_files(self, cr, uid, context=None):
+        user_read = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
+        company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['def_calls_directory'])
+        location = company_read['def_calls_directory']
+        if location:
+            latestdb = sorted([ db for db in os.listdir(location)])
+            fileLists = []
+        else:
+            raise osv.except_osv(_('Error!'), _('ERR-007: No defined Calls.dbf location!'))
+        for file in latestdb:
+            fileLists.append([file,file])
+        return fileLists
+    
     _name = "callsdbf.reader"
     _description = "DBF Reader"
     _columns = {
@@ -449,36 +462,20 @@ class callsdbf_reader(osv.osv_memory):
         'line_id':fields.many2one('phone.line','Phone Line'),
         'calls_file': fields.binary('Calls.dbf file', required=True),
         'state':fields.selection([('init','init'),('done','done')], 'state', readonly=True),
+        'file_ids': fields.selection(_get_files, string='Files on Location'),
         }
     
     _defaults = {  
         'state': 'init',
     }
     
-    def importzip(self, cr, uid, ids, context):
-        user = uid
-        file= os.path.join('/var/tmp', 'calls.dbf')
-        (data,) = self.browse(cr, uid, ids , context=context)
-        module_data = data.calls_file
-        val = base64.decodestring(module_data)
-        fp = open(file,'wb')
-        fp.write(val)
-        fp.close
+    def clean_file2(self, cr, uid, ids, context=None):
+        user_read = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
+        company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['def_calls_directory'])
+        location = company_read['def_calls_directory']
         for form in self.read(cr, uid, ids, context=None):
-            statement_id = False
-            soa=form['soa']
-            statement_search = self.pool.get('phone.statement').search(cr, uid, [('bill_period','=',form['bill_period']),
-                                                                                 ('line_id','=',form['line_id']),
-                                                                                 ('name','=',form['soa']),
-                                                                                 ])
-            if statement_search:
-                raise osv.except_osv(_('Error!'), _('ERROR CODE - ERR-007: Statement for SOA %s has already been created!')%soa)
-            elif not statement_search:
-                self.write(cr, uid, ids, {'state':'done'})
-            return True
-    
-    def clean_file(self, cr, uid, ids, context=None):
-        for form in self.read(cr, uid, ids, context=None):
+            call_file = form['file_ids'].split('.')
+            file = call_file[0]
             statement_id = False
             soa=form['soa']
             statement_search = self.pool.get('phone.statement').search(cr, uid, [('bill_period','=',form['bill_period']),
@@ -530,7 +527,6 @@ class callsdbf_reader(osv.osv_memory):
                 start_date = str(period[1])+'-'+str(period[0])+'-'+start_day
                 end_date = str(period[1])+'-'+str(period[0])+'-'+end_day
             #ad = tools.config['root_path'].split(",")[-1]
-            file= os.path.join('/var/tmp', 'calls')
             table = dbf.Table(file)
             table.open()
             for record in table:
@@ -587,6 +583,8 @@ class callsdbf_reader(osv.osv_memory):
                 'res_model':'phone.statement',
                 'type':'ir.actions.act_window',
                 'context':context,}
+
+
     
 callsdbf_reader()
 

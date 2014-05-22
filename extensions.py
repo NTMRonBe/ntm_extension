@@ -27,17 +27,18 @@ region_config()
 class res_company(osv.osv):
     _inherit = 'res.company'
     _columns = {
-        'transit_php':fields.many2one('account.account','PHP Transit Account', required=True),
-        'transit_usd':fields.many2one('account.account','USD Transit Account', required=True),
-        'phone_bill_ap':fields.many2one('account.account','Phonebill Payable Account', required=True),
-        'other_ap':fields.many2one('account.account','Other Payable Accounts', required=True),
+        'transit_php':fields.many2one('account.account','PHP Transit Account'),
+        'transit_usd':fields.many2one('account.account','USD Transit Account'),
+        'phone_bill_ap':fields.many2one('account.account','Phonebill Payable Account'),
+        'other_ap':fields.many2one('account.account','Other Payable Accounts'),
         'contribution':fields.float('Contribution Percentage'),
-        'donations':fields.many2one('account.account','Donations Account', required=True),     
-        'bank_charge':fields.many2one('account.analytic.account','Bank Charges Account', required=True),
+        'donations':fields.many2one('account.account','Donations Account'),     
+        'bank_charge':fields.many2one('account.analytic.account','Bank Charges Account'),
         'contributions_acct':fields.many2one('account.account','Contributions Account'),
         'def_gain_loss':fields.many2one('account.analytic.account','Default Exchange Gain/Loss',domain=[('ntm_type','=','gl')]),
 		'ur_gain_loss':fields.many2one('account.account','Unrealized Gain/Loss'),
 		'sec_currency':fields.many2one('res.currency','Secondary Currency'),
+        'def_calls_directory':fields.char('Default Calls.dbf Directory',size=64,help="Calls.dbf Location on the server"),
         }
 res_company()
 
@@ -74,15 +75,15 @@ class aaa_accpac(osv.osv):
     _name = 'account.accpac'
     _description = 'Accpac Accounts Matcher'
     _columns = {
-        'name':fields.char('Account Number',size=64),
-        'code':fields.char('Code to Match',size=64),
+        'name':fields.char('Account Number',size=64, required=True),
+        'code':fields.char('Code to Match',size=64, required=True),
         'description':fields.char('Account Description',size=64),
         'analytic_id':fields.many2one('account.analytic.account','Analytic Account'),
         'account_id':fields.many2one('account.account','Normal Account'),
         'state':fields.selection([
                                   ('for_matching','For Matching'),
                                   ('matched','Matched'),
-                                  ('nomatched','No Match'),
+                                  ('nomatched','No Matches'),
                         ],'Matching State', readonly=True),
         }
     _defaults = {
@@ -95,7 +96,7 @@ class aaa_accpac_wiz(osv.osv_memory):
     _description = "Accpac Matcher Wizard"
     
     def match_accounts(self, cr, uid, ids, context=None):
-        accpac_ids = self.pool.get('account.accpac').search(cr, uid, [('state','=',False)])
+        accpac_ids = self.pool.get('account.accpac').search(cr, uid, [('state','=','for_matching')])
         for accpac in accpac_ids:
             accpac_read = self.pool.get('account.accpac').read(cr, uid, accpac,context=None)
             normal_search = self.pool.get('account.account').search(cr, uid,[('code','=',accpac_read['code'])])

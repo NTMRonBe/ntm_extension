@@ -270,24 +270,23 @@
                             <group col="4">
                                 <group states="init" colspan="4">
                                     <label string="Select DBF file to import (.dbf/DBF file):" colspan="4"/>
-                                    <field name="calls_file" colspan="4"/>
+                                    <field name="file_ids" colspan="4"/>
                                 </group>
                                 <group states="done" colspan="4">
                                     <label string="DBF file successfully imported!" colspan="4"/>
                                 </group>
-                                <field name="provider" widget="selection" colspan="4" required="1"/>
-                                <field name="line_id" domain="[('company_id','=',provider)]" colspan="4" required="1"/>
-                                <field name="bill_period" widget="selection" domain="[('state','=','draft')]" colspan="4" required="1"/>
-                                <field name="due_date" colspan="4" required="1"/>
-                                <field name="soa" colspan="4" required="1"/>
+                                <field name="provider" widget="selection" colspan="4" />
+                                <field name="line_id" domain="[('company_id','=',provider)]" colspan="4" />
+                                <field name="bill_period" widget="selection" domain="[('state','=','draft')]" colspan="4" />
+                                <field name="due_date" colspan="4" />
+                                <field name="soa" colspan="4"/>
                             </group>
                         </group>
                         <group colspan="8" col="13">
                             <separator string="" colspan="13"/>
                             <label colspan="6" width="220"/>
                             <button special="cancel" string="Cancel" icon="gtk-cancel"/>
-                            <button name="importzip" string="Import DBF File" type="object" icon="gtk-apply" states="init"/>
-                            <button name="clean_file" string="Generate Statement" type="object" icon="gtk-go-forward" states="done"/>
+                            <button name="clean_file2" string="Generate Statement" type="object" icon="gtk-go-forward" states="init"/>
                         </group>
                     </group>
                </form>
