@@ -39,6 +39,7 @@ class res_company(osv.osv):
 		'ur_gain_loss':fields.many2one('account.account','Unrealized Gain/Loss'),
 		'sec_currency':fields.many2one('res.currency','Secondary Currency'),
         'def_calls_directory':fields.char('Default Calls.dbf Directory',size=64,help="Calls.dbf Location on the server"),
+        'def_voucher_directory':fields.char('Default Vouchers Directory',size=64,help="Vouchers DBF Location on the server"),
         }
 res_company()
 
