@@ -475,7 +475,7 @@ class callsdbf_reader(osv.osv_memory):
         location = company_read['def_calls_directory']
         for form in self.read(cr, uid, ids, context=None):
             call_file = form['file_ids'].split('.')
-            file = call_file[0]
+            file = location+'/'+call_file[0]
             statement_id = False
             soa=form['soa']
             statement_search = self.pool.get('phone.statement').search(cr, uid, [('bill_period','=',form['bill_period']),
