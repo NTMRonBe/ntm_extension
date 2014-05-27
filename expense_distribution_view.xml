@@ -139,16 +139,16 @@
                 <form string = "Check Payment">
                     <group colspan="4" col="4">
                         <field name="name" invisible="1"/>
-                        <field name="date" attrs="{'readonly':[('state','!=','draft')]}"/>
-                        <field name="check_date" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        <field name="date" attrs="{'readonly':[('state','!=','draft'),('check_number','!=',False)]}"/>
+                        <field name="check_date" attrs="{'readonly':[('state','!=','draft'),('check_number','!=',False)]}"/>
                         <field name="bank_account_id" widget="selection" required="1" attrs="{'readonly':[('check_number','!=',False)]}"/>
                         <group colspan="2" col="4">
                             <field name="check_number" domain="[('bank_account_id','=',bank_account_id),('state','=','available')]" readonly="1"/>
                             <button name="fetch_check_num" attrs="{'invisible':[('check_number','!=',False)]}" string="Fetch Check"  type="object"/>
                         </group>
                         <group colspan="4" col="4" attrs="{'invisible':[('check_number','=',False)]}">
-	                        <field name="ap_id" widget="selection" on_change="onchange_payables(ap_id,amount2pay)" attrs="{'readonly':[('state','!=','draft')]}"/>
-	                        <field name="amount2pay" on_change="onchange_payables(ap_id,amount2pay)" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                        <field name="ap_id" widget="selection" on_change="onchange_payables(ap_id,amount2pay)" attrs="{'readonly':[('state','!=','draft')], 'required':[('check_number','!=',False)]}"/>
+	                        <field name="amount2pay" on_change="onchange_payables(ap_id,amount2pay)" attrs="{'readonly':[('state','!=','draft')], 'required':[('check_number','!=',False)]}"/>
                         </group>
                     </group>
                     <notebook>
@@ -164,7 +164,7 @@
 	                        </field>
                         </page>
                         <page string="Remarks">
-                        <field name="remarks" nolabel="1" colspan="4"/>
+                        <field name="remarks" nolabel="1" colspan="4" attrs="{'readonly':[('state','!=','draft')]}"/>
                         </page>
                         <page string="Journal Entries">
                             <group colspan="4" col="2">
@@ -186,7 +186,7 @@
                     <group colspan="4" col="13">
                         <field name="state" readonly="1"/>
                         <button name="cancel" attrs="{'invisible':[('state','in',['cancelled','posted','draft'])]}" string="Cancel"  type="object"/>
-                        <button name="check_lines" attrs="{'invisible':[('state','!=','draft')]}" string="Reserve"  type="object" />
+                        <button name="check_lines" attrs="{'invisible':[('check_number','=',False)]}" string="Reserve"  type="object" states='draft'/>
                         <button name="set2draft" attrs="{'invisible':[('state','!=','reserved')]}" string="Set to Draft" type="object"/>
                         <button name="post" attrs="{'invisible':[('state','!=','reserved')]}" string="Release"  type="object" />
                     </group>

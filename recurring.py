@@ -73,7 +73,7 @@ class rsc(osv.osv):
     def compute(self, cr, uid, ids, context=None):
         for sub in self.browse(cr, uid, ids, context=context):
             if not sub.line_ids:
-                raise osv.except_osv(_('Error!'), _('No entries has been set!'))
+                raise osv.except_osv(_('Error!'), _('ARE-001: No entries has been set!'))
             elif sub.line_ids:
                 allDebit = False
                 allCredit = False
@@ -83,7 +83,7 @@ class rsc(osv.osv):
                 if allDebit==allCredit:
                     self.write(cr, uid, ids, {'state':'running'})
                 elif allDebit!=allCredit:
-                    raise osv.except_osv(_('Error!'), _('You can not activate unbalanced entries!'))
+                    raise osv.except_osv(_('Error!'), _('ARE-002: You can not activate unbalanced entries!'))
         return True
     
     def remove_line(self, cr, uid, ids, context=None):

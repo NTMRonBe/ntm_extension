@@ -11,9 +11,9 @@
                 <separator string="Fund Allocation" colspan="4"/>
                 <label string="This will create the allocations for all accounts that is set for allocation of balances." colspan="4"/>
 <group colspan="2" col="2">
-<field name="journal_id"/>
-<field name="period_id"/>
-<field name="name"/>
+<field name="journal_id" required="1"/>
+<field name="period_id" required="1"/>
+<field name="name" required="1"/>
 </group>
                 <separator colspan="4"/>
                     <group colspan="4" col="6">

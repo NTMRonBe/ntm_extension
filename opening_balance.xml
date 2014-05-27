@@ -20,7 +20,7 @@
             </field>
         </record>
 		
-		<record model="ir.ui.view" id="view_ob_import_form">
+		<!-- <record model="ir.ui.view" id="view_ob_import_form">
             <field name="name">view.ob.import.form</field>
             <field name="model">ob.import</field>
             <field name="type">form</field>
@@ -35,11 +35,13 @@
                     <field name="currency_id"/>
                 </form>
             </field>
-        </record>      
+        </record>  
+         -->    
         <record model="ir.actions.act_window" id="action_ob_import_form">
         	<field name="name">Import Opening Balance Entries</field>
 	        <field name="res_model">ob.import</field>
 		    <field name="view_type">form</field>
+		    <field name="view_mode">tree</field>
 		    <field name="help">Import the opening balances of each account. 
 		    You can use OpenERP normal/analytic accounts and ACCPAC account numbers. 
 		    For ACCPAC account numbers to work, the account should be matched first using ACCPAC Account Matcher.</field>

@@ -213,11 +213,13 @@ class ecp(osv.osv):
     def fetch_check_num(self,cr, uid, ids, context=None):
         for ecp in self.read(cr, uid, ids, context=None):
             check_search = self.pool.get('res.partner.check.numbers').search(cr, uid, [('bank_account_id','=',ecp['bank_account_id'][0]),('state','=','available')], limit=1, order='id asc')
-            vals = {
-                'check_number':check_search[0]
-                }
-            self.write(cr, uid, ids, vals)
-        return True
+            if check_search:
+                vals = {
+                    'check_number':check_search[0]
+                    }
+                return self.write(cr, uid, ids, vals)
+            elif not check_search:
+                raise osv.except_osv(_('Error!'), _('CP-001: No check number available for the chosen checking account!'))
     
     def onchange_payables(self, cr, uid, ids, ap_id,amount2pay):
         result = {}
@@ -230,6 +232,8 @@ class ecp(osv.osv):
             payable_search = self.pool.get('account.move.line').search(cr, uid,[('credit','>','0.00'),('account_id','=',ap_id),('reconcile_id','=',False)])
             existing_list = self.pool.get('expense.check.payment.lines').search(cr, uid, [('payment_id','=',ecp_id)])
             self.pool.get('expense.check.payment.lines').unlink(cr, uid, existing_list)
+            if amount_to_pay < 0.00:
+                raise osv.except_osv(_('Error!'), _('CP-002: Negative amounts are not allowed!'))
             if payable_search:
                 for payable in payable_search:
                     check_amount = self.pool.get('account.move.line').read(cr, uid, payable,['credit','name','reconcile_partial_id'])
@@ -257,7 +261,7 @@ class ecp(osv.osv):
                     amount_to_pay -=unpaid
                 result = {'value':{'payment_lines':payables}}
             elif not payable_search:
-                payables = None
+                payables = []
                 result = {'value':{'payment_lines':payables}}
         return result
     

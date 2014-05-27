@@ -21,3 +21,4 @@ import recurring
 import region_report
 import revaluation
 import database
+import installer

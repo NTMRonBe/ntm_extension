@@ -28,7 +28,7 @@
         <menuitem id="main_pettycash" name="Petty Cash" sequence="30" parent="ntm_extension.bank_and_cash"/>
         <menuitem id="fund_transfers" name="Fund Transfers" sequence="40" parent="ntm_extension.bank_and_cash"/>
         <menuitem id="ntm_checks_main" name="Checks" sequence="40" parent="ntm_extension.bank_and_cash"/>
-        <menuitem id="menu_forex_transaction" action="action_forex_transaction_form" parent="ntm_extension.bank_and_cash" sequence="60" groups="base.group_user"/>
+        <menuitem id="menu_forex_transaction" action="action_forex_transaction_form" parent="ntm_extension.bank_and_cash" sequence="60"/>
         <menuitem id="ntm_bankandcash_config" name="Configuration" sequence="100" parent="ntm_extension.bank_and_cash"/>
 
         <!-- End of header 2 on Manual - People and Projects-->
@@ -49,7 +49,7 @@
         <menuitem id="menu_idg" action="action_idg_form" parent="menu_income_distribution_main" sequence="10"/>
         <menuitem id="menu_voucher_distribution" action="action_voucher_distribution_form" parent="menu_income_distribution_main" sequence="30"/>
         
-        <menuitem id="menu_vehicle_log" action="action_vehicle_log_form"  parent="menu_expense_distribution_main" sequence="10" groups="group_vehicle_manager"/>
+        <menuitem id="menu_vehicle_log" action="action_vehicle_log_form"  parent="menu_expense_distribution_main" sequence="10" groups="ntm_extension.group_vehicle_manager"/>
         <menuitem id="menu_communications_cleaner" parent="menu_expense_distribution_main" sequence="20" action="action_callsdbf_reader"/>
         <menuitem id="menu_communications_statement" parent="menu_expense_distribution_main" sequence="30" action="action_phone_statement_form"/>
         <menuitem id="menu_edg" action="action_edg_form" parent="menu_expense_distribution_main" sequence="40"/>
@@ -74,19 +74,19 @@
         <menuitem id="menu_action_ntm_res_partner_bank_project_form" parent="ntm_bankaccounts_main" sequence="20" action="action_ntm_res_partner_bank_project_tree"/>
         <menuitem id="recon_check_clearance_menu" sequence="20" action="action_check_clearing_form" parent="main_bank_recon"/>
         <menuitem id="recon_fund_transfer_menu" sequence="30" action="action_fund_transfer_clearing_form" parent="main_bank_recon"/>
-        <menuitem id="menu_pettycash" action="action_pettycash_form" parent="main_pettycash" sequence="10" groups="base.group_user"/>
-        <menuitem id="menu_be" action="action_be_form" parent="main_pettycash" sequence="20" groups="base.group_user"/>
-        <menuitem id="menu_pcr" action="action_pcr_form" parent="main_pettycash" sequence="30" groups="base.group_user"/>
-     <!-- <menuitem id="menu_crs" action="action_crs_form" parent="main_pettycash" sequence="40" groups="base.group_user"/>
-        <menuitem id="menu_pcd" action="action_pcd_form" parent="main_pettycash" sequence="50" groups="base.group_user"/> -->   
+        <menuitem id="menu_pettycash" action="action_pettycash_form" parent="main_pettycash" sequence="10" />
+        <menuitem id="menu_be" action="action_be_form" parent="main_pettycash" sequence="20" />
+        <menuitem id="menu_pcr" action="action_pcr_form" parent="main_pettycash" sequence="30" />
+     <!-- <menuitem id="menu_crs" action="action_crs_form" parent="main_pettycash" sequence="40"/>
+        <menuitem id="menu_pcd" action="action_pcd_form" parent="main_pettycash" sequence="50" /> -->   
         <menuitem id="menu_pc_transfer_main" parent="main_pettycash" sequence="60" name="Transfers"/>
-        <menuitem id="menu_pcl" action="action_pcl_form" parent="main_pettycash" sequence="70" groups="base.group_user"/>
+        <menuitem id="menu_pcl" action="action_pcl_form" parent="main_pettycash" sequence="70" />
         
        <!-- <menuitem id="iat_people2pc" parent="menu_pc_transfer_main" sequence="20" action="action_people2pc_tree"/>
         <menuitem id="iat_proj2pc" parent="menu_pc_transfer_main" sequence="30" action="action_proj2pc_tree"/>
         <menuitem id="iat_income2pc" parent="menu_pc_transfer_main" sequence="40" action="action_income2pc_tree"/> -->
         <menuitem id="fund_transfer_p2b" parent="fund_transfers" sequence="40" action="action_p2b_fund_transfer"/>
-        <menuitem id="menu_pettycash_transfer" action="action_pettycash_transfer_form" parent="fund_transfers" sequence="30"  groups="base.group_user"/>
+        <menuitem id="menu_pettycash_transfer" action="action_pettycash_transfer_form" parent="fund_transfers" sequence="30"  />
         <menuitem id="b2b_fund_transfer" parent="fund_transfers" sequence="20" action="action_b2b_fund_transfer"/>
         <menuitem id="iat_main" name="Internal Account Transfers" parent="fund_transfers" sequence="50" action="action_default_tree"/>
         
@@ -109,7 +109,7 @@
         <menuitem id="bank_transfer_generate" parent="bank_transfer_main" sequence="40" action="action_bank_transfer_wizard"/>
         <menuitem id="menu_ecp" action="action_ecp_form" parent="ntm_checks_main" sequence="15"/>
         <menuitem id="menu_rpcn" action="action_rpcn_form" parent="ntm_checks_main" sequence="15"/>
-        <menuitem id="menu_denom" action="action_denom_form"  parent="ntm_bankandcash_config" sequence="20" groups="base.group_user"/>
+        <menuitem id="menu_denom" action="action_denom_form"  parent="ntm_bankandcash_config" sequence="20" />
         <menuitem action="base.action_currency_form" id="base.menu_action_currency_form" parent="ntm_bankandcash_config" sequence="10"/>
         <menuitem action="base.action_res_bank_form" id="base.menu_action_res_bank_form" parent="ntm_bankandcash_config" sequence="30"/>
         <!-- End of header 3 on Manual - Bank and Cash-->
@@ -149,8 +149,8 @@
         <menuitem id="ntm_acct_pp3_rev2_menu" sequence="20" name="Revised Monthly Revaluation" parent="ntm_acct_pp3_menu" action="action_new_reval_tree"/>
         
         
-        <menuitem id="ntm_menu_account_soa" action="action_account_soa_form" parent="ntm_acct_reports1_root" sequence="10" groups="base.group_user"/> 
-        <menuitem id="ntm_menu_soa_request" string="Statement Requests" action="action_soa_request_form" parent="ntm_acct_reports1_root" sequence="20" groups="base.group_user"/>
+        <menuitem id="ntm_menu_account_soa" action="action_account_soa_form" parent="ntm_acct_reports1_root" sequence="10"/> 
+        <menuitem id="ntm_menu_soa_request" string="Statement Requests" action="action_soa_request_form" parent="ntm_acct_reports1_root" sequence="20"/>
         
         <menuitem id="ntm_acct_reports2_1_root" action="action_region_report_wiz" parent="ntm_acct_reports2_root" sequence="10"/>
         <menuitem id="ntm_acct_reports2_2_root" string="Regional Profit and Loss" action="action_region_report_form" parent="ntm_acct_reports2_root" sequence="10"/>
@@ -188,6 +188,11 @@
         <menuitem id="ntm_acct_config1_3_2_root" sequence="20" name="Accounts" parent="ntm_acct_config1_3_root" action="account.action_account_form"/>
         
         <!-- End of header 5 on Manual - Accounting-->
-        <!-- End of header 5 on Manual-->      
+        <!-- End of header 5 on Manual-->
+        
+        
+        <!-- Inherited menus-->
+        
+              
     </data>
 </openerp>

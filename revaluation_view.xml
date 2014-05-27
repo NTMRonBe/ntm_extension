@@ -87,7 +87,7 @@
 						</group>
 					</group>
 					<notebook>
-						<page string="Foreign Exchanges" invisible="1">
+						<page string="Foreign Exchanges" invisible="0">
 							<group colspan="4">
 								<field name="src_exchange_ids" mode="tree" nolabel="1" readonly="1" colspan="4">
 									<tree string="From Company Currency Exchanges" limit="100">

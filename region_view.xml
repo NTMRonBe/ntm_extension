@@ -7,7 +7,7 @@
             <field name="model">region.config</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string = "Regional Settings">
+                <form string = "Regional Setting">
                     <group colspan="4" col="4">
                         <field name="name"/>
                         <field name="gain_loss_acct"/>
@@ -15,7 +15,7 @@
                     </group>
 					<notebook>
 						<page string="Income Accounts">
-							<field name="income_ids" nolabel="1" height="350">
+							<field name="income_ids" nolabel="1" height="350" readonly="1">
                                 <tree string="Income Accounts">
                                     <field name="code"/>
                                     <field name="name"/>
@@ -26,7 +26,7 @@
                             </field>
 						</page>
 						<page string="Expense Accounts">
-                            <field name="expense_ids" nolabel="1" height="350">
+                            <field name="expense_ids" nolabel="1" height="350" readonly="1">
                                 <tree string="Expense Accounts">
                                     <field name="code"/>
                                     <field name="name"/>
@@ -37,7 +37,7 @@
                             </field>
 						</page>
 						<page string="Equity Accounts">
-                            <field name="equity_ids" nolabel="1" height="350">
+                            <field name="equity_ids" nolabel="1" height="350" readonly="1">
                                 <tree string="Equity Accounts">
                                     <field name="code"/>
                                     <field name="name"/>

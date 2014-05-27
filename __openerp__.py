@@ -49,7 +49,7 @@
                    ,"account_pettycash/crs_view.xml","opening_balance.xml","region_report_view.xml",
                    "vehicle_charging_view.xml","regional_uploader_view.xml","bank_recon_view.xml",
                    "dbe_view.xml","allocate_view.xml","recurring_view.xml","region_view.xml",
-                   "revaluation_view.xml","database_view.xml","ntm_menu2.xml","ntm_menus.xml"
+                   "revaluation_view.xml","database_view.xml","ntm_menu2.xml","ntm_menus.xml",'security/ir.model.access.csv',"ntm_installer.xml"
                    ],
     'demo_xml': [
     ],

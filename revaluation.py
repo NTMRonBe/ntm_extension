@@ -126,6 +126,12 @@ class new_reval(osv.osv):
 		srces = []
 		srces = self.pool.get('forex.transaction').search(cr, uid, [('period_id','=',period_id),('src.currency_id','=',currency)])
 		return srces
+	
+	def _getName(self, cr, uid, ids, context=None):
+		period_id = ids['default_period_id']
+		period_read = self.pool.get('account.period').read(cr, uid, ids['default_period_id'], ['name'])
+		name = 'Revaluation for ' + period_read['name']
+		return name
 	def _get_ex_dest(self, cr, uid, ids, context=None):
 		period_id = ids['default_period_id']
 		period_read = self.pool.get('account.period').read(cr, uid, ids['default_period_id'],['company_id'])
@@ -138,6 +144,7 @@ class new_reval(osv.osv):
 		userRead = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
 		compRead = self.pool.get('res.company').read(cr, uid, userRead['company_id'][0], ['currency_id'])
 		return compRead['currency_id'][0]
+	
 	def _get_sec_curr2(self, cr, uid, ids, context=None):
 		userRead = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
 		compRead = self.pool.get('res.company').read(cr, uid, userRead['company_id'][0], ['sec_currency'])
@@ -163,7 +170,8 @@ class new_reval(osv.osv):
 
 	_defaults = {
 		'journal_id':_get_journal,
-		'name':lambda *a: time.strftime('%Y-%m-%d'),
+		'name':_getName,
+		'date':lambda *a: time.strftime('%Y-%m-%d'),
 		'primary_curr':_get_pri_curr,
 		'secondary_curr':_get_sec_curr2,
 		'src_exchange_ids':_get_ex_src,
