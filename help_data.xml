@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="0">
+          
+        <record id="err_1" model="ntm.error">
+            <field name="name">ERR-001</field>
+            <field name="description">If Charges are still included, bank charges must be greater than 0.00!</field>
+            <field name="model_id" ref="ntm_extension.model_income_distribution_generic"/>
+            <field name="sequence">1</field>
+            <field name="fix">Bank Charges must always be greater than equal to ZERO before clicking the ‘Receive Money’ button when the ‘Charges still included’ checkbox is True.</field>
+        </record>
+        <record id="err_2" model="ntm.error">
+            <field name="name">ERR-002</field>
+            <field name="description">You must have a distribution list before distribution!</field>
+            <field name="model_id" ref="ntm_extension.model_income_distribution_generic"/>
+            <field name="sequence">2</field>
+            <field name="fix">Add accounts to where the received money will be distributed.</field>
+        </record>
+        <record id="err_3" model="ntm.error">
+            <field name="name">ERR-003</field>
+            <field name="description">Total received amount is not equal to the total amount to be distributed!</field>
+            <field name="model_id" ref="ntm_extension.model_income_distribution_generic"/>
+            <field name="sequence">3</field>
+            <field name="fix">Check the distribution list if the total amount is equal to the amount to be distributed.</field>
+        </record>
+        <record id="err_4" model="ntm.error">
+            <field name="name">ERR-004</field>
+            <field name="description">Negative ending KM is not allowed.</field>
+            <field name="model_id" ref="ntm_extension.model_voucher_distribution"/>
+            <field name="sequence">4</field>
+            <field name="fix">Ending KM must be greater than the starting KM.</field>
+        </record>
+        <record id="err_5" model="ntm.error">
+            <field name="name">ERR-005</field>
+            <field name="description">Percentage of the shared trips is already 100%!</field>
+            <field name="model_id" ref="ntm_extension.model_voucher_distribution"/>
+            <field name="sequence">5</field>
+            <field name="fix">Adjust percentages to be able to add accounts.</field>
+        </record>
+        <record id="err_6" model="ntm.error">
+            <field name="name">ERR-006</field>
+            <field name="description">Shared trip percentage is over by (total_percent - 100)! Adjust your percentage!</field>
+            <field name="model_id" ref="ntm_extension.model_voucher_distribution"/>
+            <field name="sequence">6</field>
+            <field name="fix">Adjust the percentage of the distribution.</field>
+        </record>
+        
+        
+        <act_window context="{'search_default_model_id':'income.distribution.generic', 'default_model_id': 'income.distribution.generic'}" id="act_ntm_error_2_income_distribution_generic_opened" name="Error Lists" res_model="ntm.error" src_model="income.distribution.generic"/>
+        <act_window context="{'search_default_model_id':'voucher.distribution', 'default_model_id': 'voucher.distribution'}" id="act_ntm_error_2_voucher_distribution_opened" name="Error Lists" res_model="ntm.error" src_model="voucher.distribution"/>
+    </data>
+</openerp>
