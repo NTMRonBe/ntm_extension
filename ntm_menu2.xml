@@ -88,7 +88,7 @@
         <menuitem id="fund_transfer_p2b" parent="fund_transfers" sequence="40" action="action_p2b_fund_transfer"/>
         <menuitem id="menu_pettycash_transfer" action="action_pettycash_transfer_form" parent="fund_transfers" sequence="30"  />
         <menuitem id="b2b_fund_transfer" parent="fund_transfers" sequence="20" action="action_b2b_fund_transfer"/>
-        <menuitem id="iat_main" name="Internal Account Transfers" parent="fund_transfers" sequence="50" action="action_default_tree"/>
+        <!-- <menuitem id="iat_main" name="Internal Account Transfers" parent="fund_transfers" sequence="50" action="action_default_tree"/> -->
         
         <!-- Removed menus April 8 2014 
         <menuitem id="iat_people2people" parent="iat_main" sequence="10" action="action_people2people_tree"/>

@@ -7,7 +7,7 @@ from tools.translate import _
 import decimal_precision as dp
 
 class iat(osv.osv):
-    _inherit = 'internal.account.transfer'
+    _name = 'internal.account.transfer'
     
     def transfer(self, cr, uid, ids, context=None):
         if 'transfer_type' in context:
