@@ -223,7 +223,7 @@
            
            
            
-       <!--     
+            
            
        <record id="view_export_ntm_class" model="ir.ui.view">
             <field name="name">export.ntm.class.form</field>
@@ -278,6 +278,6 @@
             action="action_export_ntm_class"
             id="menu_action_export_ntm_class"
             sequence="50"
-           /> -->
+           /> 
     </data>
 </openerp>

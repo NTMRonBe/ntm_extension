@@ -115,7 +115,6 @@ class idg(osv.osv):
         rate = False
         currency = False
         for idg in self.read(cr, uid, ids, context=None):
-            bankChargeAccount = self.pool.get('account.analytic.account').read(cr, uid, idg['bank_charge_account'][0], ['normal_account'])
             bank_read = self.pool.get('res.partner.bank').read(cr, uid, idg['bank_id'][0],['currency_id','journal_id','account_id'])
             journal_id = bank_read['journal_id'][0]
             period_search = self.pool.get('account.period').search(cr, uid, [('date_start','<=',idg['rdate']),('date_stop','>=',idg['rdate'])],limit=1)
@@ -154,8 +153,9 @@ class idg(osv.osv):
             if not idg['charges_included']:
                 donated_amt = idg['amount']
             elif idg['charges_included']:
+                bankChargeAccount = self.pool.get('account.analytic.account').read(cr, uid, idg['bank_charge_account'][0], ['normal_account'])
                 if idg['bank_charges']<=0.00:
-                    raise osv.except_osv(_('Error!'), _('ERROR CODE - IDG-001: If Charges are still included, bank charges must be greater than 0.00!'))
+                    raise osv.except_osv(_('IDG-001!'), _('ERROR CODE - IDG-001: If Charges are still included, bank charges must be greater than 0.00!'))
                 elif idg['bank_charges']>0.00:
                         donated_amt = idg['amount'] - idg['bank_charges']
                         charge_amt = idg['bank_charges']
@@ -192,6 +192,10 @@ class idg(osv.osv):
             self.pool.get('account.move.line').create(cr, uid, move_line)    
             self.pool.get('account.move').post(cr, uid, [move_id])
             self.write(cr, uid, ids, {'rmove_id':move_id,'state':'received'})
+        return True
+    
+    def receive2(self, cr, uid, ids, context=None):
+        print context
         return True
     
     
@@ -394,7 +398,6 @@ class voucher_distribution(osv.osv):
             transferred_comp_curr = transferred_curr / currRead['rate']
             amount = "%.2f" % transferred_comp_curr
             transferred_comp_curr = float(amount)
-            print transferred_comp_curr
             move_line = {
                         'name':name,
                         'journal_id':journal_id,
@@ -413,7 +416,6 @@ class voucher_distribution(osv.osv):
             transferred_comp_curr = transferred_curr / currRead['rate']
             amount = "%.2f" % transferred_comp_curr
             transferred_comp_curr = float(amount)
-            print transferred_comp_curr
             move_line = {
                         'name':name,
                         'journal_id':journal_id,
@@ -433,7 +435,6 @@ class voucher_distribution(osv.osv):
             transferred_comp_curr = transferred_curr / currRead['rate']
             amount = "%.2f" % transferred_comp_curr
             transferred_comp_curr = float(amount)
-            print transferred_comp_curr
             move_line = {
                         'name':name,
                         'journal_id':journal_id,
@@ -1201,10 +1202,7 @@ class vd(osv.osv):
                 }
                 self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
             self.write(cr, uid, ids, {'m_move_id':move_id,'state':'entry_created'})
-            print allCreditAmounts
-            print allDebitAmounts
             gainLoss = allDebitAmounts - allCreditAmounts
-            print gainLoss
             entry_amount = gainLoss * rate
             uid_read = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
             company_read = self.pool.get('res.company').read(cr, uid, uid_read['company_id'][0],['def_gain_loss'])
@@ -1229,7 +1227,6 @@ class vd(osv.osv):
                     'amount_currency':entry_amount,
                     'currency_id':currency,
                 }
-                print 'debit'
                 self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
             elif allCreditAmounts<allDebitAmounts:
                 debit = 0.00
@@ -1247,7 +1244,6 @@ class vd(osv.osv):
                     'amount_currency':entry_amount,
                     'currency_id':currency,
                 }
-                print 'credit'
                 self.pool.get('account.move.line').create(cr, uid, emailChargeEntry)
         return True
     def sendEmail(self, cr, uid, ids, context=None):

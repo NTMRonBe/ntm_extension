@@ -149,7 +149,7 @@
 	                        <field name="rremarks" attrs="{'invisible':[('state','!=','draft')],'required':[('state','=','draft')]}"/>
 	                        <field name="name" invisible="1"/>
 	                        <field name="journal_id" invisible="1"/>
-	                        <field name="country" widget="selection" attrs="{'invisible':[('state','=','draft')]}"/>
+	                        <field name="country" widget="selection"/>
 	                        <field name="generated" invisible="1"/>
 	                        <field name="currency_id" widget="selection"/>
                         </group>

@@ -22,3 +22,4 @@ import region_report
 import revaluation
 import database
 import installer
+import ntm_help

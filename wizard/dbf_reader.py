@@ -224,7 +224,7 @@ class dbf_reader(osv.osv_memory):
         return True
 
 dbf_reader()
-'''
+
 
 class export_ntm_class(osv.osv):
     _name = 'export.ntm.class'
@@ -311,7 +311,7 @@ class export_ntm_class_fields(osv.osv):
         'export_id':fields.many2one('export.ntm.class','Export ID',ondelete='cascade'),
         'type':fields.char('Field Type',size=64),
         }
-export_ntm_class_fields()'''
+export_ntm_class_fields()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

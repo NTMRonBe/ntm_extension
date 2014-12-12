@@ -12,6 +12,9 @@
             web_icon_hover="images/accounting-hover.png"/>
         <menuitem id="ntm_extension.administration" name="NTM Administration" sequence="20" web_icon="images/people_and_projects.png"
             web_icon_hover="images/people_and_projects_hover.png"/>
+        <menuitem id="ntm_extension.help" name="Help" sequence="20" web_icon="images/help.png"
+            web_icon_hover="images/help-hover.png"/>
+        
         <!-- End of header 1 on Manual-->
         
         <!-- Start of header 2 on Manual-->
@@ -30,6 +33,7 @@
         <menuitem id="ntm_checks_main" name="Checks" sequence="40" parent="ntm_extension.bank_and_cash"/>
         <menuitem id="menu_forex_transaction" action="action_forex_transaction_form" parent="ntm_extension.bank_and_cash" sequence="60"/>
         <menuitem id="ntm_bankandcash_config" name="Configuration" sequence="100" parent="ntm_extension.bank_and_cash"/>
+        <menuitem id="ntm_error" name="Error List" sequence="10" parent="ntm_extension.help" action="action_ntm_error_form"/>
 
         <!-- End of header 2 on Manual - People and Projects-->
         
@@ -88,9 +92,8 @@
         <menuitem id="fund_transfer_p2b" parent="fund_transfers" sequence="40" action="action_p2b_fund_transfer"/>
         <menuitem id="menu_pettycash_transfer" action="action_pettycash_transfer_form" parent="fund_transfers" sequence="30"  />
         <menuitem id="b2b_fund_transfer" parent="fund_transfers" sequence="20" action="action_b2b_fund_transfer"/>
-        <menuitem id="iat_main" name="Internal Account Transfers" parent="fund_transfers" sequence="50" action="action_default_tree"/>
+        <menuitem id="iat_main" name="Internal Account Transfers" parent="fund_transfers" sequence="50" />
         
-        <!-- Removed menus April 8 2014 
         <menuitem id="iat_people2people" parent="iat_main" sequence="10" action="action_people2people_tree"/>
         <menuitem id="iat_people2proj" parent="iat_main" sequence="20" action="action_people2proj_tree"/>
         <menuitem id="iat_proj2people" parent="iat_main" sequence="50" action="action_proj2people_tree"/>
@@ -100,7 +103,7 @@
         <menuitem id="iat_expense2income" parent="iat_main" sequence="80" action="action_expense2income_tree"/>
         <menuitem id="iat_expense2people" parent="iat_main" sequence="90" action="action_expense2people_tree"/>
         <menuitem id="iat_expense2proj" parent="iat_main" sequence="100" action="action_expense2proj_tree"/>
-         -->
+        
          
         <menuitem id="bank_transfer_main" parent="fund_transfers" sequence="10" action="action_bank_transfer_tree"/>
         <menuitem id="bank_transfer_schedule" parent="bank_transfer_main" sequence="20" action="action_bank_transfer_schedule_tree"/>
