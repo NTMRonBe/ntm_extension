@@ -546,6 +546,7 @@ class pcdenom(osv.osv):
 pcdenom()
 
 class iat(osv.osv):
+<<<<<<< HEAD
     _inherit = 'internal.account.transfer'
     _columns = {
         'pat_iatd_ids':fields.one2many('internal.account.transfer.destination','pat_iat_id','Destinations'),
@@ -555,6 +556,9 @@ class iat(osv.osv):
         'move_id':fields.many2one('account.move','Journal Entry'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Releasing Journal Items', readonly=True),
         }
+=======
+    _name = 'internal.account.transfer'
+>>>>>>> 1333fd9fbd8a6b4ef863698a5d8ecb63e823facc
     
     def onchange_curr(self, cr, uid, ids, currency_id=False):
         result = {}

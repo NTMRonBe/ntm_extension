@@ -45,8 +45,8 @@
                    "expense_distribution_view.xml"
                    ,"forex_view.xml","forex_data.xml","ft_data.xml","account_pettycash/account_pettycash_view.xml"
                    ,"account_pettycash/pc_sequence.xml","account_pettycash/pcr_view.xml",
-                   "account_pettycash/pcl_view.xml","fund_transfer_view.xml","iat_view.xml"
-                   ,"account_pettycash/crs_view.xml","opening_balance.xml","region_report_view.xml",
+                   "account_pettycash/pcl_view.xml","fund_transfer_view.xml",#"iat_view.xml",
+                   "account_pettycash/crs_view.xml","opening_balance.xml","region_report_view.xml",
                    "vehicle_charging_view.xml","regional_uploader_view.xml","bank_recon_view.xml",
                    "dbe_view.xml","allocate_view.xml","recurring_view.xml","region_view.xml",
                    "revaluation_view.xml","database_view.xml","ntm_menu2.xml","ntm_menus.xml",'security/ir.model.access.csv',"ntm_installer.xml"
