@@ -70,7 +70,7 @@ class internal_account_transfer(osv.osv):
             'date':lambda *a: time.strftime('%Y-%m-%d'),
             'period_id':_get_period,
             'journal_id':_get_journal,
-            'currency_id':'base.PHP',
+            #'currency_id':'base.PHP',
             'distribute_type':'fixed',
             'state':'draft',
             }
@@ -546,7 +546,6 @@ class pcdenom(osv.osv):
 pcdenom()
 
 class iat(osv.osv):
-<<<<<<< HEAD
     _inherit = 'internal.account.transfer'
     _columns = {
         'pat_iatd_ids':fields.one2many('internal.account.transfer.destination','pat_iat_id','Destinations'),
@@ -556,9 +555,7 @@ class iat(osv.osv):
         'move_id':fields.many2one('account.move','Journal Entry'),
         'move_ids': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Releasing Journal Items', readonly=True),
         }
-=======
-    _name = 'internal.account.transfer'
->>>>>>> 1333fd9fbd8a6b4ef863698a5d8ecb63e823facc
+    #_name = 'internal.account.transfer'
     
     def onchange_curr(self, cr, uid, ids, currency_id=False):
         result = {}
