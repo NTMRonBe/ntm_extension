@@ -112,6 +112,7 @@
         <menuitem id="bank_transfer_generate" parent="bank_transfer_main" sequence="40" action="action_bank_transfer_wizard"/>
         <menuitem id="menu_ecp" action="action_ecp_form" parent="ntm_checks_main" sequence="15"/>
         <menuitem id="menu_rpcn" action="action_rpcn_form" parent="ntm_checks_main" sequence="15"/>
+        <menuitem id="menu_check_sequence" action="check_sequence_wizard_act_window" parent="ntm_checks_main" sequence="30"/>
         <menuitem id="menu_denom" action="action_denom_form"  parent="ntm_bankandcash_config" sequence="20" />
         <menuitem action="base.action_currency_form" id="base.menu_action_currency_form" parent="ntm_bankandcash_config" sequence="10"/>
         <menuitem action="base.action_res_bank_form" id="base.menu_action_res_bank_form" parent="ntm_bankandcash_config" sequence="30"/>

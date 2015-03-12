@@ -80,6 +80,8 @@
             <field name="arch" type="xml">
             <form string="Add Check Sequence">
                 <group colspan="4" col="4">
+                    <field name="bank_account_id" required="1"/>
+                    <newline/>
                     <field name="start_sequence" required="1"/>
                     <field name="end_sequence" required="1"/>
                 </group>
@@ -110,6 +112,14 @@
             <field name="key">action</field>
             <field name="model">res.partner.bank</field>
         </record>
+
+        <act_window
+            name="Add Check Sequence"
+            res_model="check.sequence.wizard"
+            view_mode="form"
+            id="check_sequence_wizard_act_window"
+            view_id="check_sequence_wizard_view"
+            target="new" />
         
         <record model="ir.ui.view" id="rpcn_search">
             <field name="name">rpcn.search</field>

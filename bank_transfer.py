@@ -457,11 +457,32 @@ res_partner_bank()
 class check_sequence_wizard(osv.osv_memory):
     _name = 'check.sequence.wizard'
     _columns = {
+        'bank_account_id':fields.many2one('res.partner.bank', 'Bank Account'), 
         'start_sequence':fields.integer('Start Sequence'),
         'end_sequence':fields.integer('Ending Sequence'),
         }
+
+    def default_get(self, cr, uid, fields, context=None):
+        if context is None:
+            context = {}
+        res = super(check_sequence_wizard, self).default_get(cr, uid, fields, context=context)
+        
+        print "default_get context: ", context
+        
+        if context and 'active_model' in context and context['active_model'] == 'res.partner.bank':
+            res['bank_account_id'] = context['active_id']
+
+        return res
+    
     def add_sequence(self, cr, uid, ids, context=None):
         for form in self.read(cr, uid, ids, context=None):
+            
+            bank_account_id = False
+            if context and 'active_id' in context and context['active_id']:
+                bank_account_id = context['active_id']
+            else:
+                bank_account_id = form['bank_account_id']
+                
             if form['start_sequence']<form['end_sequence']:
                 seq_search = self.pool.get('res.partner.check.numbers').search(cr, uid, [('name','=',form['start_sequence'])])
                 if not seq_search:
@@ -475,7 +496,7 @@ class check_sequence_wizard(osv.osv_memory):
                         for x in xrange(start,end):
                             if x<=form['end_sequence']:
                                 vals = {
-                                    'bank_account_id':context['active_id'],
+                                    'bank_account_id':bank_account_id,
                                     'name':x,
                                     'state':'available',
                                     }

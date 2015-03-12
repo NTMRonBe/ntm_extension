@@ -21,7 +21,7 @@
 {
     "name" : "NTM Extensions",
     "version" : "1.0",
-    "author" : "Roxly Rivero",
+    "author" : "Auberon Solutions, Inc.",
     "category": 'Generic Modules/Accounting',
     "description": """
     NTM Extensions
