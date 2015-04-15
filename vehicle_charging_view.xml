@@ -121,9 +121,9 @@
                         <group colspan="2" col="2">
                             <separator string="Travel Log"/>
                             <field name="shared_trip" attrs="{'readonly':[('state','!=','draft')]}"/>
-                            <field name="start_km" readonly="1"/>
+                            <field name="start_km" attrs="{'readonly':[('state','!=','draft')]}"/>
                             <field name="end_km" attrs="{'readonly':[('state','!=','draft')]}" on_change="onchange_ending(end_km,start_km)"/>
-                            <field name="kms" readonly="1"/>
+                            <field name="kms" attrs="{'readonly':[('state','!=','draft')]}"/>
                         </group>
                         <group colspan="2" col="2">
                             <separator string="Charging"/>
