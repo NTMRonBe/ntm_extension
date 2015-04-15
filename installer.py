@@ -1,42 +1,67 @@
-# -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
-from osv import fields, osv
+import os
+import fnmatch
+from shutil import copytree, rmtree, ignore_patterns, copy
+import subprocess
+import sys
+from datetime import datetime
 
-class ntm_installer(osv.osv_memory):
-    _name = 'ntm.installer'
-    _inherit = 'res.config.installer'
-    _columns = {
-        'group_ids':fields.many2many('res.groups','installer_id','ntm_id','ntm_group_rel', 'Groups to Remove'),
-        }
+openerp_dir = '/media/sf_from-macbook/eclipse-workspace/'
+module_name = 'ntm_extension'
+loan_module_dir = openerp_dir + module_name
+tmp_loan_module_dir = '/tmp/' + module_name
+now = datetime.today()
+orig_installer_name = '/install-' + module_name + '.run'
+installer_name = '/install-' + module_name + '-' + now.strftime('%Y%m%d%H%M') + '.run'
+
+# initial check for our temp environment, delete if existing
+if os.path.isdir(tmp_loan_module_dir):
+    rmtree(tmp_loan_module_dir)
+
+if os.path.isfile(loan_module_dir + '/install*.run'):
+    os.remove(loan_module_dir + '/install*.run')
+
+# work on the temp copy
+print "-> Creating temporary files..."
+copytree(loan_module_dir, tmp_loan_module_dir, 
+         ignore=ignore_patterns('*.pyc','*.doc', '*.docx', 
+                                '*.sql', '*.pyc', '*.run', '*.gz', 
+                                '*.zip', '*.sh', '*.pdf', '.project', '.pydevproject'))
+
+print "Generating installer..."
+try: 
+    subprocess.check_output('which makeself',shell=True)
+except: 
+    rmtree(tmp_loan_module_dir)
+    sys.exit('ERROR: A required binary was not found. Try installing it by\
+                                        running: sudo apt-get install makeself')
+
+subprocess.check_output(['/usr/bin/python', '-m', 'compileall', tmp_loan_module_dir])
+
+#we only need the important files e.g. xml, jrxml
+exclude_dirs =['migration_scripts', 'send_sms_android']
+ 
+for root, dirs, files in os.walk(tmp_loan_module_dir):
+    if root.split('/')[-1] in exclude_dirs:
+        rmtree(root)
+        continue
     
-    def removeGroups(self, cr, uid, ids, context=None):
-        for form in self.read(cr, uid, ids, context=None):
-            for group in form['group_ids']:
-                print group
-                groupReader = self.pool.get('res.groups').read(cr, uid, group, context=None)
-                print groupReader
-                for model in groupReader['model_access']:
-                    self.pool.get('ir.model.access').unlink(cr, uid, model)
-                cr.execute('delete from res_groups where id=%s' % group)
-        return True
-ntm_installer()
+    for basename in files:
+        if fnmatch.fnmatch(basename, '*'):
+            filename = os.path.join(root, basename)
+            if (filename.endswith(('__init__.py', '__openerp__.py'))):
+                continue 
+            
+            if filename.endswith(('.py')):
+                os.remove(filename)
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+subprocess.check_output("/usr/bin/makeself --notemp %s %s \
+       \"NTM Extensions\" echo \"Done.\"" % (tmp_loan_module_dir, \
+       loan_module_dir + installer_name), shell=True)
+
+# cleanup
+print "-> Removing temporary files.."
+rmtree(tmp_loan_module_dir)
+print "-> Installer creation successful. Location: %s" \
+          % loan_module_dir + installer_name
+
+copy(loan_module_dir + installer_name, loan_module_dir + orig_installer_name)
