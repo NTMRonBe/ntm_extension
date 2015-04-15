@@ -79,6 +79,7 @@ class soa_request(osv.osv):
                                     values = {
                                             'account_id':account_id,
                                             'email_to':email_to,
+                                            'reply_to': 'field-finance-office_ph@ntm.org',
                                             'folder':'outbox',
                                             'subject':subject,
                                             'state':'na',
