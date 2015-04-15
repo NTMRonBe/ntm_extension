@@ -5,7 +5,8 @@ Enhancements:
     Redmine #1496   - For SOA email, add reply-to field.
     Redmine #1067   - Cancellation function on petty cash transfer module.
     Redmine #859    - Tool for backing up and restoring database using psql commands.
-    Redmine #2223   - Create installer with identifier in the filename
+    Redmine #2223   - Create installer with identifier in the filename.
+    Redmine #1674   - Add new field ps_number in Phone Logs model.
     
 Bug Fixes   :
     Redmine #1495   - In People and Projects > Expense Distribution > Vehicle Logs, 
