@@ -75,6 +75,7 @@ class phone_logs(osv.osv):
         'extension':fields.char('Extension',size=10),
         'phone_pin':fields.char('Phone Pin',size=10),
         'number':fields.char('Number',size=32),
+        'ps_number':fields.char('PS Number',size=5),
         'duration':fields.char('Duration',size=32),
         'status':fields.char('Status',size=32),
         'price':fields.float('Log Price'),
