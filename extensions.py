@@ -119,6 +119,7 @@ class phone_pins(osv.osv):
         'name':fields.char('Phone Pin',size=6, required=True),
         'account_id':fields.many2one('account.analytic.account','Account Name', ondelete='cascade',required=True),
         'description':fields.char('Description',size=64,required=True),
+        'ps_number':fields.char('PS Number',size=5),
         }
 phone_pins()
 

@@ -395,7 +395,7 @@
         
         
         <record id="analytic_journal_vd" model="account.analytic.journal">
-            <field name="name">Voucher Distriution</field>
+            <field name="name">Voucher Distribution</field>
             <field name="code">VD</field>
             <field name="active" eval="1"/>
             <field name="type">general</field>

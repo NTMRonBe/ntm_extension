@@ -502,6 +502,7 @@
                     <field name="name"/>
                     <field name="account_id"/>
                     <field name="description"/>
+                    <field name="ps_number"/>
                 </form>
             </field>
         </record>        
@@ -514,6 +515,7 @@
                     <field name="name"/>
                     <field name="account_id"/>
                     <field name="description"/>
+                    <field name="ps_number"/>
                 </tree>
             </field>
         </record>
