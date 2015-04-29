@@ -62,6 +62,7 @@ class dbe(osv.osv):
         user_id = uid
         user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
         company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['currency_id','contributions_acct','donations','bank_charge'])
+        
         comp_curr = company_read['currency_id'][0]
         rate = False
         currency = False

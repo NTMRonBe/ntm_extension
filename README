@@ -1,4 +1,13 @@
 -------------------------------------------------------------------------------
+Date        : April 29, 2015
+
+Enhancements:
+    Redmine #1937   - All transactions to/from non-asset accounts should be reflected in analytical accounts.
+    Redmine #1674   - Add new field ps_number in Phone Logs model.
+    
+Bug Fixes   :
+
+-------------------------------------------------------------------------------
 Date        : April 15, 2015
 
 Enhancements:

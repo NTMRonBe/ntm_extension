@@ -88,11 +88,13 @@ class idg(osv.osv):
             user_id = uid
             user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
             company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['other_ap','currency_id'])
+            analytic_read = self.pool.get('account.analytic.account').read(cr, uid, company_read['other_ap'][0], ['normal_account'])
             move_line = {
                     'name':'Other Expenses',
                     'journal_id':journal_id,
                     'period_id':period_id,
-                    'account_id':company_read['other_ap'][0],
+                    #'account_id':company_read['other_ap'][0],
+                    'account_id':analytic_read['normal_account'][0],
                     'credit':amount,
                     'date':date,
                     'move_id':move_id,

@@ -158,6 +158,8 @@ class phone_statement_payment(osv.osv_memory):
             user_id = uid
             user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
             company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['phone_bill_ap','currency_id','transit_php'])
+            analytic_read = self.pool.get('account.analytic.account').read(cr, uid, company_read['phone_bill_ap'][0], ['normal_account'])
+            
             move_line = {
                     'name':form['check_number'],
                     'journal_id':journal_id,
@@ -175,7 +177,8 @@ class phone_statement_payment(osv.osv_memory):
                     'name':form['check_number'],
                     'journal_id':journal_id,
                     'period_id':period_id,
-                    'account_id':company_read['phone_bill_ap'][0],
+                    #'account_id':company_read['phone_bill_ap'][0],
+                    'account_id':analytic_read['normal_account'][0],
                     'debit':amount,
                     'date':date_now,
                     'ref':statement_read['name'],
@@ -365,11 +368,13 @@ class phone_statement_logs(osv.osv):
             user_id = uid
             user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
             company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['phone_bill_ap','currency_id'])
+            analytic_read = self.pool.get('account.analytic.account').read(cr, uid, company_read['phone_bill_ap'][0], ['normal_account'])
             move_line = {
                     'name':statement['name'],
                     'journal_id':journal_id,
                     'period_id':period_id,
-                    'account_id':company_read['phone_bill_ap'][0],
+                    #'account_id':company_read['phone_bill_ap'][0],
+                    'account_id':analytic_read['normal_account'][0],
                     'credit':amount,
                     'date':date_now,
                     'ref':statement['name'],

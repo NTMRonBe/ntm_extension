@@ -111,6 +111,7 @@ class idg(osv.osv):
         user_id = uid
         user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
         company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['currency_id','donations','bank_charge'])
+        analytic_read = self.pool.get('account.analytic.account').read(cr, uid, company_read['donations'][0],['normal_account'])
         comp_curr = company_read['currency_id'][0]
         rate = False
         currency = False
@@ -139,7 +140,8 @@ class idg(osv.osv):
                     'name':name,
                     'journal_id':journal_id,
                     'period_id':period_id,
-                    'account_id':company_read['donations'][0],
+                    #'account_id':company_read['donations'][0],
+                    'account_id':analytic_read['normal_account'][0],
                     'credit':amount,
                     'date':idg['rdate'],
                     'ref':idg['name'],
@@ -203,6 +205,7 @@ class idg(osv.osv):
         user_id = uid
         user_read = self.pool.get('res.users').read(cr, uid, user_id, ['company_id'])
         company_read = self.pool.get('res.company').read(cr, uid, user_read['company_id'][0],['currency_id','contributions_acct','donations','bank_charge'])
+        analytic_read = self.pool.get('account.analytic.account').read(cr, uid, [company_read['donations'][0], company_read['contributions_acct'][0]],['normal_account'])
         comp_curr = company_read['currency_id'][0]
         rate = False
         currency = False
@@ -289,7 +292,8 @@ class idg(osv.osv):
                             'name':name,
                             'journal_id':journal_id,
                             'period_id':period_id,
-                            'account_id':company_read['donations'][0],
+                            #'account_id':company_read['donations'][0],
+                            'account_id':analytic_read[0]['normal_account'][0],
                             'debit':curr_distribution,                        
                             'date':idg['ddate'],
                             'ref':idg['name'],
@@ -304,7 +308,8 @@ class idg(osv.osv):
                                'name':name,
                                'journal_id':journal_id,
                                'period_id':period_id,
-                               'account_id':company_read['contributions_acct'][0],
+                               #'account_id':company_read['contributions_acct'][0],
+                               'account_id':analytic_read[1]['normal_account'][0],
                                'credit':curr_contribution,                        
                                'date':idg['ddate'],
                                'ref':idg['name'],
