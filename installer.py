@@ -23,9 +23,9 @@ if os.path.isfile(loan_module_dir + '/install*.run'):
 # work on the temp copy
 print "-> Creating temporary files..."
 copytree(loan_module_dir, tmp_loan_module_dir, 
-         ignore=ignore_patterns('*.pyc','*.doc', '*.docx', 
+         ignore=ignore_patterns(*('installer.py', '*.pyc','*.doc', '*.docx', 
                                 '*.sql', '*.pyc', '*.run', '*.gz', 
-                                '*.zip', '*.sh', '*.pdf', '.project', '.pydevproject'))
+                                '*.zip', '*.sh', '*.pdf', '.project', '.pydevproject', '.git')))
 
 print "Generating installer..."
 try: 
