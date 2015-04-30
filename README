@@ -1,4 +1,12 @@
 -------------------------------------------------------------------------------
+Date        : April 30, 2015
+
+Enhancements:
+    Redmine #1937   - All transactions to/from non-asset accounts should be reflected in analytical accounts.
+                    - reverted changes for ur_gain_loss
+Bug Fixes   :
+
+-------------------------------------------------------------------------------
 Date        : April 29, 2015
 
 Enhancements:
