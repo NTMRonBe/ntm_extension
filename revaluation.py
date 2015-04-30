@@ -580,7 +580,7 @@ class new_reval2(osv.osv):
 						}
 			uidRead = self.pool.get('res.users').read(cr, uid, uid, ['company_id'])
 			compRead = self.pool.get('res.company').read(cr, uid, uidRead['company_id'][0], ['def_gain_loss','ur_gain_loss'])
-			defReader = self.pool.get('account.analytic.account').read(cr, uid, [compRead['def_gain_loss'][0],compRead['ur_gain_loss'][0]],['normal_account'])
+			defReader = self.pool.get('account.analytic.account').read(cr, uid, compRead['def_gain_loss'][0],['normal_account'])
 			#defReaderacctEntries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',defReader['analytic_id'][0])])
 			defReaderacctEntries = self.pool.get('account.move.line').search(cr, uid, [('analytic_account_id','=',compRead['def_gain_loss'][0])])
 			defReaderBalance = 0.00
@@ -588,11 +588,10 @@ class new_reval2(osv.osv):
 			for entry in defReaderacctEntries:
 				entryReader = self.pool.get('account.move.line').read(cr, uid, entry, ['debit','credit'])
 				defReaderBalance +=entryReader['debit']-entryReader['credit']
-			#urReaderacctEntries = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',compRead['ur_gain_loss'][0])])
-			urReaderacctEntries = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',defReader[1]['normal_account'][0])])
+			urReaderacctEntries = self.pool.get('account.move.line').search(cr, uid, [('account_id','=',compRead['ur_gain_loss'][0])])
 			name = 'Regional Accounts Gains'
 			entryTemplate.update({#'account_id':analyticRead2['normal_account'][0],
-								'account_id':defReader[0]['normal_account'][0],
+								'account_id':defReader['normal_account'][0],
 								'debit':creditSum,
 								'credit':0.00,
 								'name':name,
