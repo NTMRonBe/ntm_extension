@@ -224,6 +224,7 @@ class ob_import_wiz(osv.osv_memory):
     }
         
     def createEntries(self, cr, uid, ids, context=None):
+        pool = self.pool.get
         for form in self.read(cr, uid, ids, context=None):
             move = {
                 'ref':form['name'],
@@ -232,28 +233,31 @@ class ob_import_wiz(osv.osv_memory):
                 'date':form['date'],
                 'state':'draft',
                 }
-            move_id = self.pool.get('account.move').create(cr, uid, move)
-            for line in context['active_ids']:
-                lineRead = self.pool.get('ob.import').read(cr, uid, line, context=None)
+            move_id = pool('account.move').create(cr, uid, move)
+            lines = pool('ob.import').read(cr, uid, context['active_ids'], context=None)
+            for lineRead in lines:
+                #lineRead = pool('ob.import').read(cr, uid, line, context=None)
                 account_id = False
                 curr_id = False
                 analytic_id = False
+                
+                #print lineRead
                 if lineRead['analytic_id']:
                     analytic_id = lineRead['analytic_id'][0]
-                    analyticRead = self.pool.get('account.analytic.account').read(cr, uid, analytic_id, ['normal_account'])
+                    analyticRead = pool('account.analytic.account').read(cr, uid, analytic_id, ['normal_account'])
                     account_id = analyticRead['normal_account'][0]
                 elif lineRead['account_id']:
                     account_id = lineRead['account_id'][0]
                     analytic_id = False
                 elif lineRead['accpac_id']:
-                    checker = self.pool.get('account.accpac').search(cr, uid, [('name','=',lineRead['accpac_id']),('state','=','matched')], limit=1)
+                    checker = pool('account.accpac').search(cr, uid, [('name','=',lineRead['accpac_id']),('state','=','matched')], limit=1)
                     if checker:
-                        checker_read = self.pool.get('account.accpac').read(cr, uid, checker[0],context=None)
+                        checker_read = pool('account.accpac').read(cr, uid, checker[0],context=None)
                         if checker_read['account_id']:
                             account_id = checker_read['account_id'][0]
                         elif checker_read['analytic_id']:
                             analytic_id = checker_read['analytic_id'][0]
-                            analyticReader = self.pool.get('account.analytic.account').read(cr, uid, analytic_id,['normal_account'])
+                            analyticReader = pool('account.analytic.account').read(cr, uid, analytic_id,['normal_account'])
                             account_id = analyticReader['normal_account'][0]
                     if not checker:
                         account_number = lineRead['accpac_id']
@@ -271,8 +275,9 @@ class ob_import_wiz(osv.osv_memory):
                     'credit':lineRead['credit'],
                     'move_id':move_id,
                 }
-                self.pool.get('account.move.line').create(cr, uid, move_line)
-            lines = context['active_ids']
-            self.pool.get('ob.import').unlink(cr, uid, lines)
-        return {'type': 'ir.actions.act_window_close'}
+                pool('account.move.line').create(cr, uid, move_line)
+            pool('ob.import').unlink(cr, uid, context['active_ids'])
+        #return {'type': 'ir.actions.act_window_close'}
+        print "Done!"
+        return True
 ob_import_wiz()
