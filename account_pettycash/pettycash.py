@@ -18,6 +18,7 @@ class account_pettycash(osv.osv):
         'currency_id':fields.many2one('res.currency','Currency', required=True,),
         'state': fields.selection([
             ('draft','Draft'),
+            ('confirm','Confirmed'),
             ('active','Active'),
             ],'Status', readonly=True),
         }
@@ -100,8 +101,10 @@ class apc(osv.osv):
 					pc_denom_pool.create(cr, uid, pc_denominations)
 			elif not inv.account_code:
 				raise osv.except_osv(_('Error !'), _('PCM-001: Please define the petty cash account !'))
-		self.write(cr, uid, ids, {'state':'active'})
-		return True
+		return self.write(cr, uid, ids, {'state': 'confirm'})
+
+    def set_active(self, cr, uid, ids, context=None):
+        return self.write(cr, uid, ids, {'state': 'active'})
                 
 apc()
 

@@ -20,10 +20,10 @@
                     <group colspan="4" col="4">
                         <field name="name"/>
                         <field name="date" attrs="{'readonly': [('state','!=','draft')]}" required="True"/>
+                        <field name="bank_id" string="Source Bank" domain="[('ownership','=','company')]" attrs="{'readonly': [('state','!=','draft')]}" />
                         <field name="pettycash_id" attrs="{'readonly': [('state','!=','draft')]}" on_change="onchange_pettycash(pettycash_id)"/>
-                        <field name="bank_id" domain="[('ownership','=','company'),('currency_id','=',curr_id)]" attrs="{'readonly': [('state','!=','draft')]}" />
                         <field name="period_id" attrs="{'readonly': [('state','!=','draft')]}" required="True"/>
-                        <field name="curr_id" attrs="{'readonly': [('state','!=','draft')]}" invisible="1"/>
+                        <field name="curr_id" attrs="{'readonly': [('state','!=','draft')]}" required="True"/>
                         <field name="total_amount" invisible="1"/>
                         <field name="filled" invisible="1"/>
                     </group>

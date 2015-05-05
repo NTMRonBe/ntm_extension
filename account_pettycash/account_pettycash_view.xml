@@ -266,11 +266,11 @@
                                             type="object"
                                             name="fill_denominations"
                                             icon="gtk-execute"
-                                            attrs="{'invisible':[('state','!=','draft')]}"
+                                            attrs="{'invisible':[('state','in',['active', 'confirm'])]}"
                                             />
 	                        </group>
                         </group>
-                        <field name="denomination_ids" mode="tree" nolabel="1" readonly="True" colspan="4">
+                        <field name="denomination_ids" mode="tree" nolabel="1" attrs="{'readonly':[('state','=','active')]}" colspan="4">
                                   <tree string="Denomination Breakdown">
                                       <field name="name"/>
                                       <field name="quantity"/>
@@ -278,8 +278,13 @@
                                   </tree>
                         </field>
                         <newline/>
-                        <field name="state" colspan="4"/>
-                        
+                        <field name="state" colspan="3"/>
+                        <button string="Finalize"
+                                            type="object"
+                                            name="set_active"
+                                            icon="gtk-execute"
+                                            attrs="{'invisible':[('state','in',['draft', 'active'])]}"
+                                            />
                 </form>
             </field>
         </record>        
