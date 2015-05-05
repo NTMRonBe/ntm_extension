@@ -1,4 +1,13 @@
 -------------------------------------------------------------------------------
+Date        : May 5, 2015
+
+Enhancements:
+    Redmine #2375   - Allow secondary currency entries in recurring entries
+    Redmine #2381   - Allow pettycash manager to set denomination list values
+
+Bug Fixes   :
+
+-------------------------------------------------------------------------------
 Date        : May 4, 2015
 
 Enhancements:
