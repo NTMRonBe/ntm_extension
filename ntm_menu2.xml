@@ -128,6 +128,7 @@
         <menuitem id="ntm_acct_je4_menu" sequence="40" name="Analytic Journal Items" parent="ntm_acct_jes_root" action="account.action_account_analytic_journal_open_form"/>
         
         <menuitem id="ntm_acct_pp1_menu" sequence="10" name="Opening Balance" parent="ntm_acct_periodical_root" action="action_ob_import_form"/>
+        <menuitem id="ntm_acct_pp5_menu" sequence="10" name="Generate Entries" parent="ntm_acct_pp1_menu" action="action_ob_import_wiz"/>
         <menuitem id="account.menu_finance_recurrent_entries" sequence="20" name="Recurring Entries" parent="ntm_acct_periodical_root"/>
         <menuitem id="ntm_acct_pp2_menu" sequence="30" name="End of Period" parent="ntm_acct_periodical_root"/>
         <menuitem id="ntm_acct_pp3_menu" sequence="40" name="Revaluations" parent="ntm_acct_periodical_root"/>
