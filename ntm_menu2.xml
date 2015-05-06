@@ -38,13 +38,13 @@
          -->
         <!-- End of header 2 on Manual - People and Projects-->
         
-        <!-- Start of header 2 on Manual - Accounting-->
+        <!-- Start of header 2 on Manual - Accounting
         <menuitem id="ntm_acct_jes_root" sequence="10" name="Journal Entries" parent="ntm_extension.accounting"/>
         <menuitem id="ntm_acct_charts_root" sequence="20" name="Charts" parent="ntm_extension.accounting"/>
         <menuitem id="ntm_acct_periodical_root" sequence="30" name="Periodical Processing" parent="ntm_extension.accounting"/>
         <menuitem id="ntm_acct_reports_root" sequence="40" name="Reports" parent="ntm_extension.accounting"/>
         <menuitem id="ntm_acct_config_root" sequence="50" name="Configuration" parent="ntm_extension.accounting"/>
-        <!-- End of header 2 on Manual - Accounting-->
+        End of header 2 on Manual - Accounting-->
         
         <!-- End of header 2 on Manual-->
         
@@ -119,85 +119,51 @@
         <!-- End of header 3 on Manual - Bank and Cash-->
         
         <!-- Start of header 3 on Manual - Accounting-->
-        <menuitem id="ntm_acct_coa_action_menu" sequence="10" name="Chart of Normal Accounts" parent="ntm_acct_charts_root" action="account.action_account_chart"/>
-        <menuitem id="ntm_acct_coaa_action_menu" sequence="20" name="Chart of Analytic Accounts" parent="ntm_acct_charts_root" action="account.action_account_analytic_chart"/>
-        
-        <!-- <menuitem id="ntm_acct_je1_menu" sequence="10" name="Journal Vouchers" parent="ntm_acct_jes_root" action="account_voucher.action_voucher_list"/> -->
-        <menuitem id="ntm_acct_je2_menu" sequence="20" name="Journal Entries" parent="ntm_acct_jes_root" action="account.action_move_journal_line"/>
-        <menuitem id="ntm_acct_je3_menu" sequence="30" name="Journal Items" parent="ntm_acct_jes_root" action="account.action_account_moves_all_a"/>
-        <menuitem id="ntm_acct_je4_menu" sequence="40" name="Analytic Journal Items" parent="ntm_acct_jes_root" action="account.action_account_analytic_journal_open_form"/>
-        
-        <menuitem id="ntm_acct_pp1_menu" sequence="10" name="Opening Balance" parent="ntm_acct_periodical_root" action="action_ob_import_form"/>
+        <menuitem id="ntm_acct_pp1_menu" sequence="1" name="Opening Balance" parent="account.menu_finance_periodical_processing" action="action_ob_import_form"/>
         <menuitem id="ntm_acct_pp5_menu" sequence="10" name="Generate Entries" parent="ntm_acct_pp1_menu" action="action_ob_import_wiz"/>
-        <menuitem id="account.menu_finance_recurrent_entries" sequence="20" name="Recurring Entries" parent="ntm_acct_periodical_root"/>
-        <menuitem id="ntm_acct_pp2_menu" sequence="30" name="End of Period" parent="ntm_acct_periodical_root"/>
-        <menuitem id="ntm_acct_pp3_menu" sequence="40" name="Revaluations" parent="ntm_acct_periodical_root"/>
-        <menuitem id="ntm_acct_pp4_menu" sequence="50" name="Fund Allocation" parent="ntm_acct_periodical_root" action="action_allocate_funds_wiz"/>
         
-        <menuitem id="ntm_acct_reports1_root" name="Statement of Accounts" parent="ntm_acct_reports_root" sequence="10"/>
-        <menuitem id="ntm_acct_reports2_root" name="Regional Reports" parent="ntm_acct_reports_root" sequence="20"/>
-       
-        <menuitem id="ntm_acct_config1_root" sequence="10" name="Financial Accounting" parent="ntm_acct_config_root"/>
-        <menuitem id="ntm_acct_config2_root" sequence="20" name="Analytical Accounting" parent="ntm_acct_config_root"/>
-        <menuitem id="ntm_acct_config3_root" sequence="30" name="ACCPAC Extension Tools" parent="ntm_acct_config_root"/>
-        <menuitem id="ntm_acct_config4_root" sequence="40" name="Miscellaneous" parent="ntm_acct_config_root"/>
-        <!-- End of header 3 on Manual - Accounting-->
-        
-        
-        <!-- End of header 3 on Manual-->        
-        
-        <!-- Start of header 4 on Manual-->
-        <!-- Start of header 4 on Manual - Accounting-->
-        <menuitem id="ntm_acct_pp2_eop1_menu" sequence="10" name="Close a Period" parent="ntm_acct_pp2_menu" action="account.action_account_period_tree" />
-        <menuitem id="ntm_acct_pp2_eop2_menu" sequence="20" name="Close a Fiscal Year" parent="ntm_acct_pp2_menu" action="account.action_account_fiscalyear_close_state"/>
+        <menuitem id="account.menu_finance_recurrent_entries" sequence="20" name="Recurring Entries" parent="account.menu_finance_periodical_processing"/>
+
+        <menuitem id="ntm_acct_pp3_menu" sequence="40" name="Revaluations" parent="account.menu_finance_periodical_processing"/>
         <menuitem id="ntm_acct_pp3_rev1_menu" sequence="10" name="Monthly Revaluation" parent="ntm_acct_pp3_menu" action="action_account_revaluation"/>
         <menuitem id="ntm_acct_pp3_rev2_menu" sequence="20" name="Revised Monthly Revaluation" parent="ntm_acct_pp3_menu" action="action_new_reval_tree"/>
+
+        <menuitem id="ntm_acct_pp4_menu" sequence="50" name="Fund Allocation" parent="account.menu_finance_periodical_processing" action="action_allocate_funds_wiz"/>
         
-        
+        <menuitem id="ntm_acct_reports1_root" name="Statement of Accounts" parent="account.menu_finance_reporting" sequence="10"/>
         <menuitem id="ntm_menu_account_soa" action="action_account_soa_form" parent="ntm_acct_reports1_root" sequence="10"/> 
         <menuitem id="ntm_menu_soa_request" string="Statement Requests" action="action_soa_request_form" parent="ntm_acct_reports1_root" sequence="20"/>
-        
+
+        <menuitem id="ntm_acct_reports2_root" name="Regional Reports" parent="account.menu_finance_reporting" sequence="20"/>
         <menuitem id="ntm_acct_reports2_1_root" action="action_region_report_wiz" parent="ntm_acct_reports2_root" sequence="10"/>
         <menuitem id="ntm_acct_reports2_2_root" string="Regional Profit and Loss" action="action_region_report_form" parent="ntm_acct_reports2_root" sequence="10"/>
         <menuitem id="ntm_acct_reports2_3_root" action="action_regional_uploader_form" parent="ntm_acct_reports2_root" sequence="20"/>
-        <!-- <menuitem id="ntm_acct_reports2_4_root" action="action_upload_invoice_slips" parent="ntm_acct_reports2_root" sequence="30"/> -->
-        
-        <menuitem id="ntm_acct_config1_1_root" sequence="10" name="Periods" parent="ntm_acct_config1_root"/>
-        <menuitem id="ntm_acct_config1_2_root" sequence="20" name="Journals" parent="ntm_acct_config1_root"/>
-        <menuitem id="ntm_acct_config1_3_root" sequence="30" name="Accounts" parent="ntm_acct_config1_root"/>
-        
-        <menuitem id="ntm_acct_config2_1_root" sequence="10" name="Analytic Journals" parent="ntm_acct_config2_root" action="account.action_account_analytic_journal_form"/>
-        <menuitem id="ntm_acct_config2_2_root" sequence="20" name="Analytic Accounts" parent="ntm_acct_config2_root" action="account.action_account_analytic_account_form"/>
-        
+       
+        <menuitem id="ntm_acct_config3_root" sequence="30" name="ACCPAC Extension Tools" parent="account.menu_finance_configuration"/>
         <menuitem id="menu_account_accpac" action="action_account_accpac_form" parent="ntm_acct_config3_root" sequence="10"/>
         <menuitem id="menu_account_accpac_wiz" action="action_account_accpac_wiz" parent="ntm_acct_config3_root" sequence="20"/>
-        
-        <menuitem id="menu_region_config" action="action_region_config_form" parent="ntm_acct_config4_root" sequence="10"/>
-        <menuitem action="account.action_model_form" id="account.menu_action_model_form" sequence="20" parent="ntm_acct_config4_root" groups="base.group_extended"/>
-        <menuitem id="ntm_recurring_menu" parent="ntm_acct_config4_root" action="action_analytic_recur_entry_form" sequence="30"/>
-        
-        
-        <!-- End of header 4 on Manual - Accounting-->
-        <!-- End of header 4 on Manual-->  
-        
-        
-        <!-- Start of header 5 on Manual-->
-        <!-- Start of header 5 on Manual - Accounting-->
-        <menuitem id="ntm_acct_config1_1_fy_root" sequence="10" name="Fiscal Years" parent="ntm_acct_config1_1_root" action="account.action_account_fiscalyear_form"/>
-        <menuitem id="ntm_acct_config1_1_fp_root" sequence="20" name="Periods" parent="ntm_acct_config1_1_root" action="account.action_account_period_form"/>
-        
-        <menuitem id="ntm_acct_config1_2_1_root" sequence="10" name="Journal Views" parent="ntm_acct_config1_2_root" action="account.action_account_journal_view"/>
-        <menuitem id="ntm_acct_config1_2_2_root" sequence="20" name="Journals" parent="ntm_acct_config1_2_root" action="account.action_account_journal_form"/>
-        
-        <menuitem id="ntm_acct_config1_3_1_root" sequence="10" name="Account Types" parent="ntm_acct_config1_3_root" action="account.action_account_type_form"/>
-        <menuitem id="ntm_acct_config1_3_2_root" sequence="20" name="Accounts" parent="ntm_acct_config1_3_root" action="account.action_account_form"/>
-        
-        <!-- End of header 5 on Manual - Accounting-->
-        <!-- End of header 5 on Manual-->
-        
+
+        <menuitem id="menu_region_config" action="action_region_config_form" parent="account.menu_configuration_misc" sequence="10"/>
+        <menuitem action="account.action_model_form" id="account.menu_action_model_form" sequence="20" parent="account.menu_configuration_misc" groups="base.group_extended"/>
+        <menuitem id="ntm_recurring_menu" parent="account.menu_configuration_misc" action="action_analytic_recur_entry_form" sequence="30"/>
+
+        <!-- End of header 3 on Manual - Accounting-->
+        <!-- End of header 3 on Manual-->        
         
         <!-- Inherited menus-->
+        <!-- Remove base menu-->
+        <menuitem id="account.menu_finance_bank_and_cash" groups="base.group_no_one"/>
+        <menuitem id="account.menu_encode_entries_by_voucher" groups="base.group_no_one"/>
+        <menuitem id="account.menu_wizard_account_open_closed_fiscalyear" groups="base.group_no_one"/>
+        <menuitem id="account.menu_wizard_fy_close" groups="base.group_no_one"/>
+        <menuitem id="account.periodical_processing_journal_entries_validation" groups="base.group_no_one"/>
+        <menuitem id="account.menu_action_payment_term_form" groups="base.group_no_one"/>
         
+        <!-- 
+        <menuitem id="account.action_account_tax_chart" groups="base.group_no_one"/>
+        <menuitem id="account.menu_action_tax_code_list" groups="base.group_no_one"/>
+        <menuitem id="account.menu_action_tax_code_tree" groups="base.group_no_one"/>
+         -->
               
     </data>
 </openerp>
