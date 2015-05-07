@@ -236,7 +236,9 @@ class ob_import_wiz(osv.osv_memory):
             'state':'draft',
             }
         move_id = pool('account.move').create(cr, uid, move)
-        lines = pool('ob.import').read(cr, uid, context['active_ids'], context=None)
+        ids = pool('ob.import').search(cr, uid, [], context=None)
+        #lines = pool('ob.import').read(cr, uid, context['active_ids'], context=None)
+        lines = pool('ob.import').read(cr, uid, ids, context=None)
         
         for lineRead in lines:
             #lineRead = pool('ob.import').read(cr, uid, line, context=None)
@@ -283,6 +285,7 @@ class ob_import_wiz(osv.osv_memory):
             try:
                 id = pool('account.move.line').create(cr, uid, move_line)
             except Exception as e:
+                raise osv.except_osv(_('Error!'), (e))
                 print e
         print "Done!"
         cr.execute("delete from ob_import")
