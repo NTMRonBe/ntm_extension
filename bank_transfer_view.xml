@@ -385,6 +385,19 @@
                 <form string="Bank Transfer">
                      <group colspan="4" col="4">
 	                    <group colspan="2" col="2">
+	                        <separator string="Company Bank Details"/>
+	                        <field name="company_bank_id" string="Account #"/>
+	                        <field name="company_bank_name" string="Company Bank Name"/>
+	                    </group>
+	                    <group colspan="2" col="2">
+	                        <separator string="Recipient Details"/>
+	                        <field name="account_id" string="Analytic Account"/>
+	                        <field name="account_name" invisible="1"/>
+	                        <field name="entity_bank_id"/>
+	                        <field name="entity_bank_name"/>
+	                    </group>
+	                    <!-- 
+	                    <group colspan="2" col="2">
 	                        <separator string="Bank Details"/>
 	                        <field name="company_bank_name"/>
 	                        <field name="company_bank_id" attrs="{'readonly':[('compute','=',True)]}"/>
@@ -397,6 +410,7 @@
 	                        <field name="entity_bank_id" domain="[('partner_id.name','=',account_name)]" attrs="{'readonly':['|',('account_id','=',False),('compute','=',True)]}"/>
 	                        <field name="entity_bank_name"/>
 	                    </group>
+	                     -->
                     </group>
                     <notebook>
                         <page string="Transfer Details">
@@ -470,16 +484,15 @@
                 <form string="Transfer Requests">
                     <group colspan="4" col="4">
                     <group colspan="2" col="2">
-                        <separator string="Bank Details"/>
-                        <field name="company_bank_name"/>
-                        <field name="company_bank_id"/>
-                        <field name="company_acc_name"/>
+                        <separator string="Company Bank Details"/>
+                        <field name="company_bank_id" string="Account #"/>
+                        <field name="company_bank_name" string="Company Bank Name"/>
                     </group>
                     <group colspan="2" col="2">
                         <separator string="Recipient Details"/>
-                        <field name="account_id"/>
+                        <field name="account_id" string="Analytic Account"/>
                         <field name="account_name" invisible="1"/>
-                        <field name="entity_bank_id" domain="[('partner_id.name','=',account_name)]"/>
+                        <field name="entity_bank_id"/>
                         <field name="entity_bank_name"/>
                     </group>
                     </group>
