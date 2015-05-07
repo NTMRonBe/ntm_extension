@@ -153,11 +153,13 @@
         <!-- Inherited menus-->
         <!-- Remove base menu-->
         <menuitem id="account.menu_finance_bank_and_cash" groups="base.group_no_one"/>
+        <menuitem id="account.menu_bank_statement_tree" groups="base.group_no_one"/>
         <menuitem id="account.menu_encode_entries_by_voucher" groups="base.group_no_one"/>
         <menuitem id="account.menu_wizard_account_open_closed_fiscalyear" groups="base.group_no_one"/>
         <menuitem id="account.menu_wizard_fy_close" groups="base.group_no_one"/>
         <menuitem id="account.periodical_processing_journal_entries_validation" groups="base.group_no_one"/>
         <menuitem id="account.menu_action_payment_term_form" groups="base.group_no_one"/>
+        <menuitem id="account.menu_eaction_account_moves_purchase" groups="base.group_no_one"/>
         
         <!-- 
         <menuitem id="account.action_account_tax_chart" groups="base.group_no_one"/>

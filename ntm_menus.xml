@@ -4,7 +4,6 @@
     
     
     <!-- Hider -->
-    <menuitem id="account.menu_eaction_account_moves_purchase" groups="base.group_no_one"/>
     <!-- Menus -->
         <menuitem id="base.menu_partner_address_form" name="Addresses" parent="account.menu_finance_receivables" sequence="50" groups="base.group_no_one"/>
         <menuitem id="account.menu_finance_receivables" name="Donors" sequence="10" web_icon="images/donation_box_icon_bw.jpg"
@@ -13,9 +12,6 @@
         <menuitem id="account.menu_action_invoice_tree2" groups="base.group_no_one"/>
         <menuitem id="account.menu_action_invoice_tree3" groups="base.group_no_one"/>
         <menuitem id="account.menu_action_invoice_tree4" groups="base.group_no_one"/>
-        <menuitem id="account_voucher.menu_action_sale_receipt" groups="base.group_no_one" parent="account.menu_finance_bank_and_cash"/>
-        <menuitem id="account_voucher.menu_action_purchase_receipt" groups="base.group_no_one" parent="account.menu_finance_bank_and_cash"/>
-        <menuitem id="account_voucher.menu_action_vendor_payment" groups="base.group_no_one" parent="account.menu_finance_bank_and_cash"/>
         <menuitem id="account.menu_account_customer" name="Donors Information" parent="account.menu_finance_receivables" groups="base.group_no_one"/>
         <menuitem id="account_voucher.menu_action_vendor_receipt" groups="base.group_no_one" />
         
