@@ -122,7 +122,7 @@
         <menuitem id="ntm_acct_pp1_menu" sequence="1" name="Opening Balance" parent="account.menu_finance_periodical_processing" action="action_ob_import_form"/>
         <menuitem id="ntm_acct_pp5_menu" sequence="10" name="Generate Entries" parent="ntm_acct_pp1_menu" action="action_ob_import_wiz"/>
         
-        <menuitem id="account.menu_finance_recurrent_entries" sequence="20" name="Recurring Entries" parent="account.menu_finance_periodical_processing"/>
+        <menuitem id="ntm_recurring_models_menu" sequence="1" string="Define Recurring Models" parent="account.menu_finance_recurrent_entries" action="account.action_model_form"/>
 
         <menuitem id="ntm_acct_pp3_menu" sequence="40" name="Revaluations" parent="account.menu_finance_periodical_processing"/>
         <menuitem id="ntm_acct_pp3_rev1_menu" sequence="10" name="Monthly Revaluation" parent="ntm_acct_pp3_menu" action="action_account_revaluation"/>
@@ -145,7 +145,6 @@
 
         <menuitem id="menu_region_config" action="action_region_config_form" parent="account.menu_configuration_misc" sequence="10"/>
         <menuitem action="account.action_model_form" id="account.menu_action_model_form" sequence="20" parent="account.menu_configuration_misc" groups="base.group_extended"/>
-        <menuitem id="ntm_recurring_menu" parent="account.menu_configuration_misc" action="action_analytic_recur_entry_form" sequence="30"/>
 
         <!-- End of header 3 on Manual - Accounting-->
         <!-- End of header 3 on Manual-->        

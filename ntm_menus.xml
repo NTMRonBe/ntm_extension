@@ -37,7 +37,6 @@
         <menuitem id="base.menu_tools" groups="base.group_no_one"/>
         
         
-        <menuitem id="ntm_generate_recurring" parent="account.menu_finance_recurrent_entries" sequence="100" action="action_rsc_form"/>
         
        <!-- <menuitem id="menu_manual_entries" action="ntm_action_account_move_form" parent="account.menu_finance_payables" sequence="100"/>
        Actions -->
