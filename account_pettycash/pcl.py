@@ -545,7 +545,8 @@ class pcl(osv.osv):
                                 'amount_currency':line2_read['amount'],
                                 'currency_id':currency,
                                 }
-                        self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+                        if comp_curr_amount > 0:
+                            self.pool.get('account.move.line').create(cr, uid, move_line_vals)
                 elif line_read['multiple']==False:
                     income_amount+= line_read['amount']
                     comp_curr_amount = line_read['amount'] / rate
@@ -563,7 +564,8 @@ class pcl(osv.osv):
                             'amount_currency':line_read['amount'],
                             'currency_id':currency,
                             }
-                    self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+                    if comp_curr_amount > 0:
+                        self.pool.get('account.move.line').create(cr, uid, move_line_vals)
             for line in pcl['pcll_ids']:
                 account_id = False
                 analytic_id = False
@@ -598,7 +600,8 @@ class pcl(osv.osv):
                                 'amount_currency':line2_read['amount'],
                                 'currency_id':currency,
                                 }
-                        self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+                        if comp_curr_amount > 0:
+                            self.pool.get('account.move.line').create(cr, uid, move_line_vals)
                 elif line_read['multiple']==False:
                     expense_amount+= line_read['amount']
                     comp_curr_amount = line_read['amount'] / rate
@@ -616,7 +619,8 @@ class pcl(osv.osv):
                             'amount_currency':line_read['amount'],
                             'currency_id':currency,
                             }
-                    self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+                    if comp_curr_amount > 0:
+                        self.pool.get('account.move.line').create(cr, uid, move_line_vals)
             pca = self.pool.get('account.pettycash').read(cr, uid, pcl['pc_id'][0],context=None)
             expense_amount = expense_amount / rate
             name = pcl['name'] + " total expense of " + str(expense_amount) 
@@ -632,7 +636,9 @@ class pcl(osv.osv):
                         'amount_currency':pcl['amount'],
                         'currency_id':currency,
                         }
-            self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+            if expense_amount > 0:
+                self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+                
             income_amount= income_amount / rate
             name = pcl['name'] + " total income of " + str(income_amount)
             move_line_vals = {
@@ -647,7 +653,9 @@ class pcl(osv.osv):
                         'amount_currency':pcl['amount'],
                         'currency_id':currency,
                         }
-            self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+            if income_amount > 0:
+                self.pool.get('account.move.line').create(cr, uid, move_line_vals)
+                
             self.write(cr, uid, ids, {'state':'completed','move_id':move_id})
             #self.pool.get('account.move').post(cr, uid, )
             self.update_pc(cr, uid, [pcl['id']])
