@@ -175,16 +175,20 @@
                                 <field name="is_pr" attrs="{'invisible':[('include_pool','=',True)]}"/>
                                 <field name="equity_check" attrs="{'invisible':[('include_pool','=',True)]}"/>
                             </group>
-                            <group colspan="4" col="4" attrs="{'invisible':[('equity_check','=',True)]}">
+                            
+                            <!-- <group colspan="4" col="4" attrs="{'invisible':[('equity_check','=',True)]}"> -->
+                            <group colspan="4" col="4">
                                 <field name="to_be_moved" attrs="{'invisible': [('include_pool','=',True)]}"/>
                             </group>
                             <group colspan="4" col="6" attrs="{'invisible':[('include_pool','=',True)]}">
-	                            <group col="2" colspan="2" attrs="{'invisible':[('equity_check','=',False)]}">
+	                            <!-- <group col="2" colspan="2" attrs="{'invisible':[('equity_check','=',False)]}">  -->
+	                            <group col="2" colspan="2">
 	                                <separator string="Equity Revaluation Accounts" colspan="2"/>   
 	                                <field name="equity_reval_value_acc"/>
 	                                <field name="equity_gain_loss_acc"/>
 	                            </group>
-	                            <group col="2" colspan="2" attrs="{'invisible':[('equity_check','=',True)]}">
+                                <!-- <group col="2" colspan="2" attrs="{'invisible':[('equity_check','=',True)]}">  -->
+                                <group col="2" colspan="2">
 		                            <group col="2" colspan="2">
 	                                    <separator string="Gain Loss Account" colspan="2"/>   
 	                                    <field name="gain_loss"/>
