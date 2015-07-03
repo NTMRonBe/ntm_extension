@@ -150,6 +150,7 @@ class account_analytic_account(osv.osv):
                                 ('soa','Statement of Account')
                                 ], 'Report Type'),
             'region_id':fields.many2one('region.config', 'Region ID'),
+            'closing_account':fields.many2one('account.analytic.account', 'Closing Account'),
             
             }
     '''

@@ -84,6 +84,7 @@
 					<field name="allocated" attrs="{'invisible': [('type','=','view')]}"/>
 					<field name="report" attrs="{'invisible': [('type','=','view')]}"/>
 					<field name="normal_account"  attrs="{'invisible': [('type','=','view')],'required':[('type','=','normal')]}"/>
+					<field name="closing_account"/>
 					<group colspan="2" col="2" attrs="{'invisible': ['|',('ntm_type','!=','project'),('type','=','view')]}">
 						<label string="Included on voucher expense distribution:" colspan="1"  />
 						<field name="voucher_expense" nolabel="1" colspan="1" />
