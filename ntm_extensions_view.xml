@@ -118,7 +118,7 @@
 				        <field name="type"/>
 				        <group colspan="2" col="2" attrs="{'invisible': [('type','=','view')]}">
 					        <field name="ntm_type" attrs="{'required': [('type','=','normal')]}"/>
-                            <field name="region_id" attrs="{'invisible': [('ntm_type','not in',['income','expense','equity'])],'required':[('ntm_type','in',['income','expense','equity'])]}"/>
+                            <field name="region_id" attrs="{'invisible': [('ntm_type','not in',['gl','income','expense','equity'])],'required':[('ntm_type','in',['income','expense','equity'])]}"/>
 				        </group>
 				    </group>
 				</field>
