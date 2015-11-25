@@ -286,6 +286,53 @@
             </field>
         </record>
         
+        <record id="view_ntm_partner_bank_form" model="ir.ui.view">
+            <field name="name">ntm.partner.dict.bank.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="type">form</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
+            <field name="arch" type="xml">
+                <!-- 
+	            <field name="bank_ids" position="attributes">
+	                <attribute name="context">{'form_view_ref':'ntm_extension.view_ntm_res_partner_bank_form'}</attribute>
+	                <form>
+	                    <field name="partner_id"/>
+	                </form>
+	            </field>
+	             -->
+                <field name="bank_ids" position="replace">
+                    <field colspan="4" context="{'address': address}" name="bank_ids" nolabel="1">
+	                    <form>
+                            <field name="state"/>
+		                    <field name="partner_id" attrs="{'invisible':[('ownership','=','company')],'required':[('ownership','=','entity')]}"/>
+			                <field name="acc_number"/>
+		                    <field name="type" required="True"/>
+			                <field name="bank"/>
+		                    <field name="currency_id" widget="selection"  attrs="{'invisible':[('ownership','=','company')]}"/>
+                            <field name="sequence"/>
+                            <field colspan="4" name="name"/>
+                            <separator colspan="4" string="Bank account owner"/>
+                            <field colspan="4" name="owner_name"/>
+                            <field colspan="4" name="street"/>
+                            <newline/>
+                            <field name="zip"/>
+                            <field name="city"/>
+                            <newline/>
+                            <field completion="1" name="country_id"/>
+                            <field name="state_id"/>
+	                    </form>
+                        <tree string="Bank Details">
+                            <field name="state"/>
+                            <field name="bank"/>
+                            <field name="owner_name"/>
+                            <field name="acc_number"/>
+                        </tree>
+	                </field>
+                </field>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="view_ntm_res_partner_extension_tree">
             <field name="name">ntm.res.partner.extension.tree</field>
             <field name="model">ntm.res.partner.extension</field>
